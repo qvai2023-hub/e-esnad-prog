@@ -1,0 +1,1111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.SqlServer.Types.160.1000.6\build\net462\Microsoft.SqlServer.Types.props" Condition="Exists('..\packages\Microsoft.SqlServer.Types.160.1000.6\build\net462\Microsoft.SqlServer.Types.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D068792F-2624-4EF1-9ED9-E459C2336E11}</ProjectGuid>
+    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EtaskMinstry</RootNamespace>
+    <AssemblyName>EtaskMinstry</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort>44300</IISExpressSSLPort>
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
+    <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <UseGlobalApplicationHostFile />
+    <Use64BitIISExpress />
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Owin, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Qvision\Etask\E_TaskWide2\bin\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Qvision\Etask\E_TaskWide2\bin\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Qvision\Etask\E_TaskWide2\bin\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.Common, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportViewer.Runtime.Common.12.0.2402.15\lib\Microsoft.ReportViewer.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.DataVisualization, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportViewer.Runtime.Common.12.0.2402.15\lib\Microsoft.ReportViewer.DataVisualization.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.ReportViewer.Runtime.Common.12.0.2402.15\lib\Microsoft.ReportViewer.ProcessingObjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=16.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.SqlServer.Types.160.1000.6\lib\net462\Microsoft.SqlServer.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\EtaskMinstryWeb\EtaskMinstry\bin\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\E-Task\E_TaskWide2\bin\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Qvision\Etask\E_TaskWide2\bin\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+    </Reference>
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.4.0.20710.0\lib\net40\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.20710.0\lib\net40\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppCode\CryptoValueProvider.cs" />
+    <Compile Include="AppCode\DashBoard .cs" />
+    <Compile Include="AppCode\Encryption.cs" />
+    <Compile Include="AppCode\Enums.cs" />
+    <Compile Include="AppCode\Extentions.cs" />
+    <Compile Include="AppCode\FileManger.cs" />
+    <Compile Include="AppCode\Generallog.cs" />
+    <Compile Include="AppCode\Log.cs" />
+    <Compile Include="AppCode\LogTask.cs" />
+    <Compile Include="AppCode\Mail.cs" />
+    <Compile Include="AppCode\ManageEmployees.cs" />
+    <Compile Include="AppCode\Notification.cs" />
+    <Compile Include="AppCode\QvLib.cs" />
+    <Compile Include="AppCode\QVSecurity.cs" />
+    <Compile Include="AppCode\ReportAgent.cs" />
+    <Compile Include="AppCode\ServiceManger.cs" />
+    <Compile Include="AppCode\StatusLog.cs" />
+    <Compile Include="AppCode\TaskManger.cs" />
+    <Compile Include="AppCode\TaskWorkflow.cs" />
+    <Compile Include="AppCode\UploadFile.cs" />
+    <Compile Include="App_GlobalResources\ColumnNameLog.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ColumnNameLog.resx</DependentUpon>
+    </Compile>
+    <Compile Include="App_Start\QueryStringModule.cs" />
+    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\BaseAdminController.cs" />
+    <Compile Include="Areas\Admin\Controllers\CompanyController.cs" />
+    <Compile Include="Areas\Admin\Controllers\EmployeeController.cs" />
+    <Compile Include="Areas\Admin\Models\CompanyEmployeeVM.cs" />
+    <Compile Include="Areas\Admin\Models\CompanyVM.cs" />
+    <Compile Include="Areas\Company\CompanyAreaRegistration.cs" />
+    <Compile Include="Areas\Company\Controllers\BaseCompanyController.cs" />
+    <Compile Include="Areas\Company\Controllers\CompanyController.cs" />
+    <Compile Include="Areas\Company\Controllers\DashBoardController.cs" />
+    <Compile Include="Areas\Company\Controllers\EmployeeController.cs" />
+    <Compile Include="Areas\Company\Controllers\HelpController.cs" />
+    <Compile Include="Areas\Company\Controllers\ProfileController.cs" />
+    <Compile Include="Areas\Company\Controllers\ProjectController.cs" />
+    <Compile Include="Areas\Company\Controllers\RecurrenceTaskController.cs" />
+    <Compile Include="Areas\Company\Controllers\ReportController.cs" />
+    <Compile Include="Areas\Company\Controllers\TaskController.cs" />
+    <Compile Include="Areas\Company\Models\ComapnyTaskDetailVM.cs" />
+    <Compile Include="Areas\Company\Models\CompanyEmployeeVM.cs" />
+    <Compile Include="Areas\Company\Models\CompanyProfileVM.cs" />
+    <Compile Include="Areas\Company\Models\CompanyTaskVM.cs" />
+    <Compile Include="Areas\Company\Models\DaskBoardCompanyTaskVM.cs" />
+    <Compile Include="Areas\Company\Models\ProjectAddEdit.cs" />
+    <Compile Include="Areas\Company\Models\ProjectDisplay.cs" />
+    <Compile Include="Areas\Company\Models\RecurrenceTaskVM.cs" />
+    <Compile Include="Areas\Company\Models\ReportEmployeeTasks.cs" />
+    <Compile Include="Areas\Company\Models\ReportPreperationVM.cs" />
+    <Compile Include="Areas\Company\Models\TaskAddEdit.cs" />
+    <Compile Include="Areas\Company\Models\TaskExtensionsVM.cs" />
+    <Compile Include="Areas\Company\Models\YearlyTasksChart.cs" />
+    <Compile Include="Areas\Employee\Controllers\BaseEmployeeController.cs" />
+    <Compile Include="Areas\Employee\Controllers\DashBoardEmpController.cs" />
+    <Compile Include="Areas\Employee\Controllers\EmployeeController.cs" />
+    <Compile Include="Areas\Employee\Controllers\HelpController.cs" />
+    <Compile Include="Areas\Employee\Controllers\ReportController.cs" />
+    <Compile Include="Areas\Employee\Controllers\TasksController.cs" />
+    <Compile Include="Areas\Employee\Controllers\TestFileUploadController.cs" />
+    <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
+    <Compile Include="Areas\Employee\Models\DashBoardVM.cs" />
+    <Compile Include="Areas\Employee\Models\EmployeeTaskDetailVM.cs" />
+    <Compile Include="Areas\Employee\Models\EmployeeTask\EmployeeTaskListVM.cs" />
+    <Compile Include="Areas\Employee\Models\EmployeeTask\EmployeeTaskVM.cs" />
+    <Compile Include="Areas\Employee\Models\EmployeeTask\Status.cs" />
+    <Compile Include="Areas\Employee\Models\EmployeeVM.cs" />
+    <Compile Include="Areas\Employee\Models\ReportPreperationVM.cs" />
+    <Compile Include="Areas\Employee\Models\TaskExtensionsVM.cs" />
+    <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\DataBaseController.cs" />
+    <Compile Include="Controllers\EmployeePerformanceReportController.cs" />
+    <Compile Include="Controllers\EmployeesReportController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\LogController.cs" />
+    <Compile Include="Controllers\NotificationController.cs" />
+    <Compile Include="Controllers\AttendanceController.cs" />
+    <Compile Include="Controllers\ReportsController.cs" />
+    <Compile Include="Controllers\SecurityController.cs" />
+    <Compile Include="Controllers\SiteController.cs" />
+    <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="CustomAttrbutes\AdminAuthorize.cs" />
+    <Compile Include="CustomAttrbutes\CompanyAuthorize.cs" />
+    <Compile Include="CustomAttrbutes\CustomAuthorize.cs" />
+    <Compile Include="CustomAttrbutes\EmployeeAuthorize.cs" />
+    <Compile Include="CustomAttrbutes\EncryptedActionParameterAttribute.cs" />
+    <Compile Include="CustomAttrbutes\LoclizedDisplayName.cs" />
+    <Compile Include="CustomAttrbutes\ManageSecurityCookie.cs" />
+    <Compile Include="CustomHelpers\AjaxTabHelper.cs" />
+    <Compile Include="CustomHelpers\EncodedActionLinkHelper.cs" />
+    <Compile Include="CustomHelpers\ImageHelper.cs" />
+    <Compile Include="CustomHelpers\PaggerHelper.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Models\Attachment\AttachmentDisplay.cs" />
+    <Compile Include="Models\BriefTasksReportModel.cs" />
+    <Compile Include="Models\CompanyProfile.cs" />
+    <Compile Include="Models\ContactUs.cs" />
+    <Compile Include="Models\CustomTxtbox.cs" />
+    <Compile Include="Models\EmployeeProfile.cs" />
+    <Compile Include="Models\EmployeesReportModel.cs" />
+    <Compile Include="Models\Holiday\HolidayDisplayVM.cs" />
+    <Compile Include="Models\Login\LoginVM.cs" />
+    <Compile Include="Models\Login\Security.cs" />
+    <Compile Include="Models\Login\UserAccountVM.cs" />
+    <Compile Include="Models\Priority\PriorityDisplay.cs" />
+    <Compile Include="Models\PushNotificationVM.cs" />
+    <Compile Include="Models\Status\StatusDisplay.cs" />
+    <Compile Include="Models\TaskLogging\LogVM.cs" />
+    <Compile Include="Models\TimeUnit\TimeUnitDisplay.cs" />
+    <Compile Include="Models\UploaderVM.cs" />
+    <Compile Include="Models\UserData.cs" />
+    <Compile Include="Models\WeekEnd\WeekEndDisplayVM.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Report\Report.aspx.cs">
+      <DependentUpon>Report.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Report\Report.aspx.designer.cs">
+      <DependentUpon>Report.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Company\CompanyTask1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CompanyTask.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\EmoloyeeTask\EmployeeTask1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmployeeTask.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\Employee\Employee.Designer.cs" />
+    <Compile Include="Resources\NotficationMessage\Message.Designer.cs" />
+    <Compile Include="Resources\Shared\NotificationTemplate.Designer.cs" />
+    <Compile Include="Resources\Shared\ValidationMessages.Designer.cs" />
+    <Compile Include="Resources\Shared\ValidationResource.cs" />
+    <Compile Include="Resources\Task\Task.Designer.cs" />
+    <Compile Include="Services\AttendanceReportService.cs" />
+    <Compile Include="Services\EmployeePerformanceReportService.cs" />
+    <Compile Include="Services\EmployeesReportService.cs" />
+    <Compile Include="Services\SharedService.cs" />
+    <Compile Include="Services\TasksService.cs" />
+    <Compile Include="Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="App_Data\Database1.mdf" />
+    <Content Include="App_Data\Database1_log.ldf">
+      <DependentUpon>Database1.mdf</DependentUpon>
+    </Content>
+    <Content Include="bin\Antlr3.Runtime.dll" />
+    <Content Include="bin\EntityFramework.dll" />
+    <Content Include="bin\EtaskMinstry.dll" />
+    <Content Include="bin\EtaskMinstry.pdb" />
+    <Content Include="bin\Microsoft.AspNet.SignalR.Core.dll" />
+    <Content Include="bin\Microsoft.AspNet.SignalR.SystemWeb.dll" />
+    <Content Include="bin\Microsoft.Owin.dll" />
+    <Content Include="bin\Microsoft.Owin.Host.SystemWeb.dll" />
+    <Content Include="bin\Microsoft.Owin.Security.dll" />
+    <Content Include="bin\Microsoft.Owin.xml" />
+    <Content Include="bin\Microsoft.ReportViewer.WebForms.dll" />
+    <Content Include="bin\Microsoft.Web.Infrastructure.dll" />
+    <Content Include="bin\Newtonsoft.Json.dll" />
+    <Content Include="bin\Owin.dll" />
+    <Content Include="bin\System.Net.Http.Formatting.dll" />
+    <Content Include="bin\System.Net.Http.Formatting.xml" />
+    <Content Include="bin\System.Web.Helpers.dll" />
+    <Content Include="bin\System.Web.Helpers.xml" />
+    <Content Include="bin\System.Web.Http.dll" />
+    <Content Include="bin\System.Web.Http.WebHost.dll" />
+    <Content Include="bin\System.Web.Http.WebHost.xml" />
+    <Content Include="bin\System.Web.Http.xml" />
+    <Content Include="bin\System.Web.Mvc.dll" />
+    <Content Include="bin\System.Web.Mvc.xml" />
+    <Content Include="bin\System.Web.Optimization.dll" />
+    <Content Include="bin\System.Web.Razor.dll" />
+    <Content Include="bin\System.Web.Razor.xml" />
+    <Content Include="bin\System.Web.WebPages.Deployment.dll" />
+    <Content Include="bin\System.Web.WebPages.Deployment.xml" />
+    <Content Include="bin\System.Web.WebPages.dll" />
+    <Content Include="bin\System.Web.WebPages.Razor.dll" />
+    <Content Include="bin\System.Web.WebPages.Razor.xml" />
+    <Content Include="bin\System.Web.WebPages.xml" />
+    <Content Include="bin\TaskManagementModel.dll" />
+    <Content Include="bin\TaskManagementModel.pdb" />
+    <Content Include="bin\WebGrease.dll" />
+    <Content Include="Content\Main\960.css" />
+    <Content Include="Content\Main\bootstrap.vertical-tabs.css" />
+    <Content Include="Content\Main\chosen.css" />
+    <Content Include="Content\Main\Developers.css" />
+    <Content Include="Content\Main\digital.css" />
+    <Content Include="Content\Main\fonts\DroidKufi-Bold.eot" />
+    <Content Include="Content\Main\fonts\DroidKufi-Bold.ttf" />
+    <Content Include="Content\Main\fonts\DroidKufi-Bold.woff" />
+    <Content Include="Content\Main\fonts\DroidKufi-Bold.woff2" />
+    <Content Include="Content\Main\fonts\DroidKufi-Regular.eot" />
+    <Content Include="Content\Main\fonts\DroidKufi-Regular.ttf" />
+    <Content Include="Content\Main\fonts\DroidKufi-Regular.woff" />
+    <Content Include="Content\Main\fonts\DroidKufi-Regular.woff2" />
+    <Content Include="Content\Main\fonts\taskapp.eot" />
+    <Content Include="Content\Main\fonts\taskapp.svg" />
+    <Content Include="Content\Main\fonts\taskapp.ttf" />
+    <Content Include="Content\Main\fonts\taskapp.woff" />
+    <Content Include="Content\Main\images\00-bg.jpg" />
+    <Content Include="Content\Main\images\00.png" />
+    <Content Include="Content\Main\images\00_loginbg.jpg" />
+    <Content Include="Content\Main\images\1352207352_cancel.png" />
+    <Content Include="Content\Main\images\acrobat.png" />
+    <Content Include="Content\Main\images\active-step.png" />
+    <Content Include="Content\Main\images\activetab-bg.png" />
+    <Content Include="Content\Main\images\ad-icon.png" />
+    <Content Include="Content\Main\images\add-icon-small.png" />
+    <Content Include="Content\Main\images\add-icon.png" />
+    <Content Include="Content\Main\images\add-job.png" />
+    <Content Include="Content\Main\images\add-to-fav.png" />
+    <Content Include="Content\Main\images\add-to-interview.png" />
+    <Content Include="Content\Main\images\addjob-icon.png" />
+    <Content Include="Content\Main\images\advanced-srch-banner.png" />
+    <Content Include="Content\Main\images\ajax-loader.gif" />
+    <Content Include="Content\Main\images\apl-icon.png" />
+    <Content Include="Content\Main\images\aramco.png" />
+    <Content Include="Content\Main\images\Archive-icon.png" />
+    <Content Include="Content\Main\images\arrow-1.png" />
+    <Content Include="Content\Main\images\arrow-2.png" />
+    <Content Include="Content\Main\images\arrow.png" />
+    <Content Include="Content\Main\images\arrows-navigator.png" />
+    <Content Include="Content\Main\images\attachment-icon.png" />
+    <Content Include="Content\Main\images\background-workspace.jpg" />
+    <Content Include="Content\Main\images\banner1.jpg" />
+    <Content Include="Content\Main\images\bar-bg.jpg" />
+    <Content Include="Content\Main\images\benladen.png" />
+    <Content Include="Content\Main\images\blank.gif" />
+    <Content Include="Content\Main\images\blnk-icon.png" />
+    <Content Include="Content\Main\images\blocked-list.png" />
+    <Content Include="Content\Main\images\btn-bg.jpg" />
+    <Content Include="Content\Main\images\bullet.png" />
+    <Content Include="Content\Main\images\calendar-icon.png" />
+    <Content Include="Content\Main\images\cancel.png" />
+    <Content Include="Content\Main\images\capcha.gif" />
+    <Content Include="Content\Main\images\Check-icon.png" />
+    <Content Include="Content\Main\images\chosen-sprite%402x.png" />
+    <Content Include="Content\Main\images\chosen-sprite.png" />
+    <Content Include="Content\Main\images\close-popup.png" />
+    <Content Include="Content\Main\images\close-small-btn.png" />
+    <Content Include="Content\Main\images\coming_soon_sign.jpg" />
+    <Content Include="Content\Main\images\comment-icon.png" />
+    <Content Include="Content\Main\images\company-dash-banner.png" />
+    <Content Include="Content\Main\images\company-logo.jpg" />
+    <Content Include="Content\Main\images\company-register-banner.png" />
+    <Content Include="Content\Main\images\contact-icon.png" />
+    <Content Include="Content\Main\images\cross_icon.jpg" />
+    <Content Include="Content\Main\images\cv-complete-bar.png" />
+    <Content Include="Content\Main\images\dactive-tab.png" />
+    <Content Include="Content\Main\images\dash-icons-sprite.png" />
+    <Content Include="Content\Main\images\date-icon.png" />
+    <Content Include="Content\Main\images\db-icon-sprite.png" />
+    <Content Include="Content\Main\images\default-avatar.jpg" />
+    <Content Include="Content\Main\images\default-employee-pic.jpg" />
+    <Content Include="Content\Main\images\del-msg.png" />
+    <Content Include="Content\Main\images\delete-icon-small.png" />
+    <Content Include="Content\Main\images\delete-icon.png" />
+    <Content Include="Content\Main\images\delete-small.png" />
+    <Content Include="Content\Main\images\DelIcon.png" />
+    <Content Include="Content\Main\images\Dis-Archive-icon.png" />
+    <Content Include="Content\Main\images\disabled-btn.png" />
+    <Content Include="Content\Main\images\DisDelete.png" />
+    <Content Include="Content\Main\images\down-arrow.png" />
+    <Content Include="Content\Main\images\E-icon.png" />
+    <Content Include="Content\Main\images\edawam-bullet.png" />
+    <Content Include="Content\Main\images\edit-inline.png" />
+    <Content Include="Content\Main\images\edit_icon.png" />
+    <Content Include="Content\Main\images\employees-icon.png" />
+    <Content Include="Content\Main\images\end-icon.png" />
+    <Content Include="Content\Main\images\error.png" />
+    <Content Include="Content\Main\images\Excel-icon.png" />
+    <Content Include="Content\Main\images\excel.png" />
+    <Content Include="Content\Main\images\eye.png" />
+    <Content Include="Content\Main\images\facebook-reg-btn.png" />
+    <Content Include="Content\Main\images\fancybox_overlay.png" />
+    <Content Include="Content\Main\images\faqs-cover.png" />
+    <Content Include="Content\Main\images\fav-icon.png" />
+    <Content Include="Content\Main\images\favicon.ico" />
+    <Content Include="Content\Main\images\file-gif.png" />
+    <Content Include="Content\Main\images\file-ppt.png" />
+    <Content Include="Content\Main\images\flag-user-1.png" />
+    <Content Include="Content\Main\images\footer-bg.png" />
+    <Content Include="Content\Main\images\header-bg.png" />
+    <Content Include="Content\Main\images\help-icon.png" />
+    <Content Include="Content\Main\images\hide .png" />
+    <Content Include="Content\Main\images\hide.png" />
+    <Content Include="Content\Main\images\icon-idea.png" />
+    <Content Include="Content\Main\images\icons.png" />
+    <Content Include="Content\Main\images\img-icon.png" />
+    <Content Include="Content\Main\images\inactive-step.png" />
+    <Content Include="Content\Main\images\indicator.png" />
+    <Content Include="Content\Main\images\indicatorActive.png" />
+    <Content Include="Content\Main\images\job-icon.png" />
+    <Content Include="Content\Main\images\join-us.png" />
+    <Content Include="Content\Main\images\jpg.png" />
+    <Content Include="Content\Main\images\kafel-logo.png" />
+    <Content Include="Content\Main\images\l-bar.png" />
+    <Content Include="Content\Main\images\leftArrow.png" />
+    <Content Include="Content\Main\images\loadingBar.gif" />
+    <Content Include="Content\Main\images\log-file.png" />
+    <Content Include="Content\Main\images\log-icon.png" />
+    <Content Include="Content\Main\images\log1.png" />
+    <Content Include="Content\Main\images\login-banner.png" />
+    <Content Include="Content\Main\images\login-btns.png" />
+    <Content Include="Content\Main\images\login-facebook.png" />
+    <Content Include="Content\Main\images\login-logo.png" />
+    <Content Include="Content\Main\images\login-style.css" />
+    <Content Include="Content\Main\images\logo-white-small.png" />
+    <Content Include="Content\Main\images\logo2.jpg" />
+    <Content Include="Content\Main\images\menu-cursor.png" />
+    <Content Include="Content\Main\images\menu-icon.png" />
+    <Content Include="Content\Main\images\message-small-icon.png" />
+    <Content Include="Content\Main\images\messages-del-btn.png" />
+    <Content Include="Content\Main\images\messages-header.png" />
+    <Content Include="Content\Main\images\messages-icon.png" />
+    <Content Include="Content\Main\images\meter.png" />
+    <Content Include="Content\Main\images\minimiz-arrow.png" />
+    <Content Include="Content\Main\images\minus.png" />
+    <Content Include="Content\Main\images\mobily.png" />
+    <Content Include="Content\Main\images\more-btn.png" />
+    <Content Include="Content\Main\images\more-btn2.png" />
+    <Content Include="Content\Main\images\notification-icon.png" />
+    <Content Include="Content\Main\images\page-srch-bg.jpg" />
+    <Content Include="Content\Main\images\PDF-icon.png" />
+    <Content Include="Content\Main\images\Pend.png" />
+    <Content Include="Content\Main\images\photo-small-cion.png" />
+    <Content Include="Content\Main\images\plus-icon.png" />
+    <Content Include="Content\Main\images\plus.png" />
+    <Content Include="Content\Main\images\popcntr.png" />
+    <Content Include="Content\Main\images\poptitle-bg.png" />
+    <Content Include="Content\Main\images\print-icon.png" />
+    <Content Include="Content\Main\images\project-icon.png" />
+    <Content Include="Content\Main\images\r-bar.png" />
+    <Content Include="Content\Main\images\rar.png" />
+    <Content Include="Content\Main\images\read-icon.png" />
+    <Content Include="Content\Main\images\read-msg.png" />
+    <Content Include="Content\Main\images\reassign.png" />
+    <Content Include="Content\Main\images\register-header.png" />
+    <Content Include="Content\Main\images\registerplan-iconbig.png" />
+    <Content Include="Content\Main\images\remove-btn.png" />
+    <Content Include="Content\Main\images\reply-icon.png" />
+    <Content Include="Content\Main\images\Report.png" />
+    <Content Include="Content\Main\images\rightArrow.png" />
+    <Content Include="Content\Main\images\select-arrow.png" />
+    <Content Include="Content\Main\images\send-mail.png" />
+    <Content Include="Content\Main\images\setting-icon.png" />
+    <Content Include="Content\Main\images\setting.png" />
+    <Content Include="Content\Main\images\settings.png" />
+    <Content Include="Content\Main\images\show.png" />
+    <Content Include="Content\Main\images\site-info-header.png" />
+    <Content Include="Content\Main\images\sm-bottom.png" />
+    <Content Include="Content\Main\images\sm-top.png" />
+    <Content Include="Content\Main\images\small-arrow.png" />
+    <Content Include="Content\Main\images\small-divider.png" />
+    <Content Include="Content\Main\images\small-logo.png" />
+    <Content Include="Content\Main\images\small-task-icon.png" />
+    <Content Include="Content\Main\images\small-thumb60.jpg" />
+    <Content Include="Content\Main\images\sprite-social.png" />
+    <Content Include="Content\Main\images\sprite-socialicons.png" />
+    <Content Include="Content\Main\images\sprite-taskicons.png" />
+    <Content Include="Content\Main\images\sprite1.png" />
+    <Content Include="Content\Main\images\square.png" />
+    <Content Include="Content\Main\images\srch-btn.png" />
+    <Content Include="Content\Main\images\srch-icon-focus.png" />
+    <Content Include="Content\Main\images\srch-icon.png" />
+    <Content Include="Content\Main\images\star-rate.png" />
+    <Content Include="Content\Main\images\start-now.png" />
+    <Content Include="Content\Main\images\stat-icon.png" />
+    <Content Include="Content\Main\images\stop-account.png" />
+    <Content Include="Content\Main\images\strenth-bg.png" />
+    <Content Include="Content\Main\images\strenth-bg1.jpg" />
+    <Content Include="Content\Main\images\strenth-colors.png" />
+    <Content Include="Content\Main\images\strenth-colors1.jpg" />
+    <Content Include="Content\Main\images\success.png" />
+    <Content Include="Content\Main\images\task-ico.png" />
+    <Content Include="Content\Main\images\task-icon-small.png" />
+    <Content Include="Content\Main\images\task-icon.png" />
+    <Content Include="Content\Main\images\text-boxes.png" />
+    <Content Include="Content\Main\images\tick.png" />
+    <Content Include="Content\Main\images\time-icon.png" />
+    <Content Include="Content\Main\images\tipsy.gif" />
+    <Content Include="Content\Main\images\transparent-bg1.png" />
+    <Content Include="Content\Main\images\tweet-title-arrow.png" />
+    <Content Include="Content\Main\images\txt-icon.png" />
+    <Content Include="Content\Main\images\uc.png" />
+    <Content Include="Content\Main\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\Main\images\Unpend.png" />
+    <Content Include="Content\Main\images\unread-icon.png" />
+    <Content Include="Content\Main\images\userprofile-cover.png" />
+    <Content Include="Content\Main\images\video-small-icon.png" />
+    <Content Include="Content\Main\images\warning.jpg" />
+    <Content Include="Content\Main\images\white-logo.png" />
+    <Content Include="Content\Main\images\why-icon.png" />
+    <Content Include="Content\Main\images\wmv.png" />
+    <Content Include="Content\Main\images\Word-icon.png" />
+    <Content Include="Content\Main\images\word.png" />
+    <Content Include="Content\Main\images\workspace-tablet.jpg" />
+    <Content Include="Content\Main\internal.css" />
+    <Content Include="Content\Main\jquery-ui.css" />
+    <Content Include="Content\Main\jquery.calendars.picker.css" />
+    <Content Include="Content\Main\login-style.css" />
+    <Content Include="Content\Main\logo.png" />
+    <Content Include="Content\Main\main.css" />
+    <Content Include="Content\Main\newStyle.css" />
+    <Content Include="Content\Main\reset.css" />
+    <Content Include="Content\Main\style.css" />
+    <Content Include="Content\Main\taskapp.css" />
+    <Content Include="Content\Site\css\animate.css" />
+    <Content Include="Content\Site\css\bootstrap-arabic.min.css" />
+    <Content Include="Content\Site\css\bootstrap.css" />
+    <Content Include="Content\Site\css\font-awesome.css" />
+    <Content Include="Content\Site\css\font-awesome.min.css" />
+    <Content Include="Content\Site\css\iconate.css" />
+    <Content Include="Content\Site\css\normalize.css" />
+    <Content Include="Content\Site\css\style.css" />
+    <Content Include="Content\Site\fonts\DroidKufi-Bold.eot" />
+    <Content Include="Content\Site\fonts\DroidKufi-Bold.ttf" />
+    <Content Include="Content\Site\fonts\DroidKufi-Bold.woff" />
+    <Content Include="Content\Site\fonts\DroidKufi-Bold.woff2" />
+    <Content Include="Content\Site\fonts\DroidKufi-Regular.eot" />
+    <Content Include="Content\Site\fonts\DroidKufi-Regular.ttf" />
+    <Content Include="Content\Site\fonts\DroidKufi-Regular.woff" />
+    <Content Include="Content\Site\fonts\DroidKufi-Regular.woff2" />
+    <Content Include="Content\Site\fonts\fontawesome-webfont.eot" />
+    <Content Include="Content\Site\fonts\fontawesome-webfont.svg" />
+    <Content Include="Content\Site\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Content\Site\fonts\fontawesome-webfont.woff" />
+    <Content Include="Content\Site\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Content\Site\fonts\FontAwesome.otf" />
+    <Content Include="Content\Site\img\activities_vlign.png" />
+    <Content Include="Content\Site\img\arrow_left.png" />
+    <Content Include="Content\Site\img\arrow_right.png" />
+    <Content Include="Content\Site\img\bg.png" />
+    <Content Include="Content\Site\img\bg2.png" />
+    <Content Include="Content\Site\img\breadcrumb_home.png" />
+    <Content Include="Content\Site\img\datepicker_trigger.png" />
+    <Content Include="Content\Site\img\filter.png" />
+    <Content Include="Content\Site\img\img.png" />
+    <Content Include="Content\Site\img\img1.jpg" />
+    <Content Include="Content\Site\img\img2.jpg" />
+    <Content Include="Content\Site\img\img3.jpg" />
+    <Content Include="Content\Site\img\intro_icon_bg.png" />
+    <Content Include="Content\Site\img\logo.png" />
+    <Content Include="Content\Site\img\minus.png" />
+    <Content Include="Content\Site\img\nav_arrow_left.png" />
+    <Content Include="Content\Site\img\nav_arrow_right.png" />
+    <Content Include="Content\Site\img\plus.png" />
+    <Content Include="Content\Site\img\sort_asc.png" />
+    <Content Include="Content\Site\img\sort_asc_disabled.png" />
+    <Content Include="Content\Site\img\sort_both.png" />
+    <Content Include="Content\Site\img\sort_desc.png" />
+    <Content Include="Content\Site\img\sort_desc_disabled.png" />
+    <Content Include="Content\Site\img\vertical_arrows.png" />
+    <Content Include="Content\Site\img\zoom.png" />
+    <Content Include="Content\Site\js\application.js" />
+    <Content Include="Content\Site\js\bootstrap.js" />
+    <Content Include="Content\Site\js\bootstrap.min.js" />
+    <Content Include="Content\Site\js\datatables.min.js" />
+    <Content Include="Content\Site\js\daterangepicker.js" />
+    <Content Include="Content\Site\js\fullcalendar.min.js" />
+    <Content Include="Content\Site\js\html5shiv.js" />
+    <Content Include="Content\Site\js\iconate.min.js" />
+    <Content Include="Content\Site\js\inputmask.js" />
+    <Content Include="Content\Site\js\jquery-1.11.2.min.js" />
+    <Content Include="Content\Site\js\jquery-ui.min.js" />
+    <Content Include="Content\Site\js\jquery.js" />
+    <Content Include="Content\Site\js\modernizr.js" />
+    <Content Include="Content\Site\js\moment.js" />
+    <Content Include="Content\Site\js\plupload.full.min.js" />
+    <Content Include="Content\Site\js\plupload.queue.min.js" />
+    <Content Include="Content\Site\js\respond.min.js" />
+    <Content Include="Content\Site\js\scripts.js" />
+    <Content Include="Content\Site\js\timepicker.min.js" />
+    <Content Include="Content\Site\js\toolbar.js" />
+    <Content Include="Content\Site\js\wow.min.js" />
+    <Content Include="Content\Site\js\wysihtml5.min.js" />
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="HTML_NewDesign_Responsive\add-edit.html" />
+    <Content Include="HTML_NewDesign_Responsive\calender.html" />
+    <Content Include="HTML_NewDesign_Responsive\css\animate.css" />
+    <Content Include="HTML_NewDesign_Responsive\css\bootstrap-arabic.min.css" />
+    <Content Include="HTML_NewDesign_Responsive\css\bootstrap.css" />
+    <Content Include="HTML_NewDesign_Responsive\css\font-awesome.min.css" />
+    <Content Include="HTML_NewDesign_Responsive\css\normalize.css" />
+    <Content Include="HTML_NewDesign_Responsive\css\style.css" />
+    <Content Include="HTML_NewDesign_Responsive\dashboard.html" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\fontawesome-webfont.svg" />
+    <Content Include="HTML_NewDesign_Responsive\general_report.html" />
+    <Content Include="HTML_NewDesign_Responsive\img\activities_vlign.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\arrow_left.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\arrow_right.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\bg.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\bg2.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\breadcrumb_home.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\datepicker_trigger.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\filter.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\logo.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\minus.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\nav_arrow_left.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\nav_arrow_right.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\plus.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\sort_asc.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\sort_asc_disabled.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\sort_both.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\sort_desc.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\sort_desc_disabled.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\vertical_arrows.png" />
+    <Content Include="HTML_NewDesign_Responsive\img\zoom.png" />
+    <Content Include="HTML_NewDesign_Responsive\js\application.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\bootstrap.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\datatables.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\daterangepicker.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\fullcalendar.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\html5shiv.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\inputmask.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\jquery-1.11.2.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\jquery-ui.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\modernizr.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\moment.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\plupload.full.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\plupload.queue.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\respond.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\scripts.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\timepicker.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\toolbar.js" />
+    <Content Include="HTML_NewDesign_Responsive\js\wysihtml5.min.js" />
+    <Content Include="HTML_NewDesign_Responsive\log.html" />
+    <Content Include="HTML_NewDesign_Responsive\login.html" />
+    <Content Include="HTML_NewDesign_Responsive\manage.html" />
+    <Content Include="HTML_NewDesign_Responsive\projects.html" />
+    <Content Include="HTML_NewDesign_Responsive\project_details.html" />
+    <Content Include="HTML_NewDesign_Responsive\single_task.html" />
+    <Content Include="MailTemplate\ChangePassword.html" />
+    <Content Include="MailTemplate\email.html" />
+    <Content Include="MailTemplate\header.png" />
+    <Content Include="MailTemplate\img\btn.png" />
+    <Content Include="MailTemplate\img\header.jpg" />
+    <Content Include="MailTemplate\img\sm-facebook.png" />
+    <Content Include="MailTemplate\img\sm-gplus.png" />
+    <Content Include="MailTemplate\img\sm-twitter.png" />
+    <Content Include="MailTemplate\img\sm-youtube.png" />
+    <Content Include="MailTemplate\Notification.html" />
+    <Content Include="Report\Report.aspx" />
+    <Content Include="Scripts\application.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\chosen.jquery.js" />
+    <Content Include="Scripts\datatables.min.js" />
+    <Content Include="Scripts\daterangepicker.js" />
+    <Content Include="Scripts\dropdown.js" />
+    <Content Include="Scripts\Employee\_PartialUploadImage.js" />
+    <Content Include="Scripts\exporting.js" />
+    <Content Include="Scripts\fullcalendar.min.js" />
+    <Content Include="Scripts\GlobalScript.js" />
+    <Content Include="Scripts\highcharts.js" />
+    <Content Include="Areas\Admin\Views\Web.config" />
+    <Content Include="Areas\Admin\Views\Company\AddEdit.cshtml" />
+    <Content Include="Areas\Admin\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\Admin\Views\Company\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Company\_Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Company\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Employee\AddEdit.cshtml" />
+    <Content Include="Areas\Admin\Views\Employee\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Employee\PartialEmployee.cshtml" />
+    <Content Include="Areas\Company\Views\Employee\Details.cshtml" />
+    <Content Include="Areas\Company\Views\Help\Index.cshtml" />
+    <Content Include="Areas\Employee\Views\Help\Index.cshtml" />
+    <Content Include="bin\EtaskMinstry.dll.config" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Bold.eot" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Bold.ttf" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Bold.woff" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Bold.woff2" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Regular.eot" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Regular.ttf" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Regular.woff" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\DroidKufi-Regular.woff2" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\fontawesome-webfont.eot" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\fontawesome-webfont.ttf" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\fontawesome-webfont.woff" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\fontawesome-webfont.woff2" />
+    <Content Include="HTML_NewDesign_Responsive\fonts\FontAwesome.otf" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Bold.eot" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Bold.ttf" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Bold.woff" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Bold.woff2" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Regular.eot" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Regular.ttf" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Regular.woff" />
+    <Content Include="Content\Site\img\fonts\DroidKufi-Regular.woff2" />
+    <Content Include="Content\Site\img\fonts\fontawesome-webfont.eot" />
+    <Content Include="Content\Site\img\fonts\fontawesome-webfont.svg" />
+    <Content Include="Content\Site\img\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Content\Site\img\fonts\fontawesome-webfont.woff" />
+    <Content Include="Content\Site\img\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Content\Site\img\fonts\FontAwesome.otf" />
+    <Content Include="Areas\Admin\Views\Company\IndexOld.cshtml" />
+    <Content Include="Areas\Admin\Views\Company\AddEditOld.cshtml" />
+    <Content Include="Areas\Admin\Views\Employee\AddEditOld.cshtml" />
+    <Content Include="Areas\Company\Views\Report\EmployeeReport.cshtml" />
+    <Content Include="Areas\Admin\Views\Employee\_Index.cshtml" />
+    <Content Include="Areas\Company\Views\Task\EDitTask.cshtml" />
+    <None Include="Properties\PublishProfiles\Ayman.pubxml" />
+    <None Include="Properties\PublishProfiles\k.pubxml" />
+    <Content Include="Report\TotalEmployeeTasks.rdl" />
+    <Content Include="ReportsRDLC\EmployeesReport.rdlc" />
+    <Content Include="ReportsRDLC\EmployeePerformance.rdlc" />
+    <Content Include="Report\CompanyTasks.rdlc" />
+    <Content Include="Report\EmployeePerformance.rdl" />
+    <Content Include="Report\ProjectTasks.rdlc" />
+    <Content Include="ReportsRDLC\BriefTasksReport.rdlc" />
+    <Content Include="ReportsRDLC\Employees.rdlc" />
+    <Content Include="ReportsRDLC\Report3.rdlc" />
+    <Content Include="ReportsRDLC\Report2.rdlc" />
+    <None Include="Scripts\jquery-1.6.4-vsdoc.js" />
+    <Content Include="Scripts\html5shiv.js" />
+    <Content Include="Scripts\inputmask.js" />
+    <Content Include="Scripts\jquery-1.11.2.min.js" />
+    <Content Include="Scripts\jquery-1.6.4.js" />
+    <Content Include="Scripts\jquery-1.6.4.min.js" />
+    <None Include="Scripts\jquery-1.7.1.intellisense.js" />
+    <Content Include="Scripts\jquery-1.7.1.js" />
+    <Content Include="Scripts\jquery-1.7.1.min.js" />
+    <Content Include="Scripts\jquery-ui.min.js" />
+    <Content Include="Scripts\jquery.calendars-ar.js" />
+    <Content Include="Scripts\jquery.calendars.js" />
+    <Content Include="Scripts\jquery.calendars.picker-ar.js" />
+    <Content Include="Scripts\jquery.calendars.picker.js" />
+    <Content Include="Scripts\jquery.calendars.plus.js" />
+    <Content Include="Scripts\jquery.calendars.ummalqura.js" />
+    <Content Include="Scripts\jquery.complexify.js" />
+    <Content Include="Scripts\jquery.js" />
+    <Content Include="Scripts\jquery.mmenu.css" />
+    <Content Include="Scripts\jquery.mmenu.js" />
+    <Content Include="Scripts\jquery.mmenu.min.js" />
+    <Content Include="Scripts\jquery.signalR-2.0.1.js" />
+    <Content Include="Scripts\jquery.signalR-2.0.1.min.js" />
+    <Content Include="Scripts\jquery.ticker.js" />
+    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\jquery-1.8.3.js" />
+    <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\mediaqueries.js" />
+    <Content Include="Scripts\Menu.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
+    <Content Include="Scripts\MicrosoftMvcValidation.js" />
+    <Content Include="Scripts\modernizr-2.5.3.js" />
+    <Content Include="Scripts\modernizr.js" />
+    <Content Include="Scripts\moment.js" />
+    <Content Include="Scripts\plupload.full.min.js" />
+    <Content Include="Scripts\plupload.queue.min.js" />
+    <Content Include="Scripts\QVUploader\images\AjaxLoader.gif" />
+    <Content Include="Scripts\QVUploader\images\no_image_thumb.gif" />
+    <Content Include="Scripts\QVUploader\QVUploader.css" />
+    <Content Include="Scripts\QVUploader\QVUploader.js" />
+    <Content Include="Scripts\readmore.min.js" />
+    <Content Include="Scripts\replace_anchor_links.min.js" />
+    <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\script.js" />
+    <Content Include="Scripts\scripts.js" />
+    <Content Include="Scripts\Search.js" />
+    <Content Include="Scripts\select2\select2.min.js" />
+    <Content Include="Scripts\select2\select2.min.css" />
+    <Content Include="Scripts\tabs-src.js" />
+    <Content Include="Scripts\tabs.ui.js" />
+    <Content Include="Scripts\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_glass_75_ffffff_1x400.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Scripts\themes\base\images\ui-bg_inset-soft_95_fef1ec_1x100.png" />
+    <Content Include="Scripts\themes\base\images\ui-icons_222222_256x240.png" />
+    <Content Include="Scripts\themes\base\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Scripts\themes\base\images\ui-icons_454545_256x240.png" />
+    <Content Include="Scripts\themes\base\images\ui-icons_888888_256x240.png" />
+    <Content Include="Scripts\themes\base\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Scripts\themes\base\jquery-ui.css" />
+    <Content Include="Scripts\timepicker.min.js" />
+    <Content Include="Scripts\tool-tip.js" />
+    <Content Include="Scripts\toolbar.js" />
+    <Content Include="Scripts\ui\i18n\jquery-ui-i18n.js" />
+    <Content Include="Scripts\ui\i18n\ui.datepicker-ar.js" />
+    <Content Include="Scripts\ui\minified\jquery-ui.min.js" />
+    <Content Include="Scripts\ui\minified\ui.datepicker.min.js" />
+    <Content Include="Scripts\ui\ui.datepicker.js" />
+    <Content Include="Scripts\wysihtml5.min.js" />
+    <Content Include="Upload\Employee\00be8e3a-dfd8-4644-9a26-b07a9f3d5f45.png" />
+    <Content Include="Upload\Employee\05d183d6-9a6a-4983-8f6d-cea6fc813b85.jpg" />
+    <Content Include="Upload\Employee\0997e226-dfb8-46da-a9e2-0ee759402234.jpg" />
+    <Content Include="Upload\Employee\0e4389db-a97c-4d31-bf08-938d65bf78dd.jpg" />
+    <Content Include="Upload\Employee\15027155-36d9-43a8-985e-ce17386ad1d5.png" />
+    <Content Include="Upload\Employee\17bf6d52-ea93-4de2-a00a-ed184c1349f8.png" />
+    <Content Include="Upload\Employee\3dfebe97-9890-461e-b958-1260ee1250b3.jpg" />
+    <Content Include="Upload\Employee\3e440cab-b723-4894-9271-04079fa71fbe.png" />
+    <Content Include="Upload\Employee\421020e1-0634-455f-abea-d1b6f68e9e2d.png" />
+    <Content Include="Upload\Employee\5bd08e37-68bb-4416-974c-e289fa2ca888.jpg" />
+    <Content Include="Upload\Employee\7ba270e4-628b-4661-974d-88710f3afc38.png" />
+    <Content Include="Upload\Employee\8aac02be-13e5-4aee-b1a8-91c7688e3ba3.png" />
+    <Content Include="Upload\Employee\9123f436-e913-4c0e-a3e0-bf639664d91f.jpg" />
+    <Content Include="Upload\Employee\991e1357-bdd8-4d35-8aa1-e0c05c9e7452.png" />
+    <Content Include="Upload\Employee\9a4ff332-548a-43a2-a7eb-eb1c5aa57c06.png" />
+    <Content Include="Upload\Employee\aca92c57-bfdc-4f1e-a50d-0458f22d2eaf.png" />
+    <Content Include="Upload\Employee\ae7575eb-08f1-459c-8d01-d9b72743a07c.png" />
+    <Content Include="Upload\Employee\b5f5e8f8-6570-458a-85eb-33b7350f71e5.png" />
+    <Content Include="Upload\Employee\b9529703-f92e-4359-a1d4-8ecb94359b20.jpg" />
+    <Content Include="Upload\Employee\c84944ea-49e0-49f1-83b9-b32e521c5a4c.jpg" />
+    <Content Include="Upload\Employee\c9190dfa-f1fb-400b-916a-d61decea4a0c.jpg" />
+    <Content Include="Upload\Employee\Copy of 05d183d6-9a6a-4983-8f6d-cea6fc813b85.jpg" />
+    <Content Include="Upload\Employee\Copy of c9190dfa-f1fb-400b-916a-d61decea4a0c.jpg" />
+    <Content Include="Upload\Employee\f87c554e-d07c-44ed-bd16-9027a4b1c352.png" />
+    <Content Include="Upload\Task\133643ac-b2b5-45e8-a529-c00325e2c4d5.jpg" />
+    <Content Include="Upload\Task\257784f9-00b5-42cc-a2f4-47fa142d85c0.jpg" />
+    <Content Include="Upload\Task\2f15a57d-8189-4634-a7f0-e0899b1937b7.jpg" />
+    <Content Include="Upload\Task\31882f40-3a45-4cd7-a3c9-11205f69cdbb.jpg" />
+    <Content Include="Upload\Task\36dd8e2f-5af2-41a8-961c-faf5be80cc2c.jpg" />
+    <Content Include="Upload\Task\36eb7f90-9177-415e-ae8a-954d6177db80.jpg" />
+    <Content Include="Upload\Task\3a8710fb-d8ef-438e-b435-8c82c540b077.jpg" />
+    <Content Include="Upload\Task\4394a169-f3f3-45d3-9342-43e74c410a6b.jpg" />
+    <Content Include="Upload\Task\448944a9-7187-4e6b-8b28-462ee3b8a91c.jpg" />
+    <Content Include="Upload\Task\6274cfb5-7ad1-4423-a53d-220e56d3a42d.jpg" />
+    <Content Include="Upload\Task\658a804f-b353-4446-8bb0-8dcc33d4a4ea.jpg" />
+    <Content Include="Upload\Task\6739c24d-76aa-43db-b22e-68d233880e90.jpg" />
+    <Content Include="Upload\Task\69d3f5e7-360f-4f54-8d60-b7da398f4939.jpg" />
+    <Content Include="Upload\Task\6e7be15f-90f6-44f5-8566-5cb9f882bd84.jpg" />
+    <Content Include="Upload\Task\7cf6000b-da3e-4d73-a488-19542e3a64a9.jpg" />
+    <Content Include="Upload\Task\7ff975ea-8cb8-4fb3-bd3a-17dbed6bd811.jpg" />
+    <Content Include="Upload\Task\8930e869-a2fe-4bdb-8bfa-e93e142850aa.jpg" />
+    <Content Include="Upload\Task\895c2104-76b8-4028-b616-6b1d20075f26.jpg" />
+    <Content Include="Upload\Task\899f755a-19e4-4057-a909-ab30dcedbb41.jpg" />
+    <Content Include="Upload\Task\8d61c85f-23a6-48e0-868f-e0495e450cf2.jpg" />
+    <Content Include="Upload\Task\915e45c8-2185-42a5-bddb-5a38bea22936.jpg" />
+    <Content Include="Upload\Task\bb148274-4cb8-4d55-b339-82e2a5c20f56.jpg" />
+    <Content Include="Upload\Task\c382df47-fc88-495f-8bd6-a0c974bdcfe7.jpg" />
+    <Content Include="Upload\Task\c50bb1f6-b691-4838-b0f9-d20225642b51.jpg" />
+    <Content Include="Upload\Task\ca9790ba-90a7-4cbb-8003-c9849cbf7167.jpg" />
+    <Content Include="Upload\Task\ccb09750-87ab-4065-be8f-523c58c765ed.jpg" />
+    <Content Include="Upload\Task\ced28912-880c-480e-860b-a16ed57d57e6.jpg" />
+    <Content Include="Upload\Task\e42707a1-e40c-46d0-996b-c5c852f7da10.jpg" />
+    <Content Include="Upload\Task\e5f16693-2ed4-4c25-9db8-30bad38e4252.jpg" />
+    <Content Include="Upload\Task\ea766ae7-8567-4168-819c-135171c75b21.jpg" />
+    <Content Include="Upload\Task\ead31d1a-3432-454d-9dcd-6ce816f17bec.jpg" />
+    <Content Include="Upload\Task\f479de09-2980-4e81-a6b7-4e4ddd02179c.jpg" />
+    <Content Include="Upload\Task\fd6f287a-5e03-4d99-b45f-99213cc49a54.jpg" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\Log\Index.cshtml" />
+    <Content Include="Views\Log\PartialLogDate.cshtml" />
+    <Content Include="Views\Reports\LoadReport.cshtml" />
+    <Content Include="Views\Security\ChangePassword.cshtml" />
+    <Content Include="Views\Security\ForgetPasswoed.cshtml" />
+    <Content Include="Views\Security\ForgetPasswordConfirmation.cshtml" />
+    <Content Include="Views\Security\Login.cshtml" />
+    <Content Include="Views\Security\StopedUser.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\Modal.cshtml" />
+    <Content Include="Views\Shared\Notification.cshtml" />
+    <Content Include="Views\Shared\PartialSearchTask.cshtml" />
+    <Content Include="Views\Shared\PartialUploadFile.cshtml" />
+    <Content Include="Views\Shared\PushNotification.cshtml" />
+    <Content Include="Views\Shared\_Delete.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_Message.cshtml" />
+    <Content Include="Views\Security\AdminLoginOld.cshtml" />
+    <Content Include="Views\Shared\_LayoutNoSearchOld.cshtml" />
+    <Content Include="Views\Log\LogGeneral.cshtml" />
+    <Content Include="Views\Log\PartialLogGeneralDate.cshtml" />
+    <Content Include="Views\Shared\_ViewStart.cshtml" />
+    <Content Include="Views\Test\Index.cshtml" />
+    <Content Include="Views\Error\Error.cshtml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
+    <Content Include="Views\Shared\PartialUploadImage.cshtml" />
+    <Content Include="Views\Site\Index.cshtml" />
+    <Content Include="Views\Shared\_Site.cshtml" />
+    <Content Include="Views\Site\AboutETask.cshtml" />
+    <Content Include="Views\Site\AboutQVision.cshtml" />
+    <Content Include="Views\Site\Features.cshtml" />
+    <Content Include="Views\Site\ContactUs.cshtml" />
+    <Content Include="Views\Site\ShowContactUsData.cshtml" />
+    <Content Include="Views\Site\VerifyShowData.cshtml" />
+    <Content Include="Upload\Help\startnow.pdf" />
+    <Content Include="Upload\Help\heplforcompany.pdf" />
+    <Content Include="Upload\Help\helpforemployee.pdf" />
+    <Content Include="Views\Security\AdminLogin.cshtml" />
+    <Content Include="Views\Security\ForgetPasswoedOld.cshtml" />
+    <Content Include="Views\Security\ForgetPasswordConfirmationOld.cshtml" />
+    <Content Include="Views\Shared\_LayoutNewDesign.cshtml" />
+    <Content Include="Views\Shared\_LayoutOld.cshtml" />
+    <Content Include="Views\Shared\_LayoutNoSearch.cshtml" />
+    <Content Include="Views\Shared\_LayoutReport.cshtml" />
+    <Content Include="Views\Error\ErrorInProgress.cshtml" />
+    <Content Include="Views\DataBase\Index.cshtml" />
+    <Content Include="Views\DataBase\_TableView.cshtml" />
+    <Content Include="Views\DataBase\getTableByID.cshtml" />
+    <Content Include="Views\Attendance\AttendanceReport.cshtml" />
+    <Content Include="Views\EmployeesReport\Index.cshtml" />
+    <Content Include="Views\EmployeePerformanceReport\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Views\Shared\" />
+    <Folder Include="Areas\Employee\Views\Shared\" />
+    <Folder Include="CustomModelBinder\" />
+    <Folder Include="Upload\Company\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TaskManagementModel\TaskManagementModel.csproj">
+      <Project>{7dc83545-7aa8-478f-996b-337f8f5e23c2}</Project>
+      <Name>TaskManagementModel</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_GlobalResources\ColumnNameLog.resx">
+      <Generator>GlobalResourceProxyGenerator</Generator>
+      <LastGenOutput>ColumnNameLog.Designer.cs</LastGenOutput>
+    </Content>
+    <EmbeddedResource Include="ReportsRDLC\Attendance.rdlc" />
+    <EmbeddedResource Include="ReportsRDLC\Attendance1.rdlc" />
+    <EmbeddedResource Include="ReportsRDLC\CompanyTasks.rdlc" />
+    <EmbeddedResource Include="ReportsRDLC\ProjectTasks.rdlc" />
+    <EmbeddedResource Include="ReportsRDLC\Report1.rdlc" />
+    <EmbeddedResource Include="ReportsRDLC\TotalEmployeeTasks.rdlc" />
+    <EmbeddedResource Include="Report\TotalEmployeeTasks.rdlc" />
+    <EmbeddedResource Include="Resources\Company\CompanyTask.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CompanyTask1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\EmoloyeeTask\EmployeeTask.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>EmployeeTask1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Employee\Employee.resx" />
+    <EmbeddedResource Include="Resources\NotficationMessage\Message.resx" />
+    <EmbeddedResource Include="Resources\Shared\NotificationTemplate.resx" />
+    <EmbeddedResource Include="Resources\Shared\ValidationMessages.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Task\Task.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Company\Views\Company\Index.cshtml" />
+    <Content Include="Areas\Company\Views\Company\PartialCompTask.cshtml" />
+    <Content Include="Areas\Company\Views\Company\TaskDetails.cshtml" />
+    <Content Include="Areas\Company\Views\Company\TaskExtensions.cshtml" />
+    <Content Include="Areas\Company\Views\DashBoard\Index.cshtml" />
+    <Content Include="Areas\Company\Views\DashBoard\PartialDBCompTask.cshtml" />
+    <Content Include="Areas\Company\Views\Employee\AddEdit.cshtml" />
+    <Content Include="Areas\Company\Views\Employee\Index.cshtml" />
+    <Content Include="Areas\Company\Views\Employee\PartialEmployee.cshtml" />
+    <Content Include="Areas\Company\Views\Profile\Index.cshtml" />
+    <Content Include="Areas\Company\Views\Project\index.cshtml" />
+    <Content Include="Areas\Company\Views\Project\PartialAllProject.cshtml" />
+    <Content Include="Areas\Company\Views\Project\PartialOneProject.cshtml" />
+    <Content Include="Areas\Company\Views\RecurrenceTask\AddEdit.cshtml" />
+    <Content Include="Areas\Company\Views\Report\Index.cshtml" />
+    <Content Include="Areas\Company\Views\Report\ProjectReport.cshtml" />
+    <Content Include="Areas\Company\Views\Report\TaskChart.cshtml" />
+    <Content Include="Areas\Company\Views\Report\TaskReportPreperation.cshtml" />
+    <Content Include="Areas\Company\Views\Report\TasksByMonthsChart.cshtml" />
+    <Content Include="Areas\Company\Views\Shared\CompanyTaskRep.cshtml" />
+    <Content Include="Areas\Company\Views\Task\SaveData.cshtml" />
+    <Content Include="Areas\Company\Views\Web.config" />
+    <Content Include="Areas\Company\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\Employee\Views\DashBoardEmp\Index.cshtml" />
+    <Content Include="Areas\Employee\Views\DashBoardEmp\PartialDBEmpTask.cshtml" />
+    <Content Include="Areas\Employee\Views\Employee\Index.cshtml" />
+    <Content Include="Areas\Employee\Views\Report\Index.cshtml" />
+    <Content Include="Areas\Employee\Views\Report\ProjectReport.cshtml" />
+    <Content Include="Areas\Employee\Views\Report\TaskReportPreperation.cshtml" />
+    <Content Include="Areas\Employee\Views\Tasks\Index.cshtml" />
+    <Content Include="Areas\Employee\Views\Tasks\PartialEmpTask.cshtml" />
+    <Content Include="Areas\Employee\Views\Tasks\TaskDetails.cshtml" />
+    <Content Include="Areas\Employee\Views\Tasks\TaskExtensions.cshtml" />
+    <Content Include="Areas\Employee\Views\TestFileUpload\Add.cshtml" />
+    <Content Include="Areas\Employee\Views\Web.config" />
+    <Content Include="Areas\Employee\Views\_ViewStart.cshtml" />
+    <Content Include="Scripts\QVUploader\UploadFile.ashx" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>43799</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:43305/</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost:43305/</IISAppRootUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>https://localhost:44305/</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.SqlServer.Types.160.1000.6\build\net462\Microsoft.SqlServer.Types.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.SqlServer.Types.160.1000.6\build\net462\Microsoft.SqlServer.Types.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

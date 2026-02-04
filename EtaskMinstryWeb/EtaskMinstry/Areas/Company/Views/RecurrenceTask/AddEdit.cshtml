@@ -1,0 +1,558 @@
+﻿@model EtaskMinstry.Areas.Company.Models.RecurrenceTaskVM
+
+
+@{
+    ViewBag.Title = "AddEdit";
+}
+
+@using (Html.BeginForm("AddEdit", "RecurrenceTask", FormMethod.Post, new { id = "recurrenceForm", enctype = "multipart/form-data", area = "Company" }))
+{
+    @Html.ValidationSummary(true)
+
+
+    <h3 class="paragraph-title">
+        <img src="/Content/Main/images/task-icon-small.png" style="margin-left: 5px; vertical-align: bottom;">مهمة دورية
+
+    </h3>
+    <div class="clear">
+    </div>
+
+    @Html.HiddenFor(model => model.Id)
+
+@*    <div class="editor-label">
+            @Html.LabelFor(model => model.RecurrenceTypeID)
+        </div>
+        <div class="editor-field">
+           <select id="">
+               @foreach (var item in ViewBag.RecurrenceType)
+               {
+                   <option value="@item.RecurrenceTypeID">@item.Title</option>
+               }
+           </select>
+        </div>*@
+
+ 
+
+    <table class=" comment-grid" width="100%" border="0" cellspacing="1">
+        <tbody>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.Title)
+                </td>
+                <td width="74%">
+                    @Html.TextBoxFor(model => model.Title, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Title, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.Summary)
+                </td>
+                <td width="74%">
+                    @Html.TextAreaFor(model => model.Summary, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Summary, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "SummaryValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.Description)
+                </td>
+                <td width="74%">
+                    @Html.TextAreaFor(model => model.Description, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Description, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "DescriptionValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.ProjectID)
+                </td>
+                <td width="74%">
+
+
+                    @Html.DropDownListFor(model => model.ProjectID, ViewData["Projects"] as IEnumerable<SelectListItem>)
+                    <br />
+                    @Html.ValidationMessageFor(model => model.ProjectID, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "ProjectIDValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.RecurrenceTypeID)
+                </td>
+                <td width="74%">
+
+                    @Html.TextBoxFor(model => model.RecValue, new { @style = "display:none;" })
+                    <a class="circle-small" id="btnRecurrence" href="javascript:;"><i class="icon-retweet"></i></a>
+                    <p id="txtRecValue"></p>
+                    @Html.ValidationMessageFor(model => model.RecValue, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "RecValueValidation"
+                    })
+                    <br />
+                    <div style="width: 496px; display: none; margin-right: 35px;" id="RecurrencePopUp">
+                        <div>
+
+                            @foreach (var item in ViewData["RecurrenceType"] as IEnumerable<SelectListItem>)
+                            {
+                                @Html.RadioButtonFor(model => model.RecurrenceTypeID, item.Value) @item.Text
+                            }
+                        </div>
+                        <div style="margin-top: 15px">
+                            <div class="hide" id="weekly">
+                                <input type="checkbox" title="السبت" value="1" />السبت
+             <input type="checkbox" title="الأحد" value="2" />الأحد
+             <input type="checkbox" title="الاثنين" value="3" />الاثنين
+             <input type="checkbox" title="الثلاثاء" value="4" />الثلاثاء
+             <input type="checkbox" title="الأربعاء" value="5" />الأربعاء
+             <input type="checkbox" title="الخميس" value="6" />الخميس
+                            </div>
+                            <div class="hide" id="monthly">
+                                <input type="radio" name="monthly" value="1" />
+                                يوم<span class="hide" id="spanDayInMonthly">
+                                    <select id="DayInnMonth">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                        <option value="22">2</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>
+
+                                    </select>
+                                </span>
+                                <br />
+                                <input type="radio" name="monthly" value="2" />
+                                الاسبوع <span class="hide" id="spanWeekInMonthly">
+
+                                    <select id="week">
+                                        <option value="1">الأول</option>
+                                        <option value="2">الثاني</option>
+                                        <option value="3">الثالث</option>
+                                        <option value="4">الرابع</option>
+                                        <option value="5">الخميس</option>
+                                    </select>
+                                    اليوم
+                 <select id="DayWeek">
+                     <option value="1">السبت</option>
+                     <option value="2">الأحد</option>
+                     <option value="3">الاثنين</option>
+                     <option value="4">الثلاثاء</option>
+                     <option value="5">الأربعاء</option>
+                     <option value="6">الخميس</option>
+                 </select>
+                                </span>
+                            </div>
+                            <div class="hide" id="yearly">
+
+                                <input type="radio" name="yearly" value="1" />
+                                يوم<span class="hide" id="spanDayInYearly">
+                                    <select id="DayInYear">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                        <option value="22">2</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>
+
+                                    </select>
+                                    الشهر
+            <select id="MonthInYear">
+                <option value="1">المحرم</option>
+                <option value="2">صفر</option>
+                <option value="3">ربيع الأول</option>
+                <option value="4">ربيع الثاني</option>
+                <option value="5">جمادى الأول</option>
+                <option value="6">جمادى الثاني</option>
+                <option value="7">رجب</option>
+                <option value="8">شعبان</option>
+                <option value="9">رمضان</option>
+                <option value="10">شوال</option>
+                <option value="11">ذو القعدة</option>
+                <option value="12">ذو الحجة</option>
+            </select>
+                                </span>
+                                <br />
+                                <input type="radio" name="yearly" value="2" />
+                                الاسبوع <span class="hide" id="spanWeekInYearly">
+
+                                    <select id="WeekInYear">
+                                        <option value="1">الأول</option>
+                                        <option value="2">الثاني</option>
+                                        <option value="3">الثالث</option>
+                                        <option value="4">الرابع</option>
+                                        <option value="5">الخميس</option>
+                                    </select>
+                                    اليوم
+                 <select id="DayWeekInYear">
+                     <option value="1">السبت</option>
+                     <option value="2">الأحد</option>
+                     <option value="3">الاثنين</option>
+                     <option value="4">الثلاثاء</option>
+                     <option value="5">الأربعاء</option>
+                     <option value="6">الخميس</option>
+                 </select>
+                                    الشهر
+                  <select id="MonthWeekInYear">
+                      <option value="1">المحرم</option>
+                      <option value="2">صفر</option>
+                      <option value="3">ربيع الأول</option>
+                      <option value="4">ربيع الثاني</option>
+                      <option value="5">جمادى الأول</option>
+                      <option value="6">جمادى الثاني</option>
+                      <option value="7">رجب</option>
+                      <option value="8">شعبان</option>
+                      <option value="9">رمضان</option>
+                      <option value="10">شوال</option>
+                      <option value="11">ذو القعدة</option>
+                      <option value="12">ذو الحجة</option>
+                  </select>
+                                </span>
+                            </div>
+                        </div>
+
+                        <a class="circle-small" id="btnConfirmRecurrunce" href="javascript:;"><i class="icon-ok"></i></a>
+                    </div>
+
+
+                </td>
+            </tr>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.StartRec)
+                </td>
+                <td width="74%">
+                    @Html.EditorFor(model => model.StartRec, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.StartRec, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "StartRecValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.EndRec)
+                </td>
+                <td width="74%">
+                    @Html.EditorFor(model => model.EndRec)
+                    
+                    <br />
+                    @Html.ValidationMessageFor(model => model.EndRec, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "EndRecValidation"
+                    })
+                </td>
+            </tr>
+
+             <tr>
+                <td width="26%" class="srch-lbl">@Html.LabelFor(model => model.Employees)
+                </td>
+                <td width="74%">
+                    <div style="overflow-y:scroll;height:200px">
+
+                        @for (int x = 0; x < Model.Employees.Count(); x++)
+                        {
+                            
+                         @Html.HiddenFor(model=> Model.Employees[x].employee_Id)
+                         @Html.HiddenFor(model=> Model.Employees[x].IsETask)     
+                         @Html.CheckBoxFor(model=> model.Employees[x].IsAssigned) @Model.Employees[x].Name <br />
+                          
+                        }
+                     </div>
+                    <p id="txtValidEmployee"></p>
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Employees, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "ProjectIDValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <input id="btnSubmitTask" type="button" value="حفظ" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    
+     
+}
+<script>
+    // Add Calendar To TextBoxs .
+    var recValue = new Object();
+    var stringRecVal;
+    var text = "";
+    var type;
+    var monthlytype;
+    var yearlytype;
+    var RecValueValid = false;
+    $(document).ready(function () {
+        //Hijri Calender
+        $('#StartRec,#EndRec').calendarsPicker({
+            changeMonth: true,
+            changeYear: true,
+            showTrigger: '#calImg',
+            calendar: $.calendars.instance('ummalqura'),
+            dateFormat: 'dd/mm/yyyy',
+            yearRange: '1418:1450'
+        });
+
+        $("#btnRecurrence").click(function () {
+            $("#RecurrencePopUp").slideToggle();
+        });
+        $("input[name='RecurrenceTypeID']").live("change", function () {
+
+            type = $(this).val();
+            if (type == 1) {
+                $(".hide").hide();
+            } else if (type == 2) {
+                $(".hide").hide();
+                $("#weekly").show();
+            } else if (type == 3) {
+                $(".hide").hide();
+                $("#monthly").show();
+
+            } else if (type == 4) {
+                $(".hide").hide();
+                $("#yearly").show();
+
+            }
+
+        });
+
+        $("input[name='monthly']").live("change", function () {
+            monthlytype = $(this).val();
+            if (monthlytype == 1) {
+                $(".hide").hide();
+                $("#monthly").show();
+                $("#spanDayInMonthly").show();
+            } else if (monthlytype == 2) {
+                $(".hide").hide();
+                $("#monthly").show();
+                $("#spanWeekInMonthly").show();
+            }
+        });
+
+        $("input[name='yearly']").live("change", function () {
+            yearlytype = $(this).val();
+            if (yearlytype == 1) {
+                $(".hide").hide();
+                $("#yearly").show();
+                $("#spanDayInYearly").show();
+            } else if (yearlytype == 2) {
+                $(".hide").hide();
+                $("#yearly").show();
+                $("#spanWeekInYearly").show();
+            }
+        });
+
+        @*//@((int)EtaskMinstry.RecurrenceType.Daily) @((int)EtaskMinstry.RecurrenceType.Weekly)
+        @((int)EtaskMinstry.RecurrenceType.Monthly) @((int)EtaskMinstry.RecurrenceType.Yearyly)*@
+        $("#btnConfirmRecurrunce").live("click", function () {
+
+            if (type == 1) {
+                SetDailyRecValue();
+            } else if (type == 2) {
+                SetWeeklyRecValue();
+            } else if (type == 3) {
+                SetMonthlyRecValue();
+            } else if (type == 4) {
+                SetYearlyRecValue();
+            }
+
+            $("#txtRecValue").text(text).css("color", "black");
+            $("#RecValue").val(stringRecVal);
+            RecValueValid= CheckIsValid(type);
+        });
+
+        $("#btnSubmitTask").click(function () {
+            SubmitForm();
+        });
+
+    });
+    //Set  Daily Recurrence Task
+    function SetDailyRecValue() {
+        recValue.Type = "Daily";
+        stringRecVal = JSON.stringify(recValue);
+        text = "نوع التكرار: يومي";
+       
+    }
+    //Set  Weekly Recurrence Task
+    function SetWeeklyRecValue() {
+        var arrayDays = [];
+        var arraytext = [];
+        $("#weekly input:checkbox:checked").each(function () {
+            arrayDays.push($(this).val());
+            arraytext.push($(this).attr("title"));
+        });
+
+        recValue.Type = "Weekly";
+        recValue.Days = arrayDays;
+        stringRecVal = JSON.stringify(recValue);
+        text = "نوع التكرار: اسبوعي، الأيام: " + arraytext + "";
+    }
+    //Set  Monthly Recurrence Task
+    function SetMonthlyRecValue() {
+        recValue.Type = "Monthly";
+        if (monthlytype == 1) {
+            recValue.Date = $("#DayInnMonth").val();
+            text = "نوع التكرار: شهري، اليوم: " + recValue.Date + "";
+        } else if (monthlytype == 2) {
+            recValue.DayWeek = $("#DayWeek").val();
+            recValue.Week = $("#week").val();
+            text = "نوع التكرار: شهري، اليوم: " + $("#DayWeek :selected").text() + "، الأسبوع: " + $("#week :selected").text() + "";
+        }
+        stringRecVal = JSON.stringify(recValue);
+    }
+    //Set  Yearly Recurrence Task
+    function SetYearlyRecValue() {
+        recValue.Type = "Yearly";
+        if (yearlytype == 1) {
+            var day = $("#DayInYear").val();
+            var month = $("#MonthInYear").val();
+            recValue.Date = day + "/" + month;
+            text = "نوع التكرار: سنوي، اليوم: " + day + "، الشهر: " + $("#MonthInYear :selected").text() + "";
+        } else if (yearlytype == 2) {
+            recValue.DayWeek = $("#DayWeekInYear").val();
+            recValue.Week = $("#WeekInYear").val();
+            recValue.Month = $("#MonthWeekInYear").val();
+            text = "نوع التكرار: سنوي، اليوم: " + $("#DayWeekInYear :selected").text() + "، الأسبوع: " + $("#WeekInYear :selected").text() + "، الشهر: " + $("#MonthWeekInYear :selected").text() + "";
+
+        }
+        stringRecVal = JSON.stringify(recValue);
+    }
+
+    //Validate Choise
+    function CheckIsValid(type) {
+        if (type == @((int)EtaskMinstry.RecurrenceType.Daily)) {
+            $("#RecurrencePopUp").slideUp();
+            return true;
+    } else if (type == @((int)EtaskMinstry.RecurrenceType.Weekly)) {
+            if ($("#weekly input:checkbox:checked").length < 1) {
+                $("#txtRecValue").text("يجب اختيار يوم واحد على الأقل").css("color", "red");
+                return false;
+            }
+            else {
+                $("#RecurrencePopUp").slideUp();
+                return true;
+            }
+    } else if (type == @((int)EtaskMinstry.RecurrenceType.Monthly)) {
+            if ($("input[name='monthly']:checked").length < 1) {
+                $("#txtRecValue").text("يجب اختيار نمط التكرار").css("color", "red");
+                return false;
+            }
+            else {
+                $("#RecurrencePopUp").slideUp();
+                return true;
+            }
+    } else if (type == @((int)EtaskMinstry.RecurrenceType.Yearyly)) {
+            if ($("input[name='yearly']:checked").length < 1) {
+                $("#txtRecValue").text("يجب اختيار نمط التكرار").css("color", "red");
+                return false;
+            }
+            else {
+                $("#RecurrencePopUp").slideUp();
+                return true;
+            }
+        }
+ }
+
+    function SubmitForm() {
+        var FormIsValid = $("#recurrenceForm").valid();
+        if (RecValueValid && FormIsValid) {
+            if ($("input:checkbox:checked").length > 0) {
+                $("#recurrenceForm").submit();
+            } else {
+                $("#txtValidEmployee").text("يجب اختيار موظف واحد على الأقل").css("color", "red");
+            }
+        } else {
+            $("#txtRecValue").text("يجب اختيار نمط التكرار و بطريقة صحيحة").css("color", "red");
+            if ($("input:checkbox:checked").length <= 0)
+                $("#txtValidEmployee").text("يجب اختيار موظف واحد على الأقل").css("color", "red");
+            else
+                $("#txtValidEmployee").text("");
+        }
+    
+   
+    }
+</script>
+
+<style>
+    .hide {
+        display: none;
+    }
+</style>
+
+

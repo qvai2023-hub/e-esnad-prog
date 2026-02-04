@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+  
+    <title>E-snad | @ViewBag.Title</title>
+<link href="~/Content/Site/css/bootstrap.css" type="text/css" rel="stylesheet">
+<link href="~/Content/Site/css/bootstrap-arabic.min.css" type="text/css" rel="stylesheet">
+<!-- css links -->
+<link href="~/Content/Site/css/normalize.css" type="text/css" rel="stylesheet">
+<link href="~/Content/Site/css/animate.css" type="text/css" rel="stylesheet">
+    
+<link href="~/Content/Site/css/font-awesome.css" type="text/css" rel="stylesheet" />
+<link rel="stylesheet" href="~/Content/Site/css/iconate.css">
+<link href="~/Content/Site/css/style.css" type="text/css" rel="stylesheet">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+      <script src="~/Content/Site/js/html5shiv.js"></script>
+      <script src="~/Content/Site/js/respond.min.js"></script>
+    <![endif]-->
+
+<!-- Modernizr -->
+<script src="~/Content/Site/js/modernizr.js"></script>
+
+</head>
+<body>
+         <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper" class=" wow slideInRight">
+        
+         <div class="sidebar-brand">
+                    <a href="#">
+                    <img src="~/Content/Site/img/logo.png" class="img-responsive"> </a>
+                </div>
+         @*<div class="hotline wow tada" data-wow-delay="1.3s"><i class="fa fa-ticket"></i> اشترك الآن</div>*@
+        <div class="language-bar wow fadeInLeft" data-wow-delay=".5s"><a href="/Security/login">تسجيل الدخول</a></div>
+        
+        
+            <ul class="nav">
+               
+                <li >
+                    <a href="/Site">الرئيسية</a>
+                </li>
+                <li>
+                    <a href="/Site/AboutETask">عن إي تاسك</a>
+                </li>
+                <li>
+                    <a href="/Site/Features">خصائص ومميزات</a>
+                </li>
+               
+              <li>
+                    <a href="/Site/AboutQVision">عن Q-Vision</a>
+                </li>
+                <li>
+                    <a href="/Site/ContactUs">اتصل بنا</a>
+                </li>
+               
+            </ul>
+          <div class="social"><a href="https://www.facebook.com/Etask.proj" target="_blank"><i class="fa fa-facebook"></i></a><a href="https://twitter.com/Etask_proj" target="_blank"><i class="fa fa-twitter"></i></a><!--<a href="#"><i class="fa fa-google-plus"></i></a><a href="#"><i class="fa fa-linkedin"></i></a><a href="#"><i class="fa fa-pinterest"></i></a><a href="#"><i class="fa fa-youtube"></i></a>--></div>
+        <div class="copyrights">  جميع الحقوق محفوظة ©
+        برنامج إدارة المهام 2017
+        -
+        تم التطوير بواسطة <a target="_blank" href="http://qvsite.com">Q-Vision</a></h5>
+        </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        @RenderBody()
+  
+<!-- /#page-content-wrapper -->
+
+    </div>
+       
+      
+<img src="~/Content/Site/img/logo1.png" class="logo1 img-responsive" />
+<!-- JavaScript --> 
+
+    <script src="~/Content/Site/js/jquery.js"></script>
+     <script src="~/Content/Site/js/bootstrap.min.js"></script>
+    <script src="~/Content/Site/js/respond.min.js"></script>
+     <script src="~/Content/Site/js/wow.min.js"></script>
+    <script src="~/Content/Site/js/iconate.min.js"></script>
+<!-- Menu Toggle Script -->
+    <script>
+
+       
+        var path = window.location.pathname;
+        if (path == "/" || path == "")
+            $('.nav li').first().addClass('active');
+            else
+         $('.nav li a[href="' + path + '"]').parent().addClass('active');
+
+        $(".nav").find("")
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+            var iconEl = document.getElementById('icon');
+
+            var options = {};
+            var isbarCLass = $($("#menu-toggle").children()[0]).hasClass("fa-bars");
+            if (isbarCLass) {
+                options = {
+                    from: 'fa-bars',
+                    to: 'fa-arrow-right',
+                    animation: 'rubberBand'
+                };
+            } else {
+                options = {
+                    from: 'fa-arrow-right',
+                    to: 'fa-bars',
+                    animation: 'rubberBand'
+                };
+            }
+
+
+            iconate(iconEl, options);
+        });
+        new WOW().init();
+
+
+
+
+    </script>
+   
+
+</body>
+</html>

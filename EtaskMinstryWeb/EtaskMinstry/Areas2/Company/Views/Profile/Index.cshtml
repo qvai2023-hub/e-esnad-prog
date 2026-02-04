@@ -1,0 +1,141 @@
+﻿@model EtaskMinstry.Areas.Company.Models.CompanyProfileVM
+@{
+    ViewBag.Title = "Index";
+}
+
+
+
+
+
+<div class="grid_7">
+    @*  <h3 class="sec-title">بيانات أساسية </h3>*@
+    <div class="dash-details-box" style="line-height: 36px;">
+        <dl>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Name) :</span>@Html.DisplayFor(model => model.Name)</dd>
+
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Birthdate):</span> @Html.DisplayFor(model => model.Birthdate)
+            </dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Email)  :</span>
+                <label id="lblEmail">@Html.DisplayFor(model => model.Email)</label>@Html.TextBoxFor(model => model.Email, new { @style = "display:none;" })
+                <span id="confirmbtns" style="display: none">
+                    <a href="javascript:void(0);" id="breConfirm" class="accepted-icon"></a>
+                    <a href="javascript:void(0);" id="Cancel" class="refused-icon"></a>
+                </span>
+                <a href="javascript:;" id="btnChangeEmail">تعديل </a>
+
+            </dd>
+
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Address) :</span><label id="lblAddress"> @Html.DisplayFor(model => model.Address)</label>
+                @Html.TextBoxFor(model => model.Address, new { @style = "display:none;" })
+                <span id="BtnsAddress" style="display: none">
+                    <a href="javascript:void(0);" id="SaveAddress" class="accepted-icon"></a>
+                    <a href="javascript:void(0);" id="CancelAddress" class="refused-icon"></a>
+                </span>
+                <a href="javascript:;" id="btnChangeAddress">تعديل </a>
+            </dd>
+            
+        </dl>
+
+
+
+
+    </div>
+    <br>
+
+    <div id="confirmPanel" style="display: none" class=" alert alert-warning">
+        <i class="icon-attention"></i>
+        لقد قمت بتغيير البريد الالكتروني هل تريد الحفظ 
+                       <a class="action-btn" id="btnUpdateEmail">نعم</a>
+        <a class="action-btn" id="btnCancel">لا</a>
+    </div>
+</div>
+
+
+
+
+<style>
+    .btn-fix {
+        width: 100px;
+        height: 25px;
+        padding-top: 2px;
+        display: inline-block;
+        color: white !important;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+
+        $('#btnChangeEmail').on("click", function () {
+
+            $("#btnChangeEmail,#lblEmail").hide();
+            $("#Email,#confirmbtns").show();
+
+        });
+
+
+        $("#breConfirm").live("click", function () {
+
+            $("#confirmPanel").show();
+        });
+
+        $("#Cancel,#btnCancel").live("click", function () {
+            $("#confirmPanel,#Email,#confirmbtns").hide();
+            $("#btnChangeEmail,#lblEmail").show();
+
+        });
+
+        $("#btnUpdateEmail").live("click", function () {
+
+            var email = $("#Email").val();
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("ChangeEmail")',
+                 dataType: 'json',
+                 data: { Email: email },
+                 success: function (data) {
+
+                     $("#lblEmail").text(email);
+                     $("#confirmPanel,#Email,#confirmbtns").hide();
+                     $("#btnChangeEmail,#lblEmail").show();
+
+                 }
+             });
+
+        });
+
+        $("#btnChangeAddress").live("click", function () {
+
+            $("#btnChangeAddress,#lblAddress").hide();
+            $("#Address,#BtnsAddress").show();
+        });
+
+        $("#SaveAddress").live("click", function () {
+
+            var address = $("#Address").val();
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("ChangeAddress")',
+                     dataType: 'json',
+                     data: { Address: address },
+                     success: function (data) {
+
+                         $("#lblAddress").text(address);
+                         $("#Address,#BtnsAddress").hide();
+                         $("#btnChangeAddress,#lblAddress").show();
+
+                     }
+                 });
+        });
+
+
+        $("#CancelAddress").live("click", function () {
+
+            $("#Address,#BtnsAddress").hide();
+            $("#btnChangeAddress,#lblAddress").show();
+        });
+
+     });
+</script>

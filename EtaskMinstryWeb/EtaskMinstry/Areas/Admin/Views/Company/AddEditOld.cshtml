@@ -1,0 +1,149 @@
+﻿@model EtaskMinstry.Areas.Admin.Models.CompanyVM
+
+@{
+    ViewBag.Title = "AddEdit";
+    Layout = "~/Views/Shared/_LayoutNewDesign.cshtml";
+}
+<link href="~/Scripts/QVUploader/QVUploader.css" rel="stylesheet" />
+<script src="~/Scripts/QVUploader/QVUploader.js"></script>
+
+@using (Html.BeginForm("AddEdit", "Company", FormMethod.Post, new { enctype = "multipart/form-data", area = "Admin", @id = "frm1" }))
+{
+    @Html.ValidationSummary(true)
+
+    <h3 class="paragraph-title">
+        بيانات الشركة
+
+    </h3>
+    <div class="clear">
+    </div>
+
+    @Html.HiddenFor(model => model.Id)
+
+
+    <table class=" comment-grid" width="100%" border="0" cellspacing="1">
+        <tbody>
+            <tr>
+                <td width="26%" class="srch-lbl">
+                    @Html.LabelFor(model => model.Name)
+            </td>
+            <td width="74%">
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-textbox" })
+                <br />
+                @Html.ValidationMessageFor(model => model.Name, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+            </td>
+        </tr>
+
+        <tr>
+            <td width="26%" class="srch-lbl">
+                @Html.LabelFor(model => model.Address)
+        </td>
+        <td width="74%">
+            @Html.TextBoxFor(model => model.Address, new { @class = "form-textbox" })
+            <br />
+            @Html.ValidationMessageFor(model => model.Address, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+        </td>
+    </tr>
+
+    @if (Model == null)
+    {
+        <tr>
+            <td width="26%" class="srch-lbl">
+                @Html.LabelFor(model => model.Email)
+        </td>
+        <td width="74%">
+            @Html.TextBoxFor(model => model.Email, new { @class = "form-textbox" })
+            <br />
+            @Html.ValidationMessageFor(model => model.Email, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+        </td>
+    </tr>
+    }
+    <tr>
+        <td width="26%" class="srch-lbl">
+            @Html.LabelFor(model => model.Phone)
+    </td>
+    <td width="74%">
+        @Html.TextBoxFor(model => model.Phone, new { @class = "form-textbox" })
+        <br />
+        @Html.ValidationMessageFor(model => model.Phone, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+    </td>
+</tr>
+
+<tr>
+    <td width="26%" class="srch-lbl">
+        @Html.LabelFor(model => model.CommercialRegister)
+</td>
+<td width="74%">
+    @Html.TextBoxFor(model => model.CommercialRegister, new { @class = "form-textbox" })
+    <br />
+    @Html.ValidationMessageFor(model => model.CommercialRegister, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+</td>
+</tr>
+
+<tr>
+    <td width="26%" class="srch-lbl">
+        @Html.LabelFor(model => model.IsActive)
+</td>
+<td width="74%">
+    @Html.CheckBoxFor(model => model.IsActive)
+    <br />
+
+</td>
+</tr>
+
+<tr>
+    <td width="26%" class="srch-lbl">
+        @Html.LabelFor(model => model.Logo)
+</td>
+<td width="74%">
+    @Html.TextBoxFor(model => model.Logo, new { @id = "txtLogo" })
+
+</td>
+</tr>
+<tr>
+    <td></td>
+    <td>
+        <input id="btnSbmt" type="submit" value="حفظ" />
+
+        @Html.ActionLink("الرجوع للقائمة", "Index")
+    </td>
+</tr>
+</tbody>
+</table>
+}
+<script>
+       $(function () {
+
+           $("#txtLogo").QVUploader({ type: "png,jpeg,jpg",displayImage:"on" });
+       });
+</script>
+
+
+
+
+

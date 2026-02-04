@@ -1,0 +1,123 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Admin.Models.CompanyEmployeeVM>
+
+@if (Model.Any())
+{
+
+
+
+    var grid = new WebGrid(Model);
+    var gridColumns = new List<WebGridColumn>();
+
+    if (Model.All(i => i.IsDeleted == false))
+    {
+
+        gridColumns.Add(grid.Column("EmpName", "الأسم", @<text>@item.Name</text>, "FirstColumn"));
+        gridColumns.Add(grid.Column("CompanyID", "الشركة", @<text>@item.CompanyName</text>, "SecondColumn"));
+        gridColumns.Add(grid.Column("JobTitle", "الوظيفة", @<text>@item.jobTitle</text>, "SecondColumn"));
+        gridColumns.Add(grid.Column("Gender", "النوع", @<text> @(item.Gender == true ? "ذكر" : "أنثى")</text>, "ThirdColumn"));
+        gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "FourthColumn"));
+        gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+        gridColumns.Add(grid.Column("Edit", "تعديل",@<text><span class="iconbox has-tip" title="" data-original-title="تعديل">
+           
+            @*<a style="color:white" href="/Company/Employee/AddEdit?empid=@item.Id"><i class="icon-edit-1"></i></a>*@
+            @Html.EncodedActionLink("", "AddEdit", "Employee", "Admin", new { empid = @item.Id }, new { Class = "icon-edit-1", Style = "color:white;text-decoration:none;" })
+       </span></text>));
+        gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="iconbox has-tip" title="" data-original-title="حذف">
+           <i href="javascript:void(0);" class="icon-trash-1"  id="@item.Id"></i>
+       </span></text>));
+    }
+       
+    @grid.GetHtml(columns: gridColumns.ToArray(),
+                     tableStyle: "table table-bordered dataTable  table-responsive",
+               headerStyle: "",
+                      footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+
+          
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            <tr class="table-alternat-header">
+                <td>المهمة
+                </td>
+
+            </tr>
+            <tr>
+                <td colspan="1" style="text-align: center">لا يوجد بيانات
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+
+<style>
+    .FirstColumn {
+        width: 39%;
+        text-align: center;
+    }
+
+    .SecondColumn {
+        width: 19%;
+        text-align: center;
+    }
+
+
+    .ThirdColumn {
+        width: 16%;
+        text-align: center;
+    }
+
+    .FourthColumn, .fivethColumn {
+        width: 14%;
+        text-align: center;
+    }
+
+    .table {
+        display: table;
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+    }
+
+        .table tr td {
+            border-bottom: solid 1px #CCC;
+            padding: 5px;
+        }
+
+    .tblHeader {
+        background-repeat: repeat-x;
+        font-weight: bold;
+        text-align: center;
+        height: 25px;
+        border: 0;
+    }
+
+        .tblHeader th {
+            padding-top: 4px;
+        }
+
+            .tblHeader th a {
+                color: #FFF !important;
+                padding-top: 4px;
+            }
+
+    .pagerbar {
+        text-align: center;
+    }
+</style>
+
+
+
+

@@ -1,0 +1,154 @@
+﻿@using System.Collections
+@using EtaskMinstry.Models.Project
+@model ProjectDisplay
+@{
+    ViewBag.Title = "إدارة المشروعات";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+@*<h3 class="paragraph-title">إدارة المشروعات
+        <div class="page-options">
+            <a href="javascript:;" id="btnSearchToggle" class="page-options-link2">بحث فى المشروعات</a>
+            @Ajax.ActionLink("إضافة مشروع", "NewProject", "Project",
+                                 new AjaxOptions
+                                     {
+                                         InsertionMode = InsertionMode.Replace,
+                                         UpdateTargetId = "TaskAddEdit",
+                                         OnSuccess = "var project_modal = new Modal({title: 'إضافة', id: 'TaskAddEdit'}); project_modal.show();"
+                                     }, new
+                                         {
+                                             Class = "page-options-link"
+                                         })
+        </div>
+
+    </h3>*@
+
+<div class="clear">
+</div>
+
+<div class="tab-container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h6 class="panel-title"><i class="fa fa-tasks"></i> المشروعـــــات </h6>
+
+            @* --------------------Start Add New Project Button ----------------- *@
+            <span class="pull-right">
+                @*<a href="#" class="btn btn-xs btn-success">إضافة مشروع <i class="fa fa-plus"></i></a>*@
+
+                @Ajax.ActionLink("إضافة مشروع", "NewProject", "Project",
+                                 new AjaxOptions
+                                 {
+                                     InsertionMode = InsertionMode.Replace,
+                                     UpdateTargetId = "TaskAddEdit",
+                                     OnSuccess = "debugger;var project_modal = new Modal({title: 'إضافة', id: 'TaskAddEdit'});debugger; project_modal.show();"
+                                 }, new
+                                 {
+                                     Class = "btn btn-xs btn-success"
+                                 })
+            </span>
+            @* ----------------------End Add New Project Button------------ *@
+        </div>
+        @* -----------------Start Search Panel -------------- *@
+        <div class="panel-body">
+            <div class="panel-group">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h6 class="panel-title panel-trigger">
+                            <a data-toggle="collapse" href="#panel-search">بحث</a>
+                        </h6>
+                    </div>
+                    <div id="panel-search" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            @using (Ajax.BeginForm("GetProjects", "Project", new AjaxOptions
+                            {
+                                InsertionMode = InsertionMode.Replace,
+                                UpdateTargetId = "divProjects",
+                                LoadingElementId = "loadding",
+                                LoadingElementDuration = 30
+                            },
+new
+{
+    id = "SearchForm"
+}))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label">اسم المشروع: </label>
+                                        <div class="col-sm-8">
+
+                                            @Html.TextBox("strName", "", new
+                           {
+                               @class = "form-control",
+                           })
+                                            <p class="errorMsg" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                                يجب ان لا تزيد كلمة البحث عن 150 حرف وعدم استخدام رموز خاصة
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="text-right">
+                                    <input name="Submit0" id="btnSearch" type="submit" class="btn btn-primary" value="بحث">
+                                    <input name="Submit0" id="btnShowAll" type="submit" class="btn btn-primary" value="عرض الكل">
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* -----------------End Search Panel ---------------- *@
+
+
+        <div id="divProjects" class="datatable-tasks">
+            
+            @{ Html.RenderPartial("PartialAllProject", (IEnumerable<ProjectDisplay>)ViewData["SearchResult"]); }
+        </div>
+    </div>
+
+
+
+    <div id="TaskAddEdit"></div>
+    <!--tab content end-->
+</div>
+
+<script>
+
+    $(function () {
+        //$("#btnSearchToggle").click(function () {
+
+        //    $("#SearchDiv").slideToggle("normal");
+        //});
+
+        $('#btnShowAll').click(function () {
+            $('#strName').val('');
+            $('.errorMsg').hide();
+
+            // To Set Pager To Page 1 .
+            $('#SearchForm').attr('action', $('#SearchForm').attr('action').split('?')[0]);
+        });
+
+        ////Validation rules.
+        //$.validator.addMethod("regxVldStr150", function(value, element) {
+        //    return this.optional(element) || /^[a-zA-Z0-9\u0600-\u06ff,./\s_-]{1,150}$/.test(value);
+        //}, '<br />يجب عدم استخدام رموز خاصة');
+
+        //add validation rule to search name
+        $('#strName').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff\s_-_ ]{0,150}$" });
+
+        $('#btnSearch').click(function () {
+            if (!$('#strName').valid() && $('#strName').val() != "")
+                $('.errorMsg').show();
+            else
+                $('.errorMsg').hide();
+
+            // To Set Pager To Page 1 .
+            $('#SearchForm').attr('action', $('#SearchForm').attr('action').split('?')[0]);
+        });
+
+
+    });
+
+</script>

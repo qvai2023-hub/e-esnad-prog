@@ -1,0 +1,81 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/Esnad/v17
+/EtaskMinstryWeb/.vs/EtaskMinstry-NewDesign
+
+
+# Visual Studio specific files
+.vscode/
+.vs/
+*.user
+*.suo
+*.vcxproj.user
+*.psess
+*.psess.user
+
+# Build results
+bin/
+obj/
+out/
+
+# Ignore all bin and obj directories recursively
+**/bin/
+**/obj/
+
+# Packages
+packages/
+*.nupkg
+*.snupkg
+
+# User-specific files
+*.userosscache
+*.sln.docstates
+*.sln.ide
+
+# Logs
+*.log
+*.tlog
+
+# Backup & Configuration
+*_backup*/
+.DS_Store
+*.cache
+*.bak
+
+# Project-specific
+App_Data/
+node_modules/
+bower_components/
+jspm_packages/
+
+# Publish outputs
+*.publish.xml
+
+# Rider and JetBrains specific
+.idea/
+*.sln.iml
+.idea/workspace.xml
+.idea/modules.xml
+.idea/.idea/  
+
+# Resharper files
+*.DotSettings.user
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+*.testsettings
+*.vsmdi
+
+# Temp files
+*.tmp
+~$*
+
+# Specific paths
+EtaskMinstryWeb/TaskManagementModel/obj/Debug
+EtaskMinstryWeb/EtaskMinstry/obj/Debug
+EtaskMinstryWeb/TaskManagementModel/obj/
+EtaskMinstryWeb/EtaskMinstry/obj/

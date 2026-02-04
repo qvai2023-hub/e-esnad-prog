@@ -1,0 +1,606 @@
+﻿@using EtaskMinstry
+@model EtaskMinstry.Areas.Company.Models.CompanyEmployeeVM
+
+@{
+    ViewBag.Title = "بيانات الموظف ";
+}
+
+
+
+@*<script src='https://www.google.com/recaptcha/api.js'></script>*@
+<script src="~/Scripts/Employee/_PartialUploadImage.js"></script>
+<script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit' async defer></script>
+
+@*New Design QV*@
+@*<div class="single-task">
+    <div class="row">
+        <div class="col-md-7">
+            <div class="info">
+                <h4>بيانات الموظف</h4>
+                @using (Html.BeginForm("Details", "Employee", FormMethod.Post, new { enctype = "multipart/form-data", area = "Company", id = "AddEditEmpForm" }))
+                {
+                    @Html.ValidationSummary(true)
+
+
+                    <div class="clear">
+                    </div>
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.EmpID)
+                    <ul class="list-unstyled">
+                        <li>
+                            @Html.LabelFor(model => model.Name) :
+                            <span>
+                                @Html.DisplayFor(model => model.Name, new { @class = "form-control" })
+                                <br />
+                                @Html.HiddenFor(model => model.Name, new { @name = "HF_Name" })
+
+
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.Gender) :
+                            <span class="form-group">
+                                @Html.RadioButtonFor(model => model.Gender, true, new { disabled = "disabled" }) ذكر
+                                @Html.RadioButtonFor(model => model.Gender, false, new { disabled = "disabled" }) أنثى
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.JobTitle):
+                            <span>
+                                @Html.DisplayFor(model => model.JobTitle, new { @class = "form-control" })
+                            </span>
+                        </li>
+
+                        <li>
+                            @Html.LabelFor(model => model.Address)
+                            <span>
+                                @Html.DisplayFor(model => model.Address, new { @class = "form-control" })
+
+                            </span>
+                        </li>
+
+                        @if (Model == null && ViewBag.Message == null || Model != null && Model.Id == 0 && ViewBag.IsValiRecap == false)
+                {
+                            <li>
+                                @Html.LabelFor(model => model.Email)
+                                <span>
+                                    @Html.DisplayFor(model => model.Email, new { @class = "form-control" })
+
+                                </span>
+                            </li>
+                        }
+                        <li>
+                            @Html.LabelFor(model => model.Mobile)
+                            <span>
+                                @Html.DisplayFor(model => model.Mobile, new { @class = "form-control" })
+
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.IsActive)
+
+                            <span>
+                                @Html.DisplayFor(model => model.IsActive, new { disabled = "disabled" })
+                                <br />
+
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.Birthdate)
+
+                            <span>
+                                @Html.DisplayFor(model => model.Birthdate, new { disabled = "disabled" })
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.NationalID)
+
+                            <span>
+                                @Html.DisplayFor(model => model.NationalID, new { @class = "form-control" })
+                            </span>
+                        </li>
+
+                        <li>
+
+                            @Html.LabelFor(model => model.NationaIDImage)
+                            <span>
+
+                                @Html.Image(model => model.NationaIDImage, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpNationaIDImage" })
+                                @Html.HiddenFor(model => model.NationaIDImage)
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.LaborOfficeID)
+
+                            <span>
+                                @Html.DisplayFor(model => model.LaborOfficeID, new { @class = "form-control" })
+
+                            </span>
+                        </li>
+                        <li>
+                            @Html.LabelFor(model => model.SequenceNumber)
+
+                            <span>
+                                @Html.DisplayFor(model => model.SequenceNumber, new { @class = "form-control" })
+
+                            </span>
+                        </li>
+
+                        <li>
+                            @Html.LabelFor(model => model.ImageName)
+
+                            <span>
+                                @Html.Image(model => model.ImageName, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpImageName" })
+                                @Html.HiddenFor(model => model.ImageName)
+                            </span>
+                        </li>
+
+                        <li>
+                            @Html.ActionLink("الرجوع للقائمة", "Index")
+                        </li>
+
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>*@
+@*New Design QV*@
+
+
+
+@*New  Design @Mohamed *@
+<div class="single-task">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="info">
+
+                <h4>بيانات الموظف</h4>
+                @using (Html.BeginForm("Details", "Employee", FormMethod.Post, new { enctype = "multipart/form-data", area = "Company", id = "AddEditEmpForm" }))
+                {
+                    @Html.ValidationSummary(true)
+
+
+                    <div class="clear">
+                    </div>
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.EmpID)
+
+    <div class="col-sm-6 col-xs-4">
+        <div align="center">
+            @Html.Image(model => model.ImageName, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpImageName" })
+            @Html.HiddenFor(model => model.ImageName)
+        </div>
+
+        <br>
+
+        <!-- /input-group -->
+    </div>
+                    <div class="col-sm-6">
+                         <h2> @Html.DisplayFor(model => model.Name, new { @class = "" })   </h2>                         
+                        
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr style="margin:5px 0 5px 0;">
+
+
+                    @*الاســــم*@
+                    <div class="col-md-3 ">
+                        @Html.LabelFor(model => model.Name) :
+                    </div>
+                    <div class="col-sm-3 col-xs-4 ">
+                                @Html.DisplayFor(model => model.Name, new { @class = "form-control" })
+                                <br />
+                                @Html.HiddenFor(model => model.Name, new { @name = "HF_Name" })
+                            </div>
+                    <div class="clearfix"></div>
+                   <div class="bot-border"></div>
+                          
+
+
+                    @*النــــوع*@
+                    <div class="col-md-3">
+                        @Html.LabelFor(model => model.Gender) :
+                    </div>
+                    <div class="col-sm-3 col-xs-4">
+                        @*@Html.RadioButtonFor(model => model.Gender, true, new { disabled = "disabled",style= "margin-top: 18px;" }) ذكر
+                        @Html.RadioButtonFor(model => model.Gender, false, new { disabled = "disabled" }) أنثى*@
+                        @if (Model.Gender == true)
+                        {
+                            <div class="col-xs-4 col-md-4">
+                                @Html.Label("ذكـــر")
+                            </div>
+
+                        }
+                        else
+                        {
+                            <div class="col-xs-4 col-md-4">
+                                @Html.Label("انثي")
+                            </div>
+                           
+                        }
+
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="bot-border"></div>
+                    @*النــــوع*@
+
+                    @*المسمى الوظيفى*@
+                    <div class="col-md-3 col-xs-6">
+                        @Html.LabelFor(model => model.JobTitle):
+                    </div>
+                    <div class="col-xs-4 col-md-4">
+                        @Html.DisplayFor(model => model.JobTitle, new { @class = "form-control" })
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="bot-border"></div>
+                    @*المسمى الوظيفى*@
+
+
+                     @* العنوان*@
+                     <div class="col-md-3 col-xs-5">
+                          @Html.LabelFor(model => model.Address) :
+                      </div>
+                     <div class="col-sm-4 col-xs-6 ">
+                          @Html.DisplayFor(model => model.Address, new { @class = "form-control" })
+                      </div>
+                     <div class="clearfix"></div>
+                     <div class="bot-border"></div>
+
+                   @* الايميل *@
+                      if (Model == null && ViewBag.Message == null || Model != null && Model.Id == 0 && ViewBag.IsValiRecap == false)
+                      {
+                          <div class="col-md-3 col-xs-5">
+                            @Html.LabelFor(model => model.Email)
+                        </div>
+                          <div class="col-sm-4 col-xs-6 ">
+                            @Html.DisplayFor(model => model.Email, new { @class = "form-control" })
+                        </div>
+                      }
+
+
+                @* الجوال*@
+                    <div class="col-md-3 col-xs-5">
+                        @Html.LabelFor(model => model.Mobile) :
+                    </div>
+                    <div class="col-sm-4 col-xs-6 ">
+                        @Html.DisplayFor(model => model.Mobile, new { @class = "form-control" })
+                    </div>
+                     <div class="clearfix"></div>
+                     <div class="bot-border"></div>
+
+                     @* البريد الالكتروني*@
+                    <div class="col-md-3 col-xs-5">
+                          @Html.LabelFor(model => model.Email) :
+                      </div>
+                     <div class="col-sm-4 col-xs-5 ">
+                          @Html.DisplayFor(model => model.Email, new { @class = "form-control" })
+                      </div>
+                     <div class="clearfix"></div>
+                     <div class="bot-border"></div>
+
+
+                                   @* فعال *@
+                                   <div class="col-md-2 col-xs-5">
+                                        @Html.LabelFor(model => model.IsActive) :
+                                    </div>
+                                   <div class="col-sm-4 col-xs-6" style="margin-top: 14px;">
+                                        @Html.DisplayFor(model => model.IsActive, new { disabled = "disabled" })
+                                    </div>
+                                   <div class="clearfix"></div>
+                                   <div class="bot-border"></div>
+
+
+                                   @* الميلاد*@
+                                   <div class="col-md-3 col-xs-5">
+                                        @Html.LabelFor(model => model.Birthdate) :
+                                    </div>
+                                   <div class="col-sm-4 col-xs-6 ">
+                                        @Html.DisplayFor(model => model.Birthdate, new { disabled = "disabled" })
+                                    </div>
+                                   <div class="clearfix"></div>
+                                   <div class="bot-border"></div>
+
+
+                                   @* رقم الهويه الوطنيه*@
+                                   <div class="col-md-3 col-xs-8">
+                                        @Html.LabelFor(model => model.NationalID) :
+                                    </div>
+                                   <div class="col-sm-4 col-xs-4 ">
+                                        @Html.DisplayFor(model => model.NationalID, new { @class = "form-control" })
+
+
+                                    </div>
+                                   <div class="clearfix"></div>
+                                   <div class="bot-border"></div>
+
+
+                                   @* المكتب*@
+                                   <div class="col-md-3 col-xs-5">
+                                        @Html.LabelFor(model => model.LaborOfficeID) :
+                                    </div>
+                                   <div class="col-sm-4 col-xs-6 ">
+                                        @Html.DisplayFor(model => model.LaborOfficeID, new { @class = "form-control" })
+                                    </div>
+                                   <div class="clearfix"></div>
+                                   <div class="bot-border"></div>
+
+
+                                   @* الرقم التسلسلي*@
+                                   <div class="col-md-3 col-xs-5">
+                                       @Html.LabelFor(model => model.SequenceNumber) :
+                                   </div>
+                                   <div class="col-sm-4 col-xs-6 ">
+                                       @Html.DisplayFor(model => model.SequenceNumber, new { @class = "form-control" })
+                                   </div>
+                                   <div class="clearfix"></div>
+                                   <div class="bot-border"></div>
+
+                                   @* صوره الهويه الوطنيه*@
+                                   <div class="col-md-3 col-xs-8">
+                                       @Html.LabelFor(model => model.NationaIDImage) :
+                                   </div>
+                                   <div class="col-sm-4 col-xs-4 ">
+                                       @Html.Image(model => model.NationaIDImage, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpNationaIDImage" })
+                                       @Html.HiddenFor(model => model.NationaIDImage)
+                                   </div>
+                                   <div class="clearfix"></div>
+                                   <div class="bot-border"></div>
+
+
+                                   @* الصوره*@
+                                   @*<div class="col-sm-5 col-xs-6 tital ">
+                                           @Html.LabelFor(model => model.ImageName) :
+                                       </div>
+                                       <div class="col-sm-4 col-xs-6 ">
+                                           @Html.Image(model => model.ImageName, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpImageName" })
+                                           @Html.HiddenFor(model => model.ImageName)
+                                       </div>
+                                       <div class="clearfix"></div>
+                                       <div class="bot-border"></div>*@
+
+
+
+                                  <center>
+                                      @Html.ActionLink("الرجوع للقائمة", "Index", "", new { @class = "btn btn-primary" })
+                                  </center>
+
+
+
+
+
+
+
+                }
+            </div>
+
+        </div>
+
+    </div>
+</div>
+@*My Design @Mohamed *@
+
+
+<style>
+    input.hidden {
+        position: absolute;
+        left: -9999px;
+    }
+
+    #profile-image1 {
+        cursor: pointer;
+        width: 100px;
+        height: 100px;
+        border: 2px solid #03b1ce;
+    }
+
+    .tital {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .bot-border {
+        border-bottom: 1px #f8f8f8 solid;
+        margin: 5px 0 5px 0;
+    }
+</style>
+
+
+
+<script>
+    var isFirstClick = true;
+    var isValidReCap = false;
+    function Saveclick(event) {
+        correctCaptcha();
+        if (!isValidReCap) {
+            $("#RecaptchaValidation").show();
+        } else {
+            $("#RecaptchaValidation").hide();
+        }
+
+    }
+    //$(function () {
+    var recaptcha_id;
+    var onloadCallback = function () {
+        debugger;
+        recaptcha_id = grecaptcha.render('recapElem', {
+            'sitekey': '@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]',
+            'callback': correctCaptcha
+        });
+    };
+    var correctCaptcha = function (response) {
+
+        debugger;
+        var recapResponse = grecaptcha.getResponse(recaptcha_id);
+        if (recapResponse) {
+            isValidReCap = true;
+        }
+    };
+    //});
+
+</script>
+
+@*Display Success save message *@
+
+@if (ViewBag.Message != null)
+{
+    <script>
+
+        $(document).ready(function () {
+            var isValid = true;
+
+            $('.field-validation-error').each(function (i, obj) {
+                if ($(this).css('display') != 'none') {
+                    isValid = false;
+                    return false;
+                }
+            });
+            if (isValid)//model is valid and it has been saved  truely
+            {
+                Modal.showMessage({ title: ' حفظ', message: 'تم حفظ العملية بنجاح', type: 'alert', onAccept: function () { window.location.href = "/Company/Employee/AddEdit"; }, time: false });
+
+            } else// model is not valid
+            {
+                Modal.hide();
+            }
+
+        });
+
+    </script>
+}
+@if (ViewBag.IsValiRecap == false)
+{
+    <script>
+        $(document).ready(function () {
+            $("#RecaptchaValidation").show();
+        });
+    </script>
+}
+<script>
+    //get web.config variables for _PartialUploadImage.js file
+    var Extentions = "@System.Configuration.ConfigurationManager.AppSettings["ImageExtensions"]";
+    var size = "@System.Configuration.ConfigurationManager.AppSettings["maxfileSize"]";
+
+    $(document).ready(function () {
+        //stop textboxes from autoComplete
+        $("form :input").attr("autocomplete", "off");
+        debugger
+        // Add Calendar To TextBoxs .
+        var Isgreg = "@(MvcApplication.IsGregDate)";
+        if (Isgreg == "True") {
+            //datepicker
+            var fullmonth_array = $.datepicker.regional['ar'].monthNames
+            $('#Birthdate').datepicker(
+                {
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: '1920:2016',
+                    monthNamesShort: fullmonth_array
+                },
+           $.datepicker.regional["ar"]);
+            //
+        } else {
+            $('#Birthdate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+            });
+        }
+        //delete bithdate textbox value
+        $('.iconbox .icon-trashA').live('click', function (e) {
+            debugger;
+            e.preventDefault();
+            $("#Birthdate").val("");
+        });
+        //rehire employee
+        $('#NationalID').change(function () {
+            var iRehiredEmployeeId = 0;
+            var reHireConfirmation = new Modal({
+                title: 'إعادة توظيف', //title of the popup
+                message: 'هذا الموظف تم مسحه من شركتكم سالفا. هل تريد إعادة توظيفه؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("RehireDeletedEmp")',
+                        dataType: 'json',
+                        data: { EmpId: iRehiredEmployeeId },
+                        success: function (data) {
+                            window.location.href = "/Company/Employee/AddEdit?empid=" + iRehiredEmployeeId;
+                        },
+                        error: function (e) {
+                        },
+                        complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true") {
+                                Notify("success", "تم إعادة التوظيف.يمكنك تعديل البيانات.", 3000);
+                                $("#btnSearch").click();
+                            } else
+                                Notify("danger", "لم تتم إعادة التوظيف", 3000);
+                        }
+                    });
+
+                    reHireConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    reHireConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            reHireConfirmation.hide();
+
+            var NationalId = $('#NationalID').val();
+
+            if (NationalId.length >= 10) {
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("CheckDeletedEmpNationlID")',
+                    dataType: 'json',
+                    data: { "NationalID": NationalId },
+                    success: function (response) {
+                        response = JSON.stringify(response);
+                        if (response > 0) {
+                            iRehiredEmployeeId = response;
+                            reHireConfirmation.show();
+                        }
+                        else {
+                            iRehiredEmployeeId = 0;
+                            reHireConfirmation.hide();
+                        }
+                    }
+                });
+            }
+
+        })
+    });
+
+
+</script>
+
+<style>
+    .ui-datepicker .ui-datepicker-title select {
+        float: none;
+        -webkit-appearance: menulist !important;
+        box-sizing: border-box;
+        align-items: center;
+        border: 1px solid #A9A6A6;
+        border-image-source: initial;
+        border-image-slice: initial;
+        border-image-width: initial;
+        border-image-outset: initial;
+        border-image-repeat: initial;
+        white-space: pre;
+        -webkit-rtl-ordering: logical;
+        color: black;
+        background-color: white;
+        cursor: default;
+        border-radius: 1px;
+        height: inherit;
+        font-size: 11px;
+        background-image: none;
+        padding: 0;
+        box-shadow: none;
+    }
+</style>

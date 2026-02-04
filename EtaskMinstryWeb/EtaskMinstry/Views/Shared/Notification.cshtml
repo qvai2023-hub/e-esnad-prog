@@ -1,0 +1,131 @@
+﻿@using EtaskMinstry;
+@model List<NotificationPattren>
+@{
+    ViewBag.Title = "الإشعارات";
+}
+<div class="panel panel-default">
+
+    <div class="panel-body">
+        <div class="panel-activity">
+            @if (Model == null)
+            {
+                <div class="empty">لايوجد إشعارات</div>
+            }
+            else
+            {
+
+
+                <ul id="AllNotifications" class="activity">
+                    @foreach (var obj in Model)
+                    {
+                        <li>
+                            <i class="fa fa-bell text-danger"></i>
+                            <div class='@(obj.IsSeen ? "" : "hovered") '>
+                                <a href='@(String.IsNullOrEmpty(obj.Link) ? "javascript:void(0);" : obj.Link.Substring(0, obj.Link.LastIndexOf('/'))+"/"+Extentions.Encrypt(obj.Link.Split('/').Last()))' itemid="@obj.ID">
+                                    <i class="@obj.Type"></i>
+                                    @obj.Value
+                                </a>
+
+                                <span class="">@(MvcApplication.IsGregDate ? obj.SendDate.ToGregArabicDateTime() : obj.SendDate.ToHijriArabicDateTime())</span>
+
+                            </div>
+                        </li>
+
+                    }
+                </ul>
+
+
+
+                if (Model.Count == 10)
+                {
+                    <div class="row text-center">
+                        <div class="col-md-12">
+                            <a href="javascript:void(0);" class="more btn btn-primary load" id="lnkMore">المزيد</a>
+
+                        </div>
+                    </div>
+                }
+
+                }
+    </div>
+
+</div>
+</div>
+
+                <script>
+                    $(function () {
+                        var iSkip = 0;
+
+                        iSkip = @Model.Count
+
+                        // To Get Notification By Click More Button .
+                        $("#lnkMore").click(function () {
+
+                            $.get("/Notification/GetNotification?iSkip=" + iSkip, function (data) {
+                                debugger
+                                iSkip += data.length;
+
+                                if (data.length == 0)
+                                    $("#lnkMore").fadeOut();
+                                else {
+                                    debugger
+                                    for (var i = 0; i < data.length; i++)
+                                        $("#AllNotifications").append('<li> <i class="fa fa-bell text-danger"></i><div class="' + (data[i].IsSeen == false ? "hovered " : "") + '">' +
+                                            '<a href="' + (data[i].Link == "" ? "JavaScript:void(0);" : data[i].Link) + '" itemid=' + data[i].ID + '>' +
+                                            '<i class=" + data[i].Type + "></i>' + data[i].Value +
+                                            '</a>' +
+                                            '<span class="">' + data[i].SendDate + '</span>' +
+                                            '</div></li>');
+                                    $("html, body").animate({ scrollTop: $(document).height() - $(window).height() - 100 }, 2500);
+
+                                    if (data.length < 10)
+                                        $("#lnkMore").fadeOut();
+                                }
+                            });
+                        });
+                    });
+
+
+
+                    $('#AllNotifications a').live('click', function () {
+                        debugger
+                        if ($(this).not('a.more')) {
+                            var id = $(this).attr('itemid');
+                            var href = $(this).attr('href');
+                            $.ajax({
+                                type: "POST",
+                                url: "/Security/UpdateNotification",
+                                data: { ID: id },
+                                success: function () {
+                                    if (href == '')
+                                        location.reload();
+                                    document.location.href = href;
+                                }
+                            });
+                        }
+                    });
+                </script>
+
+            }
+
+
+            <style>
+                .OneNotify {
+                    border-bottom: solid;
+                    border-bottom-width: 1px;
+                    border-bottom-color: gainsboro;
+                    height: 20px;
+                    padding-top: 8px;
+                }
+
+                    .OneNotify a {
+                        margin-right: 8px;
+                    }
+
+                .NotifyDate {
+                    color: rgb(175, 175, 175);
+                    font-size: 9px;
+                    float: left;
+                    margin-left: 8px;
+                }
+            </style>

@@ -1,0 +1,2595 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="EtaskMinstryModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Attachment">
+          <Key>
+            <PropertyRef Name="AttachmentID" />
+          </Key>
+          <Property Name="AttachmentID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FileName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="350" />
+          <Property Name="TaskID" Type="int" />
+        </EntityType>
+        <EntityType Name="Attendance">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmpId" Type="int" Nullable="false" />
+          <Property Name="CheckIn" Type="datetime" />
+          <Property Name="CheckOut" Type="datetime" />
+        </EntityType>
+        <EntityType Name="CommentStatus">
+          <Key>
+            <PropertyRef Name="CommentStatusID" />
+          </Key>
+          <Property Name="CommentStatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CommentStatus" Type="nvarchar" MaxLength="50" />
+          <Property Name="Description" Type="nvarchar" MaxLength="250" />
+        </EntityType>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="CompanyID" />
+          </Key>
+          <Property Name="CompanyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Address" Type="nvarchar" MaxLength="200" />
+          <Property Name="Email" Type="nvarchar" MaxLength="150" />
+          <Property Name="Phone" Type="nvarchar" MaxLength="20" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="IsDeleted" Type="bit" />
+          <Property Name="CommercialRegister" Type="nvarchar" MaxLength="20" />
+          <Property Name="Logo" Type="nvarchar" MaxLength="300" />
+          <Property Name="LaborOfficeID" Type="int" />
+          <Property Name="SequenceNumber" Type="int" />
+          <Property Name="HasAttendanceReport" Type="bit" />
+          <Property Name="BriefTaskReport" Type="bit" />
+        </EntityType>
+        <EntityType Name="ContactUs">
+          <Key>
+            <PropertyRef Name="ContactUsId" />
+          </Key>
+          <Property Name="ContactUsId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Email" Type="nvarchar" MaxLength="100" />
+          <Property Name="Mobile" Type="nvarchar" MaxLength="20" />
+          <Property Name="Message" Type="nvarchar(max)" />
+          <Property Name="MessageTypeId" Type="int" />
+        </EntityType>
+        <EntityType Name="ControllerName">
+          <Key>
+            <PropertyRef Name="ControllerID" />
+          </Key>
+          <Property Name="ControllerID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ControllerNameEnglish" Type="nvarchar" MaxLength="50" />
+          <Property Name="ControllerNameArabic" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Employee">
+          <Key>
+            <PropertyRef Name="EmpID" />
+          </Key>
+          <Property Name="EmpID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Birthdate" Type="datetime" />
+          <Property Name="Gender" Type="bit" />
+          <Property Name="Address" Type="nvarchar" MaxLength="200" />
+          <Property Name="Email" Type="nvarchar" MaxLength="150" />
+          <Property Name="HireDate" Type="datetime" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="CompanyID" Type="int" />
+          <Property Name="JobTitle" Type="nvarchar" MaxLength="50" />
+          <Property Name="Mobile" Type="nvarchar" MaxLength="20" />
+          <Property Name="LastModifiedDate" Type="datetime" />
+          <Property Name="IsDeleted" Type="bit" />
+          <Property Name="LaborOfficeID" Type="int" />
+          <Property Name="SequenceNumber" Type="int" />
+          <Property Name="NationalID" Type="nvarchar(max)" />
+          <Property Name="ImageName" Type="nvarchar(max)" />
+          <Property Name="NationaIDImage" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="HoliDay">
+          <Key>
+            <PropertyRef Name="HoliDayID" />
+          </Key>
+          <Property Name="HoliDayID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HoliDayName" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="StartDate" Type="date" Nullable="false" />
+          <Property Name="EndDate" Type="date" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="350" />
+          <Property Name="CompanyID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="LogGeneral">
+          <Key>
+            <PropertyRef Name="LogID" />
+          </Key>
+          <Property Name="LogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ActionID" Type="int" Nullable="false" />
+          <Property Name="ActionTime" Type="datetime" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" />
+          <Property Name="EmployeeID" Type="int" />
+          <Property Name="CompanyID" Type="int" />
+          <Property Name="IsCompany" Type="bit" />
+          <Property Name="ControllerID" Type="int" />
+        </EntityType>
+        <EntityType Name="Message">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SenderType" Type="int" Nullable="false" />
+          <Property Name="FromInstanceID" Type="int" Nullable="false" />
+          <Property Name="Details" Type="nvarchar(max)" />
+          <Property Name="CreateDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Notification">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LinkToGo" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="MessageID" Type="int" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="NotificationTypeID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="NotificationCollection">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="InstanceID" Type="int" Nullable="false" />
+          <Property Name="UserTypeID" Type="int" Nullable="false" />
+          <Property Name="IsSeen" Type="bit" Nullable="false" />
+          <Property Name="SeenDate" Type="datetime" />
+          <Property Name="NotificationID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="NotificationType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Pattern" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Priority">
+          <Key>
+            <PropertyRef Name="PriorityID" />
+          </Key>
+          <Property Name="PriorityID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Color" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Project">
+          <Key>
+            <PropertyRef Name="ProjectID" />
+          </Key>
+          <Property Name="ProjectID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="CompanyID" Type="int" Nullable="false" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RecurrenceTask">
+          <Key>
+            <PropertyRef Name="RecurrenceTaskID" />
+          </Key>
+          <Property Name="RecurrenceTaskID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Summary" Type="nvarchar" MaxLength="350" />
+          <Property Name="ProjectID" Type="int" />
+          <Property Name="RecurrenceTypeID" Type="int" />
+          <Property Name="StartRec" Type="datetime" />
+          <Property Name="EndRec" Type="datetime" />
+          <Property Name="RecValue" Type="nvarchar" MaxLength="300" />
+          <Property Name="CompanyID" Type="int" />
+        </EntityType>
+        <EntityType Name="RecurrenceTaskEmp">
+          <Key>
+            <PropertyRef Name="RecurrenceTaskEmpID" />
+          </Key>
+          <Property Name="RecurrenceTaskEmpID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RecurrenceTaskID" Type="int" />
+          <Property Name="EmpID" Type="int" />
+        </EntityType>
+        <EntityType Name="RecurrenceType">
+          <Key>
+            <PropertyRef Name="RecurrenceTypeID" />
+          </Key>
+          <Property Name="RecurrenceTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="Settings">
+          <Key>
+            <PropertyRef Name="SettingID" />
+          </Key>
+          <Property Name="SettingID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ServerName" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="50" />
+          <Property Name="Password" Type="nvarchar" MaxLength="50" />
+          <Property Name="PortNo" Type="int" Nullable="false" />
+          <Property Name="FromEmail" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="SSL" Type="bit" Nullable="false" />
+          <Property Name="OnlineVisiter" Type="int" Nullable="false" />
+          <Property Name="VisitorCounter" Type="int" Nullable="false" />
+          <Property Name="ContactUsResponsableEmail" Type="nvarchar" MaxLength="150" />
+          <Property Name="FacebookURL" Type="nvarchar" MaxLength="150" />
+          <Property Name="TwitterURL" Type="nvarchar" MaxLength="150" />
+          <Property Name="YouTubeURL" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="SIGNAL_R_SESSION">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="ConnectionID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="UserTypeID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Status">
+          <Key>
+            <PropertyRef Name="StatusID" />
+          </Key>
+          <Property Name="StatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Color" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="250" />
+          <Property Name="DesignClass" Type="nchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Task">
+          <Key>
+            <PropertyRef Name="TaskID" />
+          </Key>
+          <Property Name="TaskID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Summary" Type="nvarchar" MaxLength="350" />
+          <Property Name="StartDate" Type="datetime" />
+          <Property Name="EndDate" Type="datetime" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="ExpectedTime" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="TimeUnitID" Type="int" />
+          <Property Name="ActualTime" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="EmpID" Type="int" />
+          <Property Name="CompanyID" Type="int" Nullable="false" />
+          <Property Name="IsArchived" Type="bit" Nullable="false" />
+          <Property Name="PriorityID" Type="int" Nullable="false" />
+          <Property Name="StatusID" Type="int" Nullable="false" />
+          <Property Name="ProjectID" Type="int" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
+          <Property Name="DeliverDate" Type="date" />
+          <Property Name="IsRecurrence" Type="bit" />
+          <Property Name="RecurrenceTaskID" Type="int" />
+          <Property Name="BriefTaskName" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="TaskComment">
+          <Key>
+            <PropertyRef Name="TaskCommentID" />
+          </Key>
+          <Property Name="TaskCommentID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="IsFromCompany" Type="bit" Nullable="false" />
+          <Property Name="TaskID" Type="int" Nullable="false" />
+          <Property Name="CommentStatusId" Type="int" Nullable="false" />
+          <Property Name="EmpID" Type="int" />
+        </EntityType>
+        <EntityType Name="TaskLog">
+          <Key>
+            <PropertyRef Name="TaskLogID" />
+          </Key>
+          <Property Name="TaskLogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TaskID" Type="int" />
+          <Property Name="LogDate" Type="datetime" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" />
+          <Property Name="IsFromCompany" Type="bit" Nullable="false" />
+          <Property Name="CurrentPriority" Type="int" />
+          <Property Name="CurrentStatus" Type="int" />
+        </EntityType>
+        <EntityType Name="TaskTLog">
+          <Key>
+            <PropertyRef Name="TaskTLogID" />
+          </Key>
+          <Property Name="TaskTLogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TaskID" Type="int" Nullable="false" />
+          <Property Name="EmpID" Type="int" />
+          <Property Name="StatusID" Type="int" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="TimeCount" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="TimUnitID" Type="int" />
+        </EntityType>
+        <EntityType Name="TimeUnit">
+          <Key>
+            <PropertyRef Name="TimeUnitID" />
+          </Key>
+          <Property Name="TimeUnitID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="ParentID" Type="int" />
+          <Property Name="ConversionFactor" Type="int" />
+        </EntityType>
+        <EntityType Name="UserAccount">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="150" />
+          <Property Name="Password" Type="nvarchar" MaxLength="150" />
+          <Property Name="CompanyID" Type="int" />
+          <Property Name="EmpID" Type="int" />
+          <Property Name="IsCompany" Type="bit" />
+          <Property Name="UserTypeID" Type="int" />
+          <Property Name="IsTelesak" Type="bit" />
+        </EntityType>
+        <EntityType Name="UserType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="WeekEnd">
+          <Key>
+            <PropertyRef Name="WeekEndID" />
+          </Key>
+          <Property Name="WeekEndID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CompanyID" Type="int" Nullable="false" />
+          <Property Name="WeekEndDay" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'ProgQV-esnad.dbo.TotalLog' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="TotalLog">
+          <Key>
+            <PropertyRef Name="LogID" />
+            <PropertyRef Name="ActionID" />
+            <PropertyRef Name="ActionTime" />
+          </Key>
+          <Property Name="LogID" Type="int" Nullable="false" />
+          <Property Name="ActionID" Type="int" Nullable="false" />
+          <Property Name="ActionTime" Type="datetime" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" />
+          <Property Name="EmployeeID" Type="int" />
+          <Property Name="CompanyID" Type="int" />
+          <Property Name="IsCompany" Type="bit" />
+          <Property Name="ControllerID" Type="int" />
+        </EntityType>
+        <Association Name="FK_Attachment_Task">
+          <End Role="Task" Type="Self.Task" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Attachment" Type="Self.Attachment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TaskID" />
+            </Principal>
+            <Dependent Role="Attachment">
+              <PropertyRef Name="TaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Employee_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="0..1" />
+          <End Role="Employee" Type="Self.Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HoliDay_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="1" />
+          <End Role="HoliDay" Type="Self.HoliDay" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="HoliDay">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogGeneral_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="LogGeneral" Type="Self.LogGeneral" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="LogGeneral">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogGeneral_ControllerName">
+          <End Role="ControllerName" Type="Self.ControllerName" Multiplicity="0..1" />
+          <End Role="LogGeneral" Type="Self.LogGeneral" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ControllerName">
+              <PropertyRef Name="ControllerID" />
+            </Principal>
+            <Dependent Role="LogGeneral">
+              <PropertyRef Name="ControllerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogGeneral_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="LogGeneral" Type="Self.LogGeneral" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="LogGeneral">
+              <PropertyRef Name="EmployeeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Message_UserType">
+          <End Role="UserType" Type="Self.UserType" Multiplicity="1" />
+          <End Role="Message" Type="Self.Message" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Message">
+              <PropertyRef Name="SenderType" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Notification_NotificationType">
+          <End Role="NotificationType" Type="Self.NotificationType" Multiplicity="1" />
+          <End Role="Notification" Type="Self.Notification" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="NotificationType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Notification">
+              <PropertyRef Name="NotificationTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_NotificationCollection_Notification">
+          <End Role="Notification" Type="Self.Notification" Multiplicity="1" />
+          <End Role="NotificationCollection" Type="Self.NotificationCollection" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Notification">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="NotificationCollection">
+              <PropertyRef Name="NotificationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_NotificationCollection_UserType">
+          <End Role="UserType" Type="Self.UserType" Multiplicity="1" />
+          <End Role="NotificationCollection" Type="Self.NotificationCollection" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="NotificationCollection">
+              <PropertyRef Name="UserTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Project_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Project" Type="Self.Project" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Project">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PushNotificatication_UserType">
+          <End Role="UserType" Type="Self.UserType" Multiplicity="1" />
+          <End Role="SIGNAL_R_SESSION" Type="Self.SIGNAL_R_SESSION" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="SIGNAL_R_SESSION">
+              <PropertyRef Name="UserTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RecurrenceTask_Project">
+          <End Role="Project" Type="Self.Project" Multiplicity="0..1" />
+          <End Role="RecurrenceTask" Type="Self.RecurrenceTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectID" />
+            </Principal>
+            <Dependent Role="RecurrenceTask">
+              <PropertyRef Name="ProjectID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RecurrenceTask_RecurrenceType">
+          <End Role="RecurrenceType" Type="Self.RecurrenceType" Multiplicity="0..1" />
+          <End Role="RecurrenceTask" Type="Self.RecurrenceTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RecurrenceType">
+              <PropertyRef Name="RecurrenceTypeID" />
+            </Principal>
+            <Dependent Role="RecurrenceTask">
+              <PropertyRef Name="RecurrenceTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RecurrenceTaskEmp_RecurrenceTask">
+          <End Role="RecurrenceTask" Type="Self.RecurrenceTask" Multiplicity="0..1" />
+          <End Role="RecurrenceTaskEmp" Type="Self.RecurrenceTaskEmp" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RecurrenceTask">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Principal>
+            <Dependent Role="RecurrenceTaskEmp">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="EmpID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Priority">
+          <End Role="Priority" Type="Self.Priority" Multiplicity="1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Priority">
+              <PropertyRef Name="PriorityID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="PriorityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Project">
+          <End Role="Project" Type="Self.Project" Multiplicity="0..1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="ProjectID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_RecurrenceTask">
+          <End Role="RecurrenceTask" Type="Self.RecurrenceTask" Multiplicity="0..1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RecurrenceTask">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Status">
+          <End Role="Status" Type="Self.Status" Multiplicity="1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status">
+              <PropertyRef Name="StatusID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="StatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_TimeUnit">
+          <End Role="TimeUnit" Type="Self.TimeUnit" Multiplicity="0..1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TimeUnit">
+              <PropertyRef Name="TimeUnitID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="TimeUnitID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskComment_CommentStatus">
+          <End Role="CommentStatus" Type="Self.CommentStatus" Multiplicity="1" />
+          <End Role="TaskComment" Type="Self.TaskComment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CommentStatus">
+              <PropertyRef Name="CommentStatusID" />
+            </Principal>
+            <Dependent Role="TaskComment">
+              <PropertyRef Name="CommentStatusId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskComment_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TaskComment" Type="Self.TaskComment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="TaskComment">
+              <PropertyRef Name="EmpID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskLog_Task">
+          <End Role="Task" Type="Self.Task" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="TaskLog" Type="Self.TaskLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TaskID" />
+            </Principal>
+            <Dependent Role="TaskLog">
+              <PropertyRef Name="TaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimeUnit_TimeUnit">
+          <End Role="TimeUnit" Type="Self.TimeUnit" Multiplicity="0..1" />
+          <End Role="TimeUnit1" Type="Self.TimeUnit" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TimeUnit">
+              <PropertyRef Name="TimeUnitID" />
+            </Principal>
+            <Dependent Role="TimeUnit1">
+              <PropertyRef Name="ParentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAccount_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UserAccount" Type="Self.UserAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="UserAccount">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAccount_Employee">
+          <End Role="Employee" Type="Self.Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UserAccount" Type="Self.UserAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="UserAccount">
+              <PropertyRef Name="EmpID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAccount_UserType">
+          <End Role="UserType" Type="Self.UserType" Multiplicity="0..1" />
+          <End Role="UserAccount" Type="Self.UserAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="UserAccount">
+              <PropertyRef Name="UserTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WeekEnd_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WeekEnd" Type="Self.WeekEnd" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="WeekEnd">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="GetAssignedTime" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="int">
+          <Parameter Name="EmpID" Type="int" Mode="In" />
+        </Function>
+        <Function Name="GetCountMiniuts" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="int">
+          <Parameter Name="TimeCount" Type="int" Mode="In" />
+          <Parameter Name="TimeUnit" Type="int" Mode="In" />
+        </Function>
+        <Function Name="GetTotalTime" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="int">
+          <Parameter Name="EmpID" Type="int" Mode="In" />
+        </Function>
+        <Function Name="sp_Attendance" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CompanyId" Type="int" Mode="In" />
+          <Parameter Name="EmployeeId" Type="int" Mode="In" />
+          <Parameter Name="fromDate" Type="date" Mode="In" />
+          <Parameter Name="todate" Type="date" Mode="In" />
+        </Function>
+        <Function Name="sp_CompanyTasks" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CompanyId" Type="int" Mode="In" />
+          <Parameter Name="ProjectIds" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="EmpId" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="notInEmpList" Type="int" Mode="In" />
+          <Parameter Name="notInProjectList" Type="int" Mode="In" />
+          <Parameter Name="StatusId" Type="nvarchar" Mode="In" />
+          <Parameter Name="PriorityId" Type="nvarchar" Mode="In" />
+          <Parameter Name="FromDate" Type="datetime" Mode="In" />
+          <Parameter Name="ToDate" Type="datetime" Mode="In" />
+          <Parameter Name="taskName" Type="nvarchar" Mode="In" />
+          <Parameter Name="FromEndDate" Type="datetime" Mode="In" />
+          <Parameter Name="ToEndDate" Type="datetime" Mode="In" />
+        </Function>
+        <Function Name="sp_EmployeePerformanceReport" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CompanyId" Type="int" Mode="In" />
+          <Parameter Name="PeriodStart" Type="datetime" Mode="In" />
+          <Parameter Name="PeriodEnd" Type="datetime" Mode="In" />
+        </Function>
+        <Function Name="sp_ProjectTasks" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CompanyId" Type="int" Mode="In" />
+          <Parameter Name="ProjectId" Type="int" Mode="In" />
+          <Parameter Name="EmployeeId" Type="int" Mode="In" />
+        </Function>
+        <Function Name="sp_TotalEmployeeTasks" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CompanyId" Type="int" Mode="In" />
+          <Parameter Name="EmpIds" Type="nvarchar(max)" Mode="In" />
+          <Parameter Name="FromDate" Type="datetime" Mode="In" />
+          <Parameter Name="ToDate" Type="datetime" Mode="In" />
+          <Parameter Name="FromEndDate" Type="datetime" Mode="In" />
+          <Parameter Name="ToEndDate" Type="datetime" Mode="In" />
+        </Function>
+        <Function Name="TableRef" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="table" Type="nvarchar(max)" Mode="In" />
+        </Function>
+        <EntityContainer Name="EtaskMinstryModelStoreContainer">
+          <EntitySet Name="Attachment" EntityType="Self.Attachment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Attendance" EntityType="Self.Attendance" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CommentStatus" EntityType="Self.CommentStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Company" EntityType="Self.Company" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ContactUs" EntityType="Self.ContactUs" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ControllerName" EntityType="Self.ControllerName" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Employee" EntityType="Self.Employee" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="HoliDay" EntityType="Self.HoliDay" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LogGeneral" EntityType="Self.LogGeneral" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Message" EntityType="Self.Message" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Notification" EntityType="Self.Notification" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="NotificationCollection" EntityType="Self.NotificationCollection" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="NotificationType" EntityType="Self.NotificationType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Priority" EntityType="Self.Priority" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Project" EntityType="Self.Project" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RecurrenceTask" EntityType="Self.RecurrenceTask" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RecurrenceTaskEmp" EntityType="Self.RecurrenceTaskEmp" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RecurrenceType" EntityType="Self.RecurrenceType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Settings" EntityType="Self.Settings" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SIGNAL_R_SESSION" EntityType="Self.SIGNAL_R_SESSION" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Status" EntityType="Self.Status" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Task" EntityType="Self.Task" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskComment" EntityType="Self.TaskComment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskLog" EntityType="Self.TaskLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskTLog" EntityType="Self.TaskTLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TimeUnit" EntityType="Self.TimeUnit" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserAccount" EntityType="Self.UserAccount" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserType" EntityType="Self.UserType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WeekEnd" EntityType="Self.WeekEnd" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TotalLog" EntityType="Self.TotalLog" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+[TotalLog].[LogID] AS [LogID], 
+[TotalLog].[ActionID] AS [ActionID], 
+[TotalLog].[ActionTime] AS [ActionTime], 
+[TotalLog].[Value] AS [Value], 
+[TotalLog].[EmployeeID] AS [EmployeeID], 
+[TotalLog].[CompanyID] AS [CompanyID], 
+[TotalLog].[IsCompany] AS [IsCompany], 
+[TotalLog].[ControllerID] AS [ControllerID]
+FROM [dbo].[TotalLog] AS [TotalLog]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_Attachment_Task" Association="Self.FK_Attachment_Task">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="Attachment" EntitySet="Attachment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Employee_Company" Association="Self.FK_Employee_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="Employee" EntitySet="Employee" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HoliDay_Company" Association="Self.FK_HoliDay_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="HoliDay" EntitySet="HoliDay" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogGeneral_Company" Association="Self.FK_LogGeneral_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="LogGeneral" EntitySet="LogGeneral" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogGeneral_ControllerName" Association="Self.FK_LogGeneral_ControllerName">
+            <End Role="ControllerName" EntitySet="ControllerName" />
+            <End Role="LogGeneral" EntitySet="LogGeneral" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogGeneral_Employee" Association="Self.FK_LogGeneral_Employee">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="LogGeneral" EntitySet="LogGeneral" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Message_UserType" Association="Self.FK_Message_UserType">
+            <End Role="UserType" EntitySet="UserType" />
+            <End Role="Message" EntitySet="Message" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Notification_NotificationType" Association="Self.FK_Notification_NotificationType">
+            <End Role="NotificationType" EntitySet="NotificationType" />
+            <End Role="Notification" EntitySet="Notification" />
+          </AssociationSet>
+          <AssociationSet Name="FK_NotificationCollection_Notification" Association="Self.FK_NotificationCollection_Notification">
+            <End Role="Notification" EntitySet="Notification" />
+            <End Role="NotificationCollection" EntitySet="NotificationCollection" />
+          </AssociationSet>
+          <AssociationSet Name="FK_NotificationCollection_UserType" Association="Self.FK_NotificationCollection_UserType">
+            <End Role="UserType" EntitySet="UserType" />
+            <End Role="NotificationCollection" EntitySet="NotificationCollection" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Project_Company" Association="Self.FK_Project_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="Project" EntitySet="Project" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PushNotificatication_UserType" Association="Self.FK_PushNotificatication_UserType">
+            <End Role="UserType" EntitySet="UserType" />
+            <End Role="SIGNAL_R_SESSION" EntitySet="SIGNAL_R_SESSION" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RecurrenceTask_Project" Association="Self.FK_RecurrenceTask_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTask" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RecurrenceTask_RecurrenceType" Association="Self.FK_RecurrenceTask_RecurrenceType">
+            <End Role="RecurrenceType" EntitySet="RecurrenceType" />
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTask" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RecurrenceTaskEmp_RecurrenceTask" Association="Self.FK_RecurrenceTaskEmp_RecurrenceTask">
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTask" />
+            <End Role="RecurrenceTaskEmp" EntitySet="RecurrenceTaskEmp" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Company" Association="Self.FK_Task_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Employee" Association="Self.FK_Task_Employee">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Priority" Association="Self.FK_Task_Priority">
+            <End Role="Priority" EntitySet="Priority" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Project" Association="Self.FK_Task_Project">
+            <End Role="Project" EntitySet="Project" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_RecurrenceTask" Association="Self.FK_Task_RecurrenceTask">
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTask" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Status" Association="Self.FK_Task_Status">
+            <End Role="Status" EntitySet="Status" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_TimeUnit" Association="Self.FK_Task_TimeUnit">
+            <End Role="TimeUnit" EntitySet="TimeUnit" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskComment_CommentStatus" Association="Self.FK_TaskComment_CommentStatus">
+            <End Role="CommentStatus" EntitySet="CommentStatus" />
+            <End Role="TaskComment" EntitySet="TaskComment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskComment_Employee" Association="Self.FK_TaskComment_Employee">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="TaskComment" EntitySet="TaskComment" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskLog_Task" Association="Self.FK_TaskLog_Task">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="TaskLog" EntitySet="TaskLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimeUnit_TimeUnit" Association="Self.FK_TimeUnit_TimeUnit">
+            <End Role="TimeUnit" EntitySet="TimeUnit" />
+            <End Role="TimeUnit1" EntitySet="TimeUnit" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAccount_Company" Association="Self.FK_UserAccount_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="UserAccount" EntitySet="UserAccount" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAccount_Employee" Association="Self.FK_UserAccount_Employee">
+            <End Role="Employee" EntitySet="Employee" />
+            <End Role="UserAccount" EntitySet="UserAccount" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAccount_UserType" Association="Self.FK_UserAccount_UserType">
+            <End Role="UserType" EntitySet="UserType" />
+            <End Role="UserAccount" EntitySet="UserAccount" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WeekEnd_Company" Association="Self.FK_WeekEnd_Company">
+            <End Role="Company" EntitySet="Company" />
+            <End Role="WeekEnd" EntitySet="WeekEnd" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="EtaskMinstryModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="EtaskMinstryEntities2" p1:LazyLoadingEnabled="true">
+          <FunctionImport Name="TableRef" ReturnType="Collection(EtaskMinstryModel.TableRef_Result)">
+          <Parameter Name="table" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="Attachments" EntityType="EtaskMinstryModel.Attachment" />
+          <EntitySet Name="CommentStatus" EntityType="EtaskMinstryModel.CommentStatu" />
+          <EntitySet Name="ControllerNames" EntityType="EtaskMinstryModel.ControllerName" />
+          <EntitySet Name="HoliDays" EntityType="EtaskMinstryModel.HoliDay" />
+          <EntitySet Name="Messages" EntityType="EtaskMinstryModel.Message" />
+          <EntitySet Name="Notifications" EntityType="EtaskMinstryModel.Notification" />
+          <EntitySet Name="NotificationCollections" EntityType="EtaskMinstryModel.NotificationCollection" />
+          <EntitySet Name="NotificationTypes" EntityType="EtaskMinstryModel.NotificationType" />
+          <EntitySet Name="Priorities" EntityType="EtaskMinstryModel.Priority" />
+          <EntitySet Name="RecurrenceTasks" EntityType="EtaskMinstryModel.RecurrenceTask" />
+          <EntitySet Name="RecurrenceTaskEmps" EntityType="EtaskMinstryModel.RecurrenceTaskEmp" />
+          <EntitySet Name="RecurrenceTypes" EntityType="EtaskMinstryModel.RecurrenceType" />
+          <EntitySet Name="Settings" EntityType="EtaskMinstryModel.Setting" />
+          <EntitySet Name="SIGNAL_R_SESSION" EntityType="EtaskMinstryModel.SIGNAL_R_SESSION" />
+          <EntitySet Name="Status" EntityType="EtaskMinstryModel.Status" />
+          <EntitySet Name="Tasks" EntityType="EtaskMinstryModel.Task" />
+          <EntitySet Name="TaskComments" EntityType="EtaskMinstryModel.TaskComment" />
+          <EntitySet Name="TaskLogs" EntityType="EtaskMinstryModel.TaskLog" />
+          <EntitySet Name="TaskTLogs" EntityType="EtaskMinstryModel.TaskTLog" />
+          <EntitySet Name="UserTypes" EntityType="EtaskMinstryModel.UserType" />
+          <EntitySet Name="WeekEnds" EntityType="EtaskMinstryModel.WeekEnd" />
+          <AssociationSet Name="FK_Attachment_Task" Association="EtaskMinstryModel.FK_Attachment_Task">
+            <End Role="Task" EntitySet="Tasks" />
+            <End Role="Attachment" EntitySet="Attachments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskComment_CommentStatus" Association="EtaskMinstryModel.FK_TaskComment_CommentStatus">
+            <End Role="CommentStatu" EntitySet="CommentStatus" />
+            <End Role="TaskComment" EntitySet="TaskComments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Message_UserType" Association="EtaskMinstryModel.FK_Message_UserType">
+            <End Role="UserType" EntitySet="UserTypes" />
+            <End Role="Message" EntitySet="Messages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Notification_NotificationType" Association="EtaskMinstryModel.FK_Notification_NotificationType">
+            <End Role="NotificationType" EntitySet="NotificationTypes" />
+            <End Role="Notification" EntitySet="Notifications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_NotificationCollection_Notification" Association="EtaskMinstryModel.FK_NotificationCollection_Notification">
+            <End Role="Notification" EntitySet="Notifications" />
+            <End Role="NotificationCollection" EntitySet="NotificationCollections" />
+          </AssociationSet>
+          <AssociationSet Name="FK_NotificationCollection_UserType" Association="EtaskMinstryModel.FK_NotificationCollection_UserType">
+            <End Role="UserType" EntitySet="UserTypes" />
+            <End Role="NotificationCollection" EntitySet="NotificationCollections" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Priority" Association="EtaskMinstryModel.FK_Task_Priority">
+            <End Role="Priority" EntitySet="Priorities" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RecurrenceTask_RecurrenceType" Association="EtaskMinstryModel.FK_RecurrenceTask_RecurrenceType">
+            <End Role="RecurrenceType" EntitySet="RecurrenceTypes" />
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_RecurrenceTaskEmp_RecurrenceTask" Association="EtaskMinstryModel.FK_RecurrenceTaskEmp_RecurrenceTask">
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTasks" />
+            <End Role="RecurrenceTaskEmp" EntitySet="RecurrenceTaskEmps" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_RecurrenceTask" Association="EtaskMinstryModel.FK_Task_RecurrenceTask">
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTasks" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PushNotificatication_UserType" Association="EtaskMinstryModel.FK_PushNotificatication_UserType">
+            <End Role="UserType" EntitySet="UserTypes" />
+            <End Role="SIGNAL_R_SESSION" EntitySet="SIGNAL_R_SESSION" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Status" Association="EtaskMinstryModel.FK_Task_Status">
+            <End Role="Status" EntitySet="Status" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskTLog_Status" Association="EtaskMinstryModel.FK_TaskTLog_Status">
+            <End Role="Status" EntitySet="Status" />
+            <End Role="TaskTLog" EntitySet="TaskTLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskComment_Task" Association="EtaskMinstryModel.FK_TaskComment_Task">
+            <End Role="Task" EntitySet="Tasks" />
+            <End Role="TaskComment" EntitySet="TaskComments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskLog_Task" Association="EtaskMinstryModel.FK_TaskLog_Task">
+            <End Role="Task" EntitySet="Tasks" />
+            <End Role="TaskLog" EntitySet="TaskLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskTLog_Task" Association="EtaskMinstryModel.FK_TaskTLog_Task">
+            <End Role="Task" EntitySet="Tasks" />
+            <End Role="TaskTLog" EntitySet="TaskTLogs" />
+          </AssociationSet>
+          <EntitySet Name="TotalLogs" EntityType="EtaskMinstryModel.TotalLog" />
+          <FunctionImport Name="sp_ProjectTasks" ReturnType="Collection(EtaskMinstryModel.sp_ProjectTasks_Result)">
+            <Parameter Name="CompanyId" Mode="In" Type="Int32" />
+            <Parameter Name="ProjectId" Mode="In" Type="Int32" />
+            <Parameter Name="EmployeeId" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <EntitySet Name="Projects" EntityType="EtaskMinstryModel.Project" />
+          <AssociationSet Name="FK_RecurrenceTask_Project" Association="EtaskMinstryModel.FK_RecurrenceTask_Project">
+            <End Role="Project" EntitySet="Projects" />
+            <End Role="RecurrenceTask" EntitySet="RecurrenceTasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Project" Association="EtaskMinstryModel.FK_Task_Project">
+            <End Role="Project" EntitySet="Projects" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <EntitySet Name="LogGenerals" EntityType="EtaskMinstryModel.LogGeneral" />
+          <AssociationSet Name="FK_LogGeneral_ControllerName" Association="EtaskMinstryModel.FK_LogGeneral_ControllerName">
+            <End Role="ControllerName" EntitySet="ControllerNames" />
+            <End Role="LogGeneral" EntitySet="LogGenerals" />
+          </AssociationSet>
+          <EntitySet Name="ContactUs" EntityType="EtaskMinstryModel.ContactU" />
+          <EntitySet Name="TimeUnits" EntityType="EtaskMinstryModel.TimeUnit" />
+          <AssociationSet Name="FK_Task_TimeUnit" Association="EtaskMinstryModel.FK_Task_TimeUnit">
+            <End Role="TimeUnit" EntitySet="TimeUnits" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskTLog_TimeUnit" Association="EtaskMinstryModel.FK_TaskTLog_TimeUnit">
+            <End Role="TimeUnit" EntitySet="TimeUnits" />
+            <End Role="TaskTLog" EntitySet="TaskTLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TimeUnit_TimeUnit" Association="EtaskMinstryModel.FK_TimeUnit_TimeUnit">
+            <End Role="TimeUnit" EntitySet="TimeUnits" />
+            <End Role="TimeUnit1" EntitySet="TimeUnits" />
+          </AssociationSet>
+          <FunctionImport Name="sp_CompanyTasks" ReturnType="Collection(EtaskMinstryModel.sp_CompanyTasks_Result)">
+            <Parameter Name="CompanyId" Mode="In" Type="Int32" />
+            <Parameter Name="ProjectIds" Mode="In" Type="String" />
+            <Parameter Name="EmpId" Mode="In" Type="String" />
+            <Parameter Name="notInEmpList" Mode="In" Type="Int32" />
+            <Parameter Name="notInProjectList" Mode="In" Type="Int32" />
+            <Parameter Name="StatusId" Mode="In" Type="String" />
+            <Parameter Name="PriorityId" Mode="In" Type="String" />
+            <Parameter Name="FromDate" Mode="In" Type="DateTime" />
+            <Parameter Name="ToDate" Mode="In" Type="DateTime" />
+            <Parameter Name="taskName" Mode="In" Type="String" />
+            <Parameter Name="FromEndDate" Mode="In" Type="DateTime" />
+            <Parameter Name="ToEndDate" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <FunctionImport Name="sp_TotalEmployeeTasks" ReturnType="Collection(EtaskMinstryModel.sp_TotalEmployeeTasks_Result)">
+            <Parameter Name="CompanyId" Mode="In" Type="Int32" />
+            <Parameter Name="EmpIds" Mode="In" Type="String" />
+            <Parameter Name="FromDate" Mode="In" Type="DateTime" />
+            <Parameter Name="ToDate" Mode="In" Type="DateTime" />
+            <Parameter Name="FromEndDate" Mode="In" Type="DateTime" />
+            <Parameter Name="ToEndDate" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <EntitySet Name="Companies" EntityType="EtaskMinstryModel.Company" />
+          <AssociationSet Name="FK_HoliDay_Company" Association="EtaskMinstryModel.FK_HoliDay_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="HoliDay" EntitySet="HoliDays" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogGeneral_Company" Association="EtaskMinstryModel.FK_LogGeneral_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="LogGeneral" EntitySet="LogGenerals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Project_Company" Association="EtaskMinstryModel.FK_Project_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="Project" EntitySet="Projects" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Company" Association="EtaskMinstryModel.FK_Task_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WeekEnd_Company" Association="EtaskMinstryModel.FK_WeekEnd_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="WeekEnd" EntitySet="WeekEnds" />
+          </AssociationSet>
+          <FunctionImport Name="sp_Attendance" ReturnType="Collection(EtaskMinstryModel.sp_Attendance_Result)">
+            <Parameter Name="CompanyId" Mode="In" Type="Int32" />
+            <Parameter Name="EmployeeId" Mode="In" Type="Int32" />
+            <Parameter Name="fromDate" Mode="In" Type="DateTime" />
+            <Parameter Name="todate" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <EntitySet Name="Attendances" EntityType="EtaskMinstryModel.Attendance" />
+          <EntitySet Name="Employees" EntityType="EtaskMinstryModel.Employee" />
+          <AssociationSet Name="FK_Attendance_Employee" Association="EtaskMinstryModel.FK_Attendance_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="Attendance" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Employee_Company" Association="EtaskMinstryModel.FK_Employee_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="Employee" EntitySet="Employees" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LogGeneral_Employee" Association="EtaskMinstryModel.FK_LogGeneral_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="LogGeneral" EntitySet="LogGenerals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Task_Employee" Association="EtaskMinstryModel.FK_Task_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="Task" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskComment_Employee" Association="EtaskMinstryModel.FK_TaskComment_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="TaskComment" EntitySet="TaskComments" />
+          </AssociationSet>
+          <FunctionImport Name="sp_EmployeePerformanceReport" ReturnType="Collection(EtaskMinstryModel.sp_EmployeePerformanceReport_Result)">
+            <Parameter Name="CompanyId" Mode="In" Type="Int32" />
+            <Parameter Name="PeriodStart" Mode="In" Type="DateTime" />
+            <Parameter Name="PeriodEnd" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <EntitySet Name="UserAccounts" EntityType="EtaskMinstryModel.UserAccount" />
+          <AssociationSet Name="FK_UserAccount_Company" Association="EtaskMinstryModel.FK_UserAccount_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="UserAccount" EntitySet="UserAccounts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAccount_Employee" Association="EtaskMinstryModel.FK_UserAccount_Employee">
+            <End Role="Employee" EntitySet="Employees" />
+            <End Role="UserAccount" EntitySet="UserAccounts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserAccount_UserType" Association="EtaskMinstryModel.FK_UserAccount_UserType">
+            <End Role="UserType" EntitySet="UserTypes" />
+            <End Role="UserAccount" EntitySet="UserAccounts" />
+          </AssociationSet>
+          </EntityContainer>
+        <ComplexType Name="TableRef_Result">
+          <Property Type="String" Name="FK_TABLE_NAME" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="FK_COLUMN_NAME" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="REFERENCED_TABLE_NAME" Nullable="true" MaxLength="128" />
+          <Property Type="String" Name="REFERENCED_COLUMN_NAME" Nullable="true" MaxLength="128" />
+        </ComplexType>
+        <EntityType Name="Attachment">
+          <Key>
+            <PropertyRef Name="AttachmentID" />
+          </Key>
+          <Property Type="Int32" Name="AttachmentID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="FileName" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Description" MaxLength="350" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="TaskID" />
+          <NavigationProperty Name="Task" Relationship="EtaskMinstryModel.FK_Attachment_Task" FromRole="Attachment" ToRole="Task" />
+        </EntityType>
+        <EntityType Name="CommentStatu">
+          <Key>
+            <PropertyRef Name="CommentStatusID" />
+          </Key>
+          <Property Type="Int32" Name="CommentStatusID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="CommentStatus" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Description" MaxLength="250" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="TaskComments" Relationship="EtaskMinstryModel.FK_TaskComment_CommentStatus" FromRole="CommentStatu" ToRole="TaskComment" />
+        </EntityType>
+        <EntityType Name="ControllerName">
+          <Key>
+            <PropertyRef Name="ControllerID" />
+          </Key>
+          <Property Type="Int32" Name="ControllerID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="ControllerNameEnglish" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="ControllerNameArabic" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="LogGenerals" Relationship="EtaskMinstryModel.FK_LogGeneral_ControllerName" FromRole="ControllerName" ToRole="LogGeneral" />
+        </EntityType>
+        <EntityType Name="HoliDay">
+          <Key>
+            <PropertyRef Name="HoliDayID" />
+          </Key>
+          <Property Type="Int32" Name="HoliDayID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="HoliDayName" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="DateTime" Name="StartDate" Nullable="false" Precision="0" />
+          <Property Type="DateTime" Name="EndDate" Nullable="false" Precision="0" />
+          <Property Type="String" Name="Description" MaxLength="350" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="CompanyID" Nullable="false" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_HoliDay_Company" FromRole="HoliDay" ToRole="Company" />
+        </EntityType>
+        <EntityType Name="Message">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="SenderType" Nullable="false" />
+          <Property Type="Int32" Name="FromInstanceID" Nullable="false" />
+          <Property Type="String" Name="Details" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="DateTime" Name="CreateDate" Precision="3" />
+          <NavigationProperty Name="UserType" Relationship="EtaskMinstryModel.FK_Message_UserType" FromRole="Message" ToRole="UserType" />
+        </EntityType>
+        <EntityType Name="Notification">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="LinkToGo" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Value" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="MessageID" />
+          <Property Type="DateTime" Name="CreateDate" Nullable="false" Precision="3" />
+          <Property Type="Int32" Name="NotificationTypeID" Nullable="false" />
+          <NavigationProperty Name="NotificationType" Relationship="EtaskMinstryModel.FK_Notification_NotificationType" FromRole="Notification" ToRole="NotificationType" />
+          <NavigationProperty Name="NotificationCollections" Relationship="EtaskMinstryModel.FK_NotificationCollection_Notification" FromRole="Notification" ToRole="NotificationCollection" />
+        </EntityType>
+        <EntityType Name="NotificationCollection">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="InstanceID" Nullable="false" />
+          <Property Type="Int32" Name="UserTypeID" Nullable="false" />
+          <Property Type="Boolean" Name="IsSeen" Nullable="false" />
+          <Property Type="DateTime" Name="SeenDate" Precision="3" />
+          <Property Type="Int32" Name="NotificationID" Nullable="false" />
+          <NavigationProperty Name="Notification" Relationship="EtaskMinstryModel.FK_NotificationCollection_Notification" FromRole="NotificationCollection" ToRole="Notification" />
+          <NavigationProperty Name="UserType" Relationship="EtaskMinstryModel.FK_NotificationCollection_UserType" FromRole="NotificationCollection" ToRole="UserType" />
+        </EntityType>
+        <EntityType Name="NotificationType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" />
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Pattern" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Notifications" Relationship="EtaskMinstryModel.FK_Notification_NotificationType" FromRole="NotificationType" ToRole="Notification" />
+        </EntityType>
+        <EntityType Name="Priority">
+          <Key>
+            <PropertyRef Name="PriorityID" />
+          </Key>
+          <Property Type="Int32" Name="PriorityID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Color" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_Priority" FromRole="Priority" ToRole="Task" />
+        </EntityType>
+        <EntityType Name="RecurrenceTask">
+          <Key>
+            <PropertyRef Name="RecurrenceTaskID" />
+          </Key>
+          <Property Type="Int32" Name="RecurrenceTaskID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Title" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Description" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Summary" MaxLength="350" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="ProjectID" />
+          <Property Type="Int32" Name="RecurrenceTypeID" />
+          <Property Type="DateTime" Name="StartRec" Precision="3" />
+          <Property Type="DateTime" Name="EndRec" Precision="3" />
+          <Property Type="String" Name="RecValue" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="CompanyID" />
+          <NavigationProperty Name="RecurrenceType" Relationship="EtaskMinstryModel.FK_RecurrenceTask_RecurrenceType" FromRole="RecurrenceTask" ToRole="RecurrenceType" />
+          <NavigationProperty Name="RecurrenceTaskEmps" Relationship="EtaskMinstryModel.FK_RecurrenceTaskEmp_RecurrenceTask" FromRole="RecurrenceTask" ToRole="RecurrenceTaskEmp" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_RecurrenceTask" FromRole="RecurrenceTask" ToRole="Task" />
+          <NavigationProperty Name="Project" Relationship="EtaskMinstryModel.FK_RecurrenceTask_Project" FromRole="RecurrenceTask" ToRole="Project" />
+        </EntityType>
+        <EntityType Name="RecurrenceTaskEmp">
+          <Key>
+            <PropertyRef Name="RecurrenceTaskEmpID" />
+          </Key>
+          <Property Type="Int32" Name="RecurrenceTaskEmpID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="RecurrenceTaskID" />
+          <Property Type="Int32" Name="EmpID" />
+          <NavigationProperty Name="RecurrenceTask" Relationship="EtaskMinstryModel.FK_RecurrenceTaskEmp_RecurrenceTask" FromRole="RecurrenceTaskEmp" ToRole="RecurrenceTask" />
+        </EntityType>
+        <EntityType Name="RecurrenceType">
+          <Key>
+            <PropertyRef Name="RecurrenceTypeID" />
+          </Key>
+          <Property Type="Int32" Name="RecurrenceTypeID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Title" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RecurrenceTasks" Relationship="EtaskMinstryModel.FK_RecurrenceTask_RecurrenceType" FromRole="RecurrenceType" ToRole="RecurrenceTask" />
+        </EntityType>
+        <EntityType Name="Setting">
+          <Key>
+            <PropertyRef Name="SettingID" />
+          </Key>
+          <Property Type="Int32" Name="SettingID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="ServerName" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="UserName" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Password" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="PortNo" Nullable="false" />
+          <Property Type="String" Name="FromEmail" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="Boolean" Name="SSL" Nullable="false" />
+          <Property Type="String" Name="FacebookURL" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="TwitterURL" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="YouTubeURL" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="OnlineVisiter" Type="Int32" Nullable="false" />
+          <Property Name="VisitorCounter" Type="Int32" Nullable="false" />
+          <Property Name="ContactUsResponsableEmail" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="SIGNAL_R_SESSION">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="UserID" Nullable="false" />
+          <Property Type="String" Name="ConnectionID" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Type="Int32" Name="UserTypeID" Nullable="false" />
+          <NavigationProperty Name="UserType" Relationship="EtaskMinstryModel.FK_PushNotificatication_UserType" FromRole="SIGNAL_R_SESSION" ToRole="UserType" />
+        </EntityType>
+        <EntityType Name="Status">
+          <Key>
+            <PropertyRef Name="StatusID" />
+          </Key>
+          <Property Type="Int32" Name="StatusID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Color" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Description" MaxLength="250" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_Status" FromRole="Status" ToRole="Task" />
+          <NavigationProperty Name="TaskTLogs" Relationship="EtaskMinstryModel.FK_TaskTLog_Status" FromRole="Status" ToRole="TaskTLog" />
+          <Property Name="DesignClass" Type="String" MaxLength="50" FixedLength="true" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Task">
+          <Key>
+            <PropertyRef Name="TaskID" />
+          </Key>
+          <Property Type="Int32" Name="TaskID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Title" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Description" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="String" Name="Summary" MaxLength="350" FixedLength="false" Unicode="true" />
+          <Property Type="DateTime" Name="StartDate" Precision="3" />
+          <Property Type="DateTime" Name="EndDate" Precision="3" />
+          <Property Type="DateTime" Name="CreatedDate" Nullable="false" Precision="3" />
+          <Property Type="Decimal" Name="ExpectedTime" Precision="5" Scale="2" />
+          <Property Type="Int32" Name="TimeUnitID" Nullable="true" />
+          <Property Type="Decimal" Name="ActualTime" Precision="5" Scale="2" />
+          <Property Type="Int32" Name="EmpID" />
+          <Property Type="Int32" Name="CompanyID" Nullable="false" />
+          <Property Type="Boolean" Name="IsArchived" Nullable="false" />
+          <Property Type="Int32" Name="PriorityID" Nullable="false" />
+          <Property Type="Int32" Name="StatusID" Nullable="false" />
+          <Property Type="Int32" Name="ProjectID" />
+          <Property Type="Boolean" Name="IsDeleted" Nullable="false" />
+          <Property Type="DateTime" Name="DeliverDate" Precision="0" />
+          <Property Type="Boolean" Name="IsRecurrence" />
+          <Property Type="Int32" Name="RecurrenceTaskID" />
+          <NavigationProperty Name="Attachments" Relationship="EtaskMinstryModel.FK_Attachment_Task" FromRole="Task" ToRole="Attachment" />
+          <NavigationProperty Name="Priority" Relationship="EtaskMinstryModel.FK_Task_Priority" FromRole="Task" ToRole="Priority" />
+          <NavigationProperty Name="RecurrenceTask" Relationship="EtaskMinstryModel.FK_Task_RecurrenceTask" FromRole="Task" ToRole="RecurrenceTask" />
+          <NavigationProperty Name="Status" Relationship="EtaskMinstryModel.FK_Task_Status" FromRole="Task" ToRole="Status" />
+          <NavigationProperty Name="TaskComments" Relationship="EtaskMinstryModel.FK_TaskComment_Task" FromRole="Task" ToRole="TaskComment" />
+          <NavigationProperty Name="TaskLogs" Relationship="EtaskMinstryModel.FK_TaskLog_Task" FromRole="Task" ToRole="TaskLog" />
+          <NavigationProperty Name="TaskTLogs" Relationship="EtaskMinstryModel.FK_TaskTLog_Task" FromRole="Task" ToRole="TaskTLog" />
+          <NavigationProperty Name="Project" Relationship="EtaskMinstryModel.FK_Task_Project" FromRole="Task" ToRole="Project" />
+          <NavigationProperty Name="TimeUnit" Relationship="EtaskMinstryModel.FK_Task_TimeUnit" FromRole="Task" ToRole="TimeUnit" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_Task_Company" FromRole="Task" ToRole="Company" />
+          <NavigationProperty Name="Employee" Relationship="EtaskMinstryModel.FK_Task_Employee" FromRole="Task" ToRole="Employee" />
+          <Property Name="BriefTaskName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="TaskComment">
+          <Key>
+            <PropertyRef Name="TaskCommentID" />
+          </Key>
+          <Property Type="Int32" Name="TaskCommentID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="DateTime" Name="CreatedDate" Nullable="false" Precision="3" />
+          <Property Type="String" Name="Comment" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Boolean" Name="IsFromCompany" Nullable="false" />
+          <Property Type="Int32" Name="TaskID" Nullable="false" />
+          <Property Type="Int32" Name="CommentStatusId" Nullable="false" />
+          <Property Type="Int32" Name="EmpID" />
+          <NavigationProperty Name="CommentStatu" Relationship="EtaskMinstryModel.FK_TaskComment_CommentStatus" FromRole="TaskComment" ToRole="CommentStatu" />
+          <NavigationProperty Name="Task" Relationship="EtaskMinstryModel.FK_TaskComment_Task" FromRole="TaskComment" ToRole="Task" />
+          <NavigationProperty Name="Employee" Relationship="EtaskMinstryModel.FK_TaskComment_Employee" FromRole="TaskComment" ToRole="Employee" />
+        </EntityType>
+        <EntityType Name="TaskLog">
+          <Key>
+            <PropertyRef Name="TaskLogID" />
+          </Key>
+          <Property Type="Int32" Name="TaskLogID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="TaskID" />
+          <Property Type="DateTime" Name="LogDate" Nullable="false" Precision="3" />
+          <Property Type="String" Name="Value" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Boolean" Name="IsFromCompany" Nullable="false" />
+          <Property Type="Int32" Name="CurrentPriority" />
+          <Property Type="Int32" Name="CurrentStatus" />
+          <NavigationProperty Name="Task" Relationship="EtaskMinstryModel.FK_TaskLog_Task" FromRole="TaskLog" ToRole="Task" />
+        </EntityType>
+        <EntityType Name="TaskTLog">
+          <Key>
+            <PropertyRef Name="TaskTLogID" />
+          </Key>
+          <Property Type="Int32" Name="TaskTLogID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="TaskID" Nullable="false" />
+          <Property Type="Int32" Name="EmpID" />
+          <Property Type="Int32" Name="StatusID" Nullable="false" />
+          <Property Type="DateTime" Name="CreatedDate" Nullable="false" Precision="3" />
+          <Property Type="Decimal" Name="TimeCount" Precision="5" Scale="2" />
+          <Property Type="Int32" Name="TimUnitID" />
+          <NavigationProperty Name="Status" Relationship="EtaskMinstryModel.FK_TaskTLog_Status" FromRole="TaskTLog" ToRole="Status" />
+          <NavigationProperty Name="Task" Relationship="EtaskMinstryModel.FK_TaskTLog_Task" FromRole="TaskTLog" ToRole="Task" />
+          <NavigationProperty Name="TimeUnit" Relationship="EtaskMinstryModel.FK_TaskTLog_TimeUnit" FromRole="TaskTLog" ToRole="TimeUnit" />
+        </EntityType>
+        <EntityType Name="UserType">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" />
+          <Property Type="String" Name="Name" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Messages" Relationship="EtaskMinstryModel.FK_Message_UserType" FromRole="UserType" ToRole="Message" />
+          <NavigationProperty Name="NotificationCollections" Relationship="EtaskMinstryModel.FK_NotificationCollection_UserType" FromRole="UserType" ToRole="NotificationCollection" />
+          <NavigationProperty Name="SIGNAL_R_SESSION" Relationship="EtaskMinstryModel.FK_PushNotificatication_UserType" FromRole="UserType" ToRole="SIGNAL_R_SESSION" />
+          <NavigationProperty Name="UserAccounts" Relationship="EtaskMinstryModel.FK_UserAccount_UserType" FromRole="UserType" ToRole="UserAccount" />
+        </EntityType>
+        <EntityType Name="WeekEnd">
+          <Key>
+            <PropertyRef Name="WeekEndID" />
+          </Key>
+          <Property Type="Int32" Name="WeekEndID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="CompanyID" Nullable="false" />
+          <Property Type="Int32" Name="WeekEndDay" Nullable="false" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_WeekEnd_Company" FromRole="WeekEnd" ToRole="Company" />
+        </EntityType>
+        <Association Name="FK_Attachment_Task">
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.Attachment" Role="Attachment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TaskID" />
+            </Principal>
+            <Dependent Role="Attachment">
+              <PropertyRef Name="TaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskComment_CommentStatus">
+          <End Type="EtaskMinstryModel.CommentStatu" Role="CommentStatu" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.TaskComment" Role="TaskComment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CommentStatu">
+              <PropertyRef Name="CommentStatusID" />
+            </Principal>
+            <Dependent Role="TaskComment">
+              <PropertyRef Name="CommentStatusId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Message_UserType">
+          <End Type="EtaskMinstryModel.UserType" Role="UserType" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.Message" Role="Message" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Message">
+              <PropertyRef Name="SenderType" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Notification_NotificationType">
+          <End Type="EtaskMinstryModel.NotificationType" Role="NotificationType" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.Notification" Role="Notification" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="NotificationType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Notification">
+              <PropertyRef Name="NotificationTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_NotificationCollection_Notification">
+          <End Type="EtaskMinstryModel.Notification" Role="Notification" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.NotificationCollection" Role="NotificationCollection" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Notification">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="NotificationCollection">
+              <PropertyRef Name="NotificationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_NotificationCollection_UserType">
+          <End Type="EtaskMinstryModel.UserType" Role="UserType" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.NotificationCollection" Role="NotificationCollection" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="NotificationCollection">
+              <PropertyRef Name="UserTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Priority">
+          <End Type="EtaskMinstryModel.Priority" Role="Priority" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Priority">
+              <PropertyRef Name="PriorityID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="PriorityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RecurrenceTask_RecurrenceType">
+          <End Type="EtaskMinstryModel.RecurrenceType" Role="RecurrenceType" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.RecurrenceTask" Role="RecurrenceTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RecurrenceType">
+              <PropertyRef Name="RecurrenceTypeID" />
+            </Principal>
+            <Dependent Role="RecurrenceTask">
+              <PropertyRef Name="RecurrenceTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_RecurrenceTaskEmp_RecurrenceTask">
+          <End Type="EtaskMinstryModel.RecurrenceTask" Role="RecurrenceTask" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.RecurrenceTaskEmp" Role="RecurrenceTaskEmp" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RecurrenceTask">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Principal>
+            <Dependent Role="RecurrenceTaskEmp">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_RecurrenceTask">
+          <End Type="EtaskMinstryModel.RecurrenceTask" Role="RecurrenceTask" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RecurrenceTask">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="RecurrenceTaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PushNotificatication_UserType">
+          <End Type="EtaskMinstryModel.UserType" Role="UserType" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.SIGNAL_R_SESSION" Role="SIGNAL_R_SESSION" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="SIGNAL_R_SESSION">
+              <PropertyRef Name="UserTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Status">
+          <End Type="EtaskMinstryModel.Status" Role="Status" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status">
+              <PropertyRef Name="StatusID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="StatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskTLog_Status">
+          <End Type="EtaskMinstryModel.Status" Role="Status" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.TaskTLog" Role="TaskTLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status">
+              <PropertyRef Name="StatusID" />
+            </Principal>
+            <Dependent Role="TaskTLog">
+              <PropertyRef Name="StatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskComment_Task">
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.TaskComment" Role="TaskComment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TaskID" />
+            </Principal>
+            <Dependent Role="TaskComment">
+              <PropertyRef Name="TaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskLog_Task">
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.TaskLog" Role="TaskLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TaskID" />
+            </Principal>
+            <Dependent Role="TaskLog">
+              <PropertyRef Name="TaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskTLog_Task">
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.TaskTLog" Role="TaskTLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TaskID" />
+            </Principal>
+            <Dependent Role="TaskTLog">
+              <PropertyRef Name="TaskID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="TotalLog">
+          <Key>
+            <PropertyRef Name="LogID" />
+            <PropertyRef Name="ActionID" />
+            <PropertyRef Name="ActionTime" />
+          </Key>
+          <Property Type="Int32" Name="LogID" Nullable="false" />
+          <Property Type="Int32" Name="ActionID" Nullable="false" />
+          <Property Type="DateTime" Name="ActionTime" Nullable="false" Precision="3" />
+          <Property Type="String" Name="Value" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Type="Int32" Name="EmployeeID" />
+          <Property Type="Int32" Name="CompanyID" />
+          <Property Type="Boolean" Name="IsCompany" />
+          <Property Type="Int32" Name="ControllerID" />
+        </EntityType>
+        <ComplexType Name="sp_ProjectTasks_Result">
+          <Property Type="Int32" Name="TaskID" Nullable="false" />
+          <Property Type="String" Name="task" Nullable="false" MaxLength="150" />
+          <Property Type="String" Name="project" Nullable="true" MaxLength="150" />
+          <Property Type="String" Name="EmpName" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="priority" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="status" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="StartDate" Nullable="true" MaxLength="10" />
+          <Property Type="String" Name="EndDate" Nullable="true" MaxLength="10" />
+        </ComplexType>
+        <EntityType Name="Project">
+          <Key>
+            <PropertyRef Name="ProjectID" />
+          </Key>
+          <Property Name="ProjectID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyID" Type="Int32" Nullable="false" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="RecurrenceTasks" Relationship="EtaskMinstryModel.FK_RecurrenceTask_Project" FromRole="Project" ToRole="RecurrenceTask" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_Project" FromRole="Project" ToRole="Task" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_Project_Company" FromRole="Project" ToRole="Company" />
+        </EntityType>
+        <Association Name="FK_RecurrenceTask_Project">
+          <End Type="EtaskMinstryModel.Project" Role="Project" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.RecurrenceTask" Role="RecurrenceTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectID" />
+            </Principal>
+            <Dependent Role="RecurrenceTask">
+              <PropertyRef Name="ProjectID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Project">
+          <End Type="EtaskMinstryModel.Project" Role="Project" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project">
+              <PropertyRef Name="ProjectID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="ProjectID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="LogGeneral">
+          <Key>
+            <PropertyRef Name="LogID" />
+          </Key>
+          <Property Name="LogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ActionID" Type="Int32" Nullable="false" />
+          <Property Name="ActionTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Value" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="EmployeeID" Type="Int32" />
+          <Property Name="CompanyID" Type="Int32" />
+          <Property Name="IsCompany" Type="Boolean" />
+          <Property Name="ControllerID" Type="Int32" />
+          <NavigationProperty Name="ControllerName" Relationship="EtaskMinstryModel.FK_LogGeneral_ControllerName" FromRole="LogGeneral" ToRole="ControllerName" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_LogGeneral_Company" FromRole="LogGeneral" ToRole="Company" />
+          <NavigationProperty Name="Employee" Relationship="EtaskMinstryModel.FK_LogGeneral_Employee" FromRole="LogGeneral" ToRole="Employee" />
+        </EntityType>
+        <Association Name="FK_LogGeneral_ControllerName">
+          <End Type="EtaskMinstryModel.ControllerName" Role="ControllerName" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.LogGeneral" Role="LogGeneral" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ControllerName">
+              <PropertyRef Name="ControllerID" />
+            </Principal>
+            <Dependent Role="LogGeneral">
+              <PropertyRef Name="ControllerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="ContactU">
+          <Key>
+            <PropertyRef Name="ContactUsId" />
+          </Key>
+          <Property Name="ContactUsId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Mobile" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Message" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="MessageTypeId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="TimeUnit">
+          <Key>
+            <PropertyRef Name="TimeUnitID" />
+          </Key>
+          <Property Name="TimeUnitID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ParentID" Type="Int32" />
+          <Property Name="ConversionFactor" Type="Int32" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_TimeUnit" FromRole="TimeUnit" ToRole="Task" />
+          <NavigationProperty Name="TaskTLogs" Relationship="EtaskMinstryModel.FK_TaskTLog_TimeUnit" FromRole="TimeUnit" ToRole="TaskTLog" />
+          <NavigationProperty Name="TimeUnit1" Relationship="EtaskMinstryModel.FK_TimeUnit_TimeUnit" FromRole="TimeUnit" ToRole="TimeUnit1" />
+          <NavigationProperty Name="TimeUnit2" Relationship="EtaskMinstryModel.FK_TimeUnit_TimeUnit" FromRole="TimeUnit1" ToRole="TimeUnit" />
+        </EntityType>
+        <Association Name="FK_Task_TimeUnit">
+          <End Type="EtaskMinstryModel.TimeUnit" Role="TimeUnit" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TimeUnit">
+              <PropertyRef Name="TimeUnitID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="TimeUnitID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskTLog_TimeUnit">
+          <End Type="EtaskMinstryModel.TimeUnit" Role="TimeUnit" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.TaskTLog" Role="TaskTLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TimeUnit">
+              <PropertyRef Name="TimeUnitID" />
+            </Principal>
+            <Dependent Role="TaskTLog">
+              <PropertyRef Name="TimUnitID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TimeUnit_TimeUnit">
+          <End Type="EtaskMinstryModel.TimeUnit" Role="TimeUnit" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.TimeUnit" Role="TimeUnit1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TimeUnit">
+              <PropertyRef Name="TimeUnitID" />
+            </Principal>
+            <Dependent Role="TimeUnit1">
+              <PropertyRef Name="ParentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="sp_CompanyTasks_Result">
+          <Property Type="Int32" Name="TaskID" Nullable="false" />
+          <Property Type="String" Name="task" Nullable="false" MaxLength="150" />
+          <Property Type="String" Name="project" Nullable="true" MaxLength="150" />
+          <Property Type="Int32" Name="Employee_ID" Nullable="true" />
+          <Property Type="String" Name="Employee_Name" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="priority" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="status" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="StartDate" Nullable="true" MaxLength="10" />
+          <Property Type="String" Name="EndDate" Nullable="true" MaxLength="10" />
+          <Property Type="Decimal" Name="ActualTime" Nullable="true" Precision="38" Scale="2" />
+          <Property Type="String" Name="timeUnit" Nullable="true" MaxLength="50" />
+        </ComplexType>
+        <ComplexType Name="sp_TotalEmployeeTasks_Result">
+          <Property Type="Int32" Name="EmpID" Nullable="false" />
+          <Property Type="String" Name="Name" Nullable="true" MaxLength="50" />
+          <Property Type="Int32" Name="newtask" Nullable="true" />
+          <Property Type="Int32" Name="EndedTask" Nullable="true" />
+          <Property Type="Int32" Name="RefusedTask" Nullable="true" />
+          <Property Type="Int32" Name="lateTask" Nullable="true" />
+          <Property Type="Int32" Name="InProgressTask" Nullable="true" />
+          <Property Type="Int32" Name="SuspendedTask" Nullable="true" />
+          <Property Type="Int32" Name="AcceptedTask" Nullable="true" />
+          <Property Type="Int32" Name="ApprovedTask" Nullable="true" />
+          <Property Type="Int32" Name="NotApprovedTask" Nullable="true" />
+          <Property Type="Int32" Name="TotalTime" Nullable="true" />
+          <Property Type="Int32" Name="ActivityLevel" Nullable="true" />
+        </ComplexType>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="CompanyID" />
+          </Key>
+          <Property Name="CompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Phone" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="IsDeleted" Type="Boolean" />
+          <Property Name="CommercialRegister" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Logo" Type="String" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="LaborOfficeID" Type="Int32" />
+          <Property Name="SequenceNumber" Type="Int32" />
+          <Property Name="HasAttendanceReport" Type="Boolean" />
+          <NavigationProperty Name="HoliDays" Relationship="EtaskMinstryModel.FK_HoliDay_Company" FromRole="Company" ToRole="HoliDay" />
+          <NavigationProperty Name="LogGenerals" Relationship="EtaskMinstryModel.FK_LogGeneral_Company" FromRole="Company" ToRole="LogGeneral" />
+          <NavigationProperty Name="Projects" Relationship="EtaskMinstryModel.FK_Project_Company" FromRole="Company" ToRole="Project" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_Company" FromRole="Company" ToRole="Task" />
+          <NavigationProperty Name="WeekEnds" Relationship="EtaskMinstryModel.FK_WeekEnd_Company" FromRole="Company" ToRole="WeekEnd" />
+          <NavigationProperty Name="Employees" Relationship="EtaskMinstryModel.FK_Employee_Company" FromRole="Company" ToRole="Employee" />
+          <Property Name="BriefTaskReport" Type="Boolean" />
+          <NavigationProperty Name="UserAccounts" Relationship="EtaskMinstryModel.FK_UserAccount_Company" FromRole="Company" ToRole="UserAccount" />
+        </EntityType>
+        <Association Name="FK_HoliDay_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.HoliDay" Role="HoliDay" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="HoliDay">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogGeneral_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.LogGeneral" Role="LogGeneral" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="LogGeneral">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Project_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.Project" Role="Project" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Project">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WeekEnd_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.WeekEnd" Role="WeekEnd" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="WeekEnd">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="sp_Attendance_Result">
+          <Property Type="Int32" Name="EmpID" Nullable="true" />
+          <Property Type="String" Name="employeeName" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="companyName" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="CheckIn" Nullable="true" Precision="23" />
+          <Property Type="DateTime" Name="CheckOut" Nullable="true" Precision="23" />
+          <Property Type="String" Name="hours" Nullable="true" MaxLength="47" />
+        </ComplexType>
+        <EntityType Name="Attendance">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmpId" Type="Int32" Nullable="false" />
+          <Property Name="CheckIn" Type="DateTime" Precision="3" />
+          <Property Name="CheckOut" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Employee" Relationship="EtaskMinstryModel.FK_Attendance_Employee" FromRole="Attendance" ToRole="Employee" />
+        </EntityType>
+        <EntityType Name="Employee">
+          <Key>
+            <PropertyRef Name="EmpID" />
+          </Key>
+          <Property Name="EmpID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Birthdate" Type="DateTime" Precision="3" />
+          <Property Name="Gender" Type="Boolean" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="HireDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="CompanyID" Type="Int32" />
+          <Property Name="JobTitle" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Mobile" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="LastModifiedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsDeleted" Type="Boolean" />
+          <Property Name="LaborOfficeID" Type="Int32" />
+          <Property Name="SequenceNumber" Type="Int32" />
+          <Property Name="NationalID" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ImageName" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="NationaIDImage" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Attendances" Relationship="EtaskMinstryModel.FK_Attendance_Employee" FromRole="Employee" ToRole="Attendance" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_Employee_Company" FromRole="Employee" ToRole="Company" />
+          <NavigationProperty Name="LogGenerals" Relationship="EtaskMinstryModel.FK_LogGeneral_Employee" FromRole="Employee" ToRole="LogGeneral" />
+          <NavigationProperty Name="Tasks" Relationship="EtaskMinstryModel.FK_Task_Employee" FromRole="Employee" ToRole="Task" />
+          <NavigationProperty Name="TaskComments" Relationship="EtaskMinstryModel.FK_TaskComment_Employee" FromRole="Employee" ToRole="TaskComment" />
+          <NavigationProperty Name="UserAccounts" Relationship="EtaskMinstryModel.FK_UserAccount_Employee" FromRole="Employee" ToRole="UserAccount" />
+        </EntityType>
+        <Association Name="FK_Attendance_Employee">
+          <End Type="EtaskMinstryModel.Employee" Role="Employee" Multiplicity="1" />
+          <End Type="EtaskMinstryModel.Attendance" Role="Attendance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="Attendance">
+              <PropertyRef Name="EmpId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Employee_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.Employee" Role="Employee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="Employee">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LogGeneral_Employee">
+          <End Type="EtaskMinstryModel.Employee" Role="Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.LogGeneral" Role="LogGeneral" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="LogGeneral">
+              <PropertyRef Name="EmployeeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Task_Employee">
+          <End Type="EtaskMinstryModel.Employee" Role="Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.Task" Role="Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="EmpID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskComment_Employee">
+          <End Type="EtaskMinstryModel.Employee" Role="Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.TaskComment" Role="TaskComment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="TaskComment">
+              <PropertyRef Name="EmpID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="sp_EmployeePerformanceReport_Result">
+          <Property Type="Int32" Name="EmpID" Nullable="false" />
+          <Property Type="String" Name="empName" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="compName" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="NationalID" Nullable="true" />
+          <Property Type="Int32" Name="CompletedTasks" Nullable="false" />
+          <Property Type="Int32" Name="AssignedTasks" Nullable="true" />
+          <Property Type="Decimal" Name="ExpectedTime" Nullable="false" Precision="38" Scale="2" />
+          <Property Type="Int32" Name="AssignedTaskesTime" Nullable="false" />
+          <Property Type="Int32" Name="TotalWorkTime" Nullable="false" />
+          <Property Type="Int32" Name="ActivityLevel" Nullable="false" />
+          <Property Type="Int32" Name="LoginCount" Nullable="false" />
+          <Property Type="Int32" Name="LogOutCount" Nullable="false" />
+        </ComplexType>
+        <EntityType Name="UserAccount">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Password" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyID" Type="Int32" />
+          <Property Name="EmpID" Type="Int32" />
+          <Property Name="IsCompany" Type="Boolean" />
+          <Property Name="UserTypeID" Type="Int32" />
+          <Property Name="IsTelesak" Type="Boolean" />
+          <NavigationProperty Name="Company" Relationship="EtaskMinstryModel.FK_UserAccount_Company" FromRole="UserAccount" ToRole="Company" />
+          <NavigationProperty Name="Employee" Relationship="EtaskMinstryModel.FK_UserAccount_Employee" FromRole="UserAccount" ToRole="Employee" />
+          <NavigationProperty Name="UserType" Relationship="EtaskMinstryModel.FK_UserAccount_UserType" FromRole="UserAccount" ToRole="UserType" />
+        </EntityType>
+        <Association Name="FK_UserAccount_Company">
+          <End Type="EtaskMinstryModel.Company" Role="Company" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.UserAccount" Role="UserAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="CompanyID" />
+            </Principal>
+            <Dependent Role="UserAccount">
+              <PropertyRef Name="CompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAccount_Employee">
+          <End Type="EtaskMinstryModel.Employee" Role="Employee" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="EtaskMinstryModel.UserAccount" Role="UserAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employee">
+              <PropertyRef Name="EmpID" />
+            </Principal>
+            <Dependent Role="UserAccount">
+              <PropertyRef Name="EmpID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserAccount_UserType">
+          <End Type="EtaskMinstryModel.UserType" Role="UserType" Multiplicity="0..1" />
+          <End Type="EtaskMinstryModel.UserAccount" Role="UserAccount" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UserType">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="UserAccount">
+              <PropertyRef Name="UserTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="EtaskMinstryModelStoreContainer" CdmEntityContainer="EtaskMinstryEntities2">
+          <FunctionImportMapping FunctionImportName="TableRef" FunctionName="EtaskMinstryModel.Store.TableRef">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EtaskMinstryModel.TableRef_Result">
+                <ScalarProperty Name="FK_TABLE_NAME" ColumnName="FK_TABLE_NAME" />
+                <ScalarProperty Name="FK_COLUMN_NAME" ColumnName="FK_COLUMN_NAME" />
+                <ScalarProperty Name="REFERENCED_TABLE_NAME" ColumnName="REFERENCED_TABLE_NAME" />
+                <ScalarProperty Name="REFERENCED_COLUMN_NAME" ColumnName="REFERENCED_COLUMN_NAME" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="Attachments">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Attachment">
+              <MappingFragment StoreEntitySet="Attachment">
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="FileName" ColumnName="FileName" />
+                <ScalarProperty Name="AttachmentID" ColumnName="AttachmentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CommentStatus">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.CommentStatu">
+              <MappingFragment StoreEntitySet="CommentStatus">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="CommentStatus" ColumnName="CommentStatus" />
+                <ScalarProperty Name="CommentStatusID" ColumnName="CommentStatusID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ControllerNames">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.ControllerName">
+              <MappingFragment StoreEntitySet="ControllerName">
+                <ScalarProperty Name="ControllerNameArabic" ColumnName="ControllerNameArabic" />
+                <ScalarProperty Name="ControllerNameEnglish" ColumnName="ControllerNameEnglish" />
+                <ScalarProperty Name="ControllerID" ColumnName="ControllerID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="HoliDays">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.HoliDay">
+              <MappingFragment StoreEntitySet="HoliDay">
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="HoliDayName" ColumnName="HoliDayName" />
+                <ScalarProperty Name="HoliDayID" ColumnName="HoliDayID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Messages">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Message">
+              <MappingFragment StoreEntitySet="Message">
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="Details" ColumnName="Details" />
+                <ScalarProperty Name="FromInstanceID" ColumnName="FromInstanceID" />
+                <ScalarProperty Name="SenderType" ColumnName="SenderType" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Notifications">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Notification">
+              <MappingFragment StoreEntitySet="Notification">
+                <ScalarProperty Name="NotificationTypeID" ColumnName="NotificationTypeID" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="MessageID" ColumnName="MessageID" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="LinkToGo" ColumnName="LinkToGo" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="NotificationCollections">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.NotificationCollection">
+              <MappingFragment StoreEntitySet="NotificationCollection">
+                <ScalarProperty Name="NotificationID" ColumnName="NotificationID" />
+                <ScalarProperty Name="SeenDate" ColumnName="SeenDate" />
+                <ScalarProperty Name="IsSeen" ColumnName="IsSeen" />
+                <ScalarProperty Name="UserTypeID" ColumnName="UserTypeID" />
+                <ScalarProperty Name="InstanceID" ColumnName="InstanceID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="NotificationTypes">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.NotificationType">
+              <MappingFragment StoreEntitySet="NotificationType">
+                <ScalarProperty Name="Pattern" ColumnName="Pattern" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Priorities">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Priority">
+              <MappingFragment StoreEntitySet="Priority">
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="PriorityID" ColumnName="PriorityID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RecurrenceTasks">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.RecurrenceTask">
+              <MappingFragment StoreEntitySet="RecurrenceTask">
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="RecValue" ColumnName="RecValue" />
+                <ScalarProperty Name="EndRec" ColumnName="EndRec" />
+                <ScalarProperty Name="StartRec" ColumnName="StartRec" />
+                <ScalarProperty Name="RecurrenceTypeID" ColumnName="RecurrenceTypeID" />
+                <ScalarProperty Name="ProjectID" ColumnName="ProjectID" />
+                <ScalarProperty Name="Summary" ColumnName="Summary" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="RecurrenceTaskID" ColumnName="RecurrenceTaskID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RecurrenceTaskEmps">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.RecurrenceTaskEmp">
+              <MappingFragment StoreEntitySet="RecurrenceTaskEmp">
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="RecurrenceTaskID" ColumnName="RecurrenceTaskID" />
+                <ScalarProperty Name="RecurrenceTaskEmpID" ColumnName="RecurrenceTaskEmpID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RecurrenceTypes">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.RecurrenceType">
+              <MappingFragment StoreEntitySet="RecurrenceType">
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="RecurrenceTypeID" ColumnName="RecurrenceTypeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Settings">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Setting">
+              <MappingFragment StoreEntitySet="Settings">
+                <ScalarProperty Name="ContactUsResponsableEmail" ColumnName="ContactUsResponsableEmail" />
+                <ScalarProperty Name="VisitorCounter" ColumnName="VisitorCounter" />
+                <ScalarProperty Name="OnlineVisiter" ColumnName="OnlineVisiter" />
+                <ScalarProperty Name="YouTubeURL" ColumnName="YouTubeURL" />
+                <ScalarProperty Name="TwitterURL" ColumnName="TwitterURL" />
+                <ScalarProperty Name="FacebookURL" ColumnName="FacebookURL" />
+                <ScalarProperty Name="SSL" ColumnName="SSL" />
+                <ScalarProperty Name="FromEmail" ColumnName="FromEmail" />
+                <ScalarProperty Name="PortNo" ColumnName="PortNo" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="ServerName" ColumnName="ServerName" />
+                <ScalarProperty Name="SettingID" ColumnName="SettingID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SIGNAL_R_SESSION">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.SIGNAL_R_SESSION">
+              <MappingFragment StoreEntitySet="SIGNAL_R_SESSION">
+                <ScalarProperty Name="UserTypeID" ColumnName="UserTypeID" />
+                <ScalarProperty Name="ConnectionID" ColumnName="ConnectionID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Status">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Status">
+              <MappingFragment StoreEntitySet="Status">
+                <ScalarProperty Name="DesignClass" ColumnName="DesignClass" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="StatusID" ColumnName="StatusID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tasks">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Task">
+              <MappingFragment StoreEntitySet="Task">
+                <ScalarProperty Name="BriefTaskName" ColumnName="BriefTaskName" />
+                <ScalarProperty Name="RecurrenceTaskID" ColumnName="RecurrenceTaskID" />
+                <ScalarProperty Name="IsRecurrence" ColumnName="IsRecurrence" />
+                <ScalarProperty Name="DeliverDate" ColumnName="DeliverDate" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+                <ScalarProperty Name="ProjectID" ColumnName="ProjectID" />
+                <ScalarProperty Name="StatusID" ColumnName="StatusID" />
+                <ScalarProperty Name="PriorityID" ColumnName="PriorityID" />
+                <ScalarProperty Name="IsArchived" ColumnName="IsArchived" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="ActualTime" ColumnName="ActualTime" />
+                <ScalarProperty Name="TimeUnitID" ColumnName="TimeUnitID" />
+                <ScalarProperty Name="ExpectedTime" ColumnName="ExpectedTime" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="Summary" ColumnName="Summary" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskComments">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.TaskComment">
+              <MappingFragment StoreEntitySet="TaskComment">
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="CommentStatusId" ColumnName="CommentStatusId" />
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="IsFromCompany" ColumnName="IsFromCompany" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="TaskCommentID" ColumnName="TaskCommentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskLogs">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.TaskLog">
+              <MappingFragment StoreEntitySet="TaskLog">
+                <ScalarProperty Name="CurrentStatus" ColumnName="CurrentStatus" />
+                <ScalarProperty Name="CurrentPriority" ColumnName="CurrentPriority" />
+                <ScalarProperty Name="IsFromCompany" ColumnName="IsFromCompany" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="LogDate" ColumnName="LogDate" />
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="TaskLogID" ColumnName="TaskLogID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskTLogs">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.TaskTLog">
+              <MappingFragment StoreEntitySet="TaskTLog">
+                <ScalarProperty Name="TimUnitID" ColumnName="TimUnitID" />
+                <ScalarProperty Name="TimeCount" ColumnName="TimeCount" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="StatusID" ColumnName="StatusID" />
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="TaskTLogID" ColumnName="TaskTLogID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserTypes">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.UserType">
+              <MappingFragment StoreEntitySet="UserType">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WeekEnds">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.WeekEnd">
+              <MappingFragment StoreEntitySet="WeekEnd">
+                <ScalarProperty Name="WeekEndDay" ColumnName="WeekEndDay" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="WeekEndID" ColumnName="WeekEndID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TotalLogs">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.TotalLog">
+              <MappingFragment StoreEntitySet="TotalLog">
+                <ScalarProperty Name="ControllerID" ColumnName="ControllerID" />
+                <ScalarProperty Name="IsCompany" ColumnName="IsCompany" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="ActionTime" ColumnName="ActionTime" />
+                <ScalarProperty Name="ActionID" ColumnName="ActionID" />
+                <ScalarProperty Name="LogID" ColumnName="LogID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_ProjectTasks" FunctionName="EtaskMinstryModel.Store.sp_ProjectTasks">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EtaskMinstryModel.sp_ProjectTasks_Result">
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="task" ColumnName="task" />
+                <ScalarProperty Name="project" ColumnName="project" />
+                <ScalarProperty Name="EmpName" ColumnName="EmpName" />
+                <ScalarProperty Name="priority" ColumnName="priority" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="Projects">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Project">
+              <MappingFragment StoreEntitySet="Project">
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ProjectID" ColumnName="ProjectID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LogGenerals">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.LogGeneral">
+              <MappingFragment StoreEntitySet="LogGeneral">
+                <ScalarProperty Name="ControllerID" ColumnName="ControllerID" />
+                <ScalarProperty Name="IsCompany" ColumnName="IsCompany" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="EmployeeID" ColumnName="EmployeeID" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="ActionTime" ColumnName="ActionTime" />
+                <ScalarProperty Name="ActionID" ColumnName="ActionID" />
+                <ScalarProperty Name="LogID" ColumnName="LogID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContactUs">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.ContactU">
+              <MappingFragment StoreEntitySet="ContactUs">
+                <ScalarProperty Name="MessageTypeId" ColumnName="MessageTypeId" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="Mobile" ColumnName="Mobile" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ContactUsId" ColumnName="ContactUsId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TimeUnits">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.TimeUnit">
+              <MappingFragment StoreEntitySet="TimeUnit">
+                <ScalarProperty Name="ConversionFactor" ColumnName="ConversionFactor" />
+                <ScalarProperty Name="ParentID" ColumnName="ParentID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="TimeUnitID" ColumnName="TimeUnitID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_CompanyTasks" FunctionName="EtaskMinstryModel.Store.sp_CompanyTasks">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EtaskMinstryModel.sp_CompanyTasks_Result">
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="task" ColumnName="task" />
+                <ScalarProperty Name="project" ColumnName="project" />
+                <ScalarProperty Name="Employee_ID" ColumnName="Employee_ID" />
+                <ScalarProperty Name="Employee_Name" ColumnName="Employee_Name" />
+                <ScalarProperty Name="priority" ColumnName="priority" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="ActualTime" ColumnName="ActualTime" />
+                <ScalarProperty Name="timeUnit" ColumnName="timeUnit" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_TotalEmployeeTasks" FunctionName="EtaskMinstryModel.Store.sp_TotalEmployeeTasks">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EtaskMinstryModel.sp_TotalEmployeeTasks_Result">
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="newtask" ColumnName="newtask" />
+                <ScalarProperty Name="EndedTask" ColumnName="EndedTask" />
+                <ScalarProperty Name="RefusedTask" ColumnName="RefusedTask" />
+                <ScalarProperty Name="lateTask" ColumnName="lateTask" />
+                <ScalarProperty Name="InProgressTask" ColumnName="InProgressTask" />
+                <ScalarProperty Name="SuspendedTask" ColumnName="SuspendedTask" />
+                <ScalarProperty Name="AcceptedTask" ColumnName="AcceptedTask" />
+                <ScalarProperty Name="ApprovedTask" ColumnName="ApprovedTask" />
+                <ScalarProperty Name="NotApprovedTask" ColumnName="NotApprovedTask" />
+                <ScalarProperty Name="TotalTime" ColumnName="TotalTime" />
+                <ScalarProperty Name="ActivityLevel" ColumnName="ActivityLevel" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="Companies">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Company">
+              <MappingFragment StoreEntitySet="Company">
+                <ScalarProperty Name="BriefTaskReport" ColumnName="BriefTaskReport" />
+                <ScalarProperty Name="HasAttendanceReport" ColumnName="HasAttendanceReport" />
+                <ScalarProperty Name="SequenceNumber" ColumnName="SequenceNumber" />
+                <ScalarProperty Name="LaborOfficeID" ColumnName="LaborOfficeID" />
+                <ScalarProperty Name="Logo" ColumnName="Logo" />
+                <ScalarProperty Name="CommercialRegister" ColumnName="CommercialRegister" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_Attendance" FunctionName="EtaskMinstryModel.Store.sp_Attendance">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EtaskMinstryModel.sp_Attendance_Result">
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="employeeName" ColumnName="employeeName" />
+                <ScalarProperty Name="companyName" ColumnName="companyName" />
+                <ScalarProperty Name="CheckIn" ColumnName="CheckIn" />
+                <ScalarProperty Name="CheckOut" ColumnName="CheckOut" />
+                <ScalarProperty Name="hours" ColumnName="hours" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="Attendances">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Attendance">
+              <MappingFragment StoreEntitySet="Attendance">
+                <ScalarProperty Name="CheckOut" ColumnName="CheckOut" />
+                <ScalarProperty Name="CheckIn" ColumnName="CheckIn" />
+                <ScalarProperty Name="EmpId" ColumnName="EmpId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Employees">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.Employee">
+              <MappingFragment StoreEntitySet="Employee">
+                <ScalarProperty Name="NationaIDImage" ColumnName="NationaIDImage" />
+                <ScalarProperty Name="ImageName" ColumnName="ImageName" />
+                <ScalarProperty Name="NationalID" ColumnName="NationalID" />
+                <ScalarProperty Name="SequenceNumber" ColumnName="SequenceNumber" />
+                <ScalarProperty Name="LaborOfficeID" ColumnName="LaborOfficeID" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+                <ScalarProperty Name="LastModifiedDate" ColumnName="LastModifiedDate" />
+                <ScalarProperty Name="Mobile" ColumnName="Mobile" />
+                <ScalarProperty Name="JobTitle" ColumnName="JobTitle" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="HireDate" ColumnName="HireDate" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="Birthdate" ColumnName="Birthdate" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_EmployeePerformanceReport" FunctionName="EtaskMinstryModel.Store.sp_EmployeePerformanceReport">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="EtaskMinstryModel.sp_EmployeePerformanceReport_Result">
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="empName" ColumnName="empName" />
+                <ScalarProperty Name="compName" ColumnName="compName" />
+                <ScalarProperty Name="NationalID" ColumnName="NationalID" />
+                <ScalarProperty Name="CompletedTasks" ColumnName="CompletedTasks" />
+                <ScalarProperty Name="AssignedTasks" ColumnName="AssignedTasks" />
+                <ScalarProperty Name="ExpectedTime" ColumnName="ExpectedTime" />
+                <ScalarProperty Name="AssignedTaskesTime" ColumnName="AssignedTaskesTime" />
+                <ScalarProperty Name="TotalWorkTime" ColumnName="TotalWorkTime" />
+                <ScalarProperty Name="ActivityLevel" ColumnName="ActivityLevel" />
+                <ScalarProperty Name="LoginCount" ColumnName="LoginCount" />
+                <ScalarProperty Name="LogOutCount" ColumnName="LogOutCount" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="UserAccounts">
+            <EntityTypeMapping TypeName="EtaskMinstryModel.UserAccount">
+              <MappingFragment StoreEntitySet="UserAccount">
+                <ScalarProperty Name="IsTelesak" ColumnName="IsTelesak" />
+                <ScalarProperty Name="UserTypeID" ColumnName="UserTypeID" />
+                <ScalarProperty Name="IsCompany" ColumnName="IsCompany" />
+                <ScalarProperty Name="EmpID" ColumnName="EmpID" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <DesignerProperty Name="UseLegacyProvider" Value="True" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

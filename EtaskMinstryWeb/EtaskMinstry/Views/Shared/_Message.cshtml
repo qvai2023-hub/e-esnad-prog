@@ -1,0 +1,62 @@
+﻿        <div id="MessagePopUp" style="display: none;">
+            <div class="block-dim"></div>
+            <div class="pnl1 pop-up" style="width: 450px; margin-right: -108px; position: fixed; z-index: 99999;top: 62px;">
+                <a href="#" class="close-btn"></a>
+                <div class="top-pnl">
+                    <div class="right-top-pnl"></div>
+                    <div class="left-top-pnl"></div>
+                    <div class="mid-top-pnl"></div>
+                </div>
+                <div class="mid-pnl">
+                    <div class="right-mid-pnl"></div>
+                    <div class="left-mid-pnl"></div>
+                    <div class="mid-mid-pnl" style="background-color: white;">
+                        <div class="hdr1" style="margin-bottom: 5px">
+                            <span><em>
+                                <img src="/Content/themes/base/images/icon2.png" />حذف</em></span>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px">
+                            <h2 id="Message">
+                             
+                            </h2>
+                        </div>
+                        <div class="btns" style="text-align: center; margin-top: 50px">
+                            <button id="btnCloseMessagePopUp" class="submit-btn">موافق</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-pnl">
+                    <div class="right-bottom-pnl"></div>
+                    <div class="left-bottom-pnl"></div>
+                    <div class="mid-bottom-pnl"></div>
+                </div>
+            </div>
+        </div>
+
+
+<script>
+
+    $(function() {
+
+        $("#btnCloseMessagePopUp").live("click", function() {
+            $("#MessagePopUp").fadeOut();
+        });
+        
+    });
+
+    function ShowPopUpMessage(message, url) {
+
+        $("#MessagePopUp").fadeIn();
+
+        $("#Message").html(message);
+
+        setTimeout(function () {
+
+            $("#MessagePopUp").fadeOut();
+
+            if (url != undefined)
+                window.location.href = url;
+
+        }, 2000);
+    }
+</script>

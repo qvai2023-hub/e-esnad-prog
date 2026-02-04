@@ -1,0 +1,238 @@
+﻿@using EtaskMinstry
+@model IEnumerable<EtaskMinstry.Models.Employee.DashBoardVM>
+
+@if (Model.Any())
+{
+    <input type="hidden" value="@DateTime.Now.ToGregArabicDate().Trim()" id="todayDate" />
+
+    <div id="list" class="table-responsive">
+        <div>
+            @{
+                var grid = new WebGrid(Model, null, null, 10, true, true, "divTasks");
+                var gridColumns = new List<WebGridColumn>();
+
+                if (Model.All(i => i.IsDelayed == true))
+                {
+                    gridColumns.Add(grid.Column("TaskName", "المهمة", @<text>@Html.EncodedActionLink((string)@item.taskName, "TaskDetails", "Tasks", "Employee", new { id = @item.TaskID, IsRoute = true }, null)</text>, "FirstColumn"));
+                                        gridColumns.Add(grid.Column("Status", "الحالة", @<text>@item.Status</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("StartDate", "تاريخ البداية", @<text>@item.HijriStartDate</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("Endate", "تاريخ النهاية", @<text>@item.HijriEndDate </text>, "ThirdColumn"));
+
+gridColumns.Add(grid.Column("Delay", "التأخير", @<text>@item.delayTime</text>, "FourthColumn"));
+gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Employee/Tasks/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+gridColumns.Add(grid.Column("Deliver", "انهاء", @<text>
+            @if (item.statusId == (int)TaskStatus.Inprogress && item.actualTime != 0)
+            {
+                <a taskid="@item.taskID" href="javascript:void(0);" class="FinishTask" title="انهاء المهمة"><img src="/Content/Main/images/end-icon.png" width="16" height="16"></a>
+
+            }
+            else
+            {
+                <a taskid="@item.taskID" style="display:none;" href="javascript:void(0);" class="FinishTask" title="انهاء المهمة"><img src="/Content/Main/images/end-icon.png" width="16" height="16"></a>
+            } </text>, "FourthColumn"));
+
+}
+else if (Model.All(i => i.statusId == (int)TaskStatus.New && i.EmpID == MvcApplication.userData.userId))
+{
+gridColumns.Add(grid.Column("TaskName", "المهمة", @<text>@Html.EncodedActionLink((string)@item.taskName, "TaskDetails", "Tasks", "Employee", new { id = @item.TaskID, IsRoute = true }, null)</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("StartDate", "تاريخ البداية", @<text>@item.HijriStartDate</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("Endate", "تاريخ النهاية", @<text>@item.HijriEndDate </text>, "ThirdColumn Endate"));
+gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Employee/Tasks/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+
+gridColumns.Add(grid.Column("Accept", "قبول", @<text><a taskid="@item.taskID" href="javascript:void(0);" class="accepted-icon" title="قبول المهمة"><img src="/Content/Main/images/Check-icon.png" width="16" height="16" /></a>
+        </text>, "FourthColumn"));
+gridColumns.Add(grid.Column("Refused", "رفض", @<text><a taskid="@item.taskID" href="javascript:void(0);" class="refused-icon" title="رفض المهمة"><img src="/Content/Main/images/delete-icon.png" width="16" height="16" /></a>
+        </text>, "fivethColumn"));
+
+
+}//&& i.endDate.Value.Date !=DateTime.Now.Date
+else if (Model.All(i => i.statusId == (int)TaskStatus.Inprogress && !i.IsSusbended))
+{
+gridColumns.Add(grid.Column("TaskName", "المهمة", @<text>@Html.EncodedActionLink((string)@item.taskName, "TaskDetails", "Tasks", "Employee", new { id = @item.TaskID, IsRoute = true }, null)</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("StartDate", "تاريخ البداية", @<text>@item.HijriStartDate</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("Endate", "تاريخ النهاية", @<text>@item.HijriEndDate </text>, "Column Endate"));
+
+
+gridColumns.Add(grid.Column("TaskName", "الوقت المستغرق اليوم", @<text><div class="estimated-time">
+
+                <span class="estm_time" style="display: inline-flex;">
+                    <p class="actualTime" style="line-height: 1.5;padding-left: 6px;">@item.TasktodayTime</p>ساعة
+                    <a time="3" class="edit-inline-icon modify_time" title="تعديل"><i style="line-height: 1.5;padding-right: 4px;" class="fa fa-edit"></i></a>
+                </span>
+                <span class="divTimeUpdate" style="display: none;">
+                    <input type="text" class="time_value">
+                    <img src="~/Content/Main/images/tick.png" taskid="@item.taskID" class="approved" style="position: relative; top: 3px; right: 4px;">
+                </span>
+            </div></text>, "ThirdColumn"));
+gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Employee/Tasks/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+
+gridColumns.Add(grid.Column("Deliver", "انهاء", @<text>
+            @if (item.actualTime != 0)
+            {
+                <a taskid="@item.taskID" href="javascript:void(0);" class="FinishTask" title="انهاء المهمة"><img src="/Content/Main/images/end-icon.png" width="16" height="16"></a>
+
+            }
+            else
+            {
+                <a taskid="@item.taskID" style="display:none;" href="javascript:void(0);" class="FinishTask" title="انهاء المهمة"><img src="/Content/Main/images/end-icon.png" width="16" height="16"></a>
+            } </text>, "FourthColumn"));
+
+
+}
+else if (Model.All(i => i.statusId == (int)TaskStatus.Inprogress && (i.endDate >= DateTime.Now.AddDays(-1) && i.endDate <= DateTime.Now.AddDays(1))))
+{
+gridColumns.Add(grid.Column("TaskName", "المهمة", @<text>@Html.EncodedActionLink((string)@item.taskName, "TaskDetails", "Tasks", "Employee", new { id = @item.TaskID, IsRoute = true }, null)</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("StartDate", "تاريخ البداية", @<text>@item.HijriStartDate</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Employee/Tasks/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+
+gridColumns.Add(grid.Column("Deliver", "انهاء", @<text><a taskid="@item.taskID" href="javascript:void(0);" class="FinishTask" title="انهاء المهمة"><img src="/Content/Main/images/end-icon.png" width="16" height="16"></a>
+        </text>, "ThirdColumn"));
+}
+else
+{
+ gridColumns.Add(grid.Column("TaskName", "المهمة", @<text>@Html.EncodedActionLink((string)@item.taskName, "TaskDetails", "Tasks", "Employee", new { id = @item.TaskID, IsRoute = true }, null)</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("StopDate", " تاريخ الايقاف", @<text>@item.HijriStopDate</text>, "SecondColumn"));
+
+gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Employee/Tasks/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+
+
+}
+
+
+            }
+            @grid.GetHtml(columns: grid.Columns(gridColumns.ToArray()),
+                   tableStyle: "table table-bordered dataTable",
+                      headerStyle: "",
+                   footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+
+
+        </div>
+    </div>
+
+
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            <tr class="table-alternat-header">
+           
+            </tr>
+            <tr>
+                <td colspan="1" style="text-align: center">
+                    <h4>لا يوجد بيانات</h4>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+
+@*<style>
+   
+      .task-tbl-head th{
+    
+    text-align: center;
+    }
+    .task-tbl-head th a{
+        color: #2c3e50 !important;
+    }
+
+       #list .fav-grid{
+    border-collapse:collapse;
+    border-spacing:0;
+    }
+
+    .FirstColumn {
+        width: 39%;
+        text-align: center;
+    }
+
+    .SecondColumn {
+        width: 19%;
+        text-align: center;
+    }
+   
+
+    .ThirdColumn {
+        width: 16%;
+        text-align: center;
+    }
+
+    .FourthColumn, .fivethColumn {
+        width: 14%;
+        text-align: center;
+    }
+
+    .table {
+        display: table;
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+    }
+
+        .table tr td {
+            border-bottom: solid 1px #CCC;
+            padding: 5px;
+        }
+
+    .tblHeader {
+        background-repeat: repeat-x;
+        font-weight: bold;
+        text-align: center;
+        height: 25px;
+        border: 0;
+    }
+
+        .tblHeader th {
+            padding-top: 4px;
+        }
+
+            .tblHeader th a {
+                color: #FFF !important;
+                padding-top: 4px;
+            }
+
+    .pagerbar {
+        text-align: center;
+    }
+</style>*@
+
+<script>
+
+    
+    $(function () {
+        applyClassesToWebGrid();
+        //$('a[href*="&X-Requested-With=XMLHttpRequest"]').each(function () {
+        //    this.href = this.href.replace("&X-Requested-With=XMLHttpRequest", '');
+        //    if (this.href.indexOf("page=") != -1) {
+        //        var fst = this.href.split('/GetTasks?')[0];
+        //       var snd = this.href.split('page=')[1];
+        //       this.href = fst+"?page="+snd;
+        //    }
+
+        //});
+        $('.copy_text').click(function (e) {
+            e.preventDefault();
+            var copyText = $(this).attr('href');
+
+            document.addEventListener('copy', function (e) {
+                e.clipboardData.setData('text/plain', copyText);
+                e.preventDefault();
+            }, true);
+
+            document.execCommand('copy');
+            console.log('copied text : ', copyText);
+
+        });
+    });
+
+</script>

@@ -1,0 +1,13 @@
+﻿@{
+    ViewBag.Title = "Add";
+}
+
+<h2>Add</h2>
+@using (Html.BeginForm("Add", "TestFileUpload", FormMethod.Post, new { area="Employee",enctype = "multipart/form-data" })) {
+    <label>File</label>
+    @Html.Partial("PartialUploadFile")
+
+    <div>
+        <input type="submit" />
+    </div>
+}

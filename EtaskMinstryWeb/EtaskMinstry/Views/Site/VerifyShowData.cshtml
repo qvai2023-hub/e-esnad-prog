@@ -1,0 +1,38 @@
+﻿@model EtaskMinstry.Models.ContactUs
+@{
+    ViewBag.Title = "VerifyShowData";
+    Layout = "~/Views/Shared/_Site.cshtml";
+}
+<meta name="robots" content="noindex, nofollow">
+<div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        
+                        @using (Html.BeginForm("VerifyShowData", "Site"))
+                        {
+                             @Html.AntiForgeryToken()
+                           @Html.PasswordFor(s=>s.code)
+                          <input type="submit" value="verify" />
+                        }
+                        </div>
+                    </div>
+                </div>
+    </div>
+<script>
+    $(function () {
+
+        $("#verify").click(function () {
+            $.ajax({
+                url: "/Site/VerifyShowData",
+                data: {
+                    code: $("#code").val()
+                },
+                type: 'POST',
+                complete: function (data) {
+                    
+                }
+            });
+        })
+    });
+</script>

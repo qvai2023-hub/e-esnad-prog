@@ -1,0 +1,140 @@
+﻿@model EtaskMinstry.Areas.Admin.Models.CompanyVM
+
+@{
+    ViewBag.Title = "تعديل / اضافه";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+<link href="~/Scripts/QVUploader/QVUploader.css" rel="stylesheet" />
+<script src="~/Scripts/QVUploader/QVUploader.js"></script>
+
+    @Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.Id)
+
+    <!-- Right labels -->
+    <form class="form-horizontal" method="post" role="form">
+        <div class="panel panel-default">
+            <div class="panel-heading"><h6 class="panel-title"><i class="fa fa-edit"></i> تعديل / اضافه شركه </h6></div>
+            <div class="panel-body">
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Name):</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.Name, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Address):</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.Address, new { @class = "form-control" })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.Address, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Email):</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.Email, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Phone):</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.Phone, new { @class = "form-control" })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.Phone, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.CommercialRegister):</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(model => model.CommercialRegister, new { @class = "form-control" })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.CommercialRegister, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.IsActive):</label>
+                    <div class="col-sm-10">
+                        @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-textbox" })
+                        <br />
+                        @Html.ValidationMessageFor(model => model.IsActive, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Logo):</label>
+                    <div class="col-sm-10">
+                        @*@Html.TextBoxFor(model => model.Logo, new { @id = "txtLogo", @class = "btn btn-success" })*@
+
+
+                        @*<input type="file" class="btn btn-success" id = "txtLogo">*@
+                        <br />
+                        @Html.ValidationMessageFor(model => model.Logo, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                    </div>
+                </div>
+
+
+
+
+                <div class="form-actions text-right">
+                    <input type="submit" value="حفظ" class="btn btn-primary">&nbsp;  
+                    <a href="/Admin/Company/Index" class="btn btn-primary">الغاء</a>
+                </div>
+
+            </div>
+        </div>
+    </form>
+    <!-- /right labels -->
+
+
+   <script>
+       $(function () {
+        
+           $("#txtLogo").QVUploader({ type: "png,jpeg,jpg",displayImage:"on" });
+       });
+   </script>
+
+
+
+
+

@@ -1,0 +1,83 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Company.Models.CompanyEmployeeVM>
+
+@if (Model.Any())
+{
+
+
+
+    var grid = new WebGrid(Model);
+    var gridColumns = new List<WebGridColumn>();
+
+    if (Model.All(i => i.IsDeleted == false))
+    {
+
+        gridColumns.Add(grid.Column("EmpName", "الأسم", @<text>@item.Name</text>, "FirstColumn"));
+        gridColumns.Add(grid.Column("JobTitle", "الوظيفة", @<text>@item.jobTitle</text>, "SecondColumn"));
+        gridColumns.Add(grid.Column("Gender", "النوع", @<text> @(item.Gender == true ? "ذكر" : "أنثى")</text>, "ThirdColumn"));
+        gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "FourthColumn"));
+        gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+        gridColumns.Add(grid.Column("Edit", "تفاصيل",@<text>
+           
+            @*<a style="color:white" href="/Company/Employee/AddEdit?empid=@item.Id"><i class="icon-edit-1"></i></a>*@
+            @Html.EncodedActionLink("", "Details", "Employee", "Company", new { empid = @item.Id }, new { Class = "detailsIcon", Style = "color:black;text-decoration:none;" })</text>, "FifthColumn"));
+        @*gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="iconbox has-tip" title="" data-original-title="حذف">
+           <i href="javascript:void(0);" class="icon-trash-1"  id="@item.Id"></i></span></text>));*@
+    }
+       
+    @grid.GetHtml(columns: gridColumns.ToArray(),
+                         tableStyle: "table table-bordered dataTable ",
+                    //  headerStyle: "table-alternat-header",
+                           footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+
+          
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            <tr class="table-alternat-header">
+                <td>المهمة
+                </td>
+
+            </tr>
+            <tr>
+                <td colspan="1" style="text-align: center">لا يوجد بيانات
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+<script>
+  
+    $(document).ready(function () {
+
+        $(".detailsIcon").addClass("fa fa-server");
+    });
+
+</script>
+<style>
+
+  
+
+    .pagerbar {
+        text-align: center;
+    }
+  th {
+        text-align: center;
+    }
+</style>
+
+
+
+

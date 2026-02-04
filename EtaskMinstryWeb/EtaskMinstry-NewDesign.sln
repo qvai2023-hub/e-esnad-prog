@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EtaskMinstry", "EtaskMinstry\EtaskMinstry.csproj", "{D068792F-2624-4EF1-9ED9-E459C2336E11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagementModel", "TaskManagementModel\TaskManagementModel.csproj", "{7DC83545-7AA8-478F-996B-337F8F5E23C2}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "Reports", "Reports\Reports.rptproj", "{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}"
+EndProject
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "ReportRDLC", "ReportRDLC\ReportRDLC.rptproj", "{D27471E1-BB99-4D35-AD18-F3DDEB50282F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DebugLocal|Any CPU = DebugLocal|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D068792F-2624-4EF1-9ED9-E459C2336E11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D068792F-2624-4EF1-9ED9-E459C2336E11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D068792F-2624-4EF1-9ED9-E459C2336E11}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{D068792F-2624-4EF1-9ED9-E459C2336E11}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{D068792F-2624-4EF1-9ED9-E459C2336E11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D068792F-2624-4EF1-9ED9-E459C2336E11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DC83545-7AA8-478F-996B-337F8F5E23C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DC83545-7AA8-478F-996B-337F8F5E23C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DC83545-7AA8-478F-996B-337F8F5E23C2}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DC83545-7AA8-478F-996B-337F8F5E23C2}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{7DC83545-7AA8-478F-996B-337F8F5E23C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DC83545-7AA8-478F-996B-337F8F5E23C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.Debug|Any CPU.ActiveCfg = Debug
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.Debug|Any CPU.Build.0 = Debug
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.Debug|Any CPU.Deploy.0 = Debug
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.Release|Any CPU.ActiveCfg = Release
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.Release|Any CPU.Build.0 = Release
+		{100C0D03-82FA-4CAD-BDCB-4FE7CA94CC21}.Release|Any CPU.Deploy.0 = Release
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.Debug|Any CPU.ActiveCfg = Debug
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.Debug|Any CPU.Build.0 = Debug
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.Debug|Any CPU.Deploy.0 = Debug
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.DebugLocal|Any CPU.ActiveCfg = DebugLocal
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.DebugLocal|Any CPU.Build.0 = DebugLocal
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.Release|Any CPU.ActiveCfg = Release
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.Release|Any CPU.Build.0 = Release
+		{D27471E1-BB99-4D35-AD18-F3DDEB50282F}.Release|Any CPU.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {939AF36B-115B-4B5F-BCAF-5CB87B9A42C1}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 5
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://qv-site.com:8080/tfs/webapplications
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = EtaskMinstry\\EtaskMinstry.csproj
+		SccProjectName1 = EtaskMinstry
+		SccLocalPath1 = EtaskMinstry
+		SccProjectUniqueName2 = TaskManagementModel\\TaskManagementModel.csproj
+		SccProjectName2 = TaskManagementModel
+		SccLocalPath2 = TaskManagementModel
+		SccProjectUniqueName3 = Reports\\Reports.rptproj
+		SccProjectName3 = Reports
+		SccLocalPath3 = Reports
+		SccProjectUniqueName4 = ReportRDLC\\ReportRDLC.rptproj
+		SccProjectName4 = ReportRDLC
+		SccLocalPath4 = ReportRDLC
+	EndGlobalSection
+EndGlobal

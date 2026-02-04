@@ -1,0 +1,176 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <title>E-snad | برنامج إدارة المهام</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <!--css-->
+    <link href="~/Content/Site/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/normalize.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/animate.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/style.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            direction:ltr;
+        }
+    </style>
+    <!-- Modernizr -->
+    <script src="~/Content/Site/js/modernizr.js"></script>
+    <script src="~/Scripts/jquery-1.7.1.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#generateExcel").hide();
+            //stop pass textbox from autoComplete
+         
+        });
+
+        function fnExcelReport() {
+            debugger
+            var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            tab_text = tab_text + '<head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+            tab_text = tab_text + '<x:Name>Test Sheet</x:Name>';
+            tab_text = tab_text + '<x:WorksheetOptions><x:Panes></x:Panes></x:WorksheetOptions></x:ExcelWorksheet>';
+            tab_text = tab_text + '</x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body>';
+            tab_text = tab_text + "<table border='1px'>";
+
+            //get table HTML code
+            tab_text = tab_text + $('#tableView').html();
+            tab_text = tab_text + '</table></body></html>';
+
+
+            var data_type = 'data:application/vnd.ms-excel';
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+            //For IE
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                if (window.navigator.msSaveBlob) {
+                    var blob = new Blob([tab_text], { type: "application/csv;charset=utf-8;" });
+                    navigator.msSaveBlob(blob, 'Test file.xls');
+                }
+            }
+                //for Chrome and Firefox 
+            else {
+                $('#generateExcel').attr('href', data_type + ', ' + encodeURIComponent(tab_text));
+                $('#generateExcel').attr('download', $("#allTables option:selected").text() + '.xls');
+            }
+        }
+    </script>
+</head>
+
+<body class="full-width page-condensed">
+
+    <!-- /navbar -->
+    <!-- Login wrapper -->
+    <div class="container">
+        <br /><br />
+        <div class="row">
+            <div class="form-group has-feedback">
+                <label>Connection String</label><br />
+                @Html.TextBox("txtconnectionstring", null, new { @class = "form-control" })
+
+
+
+            </div>
+
+            <div class="form-group has-feedback">
+                <label>Database</label><br />
+                @Html.DropDownList("allDatabases", ViewBag.allDatabases as SelectList, "Select Database...",
+                    new
+                    {
+                        @id = "allDatabases",
+                        Class = "form-select"
+                    })
+
+
+            </div>
+            <div class="form-group has-feedback">
+                <label>Tables</label><br />
+                @Html.DropDownList("allTables", ViewBag.AllTables as SelectList, "Select Table...",
+                    new
+                    {
+                        @id = "allTables",
+                        Class = "form-select"
+                    })
+
+            </div>
+
+            <div class="row form-actions">
+                <div class="col-xs-9">
+                </div>
+                <div class="col-xs-3">
+                    <a id="generateExcel" onclick="fnExcelReport()" class="btn btn-warning pull-left">Generate Excel Sheet</a>
+                </div>
+            </div>
+
+
+
+            <div class="form-group has-feedback">
+                <label>Tables</label><br />
+              <div id="tableView" >
+
+                   
+
+              </div>
+
+            </div>
+        </div>  
+    </div>
+    <!-- /login wrapper -->
+    <!-- Footer -->
+    <div class="footer clearfix">
+        <div class="pull-left">
+            <footer>
+            </footer>
+        </div>
+        <div class="pull-right icons-group">
+            <a href="#"><i class="icon-screen2"></i></a>
+            <a href="#"><i class="icon-balance"></i></a>
+            <a href="#"><i class="icon-cog3"></i></a>
+        </div>
+    </div>
+    <!-- /footer -->
+    <script src="~/Content/Site/js/bootstrap.js"></script>
+</body>
+</html>
+
+<script>
+    $(function () {
+        $("#allTables").change(function () {
+            debugger
+            if ($("#allTables").val() == "") {
+
+                $("#generateExcel").hide();
+            }
+            else {
+                $("#generateExcel").show();
+
+
+            }
+            $.ajax({
+                type: 'Post',
+               // url: '@Url.Action("Index")',
+                url: '/DataBase/getTableByID',
+                //dataType: 'html',
+                data: { "tableID": $("#allTables").val(), "tableName": $("#allTables option:selected").text() },
+                success: function (data) {
+                    debugger
+                    console.log(data)
+                    $("#tableView").html(data);
+                   
+                }
+            });
+
+
+        })
+
+
+    })
+
+
+
+</script>

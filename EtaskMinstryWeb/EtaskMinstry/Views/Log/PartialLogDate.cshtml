@@ -1,0 +1,332 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Models.TaskLogging.LogVM>
+@{
+    ViewBag.Title = "سجل العمليات";
+    string ItemDate = "";
+}
+
+
+<ul class="activity">
+    @if (Model.Count() > 0)
+            {
+                var currentuserID = MvcApplication.userData.userId.ToString();
+        <input type="hidden" value="@ViewBag.total" id="hiddenTotal" />
+        var model = Model.ToList();
+        for (int item = 0; item < model.Count; item++)
+        {
+
+            if (model[item].logdate.ToShortDateString() != ItemDate)
+            {
+                if (MvcApplication.IsGregDate)
+                {
+                    <div class="date" style=" margin-top:10px; margin-bottom:10px;">@Model.ToList()[item].logdate.ToGregArabicDateTime()</div>
+                }
+                else
+                {
+                    <div class="date" style=" margin-top:10px; margin-bottom:10px;">@Model.ToList()[item].logdate.ToHijriArabicDateTime()</div>
+                }
+                <span class="hiddenDate">@(ItemDate = Model.ToList()[item].logdate.ToShortDateString())</span>
+
+
+            }
+
+            if (model[item].isDeletedTask)
+            {
+                <br />
+
+                        <li>
+                            <i class="fa fa-bell text-danger"></i>
+                            <div>
+                                تم حذف المهمة <span><a href="javascript:void(0);">"@Model.ToList()[item].title"</a></span>
+
+                            </div>
+                        </li>
+
+                        <li>
+                            <span class="refused-icon"></span>
+                            تم حذف المهمة <span><a href="javascript:void(0);">"@Model.ToList()[item].title"</a></span>
+                        </li>
+                        <hr />
+            }
+
+
+            if (model[item].isNewTask)
+            {
+                <br />
+
+                        <li>
+                            <div style="font-weight:bold">
+                                <div>
+                                    لديك <a href="@(ViewBag.TaskUrl + Model.ToList()[item].taskID)">" @Model.ToList()[item].title "</a>
+                                    <span>كمهمة جديدة</span>
+                                </div>
+                            </div>
+
+                        </li>
+
+                foreach (var elm in model[item].jsonObj)
+                {
+                    if (!string.IsNullOrEmpty(elm.newVal))
+                    {
+                        if (elm.columnName == "EmpID")
+                        {
+                            <li><span><i class="fa fa-check text-success"></i></span><span>تم تحديد الموظف : " @elm.newVal " مسؤول عن المهمة</span></li>}
+
+                                else if (elm.columnName == "Description")
+                                {
+                            <li><span><i class="fa fa-check text-success"></i></span><span>تم تعيين وصف المهمة إلى : " @elm.newVal "</span></li>}
+
+                                else if (elm.columnName == "Summary")
+                                {
+                            <li><span><i class="fa fa-check text-success"></i></span><span>تم تعيين ملخص المهمة إلى : " @elm.newVal "</span></li>}
+
+                                else if (elm.columnName == "StartDate")
+                                {
+                            <li>
+                                <span class="accepted-icon"></span>
+                                @if (MvcApplication.IsGregDate)
+                                        {
+                                        <span>تم تحديد  تاريخ بداية المهمة من: " @elm.newVal.ToGregArabicDateOnly() "</span>
+                                        }
+                                        else
+                                        {
+                                        <span>تم تحديد  تاريخ بداية المهمة من: " @elm.newVal.ToHijriArabicDateOnly() "</span>
+                                        }
+                            </li>
+                        }
+
+                        else if (elm.columnName == "EndDate")
+                        {
+                            <li>
+                                <span class="accepted-icon"></span>
+                                @if (MvcApplication.IsGregDate)
+                                        {
+                                        <span>تم تحديد تاريخ نهاية المهمة إلى : "@elm.newVal.ToGregArabicDateOnly()"</span>
+                                        }
+                                        else
+                                        {
+                                        <span>تم تحديد  تاريخ بداية المهمة إلى: "@elm.newVal.ToHijriArabicDateOnly()"</span>
+                                        }
+
+                            </li>
+                        }
+
+                        else if (elm.columnName == "ExpectedTime")
+                        {
+                            if (elm.newVal != "0")
+                            {
+
+                                <li><span><i class="fa fa-check text-success"></i></span><span>تم تحديد الوقت المتوقع إلى : "@elm.newVal @Model.ToList()[item].timeUnit"</span></li>
+                            }
+                        }
+
+                        else if (elm.columnName == "PriorityID")
+                        {
+                            <li><span><i class="fa fa-check text-success"></i></span><span>تم تحديد الأهمية إلى : "@elm.newVal"</span></li>}
+
+                                else if (elm.columnName == "StatusID")
+                                {
+                            <li><span><i class="fa fa-check text-success"></i></span><span>تم تحديد حالة المهمة إلى : "@elm.newVal"</span></li>}
+                                else if (elm.columnName == "ProjectID")
+                                {
+                            <li><span><i class="fa fa-check text-success"></i></span><span>تم تحديد مشروع المهمة إلى : "@elm.newVal"</span></li>}
+
+
+                            }
+
+
+                        }
+                <hr />
+
+            }
+
+            else
+            {
+                var elm = model[item].jsonObj;
+                for (int i = 0; i < model[item].jsonObj.Count; i++)
+                {
+                    if (elm[i].columnName == "PriorityID" && model[item].PriorityIsShown)
+                    {
+                        <li>
+                            <span><i class="fa fa-check text-success"></i></span>
+                            تم تغيير أهمية المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <span class="spnVal">@elm[i].oldVal</span> إلى : <span class="spnVal">@elm[i].newVal</span>
+                        </li>
+                    }
+                    else if (elm[i].columnName == "Description")
+                    {
+                        if (elm[i].newVal != "")
+                        {
+                            <li>
+                                <span><i class="fa fa-check text-success"></i></span>
+                                تم تغيير وصف المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <span class="spnVal">@elm[i].oldVal</span> إلى :<span class="spnVal">@elm[i].newVal</span>
+                            </li>
+                        }
+
+                    }
+                    else if (elm[i].columnName == "ProjectID")
+                    {
+                        if (elm[i].newVal != "")
+                        {
+                            <li>
+                                <span><i class="fa fa-check text-success"></i></span>
+                                تم تغيير مشروع المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <span class="spnVal">@elm[i].oldVal</span> إلى :<span class="spnVal">@elm[i].newVal</span>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <span><i class="fa fa-check text-success"></i></span>
+                                تم تغيير مشروع المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <span class="spnVal">@elm[i].oldVal</span> إلى :<span class="spnVal">لا يوجد مشروع</span>
+                            </li>
+                        }
+
+                    }
+                    else if (elm[i].columnName == "StatusID" && model[item].StatusIsShown)
+                    {
+                        // فى حالة عدم ظهور اللوج تم تغيير الحالة من جارى العمل لجديدة للموظف الجديد .. يظهر تم الاسناد له فقط
+                        if (elm.Count == 2 && i == 1)
+                        {
+
+                            if (!((MvcApplication.userData.isCompany ? false : elm[i].newVal == "جديدة")))
+                            {
+                                <li>
+
+
+                                    <span><i class="fa fa-check text-success"></i></span>
+                                    تم تغيير حالة المهمة <span><a href="@(ViewBag.TaskUrl +  model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <span class="spnVal">@elm[i].oldVal</span> إلى :<span class="spnVal">@elm[i].newVal</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li>
+                                <span><i class="fa fa-check text-success"></i></span>
+                                تم تغيير حالة المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <span class="spnVal">@elm[i].oldVal</span> إلى :<span class="spnVal">@elm[i].newVal</span>
+                            </li>
+                        }
+
+                    }
+
+                    else if (elm[i].columnName == "AttachmentID" && model[item].ShowOther)
+                    {
+                        <li>
+                            <span class="com-icon"></span>
+                            قام <span>@Model.ToList()[item].userName</span> بإضافة ملف <span class="spnVal">@elm[i].newVal</span> إلى المهمة<span><a href="@(ViewBag.TaskUrl +  model[item].taskID)">@Model.ToList()[item].title</a></span>
+                        </li>
+                    }
+
+                    else if (elm[i].columnName == "TaskCommentID" && model[item].ShowOther)
+                    {
+                        //if the task is pending the comments don't appear for this employee
+                        if (item + 1 != model.Count())
+                        {
+                            if (model[item + 1].jsonObj[0].newVal != "معلقة")
+                            {
+
+                                <li>
+                                    <span class="com-icon"></span>
+                                    تم التعليق على المهمة   <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من قبل : <span class="spnVal">@Model.ToList()[item].userName</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li>
+                                <span class="com-icon"></span>
+                                تم التعليق على المهمة   <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من قبل : <span class="spnVal">@Model.ToList()[item].userName</span>
+                            </li>
+                        }
+
+                    }
+
+                    else if (elm[i].columnName == "FileName" && model[item].ShowOther)
+                    {
+                        <li>
+                            <span class="attach-icon"></span>
+                            تم أرفاق ملف <span>"@elm[i].newVal"</span> إلى المهمة  : <span class="spnVal"><a href="@(ViewBag.TaskUrl + model[item].taskID)">@Model.ToList()[item].title</a></span>
+                        </li>
+                    }
+
+                    else if (elm[i].columnName == "EndDate" && model[item].ShowOther)
+                    {
+                        <li>
+                            <span class="time-icon"></span>
+                            تم تغيير تاريخ النهاية للمهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <sapn class="spnVal">@elm[i].oldVal</sapn> إلى : <span>@elm[i].newVal</span>
+                        </li>
+                    }
+
+                    else if (elm[i].columnName == "StartDate" && model[item].ShowOther)
+                    {
+                        <li>
+                            <span class="time-icon"></span>
+                            تم تغيير تاريخ البداية للمهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">"@Model.ToList()[item].title"</a></span> من : <sapn class="spnVal">@elm[i].oldVal</sapn> إلى : <span>@elm[i].newVal</span>
+                        </li>
+                    }
+
+                    else if (elm[i].columnName == "ExpectedTime" && model[item].ShowOther)
+                    {
+                        if (elm[i].newVal != "")
+                        {
+                            <li>
+                                <span class="time-icon"></span>
+                                تم تغيير الوقت المتوقع للمهمة <span class="spnVal"><a href="@(ViewBag.TaskUrl + model[item].taskID)">@Model.ToList()[item].title</a></span> من :<span class="spnVal">@elm[i].oldVal</span> إلى : <span class="spnVal">@elm[i].newVal</span>
+                            </li>
+                        }
+                    }
+
+                    else if (elm[i].columnName == "IsArchived" && model[item].ShowOther)
+                    {
+                        <li>
+                            <span class="accepted-icon"></span>
+                            تم اضافة المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">@Model.ToList()[item].title</a></span> الى ارشيف المهام
+                        </li>
+                    }
+
+                    //appear if isCompany or current employee only
+                    else if (elm[i].columnName == "EmpID" && model[item].ShowOther && (MvcApplication.userData.isCompany ? true : elm[i].newVal == ServiceManger.GetEmplyeeName(MvcApplication.userData.userId)))
+                    {
+                        <li>
+                            <span class="accepted-icon"></span>
+                            تم اسناد المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">@Model.ToList()[item].title</a></span> إلى الموظف : "@elm[i].newVal"
+                        </li>
+                    }
+                    //عند ايقاف مهمة قبل قبول الموظف لها
+                    else if (elm[i].columnName == "EmpID" && model[item].ShowOther && (MvcApplication.userData.isCompany ? true : elm[i].oldVal == currentuserID))
+                    {
+                        <li>
+                            <span class="accepted-icon"></span>
+                            تم ايقاف المهمة <span><a href="@(ViewBag.TaskUrl + model[item].taskID)">@Model.ToList()[item].title</a></span>
+                        </li>
+                    }
+
+                }
+
+            }
+        }//for Model
+    }
+    else
+    {
+        <div class="empty">
+            لا يوجد بيانات
+        </div>
+    }
+</ul>
+
+
+<style>
+    .spnVal {
+        color: #AFB42B;
+        font-weight: bold;
+    }
+
+    .hiddenDate {
+        display: none;
+    }
+</style>
+<script>
+    $(function () {
+        if ('@(Model.Count())' < 10)
+            $("#lnkMore").hide();
+    });
+</script>

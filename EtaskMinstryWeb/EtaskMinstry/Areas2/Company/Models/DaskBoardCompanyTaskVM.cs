@@ -1,0 +1,352 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Linq;
+using System.Web;
+using EtaskMinstry;
+using EtaskMinstry.AppCode;
+using EtaskMinstry.App_Code;
+using EtaskMinstry.Models.EmployeeTask;
+using TaskManagementModel;
+
+namespace EtaskMinstry.Models.Company
+{
+    public class DaskBoardCompanyTaskVM
+    {
+        #region"Properties"
+
+       
+        [ScaffoldColumn(false)]
+        public int TaskID { get; set; }
+
+      
+        [LocalizedDisplayName("Task", NameResourceType = typeof (Resources.CompanyTask))]
+        public String Task { get; set; }
+
+        [LocalizedDisplayName("Status", NameResourceType = typeof (Resources.EmployeeTask))]
+        public String Status { get; set; }
+
+     
+        public int StatusID { get; set; }
+
+        public int PrioirtyID { get; set; }
+   
+        public String Prioirty { get; set; }
+
+        public String EmpName { get; set; }
+
+        public int? EmpID { get; set; }
+
+        public DateTime? FinishDate { get; set; }
+
+
+
+        public String ArabicStartDate { get; set; }
+
+     
+        public Boolean IsDelayed { get; set; }
+        public string delayTime { get; set; }
+        
+      
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
+        public String HijriStartDate { get; set; }
+
+        public String HijriEndDate { get; set; }
+        public String HijriFinishDate { get; set; }
+        public string HijriRejectedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? RejectedDate { get; set; }
+        public DashBoaedTaskType DBStatus { get; set; }
+        public DateTime? SuspendedDate { get; set; }
+        public string HijriSuspendedDate { get; set; }
+        public double delayPercentage { get; set; }
+        #endregion
+
+        #region"Manage"
+
+        private UnitOfWork _unitOfWork;
+
+        public DaskBoardCompanyTaskVM()
+        {
+            _unitOfWork =
+                new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+        }
+
+
+
+        public List<DaskBoardCompanyTaskVM> SelectCompanyTasks(DashBoaedTaskType taskType)
+        {
+          
+            UnitOfWork _unitOfWork =
+               new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+
+            //DateTime? PlusOneDay = DateTime.Now.AddDays(1);
+            //DateTime? MinusOneDay = DateTime.Now.AddDays(-1);
+            DateTime? DateNow = DateTime.Now.Date;
+
+            // Get Company Employees .
+            List<EmployeeProfile> CompanyEmployee = EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployee(MvcApplication.userData.userId);
+
+
+            List<DaskBoardCompanyTaskVM> objTasks = new List<DaskBoardCompanyTaskVM>();
+            switch( taskType)
+            {
+                    case DashBoaedTaskType.NeedAssign: // Need assign without Employees 
+                    objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                        && !t.EmpID.HasValue && !t.IsDeleted).Select(t => new DaskBoardCompanyTaskVM()
+                                                        {
+                                                            TaskID = t.TaskID,
+                                                            Task = t.Title,                                                         
+                                                            Status = t.Status.Name,
+                                                            StatusID = t.StatusID,
+                                                            PrioirtyID = t.PriorityID,
+                                                            Prioirty = t.Priority.Name,
+                                                            StartDate = t.StartDate.Value,
+                                                            EndDate = t.EndDate.Value,
+                                                            EmpID = t.EmpID,
+                                                           // Get Finish Date .
+                                                            FinishDate = t.DeliverDate                                                        
+                                                        }).OrderByDescending(i => i.TaskID).ToList();
+
+                    break;
+                    case DashBoaedTaskType.Delayed: // Delayed Tasks
+                     objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                       ).Select(t => new DaskBoardCompanyTaskVM()
+                                                        {
+                                                            TaskID = t.TaskID,
+                                                            Task = t.Title,
+                                                            Status = t.Status.Name,
+                                                            StatusID = t.StatusID,
+                                                            PrioirtyID = t.PriorityID,
+                                                            Prioirty = t.Priority.Name,
+                                                            StartDate = t.StartDate.Value,
+                                                            EndDate = t.EndDate.Value,
+                                                            EmpID = t.EmpID,
+                                                          // Get Finish Date .
+                                                            FinishDate = t.DeliverDate                                                          
+                                                        }).OrderByDescending(i => i.TaskID).ToList();
+
+                       objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
+                       objTasks = objTasks.Where(i => i.IsDelayed).ToList();
+
+                    break;
+
+                case DashBoaedTaskType.FinishToday: //EndDate =today
+                    var obj = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                         &&   t.StatusID == (int)TaskStatus.Inprogress);
+                             
+                         objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                             && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress)
+                             .Select(t => new DaskBoardCompanyTaskVM()
+                             {
+                                 TaskID = t.TaskID,
+                                 Task = t.Title,
+                                 Status = t.Status.Name,
+                                 StatusID = t.StatusID,
+                                 PrioirtyID = t.PriorityID,
+                                 Prioirty = t.Priority.Name,
+                                 StartDate = t.StartDate.Value,
+                                 EndDate = t.EndDate.Value,
+                                 EmpID = t.EmpID.Value,
+                                 // Get Finish Date .
+                                 FinishDate = t.DeliverDate                                                    
+                                                        }).OrderByDescending(i => i.TaskID).ToList();
+
+                     
+
+                    break;
+                    case DashBoaedTaskType.Susspended: // SuspendedStatud
+                         objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                             && t.StatusID ==(int) TaskStatus.Pending)
+                             .Select(t => new DaskBoardCompanyTaskVM()
+                             {
+                                 TaskID = t.TaskID,
+                                 Task = t.Title,
+                                 Status = t.Status.Name,
+                                 StatusID = t.StatusID,
+                                 PrioirtyID = t.PriorityID,
+                                 Prioirty = t.Priority.Name,
+                                 StartDate = t.StartDate.Value,
+                                 EndDate = t.EndDate.Value,
+                                 EmpID = t.EmpID.Value,
+                                // Get Finish Date 
+                                 SuspendedDate = t.TaskTLogs.Where(l => l.StatusID == (int)TaskStatus.Pending).OrderByDescending(s => s.TaskTLogID).FirstOrDefault() == null ?
+                                 DateTime.MinValue : t.TaskTLogs.Where(l => l.StatusID == (int)TaskStatus.Pending).OrderByDescending(s => s.TaskTLogID).FirstOrDefault().CreatedDate,
+                                 FinishDate = t.EndDate                                                    
+                                                        }).OrderByDescending(i => i.TaskID).ToList();
+
+                         objTasks.ForEach(
+                     i => i.HijriSuspendedDate = (i.SuspendedDate != DateTime.MinValue) ? MvcApplication.IsGregDate ? i.SuspendedDate.Value.ToGregArabicDate() : i.SuspendedDate.Value.ToHijriArabicDate() : String.Empty);
+
+                         objTasks.ForEach(
+                    i => i.HijriFinishDate = (i.FinishDate.HasValue) ? MvcApplication.IsGregDate ? i.FinishDate.Value.ToGregArabicDate() : i.FinishDate.Value.ToHijriArabicDate() : String.Empty);
+                     break;
+                    case DashBoaedTaskType.Empfinish:
+                            objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                             && t.StatusID ==(int) TaskStatus.Done)
+                             .Select(t => new DaskBoardCompanyTaskVM()
+                             {
+                                 TaskID = t.TaskID,
+                                 Task = t.Title,
+                                 Status = t.Status.Name,
+                                 StatusID = t.StatusID,
+                                 PrioirtyID = t.PriorityID,
+                                 Prioirty = t.Priority.Name,
+                                 StartDate = t.StartDate.Value,
+                                 EndDate = t.EndDate.Value,
+                                 EmpID = t.EmpID.Value,
+                                 // Get Finish Date .
+                                 FinishDate = t.DeliverDate                                                    
+                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                    
+                      objTasks.ForEach(
+                          i => i.HijriFinishDate = (i.FinishDate.HasValue) ? MvcApplication.IsGregDate ? i.FinishDate.Value.ToGregArabicDate() : i.FinishDate.Value.ToHijriArabicDate() : String.Empty);
+  
+                    break;
+                   
+                    case DashBoaedTaskType.EmpReject:
+                          objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                             && t.StatusID ==(int) TaskStatus.Rejected)
+                             .Select(t => new DaskBoardCompanyTaskVM()
+                             {
+                                 TaskID = t.TaskID,
+                                 Task = t.Title,
+                                 Status = t.Status.Name,
+                                 StatusID = t.StatusID,
+                                 PrioirtyID = t.PriorityID,
+                                 Prioirty = t.Priority.Name,
+                                 StartDate = t.StartDate.Value,
+                                 EndDate = t.EndDate.Value,
+                                 RejectedDate = t.TaskTLogs.Where(l=>l.StatusID== (int)TaskStatus.Rejected).OrderByDescending(s=>s.TaskTLogID).FirstOrDefault() == null ?
+                                 DateTime.MinValue : t.TaskTLogs.Where(l => l.StatusID == (int)TaskStatus.Rejected).OrderByDescending(s => s.TaskTLogID).FirstOrDefault().CreatedDate,
+                                 EmpID = t.EmpID.Value,
+                                // Get Finish Date .
+                                 FinishDate = t.DeliverDate                                                    
+                                                        }).OrderByDescending(i => i.TaskID).ToList();
+
+                          objTasks.ForEach(
+                   i => i.HijriRejectedDate = (i.RejectedDate != DateTime.MinValue) ? MvcApplication.IsGregDate ? i.RejectedDate.Value.ToGregArabicDate() : i.RejectedDate.Value.ToHijriArabicDate() : String.Empty);
+                          objTasks.ForEach(
+                                           i => i.HijriStartDate = (i.StartDate.HasValue) ? MvcApplication.IsGregDate ? i.StartDate.Value.ToGregArabicDate() : i.StartDate.Value.ToHijriArabicDate() : String.Empty);
+                    break;
+                    case DashBoaedTaskType.New: // Need assign without Employees 
+                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                        && t.StatusID==(int)TaskStatus.New).Select(t => new DaskBoardCompanyTaskVM()
+                        {
+                            TaskID = t.TaskID,
+                            Task = t.Title,
+                            Status = t.Status.Name,
+                            StatusID = t.StatusID,
+                            PrioirtyID = t.PriorityID,
+                            Prioirty = t.Priority.Name,
+                            StartDate = t.StartDate.Value,
+                            EndDate = t.EndDate.Value,
+                            EmpID = t.EmpID,
+                            // Get Finish Date .
+                            FinishDate = t.DeliverDate
+                        }).OrderByDescending(i => i.TaskID).ToList();
+                    objTasks.ForEach(
+                                           i => i.HijriStartDate = (i.StartDate.HasValue) ? MvcApplication.IsGregDate ? i.StartDate.Value.ToGregArabicDate() : i.StartDate.Value.ToHijriArabicDate() : String.Empty);
+
+                    objTasks.ForEach(
+                                           i => i.HijriEndDate = (i.EndDate.HasValue) ? MvcApplication.IsGregDate ? i.EndDate.Value.ToGregArabicDate() : i.EndDate.Value.ToHijriArabicDate() : String.Empty);
+               
+                
+                    break;
+
+
+            }
+            objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
+            objTasks.ForEach(i => i.delayTime = TaskDelayTime(i));
+            objTasks.ForEach(i => i.DBStatus = taskType);
+            objTasks.ForEach(i => i.EmpName = i.EmpID.HasValue ? EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName(i.EmpID.Value) : "_");
+            objTasks.ForEach(i => i.delayPercentage = DelayPercentage(i));
+                    return objTasks;
+        }
+
+        public static  int  GetCompanyTasksCount( DashBoaedTaskType taskType,DateTime dtDashBoardDate)
+        {
+
+            UnitOfWork _unitOfWork =
+               new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+            //DateTime? PlusOneDay = DateTime.Now.AddDays(1);
+            //   DateTime? MinusOneDay = DateTime.Now.AddDays(-1);
+            DateTime? DateNow = DateTime.Now.Date;
+           int iTasksCount  =0;
+            switch (taskType)
+            {
+                case DashBoaedTaskType.NeedAssign: // Need assign without Employees 
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                        && !t.EmpID.HasValue && !t.IsDeleted).Count();
+
+                    break;
+                case DashBoaedTaskType.Delayed: // Delayed Tasks
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                      ).ToList().Count(t => t.isDelayed);
+                    break;
+                case DashBoaedTaskType.FinishToday: //EndDate =today
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                        && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress).Count();                       
+                    break;
+                case DashBoaedTaskType.Susspended: // SuspendedStatud
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                        && t.StatusID == (int)TaskStatus.Pending).Count();                        
+                    break;
+                case DashBoaedTaskType.Empfinish:
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                     && t.StatusID == (int)TaskStatus.Done).Count();                   
+                   break;
+                case DashBoaedTaskType.EmpReject:
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                       && t.StatusID == (int)TaskStatus.Rejected).Count();
+                      
+                    break;
+                case DashBoaedTaskType.New:
+                    iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                       && t.StatusID ==(int)TaskStatus.New).Count();
+
+                    break;
+
+
+            }
+
+            return iTasksCount;
+        }
+
+
+        public static bool isTaskDelayed(DaskBoardCompanyTaskVM task)
+        {
+            UnitOfWork _unitOfWork =
+                 new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+    
+            return _unitOfWork.TaskRepository.GetByID(task.TaskID).isDelayed;
+
+        }
+
+
+        public static string TaskDelayTime(DaskBoardCompanyTaskVM task)
+        {
+            UnitOfWork _unitOfWork =
+                 new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+
+            return _unitOfWork.TaskRepository.GetByID(task.TaskID).delayTime.Replace('-',' ');
+
+        }
+
+        public static double DelayPercentage(DaskBoardCompanyTaskVM task)
+        {
+            UnitOfWork _unitOfWork =
+                 new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+
+            return _unitOfWork.TaskRepository.GetByID(task.TaskID).DelayPercentage;
+
+        }
+     
+        #endregion
+
+    }
+}

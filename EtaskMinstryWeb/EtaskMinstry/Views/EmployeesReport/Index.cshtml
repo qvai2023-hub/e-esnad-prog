@@ -1,0 +1,99 @@
+﻿@using EtaskMinstry;
+@{
+    ViewBag.Title = "تقرير الموظفين";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm("ViewReport", "EmployeesReport"))
+{
+    @Html.AntiForgeryToken()
+
+
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h6 class="panel-title panel-trigger">
+                <a data-toggle="collapse" href="#panel-search" class="collapsed">بحث</a>
+            </h6>
+        </div>
+        <div id="panel-search" class="panel-collapse collapse" style="height: 0px;">
+            <div class="panel-body">
+                <form>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+
+                            <label class="col-sm-4 control-label">مزود الخدمة  : </label>
+                            <div class="col-sm-8">
+                                <div class='input-group date'>
+                                    @Html.DropDownList("Provider", ViewBag.Providers as SelectList, "الكل",
+    new
+    {
+    @id = "Provider",
+    Class = "form-control",
+    required = "مطلوب"
+
+    })
+                                    @Html.ValidationMessage("Provider", "مطلوب",
+       new
+       {
+           Style = "Color:red;",
+       })
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-group col-sm-6">
+
+                            <label class="col-sm-4 control-label">إسم الشركة : </label>
+                            <div class="col-sm-8">
+                                <div class='input-group date'>
+                                    @Html.DropDownList("CompanyId", new SelectList(ViewBag.companies, "Value", "Text"), "الكل",
+
+    new
+    {
+        @id = "CompanyId",
+        Class = "form-control"
+
+    })
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-right">
+                        <input type="submit" class="btn btn-primary" value="تقرير" />
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+}
+<script>
+    $('#Provider').change(function () {
+        debugger;
+        $.ajax({
+            type: 'post',
+            url: '/EmployeePerformanceReport/GetCompanies?provider=' + $('#Provider').val(),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
+                $("#CompanyId").html("");
+                $("#CompanyId").append($('<option/>', {
+                    value: "",
+                    text: "الكل"
+                }));
+                debugger
+                $.each(data, function (index, item) {
+                    $("#CompanyId").append($('<option/>', {
+                        value: item.Value,
+                        text: item.Text
+                    }));
+                });
+            }
+        });
+    });
+    </script>

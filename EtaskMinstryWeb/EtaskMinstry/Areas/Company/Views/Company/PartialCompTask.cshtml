@@ -1,0 +1,492 @@
+﻿@using EtaskMinstry
+@model IEnumerable<EtaskMinstry.Models.Company.CompanyTaskVM>
+@if (Model.Any())
+{
+    <div id="list" class="table-responsive">
+        @{
+
+            var grid = new WebGrid(Model);
+            var gridColumns = new List<WebGridColumn>();
+
+            gridColumns.Add(grid.Column("Task", "المهمة",
+    @<text>  <strong>
+            @Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)
+            <input class="" type="hidden" value="@item.RowColor" />
+        </strong> </text>, "FirstColumn wordBreak"));
+
+gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("Project", "المشروع", @<text>@item.Project</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("Status", "الحالة", @<text>@item.Status<input type="hidden" value="@item.PrioirtyID" /></text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("StartDate", "تاريخ البداية", @<text>@item.HijriStartDate</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("EndDate", "تاريخ النهاية", @<text>@item.HijriEndDate</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("FinishedDate", "تاريخ التسليم", @<text>@if (@item.StatusID != (int)TaskStatus.New && @item.StatusID != (int)TaskStatus.Inprogress && @item.StatusID != (int)TaskStatus.Pending)
+        {@item.ArabicFinishDate}</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Company/Company/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+
+if (!Model.All(i => i.IsDelayed) && !Model.All(i => i.StatusID == (int)TaskStatus.Done) && !Model.All(i => i.IsArchived)
+&& !Model.All(i => i.StatusID == (int)TaskStatus.Rejected) && !Model.All(i => i.StatusID == (int)TaskStatus.NotAproved)
+&& !Model.All(i => i.StatusID == (int)TaskStatus.Approved))
+{
+gridColumns.Add(grid.Column("Progressbar", "المؤشرالزمنى"
+,@<text>@if (@item.StatusID == (int)TaskStatus.New || @item.StatusID == (int)TaskStatus.Inprogress)
+        {
+            <div class="progress progress-micro">
+                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width:@item.Progressbar%;">
+                    <span class="sr-only">@item.Progressbar% تم</span>
+                </div>
+            </div>
+
+        }</text>, "barCol"));
+}
+
+
+String classForDimedPrioirty = "Static-bar";
+
+gridColumns.Add(grid.Column("Prioirty", "الأهمية", @<text><div class='@((@item.StatusID == (int)TaskStatus.Done || @item.IsArchived || @item.StatusID == (int)TaskStatus.Approved) ? classForDimedPrioirty : "priortybar")' title="@item.Prioirty">
+            @*<div class="strenth-colors" style="width: @(item.PrioirtyID * 25)%;"></div>*@
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-group" data-toggle="buttons" taskid="@item.TaskID" prioirtyid='@item.PrioirtyID'>
+                        @if (@item.PrioirtyID == (int)TaskPriority.Noraml)
+                        {
+
+                            <label class="btn btn-xs btn-info active" id="@((int)TaskPriority.Noraml)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-success" id="@((int)TaskPriority.Average)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-warning" id="@((int)TaskPriority.High)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-danger" id="@((int)TaskPriority.VeryHigh)">
+                                <input type="radio" name="options">
+                            </label>
+
+                        }
+                        else if (@item.PrioirtyID == (int)TaskPriority.Average)
+                        {
+
+                            <label class="btn btn-xs btn-info " id="@((int)TaskPriority.Noraml)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-success active" id="@((int)TaskPriority.Average)">
+                                <input type="radio" name="options ">
+                            </label>
+                            <label class="btn btn-xs btn-warning" id="@((int)TaskPriority.High)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-danger" id="@((int)TaskPriority.VeryHigh)">
+                                <input type="radio" name="options">
+                            </label>
+                        }
+                        else if (@item.PrioirtyID == (int)TaskPriority.High)
+                        {
+                            <label class="btn btn-xs btn-info " id="@((int)TaskPriority.Noraml)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-success" id="@((int)TaskPriority.Average)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-warning active" id="@((int)TaskPriority.High)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-danger" id="@((int)TaskPriority.VeryHigh)">
+                                <input type="radio" name="options">
+                            </label>
+                        }
+                        else
+                        {
+                            <label class="btn btn-xs btn-info " id="@((int)TaskPriority.Noraml)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-success" id="@((int)TaskPriority.Average)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-warning" id="@((int)TaskPriority.High)">
+                                <input type="radio" name="options">
+                            </label>
+                            <label class="btn btn-xs btn-danger active" id="@((int)TaskPriority.VeryHigh)">
+                                <input type="radio" name="options">
+                            </label>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div></text>, "SecondColumn"));
+
+if (!Model.All(i => i.IsArchived))
+{
+if (!Model.All(i => i.StatusID == (int)TaskStatus.Rejected) && !Model.All(i => i.StatusID == (int)TaskStatus.Approved)
+&& !Model.All(i => i.StatusID == (int)TaskStatus.Delay) && !Model.All(i => i.StatusID == (int)TaskStatus.Done)
+&& !Model.All(i => i.StatusID == (int)TaskStatus.Inprogress) && !Model.All(i => i.StatusID == (int)TaskStatus.New)
+&& !Model.All(i => i.StatusID == (int)TaskStatus.NotAproved) && !Model.All(i => i.StatusID == (int)TaskStatus.Pending))
+{
+gridColumns.Add(grid.Column("Status", "الارشيف", @<text>@(item.IsArchived ? "نعم" : "لا")</text>, "ThirdColumn"));
+}
+}
+
+
+if (Model.All(i => i.IsDelayed))
+{
+gridColumns.Add(grid.Column("Delay", "مدة التأخير", @<text>@item.Delay</text>, "FirstColumn"));
+
+}
+
+// For Approved Tasks .
+
+if (Model.All(i => i.StatusID == (int)TaskStatus.Approved))
+{
+
+gridColumns.Add(grid.Column("Archive", "الأرشيف", @<text>@if (@item.StatusID == (int)TaskStatus.Approved && !@item.IsArchived)
+        {
+            <a class="Archive-icon" onclick='return Archive(@item.TaskID)' href="#" iTaskID="@item.TaskID" title="نقل إلى الأرشيف"> </a>@*
+            @(Ajax.ActionLink(" ", "Archive", new
+                                                                           {
+                                                                               iTaskID = @item.TaskID
+                                                                           }, new AjaxOptions()
+                                                                               {
+                                                                                   UpdateTargetId = "divTasks",
+                                                                                   HttpMethod = "post"
+                                                                               }, new
+                                                                                   {
+                                                                                       @class = "Archive-icon",
+                                                                                       title = "نقل إلى الأرشيف"
+                                                                                   }))*@
+        }
+        else
+        {
+            <a class="Dis-Archive-icon" title="تم نقلها للارشيف" />
+
+        }
+    </text>, "FourthColumn"));
+}
+
+// For New Tasks .
+
+if (Model.All(i => i.StatusID == (int)TaskStatus.New) && Model.Any(i => i.EmpName != ""))
+{
+gridColumns.Add(grid.Column("Delete", "حذف",
+    @<text><span class="iconbox has-tip" title="" data-original-title="حذف">
+            <i href="javascript:void(0);" class="fa fa-trash" currenclass="Task" id="@item.TaskID"></i>
+        </span></text>));
+}
+
+// For Done Tasks .
+if (Model.All(i => i.StatusID == (int)TaskStatus.Done))
+{
+gridColumns.Add(grid.Column("WorkedHours", "الوقت المستغرق", @<text>@item.SpendtimebyDay</text>, "ForthColumn"));
+
+
+
+gridColumns.Add(grid.Column("Accept", "اعتماد", @<text>
+        <a taskid="@item.TaskID" href="javascript:void(0);" class="accepted-icon" title="اعتماد المهمة">
+            <i class="fa fa-check"></i>
+        </a>
+    </text>, "FourthColumn"));
+
+gridColumns.Add(grid.Column("Refused", "رفض", @<text>
+        <a taskid="@item.TaskID" href="javascript:void(0);" class="refused-icon" title="رفض المهمة">
+            <i class="fa fa-close"></i>
+        </a>
+    </text>, "fivethColumn"));
+}
+gridColumns.Add(grid.Column("Edit", "تعديل", @<text><a class="fa fa-edit" id="a_@item.TaskID" href="/Company/Task/EDitTask?taskId=@item.TaskID"></a></text>, "EditCol"));
+gridColumns.Add(grid.Column("Delete", "حذف", @<text>
+        @*<span class='@(item.bCanDelete ? "" : "spandisabled")' has-tip' title='@(item.bCanDelete ? "حذف" : "لا يمكن الحذف")'>
+            <a id='@item.ID' class='@(item.bCanDelete ? "fa fa-trash" : "fa fa-trash disabled")'></a>
+            <i href="javascript:void(0);" currenclass="Project" id='@item.TaskID'></i>
+        </span>*@
+        <a class="fa fa-trash" id="@item.TaskID"></a>
+    </text>
+
+    , "DeleteCol"));
+
+        }
+        @grid.GetHtml(columns: gridColumns.ToArray(),
+                       tableStyle: "table table-bordered dataTable ",
+         headerStyle: "",
+          footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+             )
+    </div>
+}
+else
+{
+
+    @*--------------------Start Table when no data found----------------*@
+ 
+        
+        <div class="datatable-tasks">
+            <table class="table table-bordered dataTable  table-responsive">
+                <thead>
+                <th>المهمه</th>
+                <th>المشروع</th>
+                <th>تعديل </th>
+                <th>حذف </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" style="text-align: center">
+                            لا يوجد بيانات
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+  
+    @*--------------------End Table when no data found----------------*@
+
+}
+
+<style>
+        /*table thead tr th {
+            text-align: center !important;
+        }
+
+
+        #list .fav-grid {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .wordBreak {
+            word-break: break-all;
+        }
+
+        .FirstColumn {
+            width: 9%;
+            text-align: center;
+        }
+
+        .SecondColumn {
+            width: 40%;
+            text-align: center;
+        }*/
+
+
+        /*.ThirdColumn {
+            width: 16%;
+            text-align: center;
+        }*/
+
+
+        /*.table {
+            display: table;
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+            .table tr td {
+                border-bottom: solid 1px #CCC;
+                padding: 5px;
+            }
+
+        .tblHeader {
+            background-repeat: repeat-x;
+            font-weight: bold;
+            text-align: center;
+            height: 25px;
+            border: 0;
+        }
+
+            .tblHeader th {
+                padding-top: 4px;
+            }
+
+                .tblHeader th a {
+                    color: #FFF !important;
+                    padding-top: 4px;
+                }*/
+
+        /*.pagerbar {
+            text-align: center;
+        }
+
+        .barCol {
+            width: 10%;
+            text-align: right;
+        }*/
+    </style>
+
+<script>
+
+    $(function () {
+
+
+
+
+        var approvConfirmation;
+
+            $('.Archive-icon').click(function (e) {
+                e.preventDefault();
+            debugger;
+            var iTaskid = $(this).attr('iTaskID');
+
+            approvConfirmation = new Modal({
+                title: 'تأكيد', //title of the popup
+                message: 'هل انت متأكد من نقل المهمة الى الارشيف ؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("Archive")',
+                        dataType: 'json',
+                        data: { iTaskID: iTaskid },
+                        success: function (data) {
+                        },
+                        error: function (e) {
+                        },
+                        complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true") {
+                                Notify("success", "تم نقل المهمة بنجاح", 3000);
+                                $("#btnSearch").click();
+                            } else
+                                Notify("danger", "لم تتم العملية بنجاح", 3000);
+                        }
+                    });
+
+                    approvConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    approvConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            approvConfirmation.show();
+
+        });
+
+        $('.accepted-icon').click(function () {
+
+            var iTaskid = $(this).attr('taskid');
+
+            approvConfirmation = new Modal({
+                title: 'تأكيد', //title of the popup
+                message: 'هل انت متأكد من اعتماد المهمة ؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("AcceptTask")',
+                        dataType: 'json',
+                        data: { iTaskID: iTaskid },
+                        success: function (data) {
+                        },
+                        error: function (e) {
+                        },
+                        complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true") {
+                                Notify("success", "تم اعتماد المهمة بنجاح", 3000);
+                                $("#btnSearch").click();
+                            } else
+                                Notify("danger", "لم تتم العملية بنجاح", 3000);
+                        }
+                    });
+
+                    approvConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    approvConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            approvConfirmation.show();
+
+        });
+
+        $('.refused-icon').click(function () {
+
+            var iTaskid = $(this).attr('taskid');
+
+            approvConfirmation = new Modal({
+                title: 'تأكيد', //title of the popup
+                message: 'هل انت متأكد من رفض المهمة ؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("RefusedTask")',
+                        dataType: 'json',
+                        data: { iTaskID: iTaskid },
+                        success: function (data) {
+                        },
+                        error: function (e) {
+                        },
+                        complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true") {
+                                Notify("success", "تم رفض المهمة بنجاح", 3000);
+                                $("#btnSearch").click();
+                            } else
+                                Notify("danger", "لم تتم العملية بنجاح", 3000);
+                        }
+                    });
+                    approvConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    approvConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            approvConfirmation.show();
+        });
+
+
+    });
+
+
+    //to add color for each row according to priority.
+
+    function loadColor() {
+        var action = $('form').attr('action').split('?')[0];
+        $('priorityId').val(0);
+        $('form').attr('action', action);
+        $('#list table tr').each(function (index, elm) {
+            var elm = $(elm).find('input[type=hidden].priorityColor');
+            var elmVal = elm.val();
+            elm.closest('tr').css('background-color', elmVal);
+        });
+    }
+
+    loadColor();
+    applyClassesToWebGrid();
+
+      @*$("a[id^=delete_]").on('click', (function () {
+            debugger;
+            var id = $(this).attr('id').split('_')[1];
+          console.log(id);
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("DeleteTask")',
+                dataType: 'html',
+                data: {
+                    "ID": id
+                },
+                success: function (response) {
+                    debugger;
+                    window.location.href = "/Company/Company/index";
+                },
+                error: function (response) {
+                 
+                }
+            });
+      }));*@
+
+</script>

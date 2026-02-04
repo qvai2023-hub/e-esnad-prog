@@ -1,0 +1,392 @@
+﻿@using EtaskMinstry
+@using Resources
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //Layout = "~/Views/Shared/_LayoutOld.cshtml";
+}
+@{
+    ViewBag.Title = "سجل المهام";
+
+}
+</br>
+<!-- Breadcrumbs line -->
+@*<div class="breadcrumb-line">
+        <ul class="breadcrumb">
+            <li><a href="#">الرئيسية</a></li>
+            <li>
+                <i class="icon-task"></i>
+                @if (EtaskMinstry.MvcApplication.userData != null)
+                {
+                    if (EtaskMinstry.MvcApplication.userData.isCompany)
+                    {
+                        <a href="/Company/Company/Index">المهام</a>
+                    }
+                    else if (!EtaskMinstry.MvcApplication.userData.isCompany)
+                    {
+                        <a href="/Employee/Tasks/Index">المهام</a>
+                    }
+                }
+            </li>
+            <li class="active"> سجل المهام</li>
+        </ul>
+    </div>*@
+<!-- /breadcrumbs line -->
+<div class="row">
+    @if (ViewBag.task != 0)
+    {
+        if (EtaskMinstry.MvcApplication.userData.isCompany)
+        {
+            @Html.EncodedActionLink("رجوع للمهمة", "TaskDetails", "Company", "Company", new { id = ViewBag.task, IsRoute = true }, new { @class = "return" })
+
+        }
+
+        else
+        {
+            @Html.EncodedActionLink("رجوع للمهمة", "TaskDetails", "Tasks", "Employee", new { id = ViewBag.task, IsRoute = true }, new { @class = "return" })
+        }
+    }
+</div>
+</br>
+<div class="clear"></div>
+
+@* --------------------------------------Start Search Panel----------------------------------------- *@
+
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h6 class="panel-title panel-trigger">
+            <a data-toggle="collapse" href="#panel-search">بحث</a>
+        </h6>
+    </div>
+    <div id="panel-search" class="panel-collapse collapse">
+        <div class="panel-body">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "ErrorMessage" })
+                @*<form class="form-horizontal">*@
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label class="col-sm-4 control-label">المهمة: </label>
+                        <div class="col-sm-8">
+                            @Html.TextBox("taskName", (string)ViewBag.taskName, new { @class = "form-control" })
+                            <p class="errorMsgName" style="display: none; color: red;">
+                                يجب ان لا تزيد كلمة البحث عن 150 حرف وعدم استخدام رموز خاصة
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-sm-6">
+
+                        <label class="col-sm-4 control-label">الاهميه: </label>
+                        <div class="col-sm-8">
+                            @Html.DropDownList("priorityId", ViewBag.priority as SelectList, "--اختر الأهمية--", new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+
+                        <label class="col-sm-4 control-label">الحاله: </label>
+                        <div class="col-sm-8">
+                            @Html.DropDownList("statuseId", ViewBag.status as SelectList, "--اختر الحالة--", new { @class = "form-control" })
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-sm-6">
+
+                        <label class="col-sm-4 control-label">  من: </label>
+                        <div class="col-sm-8">
+                            <div class='input-group date'>
+                                @Html.TextBox("fromDate", null, new { @id = "startDate", @class = "form-control", @readonly = "readonly" })
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label class="col-sm-4 control-label">إلى: </label>
+                        <div class="col-sm-8">
+
+                            <div class='input-group date'>
+                                @Html.TextBox("toDate", null, new { @id = "endDate", @class = "form-control", @readonly = "readonly" })
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="errorMsg">يجب ان يكون تاريخ بداية البحث اقل من تاريخ النهاية</span>
+
+                    </div>
+                </div>
+                <div class="text-right">
+                    <input name="Submit0" id="btnSearch1" type="button" class="btn btn-primary" value="بحث">
+                    <input name="Submit1" id="ShowAllData" type="button" class="btn btn-primary" value="عرض الكل">
+
+                </div>
+                <div>
+                    <span style="display: inline-block; text-align: left;margin-right: 332px;">
+                        <img id="loadongbar" src="/Content/Main/images/loadingBar.gif" style="display: none" />
+                    </span>
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+@* --------------------------------------End Search Panel----------------------------------------- *@
+
+
+@* -------------------------------------Start Get Log Data From  PartialLogDate  ----------------- *@
+<div class="panel panel-default">
+
+    <div class="panel-body">
+        <div id="countDiv" class="panel-activity">
+            @Html.Action("GetLogData", "Log", new { taskName = ViewBag.taskName, statusId = ViewBag.statusId, priorityId = ViewBag.priorityId, taskId = ViewBag.task })
+        </div>
+    </div>
+</div>
+
+@* --------------------------------------End Get Log Datal From  PartialLogDate  ----------------- *@
+
+@* --------------------------------------Start Read More Ajax Call  ------------------------------ *@
+@Ajax.ActionLink("المزيد", "GetLogData", null,
+     new AjaxOptions()
+     {
+         UpdateTargetId = "countDiv",
+         InsertionMode = InsertionMode.InsertAfter,
+         OnComplete = "scroll",
+         LoadingElementId = "loadongbar",
+         LoadingElementDuration = 200
+     },
+     new
+     {
+         @id = "lnkMore",
+         @class = "more btn btn-primary load"
+     })
+@* --------------------------------------End Read More Ajax Call  ------------------------------ *@
+<script src="~/Scripts/ui/ui.datepicker.js"></script>
+<script src="~/Scripts/ui/i18n/jquery-ui-i18n.js"></script>
+<script src="~/Scripts/ui/i18n/ui.datepicker-ar.js"></script>
+<script>
+
+
+
+    debugger
+    var skip = 0;
+    var sDate = "";
+    var eDate = "";
+    var task = "";
+    var isSarch = false;
+    var total = "";
+    var statuseId = 0;
+    var priorityId = 0;
+    var taskId = "@ViewBag.task";
+    $(function () {
+
+
+        $(document).ready(function () {
+
+            $(".return").addClass("btn btn-success");
+        });
+        // get count of all avialble log data.
+        //then hide the more btn if the we retrieved all log data.
+        total = $('#hiddenTotal').val();
+        if (skip + 10 >= total || typeof total === 'undefined') {
+            $('.more').hide();
+        }
+        /////////////////////////////////////////////////////
+        debugger
+        //Check Date Greg OR Hijrii
+        var Isgreg = "@(MvcApplication.IsGregDate)";
+        if (Isgreg == "True") {
+            //datepicker Grerg
+            debugger
+            $("#startDate").datepicker($.datepicker.regional["ar"]);
+            $("#endDate").datepicker($.datepicker.regional["ar"]);
+
+            //
+        }
+        else {
+            //calendar Hijrii
+            $('#startDate,#endDate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+            });
+        }
+        //wrap textbox of start and end date by calender style
+        //$('#startDate,#endDate').calendarsPicker({
+        //    changeMonth: true, changeYear: true,
+        //    minDate: -24000,
+        //    maxDate: +0, showTrigger: '#calImg',
+        //    calendar: $.calendars.instance('ummalqura'),
+        //    dateFormat: 'dd/mm/yyyy',
+        //    Range: "-70:+0"
+        //});
+        /////////////////////////////////////////////////////////
+
+        //when click on more btn get next 10 log data.
+        $('#lnkMore').click(function () {
+            debugger;
+            skip += 10;
+            if (isSarch) {
+                skip = 0;
+                $("#countDiv").html("");
+            }
+            sDate = $("#startDate").val();
+            eDate = $("#endDate").val();
+            task = $("#taskName").val();
+            getByStatus = $("#getByStatuse").is(':checked');
+            statuseId = $("#statuseId").val();
+            priorityId = $("#priorityId").val();
+
+            $(this).attr("href", "/log/GetLogData?skip=" + skip + "&fromDate=" + sDate + "&toDate=" + eDate + "&taskName="
+                + task + "&statusId=" + statuseId + "&priorityId=" + priorityId + "&taskId=" + taskId);
+
+            if (skip + 10 >= total) {
+                $('.more').hide();
+            }
+        });
+        /////////////////////////////////////////////////////////
+
+        //when click on search btn
+        // check for date validation
+        //if true call the function of the more btn
+        // to get log data according to search criteria.
+        // to get log data according to search criteria.
+        $('#taskName').rules("add", { regex: "@ValidationResource.RevString150" });
+        $('#btnSearch1').click(function (e) {
+            debugger
+            //alert("searchButton");
+
+            e.preventDefault();
+            if (!$('#taskName').valid()) {
+                $(".errorMsgName").show();
+                isSarch = false;
+
+            }
+            else {
+                $(".errorMsgName").hide();
+            }
+            var sDate = $('#startDate').val();
+            var eDate = $('#endDate').val();
+            if (sDate !== "" && eDate !== "") {
+
+                if (HijridateCompare(sDate, eDate) == -1 || HijridateCompare(sDate, eDate) == 0) {
+                    $('.errorMsg').hide();
+                    isSarch = true;
+
+                } else {
+                    $('.errorMsg').show();
+                    isSarch = false;
+                }
+            }
+            else { isSarch = true; }
+            if (isSarch) { $('#lnkMore').click(); }
+        });
+        ///////////////////////////////////////////////////
+
+        //click on show all btn
+        //empty all search inputs
+        // then call  the function of the more btn.
+        $('#btnShowAll').click(function () {
+            //$('.errorMsg').hide();
+            //isSarch = true;
+            //sDate = $("#startDate").val("");
+            //eDate = $("#endDate").val("");
+            //task = $("#taskName").val("");
+            //$("#getByStatuse").attr('checked', false);
+            //$('#lnkMore').click();
+
+            debugger;
+            sDate = $("#startDate").val("");
+            eDate = $("#endDate").val("");
+            $("#priorityId").val("");
+            $("#statuseId").val("");
+            task = $("#taskName").val("");
+            $("#getByStatuse").attr('checked', false);
+            window.location.href = "/Log/index";
+        });
+        //////////////////////////////////////////////
+
+        //Show all data for specific task
+        $("#ShowAllData").click(function () {
+            //isSarch = true;
+            //sDate = $("#startDate").val("");
+            //eDate = $("#endDate").val("");
+            //$('#lnkMore').click();
+            window.location.href = "/Log/index";
+        });
+        //////////////////////////////////////
+
+        @* //apply search by task if redirect from specific task.
+        var task = "@ViewBag.taskName";
+        if (task != "") {
+            $("#taskName").val(task);
+            $('#btnSearch').click();
+        }*@
+        ///////////////////////////////////////////////////////
+        //hide search criteria if user com from specific task
+        var taskId = "@Request.QueryString["q"]";
+        var loginUser = "@MvcApplication.userData.isCompany";
+        debugger;
+        if (taskId != "" && loginUser == "False") {
+            $("#taskName").hide().parent().prev().hide();
+            $("#getByStatuse").hide().prev().hide();
+            $("#statuseId").hide().parent().prev().hide();
+            $("#priorityId").hide().parent().prev().hide();
+            $("#ShowAllData").show();
+        }
+    })
+
+    //add regular exp validation
+    $('#startDate').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,20}$" });
+    $('#endDate').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,20}$" });
+
+    //scrol to the log data to show
+    //all new logs.
+    function scroll() {
+        if (!isSarch) {
+            $("html, body").animate({ scrollTop: $(document).height() - $(window).height() - 100 }, 2500);
+        }
+        isSarch = false;
+    }
+    ////////////////////////////////////////////////////
+</script>
+
+<style>
+    .more {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        display: block;
+    }
+
+    .search select {
+        width: 150px;
+    }
+
+    .search span {
+        color: black;
+        font-size: 14px;
+    }
+
+    .errorMsg {
+        color: red !important;
+        text-align: center;
+        display: none;
+    }
+
+    .return {
+        float: left;
+    }
+</style>

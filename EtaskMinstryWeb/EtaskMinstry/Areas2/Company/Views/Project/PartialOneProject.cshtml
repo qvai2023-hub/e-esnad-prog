@@ -1,0 +1,110 @@
+﻿@model EtaskMinstry.Models.Project.ProjectAddEdit
+@using (Ajax.BeginForm("SaveProject", "Project", new AjaxOptions
+            {
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 30,
+                OnSuccess = "funSaved"
+            }, new
+                {
+                    @id = "FormSave"
+                }))
+{
+
+    @Html.HiddenFor(model => model.ID)
+
+
+
+    <div>
+       
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, new { Class = "label-control" })
+                @Html.TextBoxFor(model => model.Name, new
+       {
+           Class = "form-control"
+       })
+
+                @Html.ValidationMessageFor(model => model.Name, null, new { Style = "color:red;" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Description, new { Class = "label-control" })
+                @*<td style="vertical-align: top;">:</td>*@
+                @Html.TextAreaFor(model => model.Description, new
+           {
+               Class = "form-control"
+           })
+                <br />
+                @Html.ValidationMessageFor(model => model.Description, null, new { Style = "color:red;" })
+            </div>
+       
+     
+            <div class="text-right">
+
+
+                <input name="Submit0" id="btnSave" type="button" class="btn btn-primary" value="حفظ">
+                <input name="Submit0" id="btnCancel" type="button" class="btn btn-default" value="الغاء">
+
+            </div>
+       
+    </div>
+  
+
+}
+
+<script>
+    $(function () {
+        var toSubmit = true;
+        $('#btnSave').click(function (e) {
+            debugger;
+            if ($("#FormSave").valid()) {
+                $(this).attr("disabled", "disabled");
+                $("#FormSave").submit();
+            }
+        });
+        //handle enter press
+        $(window).keypress(function (e) {
+            debugger;
+            var charKey = e.charCode || e.keyCode;
+            if (charKey == 13) {
+                if (e.target.nodeName == "TEXTAREA") {
+                    debugger
+                    return true;
+                } else {
+                    //Modal.hide();
+                    if (toSubmit && $("#FormSave").valid()) {
+                        $('#btnSave').click();
+                        toSubmit = false;
+                    }
+                    return false;
+                }
+            }
+        });
+    
+      
+
+        $('#ClosePopUp,#btnCancel').click(function () {
+            Modal.hide();
+        });
+
+        $('form').removeData('validator');
+        $('form').removeData('unobtrusiveValidation');
+        $.validator.unobtrusive.parse('form');
+
+    });
+
+    function funSaved(data) {
+        Modal.hide();
+        var currentController = '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()';
+        currentController = currentController.substr(0, 1).toUpperCase() + currentController.substr(1);
+
+        if (data.toLowerCase() == "true") {
+            Notify("success", "تم الحفظ بنجاح", 3000);
+          //  $("#btnSearch").click();
+             Modal.showMessage({ title: 'حفظ', message: 'تم الحفظ بنجاح', type: 'alert', onAccept: function () { window.location.href = "/Company/" + currentController + "/"; }, time: false });
+        } else
+            Notify("danger", "لم يتم الحفظ ", 3000);
+        // Modal.showMessage('خطأ', "لم يتم الحفظ ");
+    }
+
+</script>

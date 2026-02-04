@@ -1,0 +1,215 @@
+﻿@model IEnumerable<EtaskMinstry.Models.Project.ProjectDisplay>
+
+@*<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />*@
+@*<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>*@
+@if (Model.Any())
+{
+    <div class="datatable-tasks">
+        @{
+
+    var grid = new WebGrid(Model);
+
+    @grid.GetHtml(
+            htmlAttributes: new
+            {
+                id = "gridProjects"
+            },
+           columns: new[]
+                {
+                    grid.Column("Name", "المشروع", @<text><a data-toggle="collapse" href="#collapse1"><i class="icon-plus-squared fa fa-plus fa-lg" projectid="@item.ID"></i></a><strong class="ShowTasks">@item.Name</strong> </text>, "ProjectColumn"),
+
+                    grid.Column("ShortDescription", "الوصف", @<text><center><span title="@item.FullDescription">@item.ShortDescription</span></center></text>),
+
+                    grid.Column("Edit", "تعديل", @<text><a class="fa fa-edit" id="a_@item.ID"></a>
+
+        @*@Html.EncodedActionLink("", "","","", null, new { Id="a_"+@item.ID,Class = "icon-pencil-squared", Style = "color:white;",href="javascript:;"})*@
+                    </text>, "EditCol"),
+
+                    grid.Column("Delete", "حذف",
+                    @<text>
+                        <span class='@(item.bCanDelete ? "" : "spandisabled")' has-tip' title='@(item.bCanDelete ? "حذف" : "لا يمكن الحذف")'>
+                            <a id='@item.ID' class='@(item.bCanDelete ? "fa fa-trash" : "fa fa-trash disabled")'></a>
+                            <i href="javascript:void(0);" currenclass="Project" id='@item.ID'></i>
+                        </span>
+                    </text>, "DeleteCol")
+
+                },
+                       tableStyle: "table table-bordered dataTable no-footer",
+                       headerStyle: "table-alternat-header",
+                       footerStyle: "table-pager",
+                       mode: WebGridPagerModes.All,
+                       numericLinksCount: 5,
+                       firstText: "الاول",
+                       previousText: "السابق",
+                       nextText: "التالى",
+                       lastText: "الاخير"
+                       )
+
+
+        }
+        @*<div class="row">
+                <div class="col-sm-6">
+                    @grid.PagerList(mode: WebGridPagerModes.All, paginationStyle: "pagination pagination-small pagination-right")
+                </div>
+            </div>*@
+
+    </div>
+
+}
+else
+{
+                @*--------------------Start Table when no data found----------------*@
+                <div class="panel panel-default">
+
+                    <div class="datatable-tasks">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>المشروع</th>
+                                    <th>تعديل</th>
+                                    <th>حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td colspan="1" style="text-align: center">
+                                        لا يوجد بيانات
+                                    </td>
+                                    <td></td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @*--------------------End Table when no data found----------------*@
+
+
+
+            }
+
+
+<script>
+    $(document).ready(function () {
+        //$('#gridProjects').dataTable();
+        setTimeout(function () {
+            $('.icon-minus-squared.fa-minus').live('click', function () {
+                console.log("minus");
+                debugger;
+                $('tr.ProjectTasks').remove();
+
+                $(this).removeClass('icon-minus-squared fa fa-minus').addClass('icon-plus-squared fa fa-plus');
+
+            });
+        }, 3000);
+        // To Hide Projects Tasks .
+       
+    });
+    var IsFirstEdit = true;
+    $(function () {
+        $("a").on('click', (function () {
+            console.log("a taaagggg");
+
+        }));
+        //To Edit project PopUp
+        $("a[id^=a_]").on('click', (function () {
+            debugger;
+            var iProjectId = $(this).attr('id').split('_')[1];
+            console.log(iProjectId);
+            $("#TaskAddEdit").html('');
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("GetProject")',
+                dataType: 'html',
+                data: {
+                    "iID": iProjectId
+                },
+                success: function (response) {
+                    if (IsFirstEdit || Editproject_modal === undefined) {
+                        $('.modal').hide();
+                        var Editproject_modal = new Modal({ title: 'تعديل', id: 'TaskAddEdit' });
+                        IsFirstEdit = false;
+
+                    }
+                    $("#TaskAddEdit").html(response);
+                    Editproject_modal.show();
+                },
+                error: function (response) {
+                    Editproject_modal.hide();
+                }
+            });
+        }));
+        // To Get Projects Tasks And Append It To Web Grid .
+        $('.icon-plus-squared').on("click", function () {
+            var priority = "";
+            debugger;
+            var Project = $(this).parent();
+
+            var ProjectID = $(this).attr('ProjectId');
+
+            $('tr.ProjectTasks').remove();
+
+            //$('.icon-minus-squared').removeClass('icon-minus-squared fa fa-minus').addClass('icon-plus-squared fa fa-plus');
+            $(this).removeClass('icon-plus-squared fa fa-plus').addClass('icon-minus-squared fa fa-minus');
+
+            // Get Project Tasks From DB .
+            $.ajax({
+                url: "/Project/GetTasksByProject",
+                data: {
+                    "ProjectID": ProjectID
+                },
+                type: "GET",
+                success: function (data) {
+                    console.log(data);
+                    $('tr.ProjectTasks').remove();
+
+                    var TaskTable = "<table class='table table-bordered'>" +
+                        "<thead><th>المهمه</th><th>الحاله</th><th>الأهمية</th></thead>";
+
+                    if (data.length > 0) {
+
+                        for (var i = 0; i < data.length; i++)
+                        {debugger
+                            if (data[i].PriorityID == 1)
+                                priority = "<span class='label label-info'>عادية</span>";
+                            else if (data[i].PriorityID == 2)
+                                priority = "<span class='label label-success'>متوسطة</span>";
+                            else if (data[i].PriorityID == 3)
+                                priority = "<span class='label label-warning'>مرتفعة</span>";
+                            else if (data[i].PriorityID == 4)
+                                priority = "<span class='label label-danger'>مرتفعة جدا</span>";
+
+                            TaskTable += "<tr>" +
+                                "<td>" +
+                                "<a href='/Company/Company/TaskDetails/" + data[i].TaskID + "'> " + data[i].Title + "</a>" +
+                                "</td>" +
+                                "<td>" + data[i].Status + "</td>" +
+                                "<td>" +
+                                priority
+                            +
+                                "</td></tr>";
+                        }
+
+                        //$(Project).closest('tr').after("<tr class='showMore'><td colspan='6'><div id='collapse1' class='panel-collapse collapse'>\
+                        //                                    <div class='table-responsive'>" + TaskTable + "</div></div></td></table>" + "</tr>");
+                        $(Project).closest('tr').after("<tr class='ProjectTasks showMore'><td colspan='6'><div id='collapse1' class='panel-collapse'><div class='table-responsive'>" + TaskTable + "</div></div></td></table>" + "</tr>");
+                        $("i.icon-trash-1[id='" + ProjectID + "']").parent().removeClass("iconbox").addClass("iconbox-gray");
+                    } else {
+                        $(Project).closest('tr').after("<tr class='ProjectTasks showMore'><td colspan='6'><div id='collapse1' class='panel-collapse'><div class='table-responsive'>" + TaskTable + "<tr><td colspan='3'>لايوجد مهام</td></tr></div></div></td></table>" + "</tr>");
+                        $("i.icon-trash-1[id='" + ProjectID + "']").parent().removeClass("iconbox-gray").addClass("iconbox");
+                    }
+
+
+                }
+            });
+        });
+
+
+
+
+    });
+
+    // applyClassesToWebGrid();
+</script>

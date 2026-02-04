@@ -1,0 +1,262 @@
+﻿@using System.Configuration
+@using EtaskMinstry
+@model List<EtaskMinstry.Models.Company.CompanyTaskVM>
+@{
+    ViewBag.Title = "إحصائيات المهام";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+
+@{
+    Decimal dTaskAll = Model.Count();
+
+    Decimal dTaskNew = 0, dTaskInprogress = 0, dTaskDone = 0, dTaskPending = 0, dTaskReOpen = 0, dTaskApproved = 0, dTaskNotAproved = 0, dTaskAccepted = 0, dTaskRejected = 0, dTaskDelay = 0;
+
+    if (dTaskAll > 0)
+    {
+        
+        dTaskNew = Model.Count(i => i.StatusID == (int)TaskStatus.New);
+        dTaskInprogress = Model.Count(i => i.StatusID == (int)TaskStatus.Inprogress);
+        dTaskDone = Model.Count(i => i.StatusID == (int)TaskStatus.Done);
+        dTaskPending = Model.Count(i => i.StatusID == (int)TaskStatus.Pending);
+        //dTaskReOpen = Model.Count(i => i.StatusID == (int)TaskStatus.ReOpen);
+        dTaskApproved = Model.Count(i => i.StatusID == (int)TaskStatus.Approved);
+        dTaskNotAproved = Model.Count(i => i.StatusID == (int)TaskStatus.NotAproved);
+        dTaskAccepted = Model.Count(i => i.StatusID == (int)TaskStatus.Accepted);
+        dTaskRejected = Model.Count(i => i.StatusID == (int)TaskStatus.Rejected);
+        dTaskDelay = Model.Count(i => i.IsDelayed == true);
+    }
+}
+
+<script>
+
+    $(function () {
+        
+        var chart;
+        $(document).ready(function () {
+            debugger
+            if ($('#ProjectID option:selected').text() != "الكل")
+                $('#chartTitle').text("اسم المشروع: " + $('#ProjectID option:selected').text())
+            else
+                $('#chartTitle').text("")
+
+            if ($('#EmpID option:selected').text() != "الكل")
+                $('#chartEmployee').text("اسم الموظف: " + $('#EmpID option:selected').text())
+            else
+                $('#chartEmployee').text("")
+
+            if ($('#ddlHijriDateYear option:selected').text() != "الكل")
+                $('#chartYear').text("السنة:"+ $('#ddlHijriDateYear option:selected').text())
+            else
+                $('#chartYear').text("")
+
+
+            chart = new Highcharts.Chart({
+                chart: {
+                    useHTML: true,
+                    renderTo: 'container',
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    events: {
+                        load: function (event) {
+
+                            $("tspan").each(function () {
+                                if ($(this)[0].textContent == "Highcharts.com")
+                                    $(this).remove();
+                            });
+                        }
+                    }
+                },
+                title: {
+                    text: "<div >" + $('#chartTitle').text() + " " + $('#chartEmployee').text() + " " + $('#chartYear').text() + "</div>", //$('#ProjectID option:selected').text(),
+                    style: {
+                        width: '100%',
+                        padding: '2px 2px 2px 5px'
+                    }
+                },
+                tooltip: {
+                    pointFormat: '',
+                    percentageDecimals: 2
+                },
+                plotOptions: {
+                    pie: {
+                        useHTML: true,
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            useHTML: true,
+                            style: {
+
+                                fontFamily: '"Droid Arabic Kufi", serif',
+                                width: '300px',
+                                padding: '30px'
+
+                            },
+                            enabled: true,
+                            distance: 20,
+                            x: -10,
+
+                            color: '#000000',
+                            connectorColor: '#000000',
+                            formatter: function () {
+                                this.point.percentage = Math.round(this.percentage * 100) / 100;
+                                return '<b> \u202B   ' + this.point.name + ': </b><b>%\u202B ' + this.point.percentage.toFixed(2) + ' </b>';
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'النسبة',
+                    data: [
+                        ['@ConfigurationManager.AppSettings[TaskStatus.New.ToString()]', @dTaskNew],
+                        ['@ConfigurationManager.AppSettings[TaskStatus.Inprogress.ToString()]', @dTaskInprogress],
+                        ['@ConfigurationManager.AppSettings[TaskStatus.Done.ToString()]', @dTaskDone],
+                        ['@ConfigurationManager.AppSettings[TaskStatus.Pending.ToString()]', @dTaskPending],
+                        @*['@ConfigurationManager.AppSettings[TaskStatus.ReOpen.ToString()]', @dTaskReOpen],*@
+                        ['@ConfigurationManager.AppSettings[TaskStatus.Approved.ToString()]', @dTaskApproved],
+                        ['@ConfigurationManager.AppSettings[TaskStatus.NotAproved.ToString()]', @dTaskNotAproved],
+                        ['@ConfigurationManager.AppSettings[TaskStatus.Accepted.ToString()]', @dTaskAccepted],
+                        ['@ConfigurationManager.AppSettings[TaskStatus.Rejected.ToString()]', @dTaskRejected],
+                         ['@ConfigurationManager.AppSettings[TaskStatus.Delay.ToString()]', @dTaskDelay]
+                    ],
+
+                }],
+                exporting: {
+                    buttons: {
+                        contextButton: {
+                            menuItems: [{
+                                text: 'تحميل صورة',
+                                onclick: function () {
+                                    this.exportChartLocal();
+                                }
+                            }
+                                //, {
+                                //text: 'PDF تحميل ',
+                                //onclick: function () {
+                                //    this.exportChartLocal({
+                                //        type: 'application/pdf'
+                                //    });
+                                //},
+                                //separator: false
+                                //}
+                            ]
+                           
+                        }
+                    }
+                }
+            });
+            Highcharts.setOptions({
+                lang: {
+                    contextButtonTitle: "استخراج الاحصائية "
+
+                }
+            });
+
+
+            $(".highcharts-button > title").text("استخراج الاحصائية")
+        });//ready
+
+
+        debugger;
+       // To Set Hidden Field To True To Get Tasks Without Projects .
+        $("#btnShowWithOutProject").click(function () {
+            $("#ProjectID").val(0);
+            $("#hdnWithoutProject").val(true);
+
+        });
+
+        // To Set Hidden Field To False To Get Tasks Without Projects .
+        $("#btnShowChart").click(function () {
+            $("#hdnWithoutProject").val(false);
+        });
+
+        $('.highcharts-button').find('title').html('استخراج الاحصائية ')
+
+       
+      
+
+    });
+
+</script>
+
+
+@using (Html.BeginForm("TaskChart", "Report"))
+{
+
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h6 class="panel-title panel-trigger">
+                <a data-toggle="collapse" href="#panel-search" class="collapsed">بحث</a>
+            </h6>
+        </div>
+        <div id="panel-search" class="panel-collapse collapse" style="height: 0px;">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="form-group">
+                        <label class="col-sm-2">إسم الموظف : </label>
+                        <div class="col-sm-3">
+                            @Html.DropDownList("EmpID", ViewBag.Employees as SelectList, "الكل",
+                       new
+                           {
+                               @id = "EmpID",
+                               Class = "form-control"
+                           })
+                        </div>
+
+
+
+                    </div>
+
+
+                </div>
+                <br />
+                <div class="row">
+                    
+                    <div class="form-group">
+                        <label class="col-sm-2">إسم المشروع : </label>
+                        <div class="col-sm-3">
+                            @Html.DropDownList("ProjectID", ViewBag.Project as SelectList, "الكل",
+                       new
+                           {
+                               @id = "ProjectID",
+                               Class = "form-control"
+                           })
+                        </div>
+
+
+
+                        <label class="col-sm-1">السنة: </label>
+                        <div class="col-sm-3">
+                            @Html.DropDownList("ddlHijriDateYear", ViewBag.Years as SelectList, "الكل",
+                                               new
+                                                   {
+                                                       @id = "ddlHijriDateYear",
+                                                       Class = "form-control",
+                                                   })
+
+
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        @*<input type="submit" class="btn btn-primary" value="تقرير" />*@
+                        <input id="hdnWithoutProject" type="hidden" value="false" name="hdnWithoutProject" />
+
+                        <input id="btnShowChart" type="submit" value="عرض" class="btn btn-primary" />
+
+                        <input id="btnShowWithOutProject" type="submit" value="عرض مهام بدون مشروعات" class="btn btn-primary" />
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <h6 id="chartTitle"></h6>
+    <h6 id="chartEmployee"></h6>
+      <h6 id="chartYear"></h6>
+      <div id="container" style="min-width: 400px; height: 400px;direction:ltr; margin: 0 auto;  margin-top: 40px;"></div>
+    
+    
+
+}

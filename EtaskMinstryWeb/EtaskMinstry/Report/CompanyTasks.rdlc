@@ -1,0 +1,1085 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Body>
+    <ReportItems>
+      <Textbox Name="textbox1">
+        <CanGrow>true</CanGrow>
+        <KeepTogether>true</KeepTogether>
+        <Paragraphs>
+          <Paragraph>
+            <TextRuns>
+              <TextRun>
+                <Value>تقرير المهام      </Value>
+                <Style>
+                  <FontStyle>Normal</FontStyle>
+                  <FontFamily>janna LT</FontFamily>
+                  <FontSize>14pt</FontSize>
+                  <FontWeight>Normal</FontWeight>
+                  <TextDecoration>None</TextDecoration>
+                  <Color>White</Color>
+                </Style>
+              </TextRun>
+            </TextRuns>
+            <Style>
+              <TextAlign>Center</TextAlign>
+            </Style>
+          </Paragraph>
+        </Paragraphs>
+        <rd:DefaultName>textbox1</rd:DefaultName>
+        <Height>0.36in</Height>
+        <Width>7.76042in</Width>
+        <Style>
+          <Border>
+            <Style>None</Style>
+          </Border>
+          <BackgroundColor>#2a4250</BackgroundColor>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+      </Textbox>
+      <Tablix Name="table1">
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn>
+              <Width>1in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>1in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>1in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>0.875in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>0.85417in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>1in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>1in</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>1.03125in</Width>
+            </TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.30333in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox2">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>الوقت المستغرق</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox2</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox3">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>تاريخ النهاية</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox3</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox4">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>تاريخ البداية</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox4</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox5">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>الأهمية</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox5</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox6">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>الحالة</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox6</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox7">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>المشروع </Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox7</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox8">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>المهمة</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox8</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox9">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>اسم الموظف</Value>
+                              <Style>
+                                <FontStyle>Normal</FontStyle>
+                                <FontFamily>janna LT</FontFamily>
+                                <FontWeight>Bold</FontWeight>
+                                <TextDecoration>None</TextDecoration>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox9</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#2a4250</BackgroundColor>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+            <TablixRow>
+              <Height>0.26208in</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="ActualTime">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!ActualTime.Value &amp; " " &amp; "ساعة"</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>ActualTime</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="EndDate">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!EndDate.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>EndDate</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="StartDate">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!StartDate.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>StartDate</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="priority">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!priority.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>priority</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="status">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!status.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>status</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="project">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!project.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>project</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                    <rd:Selected>true</rd:Selected>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="task">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!task.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>task</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>2pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="Employee_Name1">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!Employee_Name.Value</Value>
+                              <Style>
+                                <FontFamily>janna LT</FontFamily>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Center</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>Employee_Name1</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <PaddingLeft>2pt</PaddingLeft>
+                        <PaddingRight>5pt</PaddingRight>
+                        <PaddingTop>2pt</PaddingTop>
+                        <PaddingBottom>2pt</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy>
+          <TablixMembers>
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+          </TablixMembers>
+        </TablixColumnHierarchy>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember>
+              <KeepWithGroup>After</KeepWithGroup>
+              <RepeatOnNewPage>true</RepeatOnNewPage>
+              <KeepTogether>true</KeepTogether>
+            </TablixMember>
+            <TablixMember>
+              <Group Name="table1_Details_Group">
+                <DataElementName>Detail</DataElementName>
+              </Group>
+              <TablixMembers>
+                <TablixMember />
+              </TablixMembers>
+              <DataElementName>Detail_Collection</DataElementName>
+              <DataElementOutput>Output</DataElementOutput>
+              <KeepTogether>true</KeepTogether>
+            </TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+        <DataSetName>DS_CompanyTasks</DataSetName>
+        <Top>0.36in</Top>
+        <Height>0.56541in</Height>
+        <Width>7.76042in</Width>
+        <ZIndex>1</ZIndex>
+        <Style />
+      </Tablix>
+      <Textbox Name="Textbox11">
+        <CanGrow>true</CanGrow>
+        <KeepTogether>true</KeepTogether>
+        <Paragraphs>
+          <Paragraph>
+            <TextRuns>
+              <TextRun>
+                <Value> الإجمالي :</Value>
+                <Style>
+                  <FontFamily>janna LT</FontFamily>
+                  <Color>White</Color>
+                </Style>
+              </TextRun>
+              <TextRun>
+                <Value>=CountRows() &amp; " مهمة "</Value>
+                <Style>
+                  <FontFamily>janna LT</FontFamily>
+                  <Color>White</Color>
+                </Style>
+              </TextRun>
+              <TextRun>
+                <Value xml:space="preserve"> </Value>
+                <Style>
+                  <FontFamily>janna LT</FontFamily>
+                  <Color>White</Color>
+                </Style>
+              </TextRun>
+            </TextRuns>
+            <Style>
+              <TextAlign>Right</TextAlign>
+            </Style>
+          </Paragraph>
+        </Paragraphs>
+        <rd:DefaultName>Textbox10</rd:DefaultName>
+        <Top>1.06778in</Top>
+        <Left>6.25in</Left>
+        <Height>0.25in</Height>
+        <Width>1.51042in</Width>
+        <ZIndex>2</ZIndex>
+        <Style>
+          <Border>
+            <Style>None</Style>
+          </Border>
+          <BackgroundColor>#2a4250</BackgroundColor>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+      </Textbox>
+      <Textbox Name="Textbox10">
+        <CanGrow>true</CanGrow>
+        <KeepTogether>true</KeepTogether>
+        <Paragraphs>
+          <Paragraph>
+            <TextRuns>
+              <TextRun>
+                <Value>رجوع للتقرير السابق</Value>
+                <Style>
+                  <FontFamily>Janna LT</FontFamily>
+                  <Color>White</Color>
+                </Style>
+              </TextRun>
+            </TextRuns>
+            <Style>
+              <TextAlign>Center</TextAlign>
+            </Style>
+          </Paragraph>
+        </Paragraphs>
+        <rd:DefaultName>Textbox10</rd:DefaultName>
+        <ActionInfo>
+          <Actions>
+            <Action>
+              <Drillthrough>
+                <ReportName>TotalEmployeeTasks</ReportName>
+              </Drillthrough>
+            </Action>
+          </Actions>
+        </ActionInfo>
+        <Top>1.06598in</Top>
+        <Height>0.25in</Height>
+        <Width>1.30208in</Width>
+        <ZIndex>3</ZIndex>
+        <Visibility>
+          <Hidden>=(Parameters!EmpId.Value="")</Hidden>
+        </Visibility>
+        <Style>
+          <Border>
+            <Style>None</Style>
+          </Border>
+          <BackgroundColor>#2a4250</BackgroundColor>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+      </Textbox>
+    </ReportItems>
+    <Height>1.31778in</Height>
+    <Style />
+  </Body>
+  <Width>7.76042in</Width>
+  <Page>
+    <PageHeader>
+      <Height>1.01958in</Height>
+      <PrintOnFirstPage>true</PrintOnFirstPage>
+      <ReportItems>
+        <Rectangle Name="Rectangle1">
+          <ReportItems>
+            <Image Name="Image1">
+              <Source>Embedded</Source>
+              <Value>logo2</Value>
+              <Sizing>FitProportional</Sizing>
+              <Top>0.20014in</Top>
+              <Left>6.0625in</Left>
+              <Height>0.5in</Height>
+              <Width>1.4375in</Width>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+              </Style>
+            </Image>
+          </ReportItems>
+          <KeepTogether>true</KeepTogether>
+          <Height>0.99181in</Height>
+          <Width>7.76042in</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <BackgroundColor>#2a4250</BackgroundColor>
+          </Style>
+        </Rectangle>
+      </ReportItems>
+      <Style>
+        <Border>
+          <Style>None</Style>
+        </Border>
+      </Style>
+    </PageHeader>
+    <PageFooter>
+      <Height>1in</Height>
+      <PrintOnLastPage>true</PrintOnLastPage>
+      <ReportItems>
+        <Textbox Name="Textbox12">
+          <CanGrow>true</CanGrow>
+          <KeepTogether>true</KeepTogether>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>=Globals!PageNumber</Value>
+                  <Style>
+                    <FontFamily>janna LT</FontFamily>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style />
+            </Paragraph>
+          </Paragraphs>
+          <rd:DefaultName>Textbox12</rd:DefaultName>
+          <Top>0.625in</Top>
+          <Height>0.25in</Height>
+          <Width>1in</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <PaddingLeft>2pt</PaddingLeft>
+            <PaddingRight>2pt</PaddingRight>
+            <PaddingTop>2pt</PaddingTop>
+            <PaddingBottom>2pt</PaddingBottom>
+          </Style>
+        </Textbox>
+        <Textbox Name="Textbox8">
+          <CanGrow>true</CanGrow>
+          <KeepTogether>true</KeepTogether>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>=Parameters!ReportDateTime.Value</Value>
+                  <Style>
+                    <FontFamily>janna LT</FontFamily>
+                  </Style>
+                </TextRun>
+                <TextRun>
+                  <Value>  : تاريخ الطباعة</Value>
+                  <Style>
+                    <FontFamily>janna LT</FontFamily>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style>
+                <TextAlign>Center</TextAlign>
+              </Style>
+            </Paragraph>
+          </Paragraphs>
+          <rd:DefaultName>Textbox8</rd:DefaultName>
+          <Top>0.10591in</Top>
+          <Height>0.32638in</Height>
+          <Width>2.76042in</Width>
+          <ZIndex>1</ZIndex>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <PaddingLeft>2pt</PaddingLeft>
+            <PaddingRight>2pt</PaddingRight>
+            <PaddingTop>2pt</PaddingTop>
+            <PaddingBottom>2pt</PaddingBottom>
+          </Style>
+        </Textbox>
+      </ReportItems>
+      <Style>
+        <Border>
+          <Style>None</Style>
+        </Border>
+      </Style>
+    </PageFooter>
+    <PageWidth>10in</PageWidth>
+    <LeftMargin>0.3in</LeftMargin>
+    <RightMargin>0.3in</RightMargin>
+    <TopMargin>0.5in</TopMargin>
+    <Style />
+  </Page>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DS_CompanyTasks">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=41.39.30.47;Initial Catalog=EtaskMinistry_NewDesign</ConnectString>
+      </ConnectionProperties>
+      <rd:SecurityType>DataBase</rd:SecurityType>
+      <rd:DataSourceID>5f56111f-4a06-4042-b064-46c6b99dd5e0</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="DS_CompanyTasks">
+      <Query>
+        <DataSourceName>DS_CompanyTasks</DataSourceName>
+        <CommandText>sp_CompanyTasks 0,'','',0,0,'','',null,null,'',null,null</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="TaskID">
+          <DataField>TaskID</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="task">
+          <DataField>task</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="project">
+          <DataField>project</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Employee_ID">
+          <DataField>Employee_ID</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="Employee_Name">
+          <DataField>Employee_Name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="priority">
+          <DataField>priority</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="status">
+          <DataField>status</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="StartDate">
+          <DataField>StartDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="EndDate">
+          <DataField>EndDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ActualTime">
+          <DataField>ActualTime</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="timeUnit">
+          <DataField>timeUnit</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportParameters>
+    <ReportParameter Name="ReportDateTime">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>ReportDateTime</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CompanyId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Company Id</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ProjectIds">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Project Ids</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EmpId">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Emp Id</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="notInEmpList">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>not In Emp List</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="notInProjectList">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>not In Project List</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="StatusId">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Status Id</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="PriorityId">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Priority Id</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="FromDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>From Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ToDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>To Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="taskName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>task Name</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="FromEndDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>From End Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ToEndDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>To End Date</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <EmbeddedImages>
+    <EmbeddedImage Name="logo2">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>iVBORw0KGgoAAAANSUhEUgAAAKgAAAA+CAYAAAC/dFDqAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyFpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo0NTYwNTJEQkExNjAxMUU0ODE3Mjk3RUFFNEE2MkM1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo0NTYwNTJEQ0ExNjAxMUU0ODE3Mjk3RUFFNEE2MkM1NyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjQ1NjA1MkQ5QTE2MDExRTQ4MTcyOTdFQUU0QTYy
+QzU3IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjQ1NjA1MkRBQTE2MDExRTQ4MTcyOTdFQUU0QTYyQzU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+ByiZXwAAFbJJREFUeNrsXQmYVMW1Pj3DzDALw77DsC/yQFBAIiBgQKMgLiRuiWhCTHBN1KgREwzBNSJE5aGBoMH4FHwKkUVRwahRBpABFFA22ZEZ1mEbZu/OOV3/pavv3O6+3dO3p5mvz/edr+9+61b9dbY6Ve3yeDyUoFpKFaeIFrUmKuLftHPyC0YnJVoxQXFIDZi/Ys5MADRB8UYXMOczFzDPSwA0QfFEQ5jXMddlvkIOJACaoHihu5k/w/bVxsE6iXpJUBzQ/zNfj+05zIsTAE1QPFB95mXM/bFfyXynfkFCxSeopuiHzFs0cO5l7sdckgBoguLB3vyYuQX25zL3IBVaogRAE1STNJP5f7X9J5l/ylxkdXHCBk1QrKge8wLmEZq9+SvmfwS7KQHQBMWCBjO/wZyD/e+Yr2H+NtSNCRWfIKdJvPLPNXBKCKmXHXAmAFrbyeMmcpcSuWqsBBOZX9L2p5EKwpfYfUBCxddmSkoRlDJIq5wZyNwGduAHgRyUalB9eOZXGl2FeRypIHxY5Eqk28UtiRrsBtXYBI0uAoVFIh0nlVCxnXkD86GAT1l3N9GXLMQaAyaK1pCKORLesS2K5e7NvAQdQEhindfhN2ySD36NuSlZ9bPokgv8EPM3Edx/F9RDRSxkD6TKrczFIa69l3kUtr9n/mU13iuSbQwkTw+b94i6fI95Ibxkf2nY4zGiTQzQMt5OOXv0iHZFNOvzKuZ/aZo5F157ccSg8cRehI7BR4RLq5gHxLisjZgLg5zPZj5hOvYb5ulhvkcyd/4Ab9eKyjW7LZk5I8B1hyFwnvIr99rbWWa+
+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</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
+  <Language>en-US</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>62f746ff-d25d-40bf-9e56-dd56c59b212b</rd:ReportID>
+</Report>

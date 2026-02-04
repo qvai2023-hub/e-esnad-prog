@@ -1,0 +1,58 @@
+﻿@{
+    ViewBag.Title = "التقارير";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+
+<style>
+    .ReportDiv {
+        width: 33%;
+        height: 200px;
+        float: right;
+        text-align: center;
+    }
+</style>
+<div class="tab-container" style="padding-top: 45px;">
+    <div class="tab-btns-warp">
+        <a class="active-tab" href="javascript:void(0);">التقارير</a>
+    </div>
+     <div class="ReportDiv">
+        <a href="/Employee/report/ProjectReport">
+            <span class="xtra-icon-holder">
+                    <i class="icon-task"></i>
+                </span>
+            <br />
+            تقرير مهام كل مشروع
+        </a>
+    </div>
+    <div class="ReportDiv">
+        <a href="/Employee/report/TaskReportPreperation">
+            <span class="xtra-icon-holder">
+                    <i class="icon-chart-area"></i>
+                </span>
+            <br />
+             تقرير المهام 
+        </a>
+    </div>
+    @*<div class="ReportDiv">
+        <a href="#">
+            <img alt="" src="/Content/Main/images/Word-icon.png" />
+            <br />
+            تقرير مهام كل مشروع
+        </a>
+    </div>
+    <div class="ReportDiv">
+        <a href="#">
+            <img alt="" src="/Content/Main/images/Word-icon.png" />
+            <br />
+            تقرير مهام كل مشروع
+        </a>
+    </div>
+    <div class="ReportDiv">
+        <a href="#">
+            <img alt="" src="/Content/Main/images/Word-icon.png" />
+            <br />
+            تقرير مهام كل مشروع
+        </a>
+    </div>*@
+    <div class="clear"></div>
+</div>

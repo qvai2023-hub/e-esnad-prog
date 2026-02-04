@@ -1,0 +1,169 @@
+﻿@model EtaskMinstry.Models.Login.LoginVM
+@{
+    Layout = null;
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html>
+<head>
+    <title>@System.Configuration.ConfigurationManager.AppSettings["ApplicationName"] | برنامج إدارة المهام</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+    <!--css-->
+    <link href="~/Content/Site/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/bootstrap-arabic.min.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/normalize.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/animate.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/style.css" rel="stylesheet" />
+    <!-- Modernizr -->
+  
+    <script src="~/Content/Site/js/modernizr.js"></script>
+</head>
+
+<body class="full-width page-condensed">
+
+
+    <!-- Navbar -->
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="navbar-header">
+
+            <a class="navbar-brand" href="#"><img src="~/Content/Site/img/logo.png" alt="logo" /></a>
+        </div>
+
+
+    </div>
+    <!-- /navbar -->
+    <!-- Login wrapper -->
+    <div class="container">
+        <div class="row login-sec">
+            <div class="col-md-6">
+                <div class="info-sec">
+                    <h6>
+                        مرحباً بك في برنامج مراقبة أداء العاملين عن بُعد
+                    </h6>
+                    <p>
+                        البرنامج مصمم لتسهيل ومتابعة أداء العاملين عن بُعد بالشركات
+                        <br />
+                        يتضمن الأدوات التالية:
+                        <br />
+                        وقت الدخول: لتتبع وقت دخول الموظفين إلى النظام.
+                        <br />
+                        وقت الخروج: لتتبع وقت خروج الموظفين من النظام.
+                        <br />
+                        تقرير عدد المهام الموكلة: لرصد عدد المهام التي يتم تكليفها لكل موظف.
+                        <br />
+                        تقارير عدد المهام المنجزة: لمتابعة عدد المهام التي تم إنجازها من قبل الموظفين.
+                        <br />
+                        يعتمد المشروع على رؤية تدريب العاملين عن بعد على نظم الذكاء الاصطناعي بالشراكة مع منصة "هنا AI"،
+                        <br />
+                        مما يعزز من مهاراتهم ويجعلهم أكثر كفاءة وفعالية في أداء مهامهم اليومية عن بُعد.
+                    </p>
+
+                </div>
+            </div>
+            <div class="col-md-6">
+
+                <div class="login-wrapper">
+
+
+                    @using (Html.BeginForm())
+            {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "ErrorMessage" })
+
+
+                        <div class="popup-header">
+                            @*<a href="#" class="pull-left"><i class="fa fa-user-plus"></i></a>*@
+                            <span class="text-semibold">تسجيل الدخول</span>
+                            @*<div class="btn-group pull-right">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cogs"></i></a>
+                                <ul class="dropdown-menu icons-right dropdown-menu-right">
+                                    <li><a href="#"><i class="fa fa-users"></i> مستخدم آخر</a></li>
+                                    <li><a href="#"><i class="fa fa-info"></i> نسيت كلمة المرور؟</a></li>
+                                    <li><a href="#"><i class="fa fa-support"></i> مساعدة</a></li>
+                                    <li><a href="#"><i class="fa fa-wrench"></i> إعدادات</a></li>
+                                </ul>
+                            </div>*@
+                        </div>
+                        <div class="well">
+                            <div class="form-group has-feedback">
+                                <label>اسم المستخدم</label><br />
+                                @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", placeholder = "الاســـــم", id = "username", })
+                                @Html.ValidationMessageFor(model => model.UserName, null, new { @style = "color: red;" })
+                                <i class="fa fa-users form-control-feedback"></i>
+                            </div>
+
+                            <div class="form-group has-feedback">
+                                <label>كلمة المرور</label><br />
+                                @Html.PasswordFor(model => model.Password, new { @class = "form-control", placeholder = "كلمة المرور", id = "password1", Autocomplete = "off" })
+                                @*<br />*@
+                                @Html.ValidationMessageFor(model => model.Password, null, new { @style = "color: red;" })
+                                @* this additinal hidden input is for preventing password autoComplete*@
+                                <input type="password" name="password" value="" style="display: none" />
+                                <i class="fa fa-lock form-control-feedback"></i>
+                            </div>
+                            @if (Html.ValidationMessage("LoginField") != null)
+                {
+                                @Html.Raw(Html.ValidationMessage("LoginField", new { @style = "color: red;" }).ToString());
+                }
+                            <div class="row form-actions">
+                                <div class="col-xs-7">
+                                    <div class="checkbox checkbox-success">
+                                        <label>
+                                            @*@Html.CheckBoxFor(model => model.RememberMe)
+                                            تذكرني*@
+
+                                            <span class="pull-left">
+                                                <a href="/Security/ForgetPasswoed">نسيت كلمة المرور ؟</a>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-xs-5 buttonHolder">
+                                    <input class="btn btn-warning pull-right" id="btnLogin" type="submit" value="دخول" />
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /login wrapper -->
+    <!-- Footer -->
+    <div class="footer clearfix">
+        <div class="pull-left">
+            جميع الحقوق محفوظة ©
+            برنامج إدارة المهام
+            @System.Configuration.ConfigurationManager.AppSettings["devYear"]
+            -
+            تم التطوير بواسطة <a target="_blank" href="https://qvsite.com/">Q-Vision</a>
+        </div>
+       @* <div class="pull-left">
+	   &copy; 2017 اسناد
+	   مزود الخدمة المعتمد للعمل عن بعد - تم تطويره بواسطة 
+	   <a href="http://qvsite.com" target="_blank">كيوفيجن</a></div>*@
+        <div class="pull-right icons-group">
+            <a href="#"><i class="icon-screen2"></i></a>
+            <a href="#"><i class="icon-balance"></i></a>
+            <a href="#"><i class="icon-cog3"></i></a>
+        </div>
+    </div>
+    <!-- /footer -->
+
+
+
+    <script src="~/Scripts/jquery-1.11.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+</body>
+</html>

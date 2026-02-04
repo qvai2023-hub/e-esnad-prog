@@ -1,0 +1,77 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Admin.Models.CompanyVM>
+@if (Model.Any())
+{
+    <div id="list">
+
+        @{
+               
+    var grid = new WebGrid(Model);
+    var gridColumns = new List<WebGridColumn>();
+
+    if (Model.All(i => i.IsDeleted == false))
+        
+    {
+        gridColumns.Add(grid.Column("Name", "الأسم", @<text>@Html.EncodedActionLink((string)item.Name, "Details", "Company", "Admin", new { id = item.Id }, null)</text>, "FirstColumn"));
+        gridColumns.Add(grid.Column("Phone", "الهاتف", @<text>@item.Phone</text>, "SecondColumn"));
+        gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "ThirdColumn"));
+        gridColumns.Add(grid.Column("CommercialRegister", "السجل التجاري", @<text>@item.CommercialRegister</text>, "FourthColumn"));
+        gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+       
+                gridColumns.Add(grid.Column("Edit", "تعديل",@<text>
+                <a href="/Admin/Company/AddEdit/@item.Id"><span class="fa fa-edit" title="" data-original-title="تعديل"></span></a>
+                </text>));
+
+            @*gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="fa fa-trash deleteBtn" id="@item.Id" title="" data-original-title="حذف">
+                <i href="javascript:void(0);" class="" id="@item.Id"></i>*@
+gridColumns.Add(grid.Column("Delete", "حذف",@<text>
+                <span class="fa fa-trash has-tip deleteEmp" title="" id="@item.Id" data-original-title="حذف">
+                    <i href="javascript:void(0);" class="icon-trash-1"></i>
+                </span>
+
+
+
+                @*gridColumns.Add(grid.Column("Delete", "حذف",@<text>
+                    <span class="iconbox has-tip deleteEmp" title="" data-original-title="حذف">
+                        <i href="javascript:void(0);" class="icon-trash-1" id="@item.Id"></i>
+                        </span>*@
+</text>));
+    }
+        }
+        @grid.GetHtml(columns: gridColumns.ToArray(),
+                        tableStyle: "table table-bordered dataTable  table-responsive",
+                headerStyle: "",
+                      footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+
+    </div>
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            <tr class="table-alternat-header">
+                <td>المهمة
+                </td>
+
+            </tr>
+            <tr>
+                <td colspan="1" style="text-align: center">لا يوجد بيانات
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+<script>
+
+    applyClassesToWebGrid();
+
+</script>

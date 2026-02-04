@@ -1,0 +1,135 @@
+﻿@model  EtaskMinstry.Models.PushNotificationVM
+@using EtaskMinstry;
+
+
+          
+                <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-history"></i>
+                    <span id="badge-notify-list" class="label label-default" @(Model.NewCount == 0 ? "style=display:none;" : "")>@Model.GetAllNotSeen().Count()</span>
+
+    </a>
+    <div class="popup dropdown-menu dropdown-menu-left">
+    <div class="popup-header">
+        @*<a href="#" class="pull-left"><i class="fa fa-spinner"></i></a>*@
+        <span>الإشعارات</span>
+        @if (Model.Data.Count > 0)
+        {
+            <a href="/Notification/Index" class="pull-right" title=" مشاهدة كل الإشعارات"><i class="fa fa-align-justify"></i></a>
+            @*<li><a role="menuitem" href="/Notification/Index" class="center-read-more"> مشاهدة كل الإشعارات  </a></li>*@
+        }
+
+    </div>
+    <ul class="activity" id="notify-list" role="menu" aria-labelledby="dropdownMenu2">
+        @* class=" msg-list dropdown-menu " *@
+        @* <li><a role="menuitem" href="#"><i class="icon icon-duration"></i>مهمة جديدة</a></li>*@
+        @if (Model.Data.Count > 0)
+        {
+            foreach (var item in Model.Data)
+            {
+                if (string.IsNullOrEmpty(item.Link))
+                {
+                    <li href_="@item.Link" data-id="@item.ID" @(!item.IsSeen ? "class=hovered" : "")>
+                        <i class="fa fa-check text-success"></i>
+                        <div>
+                            <a role="menuitem">@Html.Raw(item.Value)</a>
+                            <span>@(MvcApplication.IsGregDate ? item.SendDate.ToGregArabicDateTime() : item.SendDate.ToHijriArabicDateTime())</span>
+                        </div>
+                    </li>
+
+                }
+                else
+                {
+                    <li href_="@item.Link.Substring(0, item.Link.LastIndexOf('/'))/@Extentions.Encrypt(item.Link.Split('/').Last())" data-id="@item.ID" @(!item.IsSeen ? "class=hovered" : "")>
+
+                        <i class="fa fa-check text-success"></i>
+                        <div>
+                            <a role="menuitem">
+
+                               @Html.Raw(item.Value)
+                            </a><span>@(MvcApplication.IsGregDate ? item.SendDate.ToGregArabicDateTime() : item.SendDate.ToHijriArabicDateTime())</span>
+                        </div>
+                            </li>
+
+                
+                }
+
+
+
+                }
+            }
+            else
+            {
+                <li><i class="fa fa-check text-success"></i> <div>
+    <a role="menuitem" href="/Notification/Index" class="center-read-more">لايوجد اشعارات جديدة</a>
+
+</div>
+    </li>
+            }
+            @*@if (Model.Data.Count > 0)
+            {
+                <li><a role="menuitem" href="/Notification/Index" class="center-read-more">   مشاهدة كل الإشعارات</a></li>
+            }*@
+
+        </ul>
+
+</div>
+
+    <script src="~/Scripts/jquery.signalR-2.0.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            var updateConnection = function (connectionID) {
+                $.ajax({
+                    type: "POST",
+                    url: "/Security/UpdateConnectionID",
+                    data: { ConnectionID: connectionID }
+                });
+            };
+            var notificationHub = $.connection.notificationHub;
+
+
+            notificationHub.client.updateConnectionID = updateConnection;
+
+            notificationHub.client.sendGeneralNotification = function (value) {
+
+                value = eval("[" + value + "]")[0];
+                $obj = $('<li href_="' + value.Link + '" data-id="' + value.ID + '" class="hovered"><a role="menuitem" ><i class="icon icon-duration ' + value.Type + '"></i>' + value.Value + '</a><span>' + value.Time + '</span></li>');
+                if (value.Type == 'message') {
+                    $('.msg-list').prepend($obj);
+                }
+                else {
+                    $('#notify-list').prepend($obj);
+                    $('#badge-notify-list').html($('#notify-list').children('.hovered').length).show();
+
+                }
+            };
+
+
+
+            $('#notify-list li').on('click', function () {
+                if ($(this).not('li a.center-read-more')) {
+                    var id = $(this).attr('data-id');
+                    var href = $(this).attr('href_');
+                    $.ajax({
+                        type: "POST",
+                        url: "/Security/UpdateNotification",
+                        data: { ID: id },
+                        success: function () {
+                            if (href == '')
+                                location.reload();
+                            document.location.href = href;
+                        }
+                    });
+                }
+            });
+
+
+
+
+
+            $.connection.hub.start().done(function () {
+                updateConnection($.connection.hub.id);
+            });
+        });
+    </script>

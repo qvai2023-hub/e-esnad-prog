@@ -1,0 +1,279 @@
+﻿@using EtaskMinstry
+@model EtaskMinstry.Models.EmployeeTask.EmployeeTaskListVM
+
+@if (Model.TaskList.Count() > 0)
+{
+    //class= "datatable-tasks"
+    <div id="list" class=" table-responsive">
+        <div>
+            @{
+    var grid = new WebGrid(Model.TaskList, null, null, 10, true, true);
+    var gridColumns = new List<WebGridColumn>();
+    gridColumns.Add(grid.Column("taskName", "المهمة",@<text> @Html.EncodedActionLink((string)item.taskName, "TaskDetails", "Tasks", "Employee", new { id = item.taskID, IsRoute = true }, null)</text>));
+
+    gridColumns.Add(grid.Column("projectName", "المشروع"));
+
+    gridColumns.Add(grid.Column("state", "الحالة", @<text>@item.state<input class="status" type="hidden" value="@item.statusId" /></text>));
+
+    gridColumns.Add(grid.Column("startDate", "تاريخ البداية"));
+
+    gridColumns.Add(grid.Column("endDate", "تاريخ النهاية"));
+
+    gridColumns.Add(grid.Column("priority", "الاهمية", @<text>
+        @if (@item.priorityId == (int)TaskPriority.Noraml)
+        {
+            <span class="label label-info">عادية</span>
+        }
+        else if (@item.priorityId == (int)TaskPriority.Average)
+        {
+            <span class="label label-success">متوسطة</span>
+        }
+        else if (@item.priorityId == (int)TaskPriority.High)
+        {
+            <span class="label label-warning">مرتفعة</span>
+        }
+        else
+        {
+            <span class="label label-danger">مرتفعة جدا</span>
+        }
+    </text>));
+    if (Model.CurrentStatuse == (int)TaskStatus.New)
+    {
+        gridColumns.Add(grid.Column("state", "قبول", @<text>
+            <a href="#" class="accept" data-task="@item.taskID">
+                <img src="/Content/Main/images/Check-icon.png" width="16" height="16" />
+                <span class="usDate" style="display: none">@item.US_startDate</span>
+                <span class="isAccepted" style="display: none">@item.isAccepted</span>
+            </a></text>));
+
+        gridColumns.Add(grid.Column("state", "رفض", @<text>
+                <a href="#" class="refuse" data-task="@item.taskID">
+                    <img src="/Content/Main/images/delete-icon.png" width="16" height="16" />
+                </a></text>));
+    }
+
+    if (Model.isDelay)
+    {
+        gridColumns.Add(grid.Column("delaytime", "مدة التأخير"));
+    }
+
+    if ((Model.CurrentStatuse == (int)TaskStatus.Inprogress) || (Model.isDelay))
+    {
+
+
+        gridColumns.Add(grid.Column("state", "إنهاء",
+            @<text>
+
+                @* if task is pending dont appear btn finish *@
+                @if (item.statusId != (int)TaskStatus.Pending && item.statusId != (int)TaskStatus.Approved && item.statusId != (int)TaskStatus.NotAproved)
+                {
+                    if (item.actualTime != 0)
+                    {
+                        <a class="@item.EndTaskClass" data-task="@item.taskID">
+                            <img src="@item.EndTaskSource" width="16" height="16" />
+                        </a>
+                        <input type="hidden" value="@item.actualTime" />
+
+                    }
+
+                }
+
+
+            </text>));
+    }
+
+
+            }
+            @grid.GetHtml(columns: grid.Columns(gridColumns.ToArray()),
+                      tableStyle: "table table-bordered dataTable",
+                      headerStyle: "",
+                   footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير")
+
+
+            @*@grid.GetHtml(columns: grid.Columns(gridColumns.ToArray()),
+                tableStyle: "fav-grid tab1",
+                headerStyle: "table-alternat-header",
+                footerStyle: "pagerbar",
+                mode: WebGridPagerModes.All,
+                numericLinksCount: 5,
+                firstText: "الاول",
+                previousText: "السابق",
+                nextText: "التالى",
+                lastText: "الاخير")*@
+        </div>
+    </div>
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            <tr class="table-alternat-header">
+ 
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: center">
+                <h4>لا يوجد بيانات</h4>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+}
+
+<style>
+     #list .fav-grid{
+    border-collapse:collapse;
+    border-spacing:0;
+    width:100%;
+    }
+</style>
+<script>
+    $(function () {
+        var currentTask = 0;
+        var isaccept = false;
+        var isToEnd = false;
+
+        
+        //click on accept or refuse icon to accept or refuse task
+        //open relateve pop up
+        $('.accept, .refuse').click(function (e) {
+            e.preventDefault();
+            currentTask = $(this).attr('data-task');
+            if ($(this).hasClass('accept')) {
+                isaccept = true;
+                $('.modal-body').html('هل انت متأكد من قبول  المهمة ؟');
+            } else if ($(this).hasClass('refuse')) {
+                isaccept = false;
+                $('.modal-body').html('هل انت متأكد من رفض المهمة ؟');
+            }
+
+            var modal = new Modal({
+                title: isaccept?'قبول مهمة' :'رفض مهمة', //title of the popup
+                message: isaccept ? 'تأكيد قبول مهمة' : 'تأكيد رفض مهمة', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    var url = "/employee/Tasks/DeliverTask";
+                    $.post(url, { taskId: currentTask, isAccept: isaccept }, function (data) {
+                        if (data) {
+                            if (isaccept) {
+                                $('a[data-task=' + currentTask + '].accept').find('.isAccepted').text('true');
+                                renderAcceptAndRefuse();
+                                //Modal.showMessage('قبول مهمة', );
+                                Notify("success", 'تم قبول المهمة بنجاح', 3000);
+                                $("#btnSearch").click();
+                            } else if (!isaccept) {
+                                $('a[data-task=' + currentTask + ']').closest('tr').remove();
+                                //Modal.showMessage('رفض مهمة', 'تم رفض المهمة');
+                                Notify("success", 'تم رفض المهمة', 3000);
+                                $("#btnSearch").click();
+                            }
+                            modal.hide();
+                        } else {
+                            //Modal.showMessage('خطأ', 'لم تتم العملية بنجاح');
+                            Notify("danger", 'لم تتم العملية بنجاح', 3000);
+                        }
+                    });
+                },// call back runs after modal accept,
+                onCancel: function () { modal.hide(); } // call back runs after modal cancel default  is false , closes the modal.
+            });
+
+            modal.show(); //open the  modal
+        });
+        /////////////////////////////////////////////////////////
+
+        //click on end icon
+        $('.end').click(function (e) {
+            e.preventDefault();
+            currentTask = $(this).attr('data-task');
+            isToEnd = true;
+            var actualtime = $(this).next('[type=hidden]').val();
+            var modal = new Modal({
+                title: 'انهاء مهمة', //title of the popup
+                message: 'تأكيد انهاء مهمة' + (actualtime == 0 ? '<br/>لم يتم ادخال وقت عمل فى هذه المهمة' : ''), // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    var url = "/employee/Tasks/EndTask";
+                    $.post(url, { taskId: currentTask }, function (data) {
+                        if (data) {
+                            // $('a[data-task=' + currentTask + ']').closest('tr').remove();
+                          
+                            //Modal.showMessage('انهاء مهمة', 'تم انهاء المهمة بنجاح');
+                            Notify("success", 'تم انهاء المهمة بنجاح', 3000);
+                            modal.hide();
+                            $('#btnSearch').click();
+                        } else {
+                           // Modal.showMessage('خطأ', 'لم تتم العملية بنجاح');
+                            Notify("danger", 'لم تتم العملية بنجاح', 3000);
+                        }
+                        modal.hide();
+                    });
+                },// call back runs after modal accept,
+                onCancel: function () { modal.hide(); } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            modal.show(); //open the  modal
+        });
+        /////////////////////////////////////////////////////
+    })
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //to add color for each row according to priority.
+    function loadColor() {
+        debugger;
+        var action = $('form').attr('action').split('?')[0];
+        $('priorityId').val(0);
+        $('form').attr('action', action);
+        $('#list table tr').each(function (index, elm) {
+            var elm = $(elm).find('input[type=hidden].priorityColor');
+            var elmVal = elm.val();
+            elm.closest('tr').css('background-color', elmVal);
+        });
+        debugger;
+        applyClassesToWebGrid();
+
+    } loadColor();
+    /////////////////////////////////////////////////////////////////
+
+    //function to re render table after accept or refuse task
+    function renderAcceptAndRefuse() {
+        $('.usDate').each(function (indx, elm) {
+            var isaccepted = $(this).next().text();
+            var date = $(this).text();
+            date = date.split('/')[1] + '/' + date.split('/')[0] + '/' + date.split('/')[2];
+            var today = new Date();
+            var taskDay = new Date(date);
+            if (today < taskDay && isaccepted.toLowerCase() == "true") {
+                $(this).closest('tr').find('.accept').parent().attr('colspan', '2').html('<p>تم القبول</p>').next().remove();
+            }
+            else if (isaccepted.toLowerCase() == "true") {
+                $(this).closest('tr').remove();
+            }
+
+            if ($('.table tbody').children().length == 0) {
+                var html = '<tr><td colspan=9 style="text-align:center">لا يوجد بيانات</td></tr>';
+                $('.table tbody').append(html);
+            }
+        });
+    } renderAcceptAndRefuse();
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+   
+
+
+
+  @*  $('.list').on('load', '.end', function (e) {
+      //  alert('hi');
+        if($('.end').attr("status") == @((int)EtaskMinstry.TaskStatus.Done))
+        {
+            $('.end').hide();
+        }
+    });*@
+
+</script>

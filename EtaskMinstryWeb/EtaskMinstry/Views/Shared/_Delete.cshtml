@@ -1,0 +1,92 @@
+﻿<!-- start popUp-->
+<div id="divPopUp" style="display:none">
+  <div class="block-dim"></div>
+  <div class="pnl1 pop-up" style="width:450px; margin-right:-108px; position:fixed;z-index: 99999;">
+  <a href="#" class="close-btn"></a>
+    <div class="top-pnl">
+      <div class="right-top-pnl"></div>
+      <div class="left-top-pnl"></div>
+      <div class="mid-top-pnl"></div>
+      </div>
+    <div class="mid-pnl">
+      <div class="right-mid-pnl"></div>
+      <div class="left-mid-pnl"></div>
+      <div class="mid-mid-pnl" style="background-color: white;">
+        <div class="hdr1" style="margin-bottom:5px"> <span><em><img src="/Content/themes/base/images/icon2.png"/>حذف</em></span>     
+        </div>
+          <div style="text-align:center; margin-top:20px">
+              <h2 class="resMsg">
+                    تأكيد عملية الحذف
+              </h2>
+          </div>
+        <div class="btns" style="text-align:center; margin-top:50px">
+          <button id="btnConfirmDelete" class="submit-btn">تأكيد</button>
+          <button id="btnClosePopUp" class="submit-btn">إلغاء</button>
+          </div>   
+      </div>
+      </div>
+    <div class="bottom-pnl">
+      <div class="right-bottom-pnl"></div>
+      <div class="left-bottom-pnl"></div>
+      <div class="mid-bottom-pnl"></div>
+      </div>
+    </div>
+    </div>
+<!--End popUp-->
+<script>
+    var SelectedItemId = 0; //variable to save current selected item id.
+    $(function () {
+        ////Open Confirmation popUp when Click on Delete icon.
+        //$('.deleteAction').live('click', function (e) {
+        //    //e.preventDefault();
+        //    //var id = $(this).attr('id');
+        //    //SelectedItemId = id;
+        //    //OpenPopUp();
+        //});
+        ///////////////////////////////////////////////////
+
+        //handel Close Popup btns
+        $('.close-btn, #btnClosePopUp').click(function () {
+            ClosePopUp();
+        });
+        ///////////////////////////////////////////////////
+
+        //handelConfirm Delet button
+        $('#btnConfirmDelete').click(function () {
+           @* var currentController = '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()';
+            currentController = currentController.substr(0, 1).toUpperCase() + currentController.substr(1);
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("Delete")',
+                dataType: 'json',
+                data: { id: SelectedItemId, CurrenClass: currentController },
+                success: function (data) {},
+                error: function (e) {},
+                complete: function(data) {
+
+                    var result = data.responseText.toLowerCase() == "true";
+                    ClosePopUp();
+                    if (result)
+                        ShowPopUpMessage("تم الحذف بنجاح", "/Company/" + currentController);
+                    else
+                        ShowPopUpMessage("لم تتم عملية الحذف");
+                }
+            });*@
+        });
+        //////////////////////////////////////////////
+
+        //function to open Confirmation PopUp.
+        function OpenPopUp() {
+            $('#divPopUp').fadeIn();
+        }
+        /////////////////////////////////////
+
+        //function to Close PopUp.
+        function ClosePopUp() {
+            $('#divPopUp').fadeOut();
+            $('.resMsg').text("تأكيد عملية الحذف");
+            $('#btnConfirmDelete').show();
+        }
+        //////////////////////////////// 
+    })
+</script>

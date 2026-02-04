@@ -1,0 +1,411 @@
+﻿@model EtaskMinstry.Areas.Company.Models.ReportPreperationVM
+@{
+    ViewBag.Title = "تقرير المهام";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+
+
+
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.6.2.min.js" type="text/javascript" />
+}
+
+@using (Html.BeginForm("ShowTaskReport", "Report", FormMethod.Post))
+{
+    @Html.ValidationSummary(true, "", new { @class = "ErrorMessage" })
+    <div class="reports">
+        <div class="row">
+            <div class="col-md-10">
+
+
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label>إسم المهمة : </label>
+                        @Html.TextBoxFor(item => item.taskName, new { @placeholder = "ادخل اسم المهمة", @class = "form-control col-sm-4" })
+                        @Html.ValidationMessageFor(model => model.taskName)
+                    </div>
+                </div>
+
+
+                <div class="row form-group">
+                    <div class="col-md-8 projectselection">
+                        <label>المشروع : </label>
+                        @Html.DropDownListFor(item => item.projects, Model.ddlProjects,
+              new { @class = "chzn-select chzn-rtl form-control", @placeholder = "اختر المشروع", @multiple = "multiple", @tabindex = "1" })
+                        @Html.ValidationMessageFor(model => model.projects)
+                    </div>
+                    <div class="col-md-4">
+                        <div class="checkbox mt-30">
+                            <label class="hint-lbl has-tip" title="بدون هذه الإختيارات">
+                                @Html.CheckBoxFor(item => item.withoutProjectChoises)
+                              ما عدا المشروعات
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <div class="checkbox">
+                            <label class="hint-lbl has-tip" data-toggle="tooltip" title="مهام غير مدرجة تحت مشروعات">مهام بدون مشروعات  </label>@Html.CheckBoxFor(item => item.withoutProject)
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-8">
+                        <label>الموظف : </label>
+                        @Html.DropDownListFor(item => item.employees, Model.ddlEmployees,
+                                new { @class = "chzn-select chzn-rtl lrg-input form-control", @multiple = "multiple", @tabindex = "1" })
+                        @Html.ValidationMessageFor(model => model.employees)
+                    </div>
+                    <div class="col-md-4">
+                        <div class="checkbox mt-30">
+                            <label class="hint-lbl has-tip" title="بدون هذه الإختيارات">
+                                @Html.CheckBoxFor(item => item.withotEmpsChoises)
+                                بدون هذه الإختيارات
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <div class="checkbox">
+                            <label class="hint-lbl has-tip" data-toggle="tooltip" title="مهام غير مدرجة تحت موظفين">
+                                بدون موظفين
+                            </label>@Html.CheckBoxFor(item => item.withoutEmps)
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label>الأهميه :</label>
+                        @foreach (var item in Model.chkPriorities)
+                        {
+                            <label class=" hint-lbl has-tip checkbox-inline" data-toggle="tooltip" title="@item.Name">
+                                <input type="checkbox" value="@item.ID" name="priorities" />@item.Name
+                            </label>
+                        }
+
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label>الحالة :</label>
+
+                        @foreach (var item in Model.chkStatus)
+                        {
+                            if (item.ID == (int)EtaskMinstry.TaskStatus.Pending)
+                            {
+                                <label class="checkbox-inline hint-lbl has-tip" data-toggle="tooltip" title="المهام التي تم ايقافها فقط وليس المهام المعاد إسنادها">
+                                    <input class="normalTasks" type="checkbox" value="@item.ID" name="Status" />@item.Name
+                                </label>
+                            }
+                            else
+                            {
+                                <label class="checkbox-inline hint-lbl has-tip" data-toggle="tooltip" title="@item.Name">
+                                    <input class="normalTasks" type="checkbox" value="@item.ID" name="Status" />@item.Name
+                                </label>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label>المهام المتأخره : </label>
+                        <div class="checkbox">
+                            <label class="hint-lbl has-tip" data-toggle="tooltip" title="متأخرة">
+                                <input class="delayTasks" type="checkbox" value="-1" name="Status" />متأخرة
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-2">
+                        <label>تاريخ البداية : </label>
+                    </div>
+                    <div class="col-md-5">
+                        <label>من : </label>
+                        <div class='input-group date'>
+                            @Html.TextBoxFor(item => item.fromDate, new { @placeholder = "اختر تاريخ البداية", @Readonly = "readonly", @class = "form-control" })
+                            <span class="input-group-addon">
+                                <span id="dateFromIcon" class="fa fa-calendar"></span>
+                            </span>
+                        </div>
+
+                    </div>
+                    <div class="col-md-5">
+                        <label>إلى : </label>
+                        <div class='input-group date'>
+                            @Html.TextBoxFor(item => item.toDate, new { @placeholder = "اختر تاريخ النهاية", @Readonly = "readonly", @class = "form-control" })
+                            <span class="input-group-addon">
+                                <span id="toDateIcon" class="fa fa-calendar"></span>
+                            </span>
+
+                        </div>
+
+                    </div>
+                    <span class="col-md-4"></span>
+                    @Html.ValidationMessageFor(model => model.toDate)
+
+                </div>
+                <div class="row form-group">
+                    <div class="col-md-2">
+                        <label>تاريخ النهاية : </label>
+                    </div>
+                    <div class="col-md-5">
+                        <label>من : </label>
+                        <div class='input-group date'>
+
+                            @Html.TextBoxFor(item => item.fromendDate, new { @placeholder = "اختر تاريخ البداية", @Readonly = "readonly", @class = "form-control" })
+
+                            <span class="input-group-addon">
+                                <span id="fromendDateIcon" class="fa fa-calendar"></span>
+                            </span>
+
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <label>إلى : </label>
+                        <div class='input-group date'>
+
+                            @Html.TextBoxFor(item => item.toendDate, new { @placeholder = "اختر تاريخ النهاية", @Readonly = "readonly", @class = "form-control" })
+
+                            <span class="input-group-addon">
+                                <span id="toendDateIcon" class="fa fa-calendar"></span>
+                            </span>
+
+
+                        </div>
+                    </div>
+
+                    <span class="col-md-4"></span>
+                    @Html.ValidationMessageFor(model => model.toendDate)
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-center mb-30 mt-30">
+                        <input type="submit" class="btn btn-primary submit" value="استخراج التقرير" />
+                        <input type="button" id="reassign" class="btn btn-primary" value="إعادة تعيين" />
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+}
+<script src="~/Scripts/ui/ui.datepicker.js"></script>
+<script src="~/Scripts/ui/i18n/jquery-ui-i18n.js"></script>
+<script src="~/Scripts/ui/i18n/ui.datepicker-ar.js"></script>
+<script>
+
+     $("#projects").chosen({
+         placeholder_text_multiple: "اختر مشروع",
+
+     });
+     $("#employees").chosen({
+         placeholder_text_multiple: "اختر موظف",
+
+     });
+
+     $('.has-tip').tooltip();
+     $(".chzn-select").chosen();
+
+
+
+
+     $(function () {
+
+         var Isgreg = "@(EtaskMinstry.MvcApplication.IsGregDate)";
+            if (Isgreg == "True") {
+                //datepicker Grerg
+                $("#fromDate").datepicker({ dateFormat: "yy/mm/dd" });
+                $("#toDate").datepicker({ dateFormat: "yy/mm/dd" });
+                $("#fromendDate").datepicker({ dateFormat: "yy/mm/dd" });
+                $("#toendDate").datepicker({ dateFormat: "yy/mm/dd" });
+
+                //
+            }
+            else {
+                //calendar Hijrii
+                $('#fromDate,#toDate').calendarsPicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    showTrigger: '#calImg',
+                    calendar: $.calendars.instance('ummalqura'),
+                    dateFormat: 'dd/mm/yyyy',
+                    yearRange: '1418:1450'
+                });
+                $('#fromendDate,#toendDate').calendarsPicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    showTrigger: '#calImg',
+                    calendar: $.calendars.instance('ummalqura'),
+                    dateFormat: 'dd/mm/yyyy' ,
+                    yearRange: '1418:1450'
+                });
+            }
+
+            /////////////////////////////////////////////////////////
+            $('#withoutProjectChoises').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#withoutProject').prop('disabled', true);
+                    // $('#projects').prop('disabled', true).trigger("liszt:updated");
+                    $('#projects').next().find('div.chzn-drop').hide();
+                }
+                else {
+                    $('#withoutProject').prop('disabled', false);
+                    // $('#projects').prop('disabled', false).trigger("liszt:updated");
+                    $('#projects').next().find('div.chzn-drop').show();
+                }
+            });
+
+            //click in check box without project
+            //if selected dim all selected peoject
+            //else enable to select projects again.
+            $('#withoutProject').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#projects').prop('disabled', true).trigger("liszt:updated");
+                    $('#projects').next().find('div.chzn-drop').hide();
+                    $('#withoutProjectChoises').prop('disabled', true);
+                } else {
+                    $('#projects').prop('disabled', false).trigger("liszt:updated");
+                    $('#projects').next().find('div.chzn-drop').show();
+                    $('#withoutProjectChoises').prop('disabled', false);
+                }
+            });
+            ////////////////////////////////////////////////////////////////////////
+
+            //click in check box without employees
+            //if selected dim all selected peoject
+            //else enable to select employees again.
+            $('#withoutEmps').click(function () {
+                debugger
+                if ($(this).is(':checked')) {
+                    $('#employees').prop('disabled', true).trigger("liszt:updated");
+                    $('#employees').next().find('div.chzn-drop').hide();
+                    $("#withotEmpsChoises").prop('disabled', true);
+                }
+                else {
+                    $('#employees').prop('disabled', false).trigger("liszt:updated");
+                    $('#employees').next().find('div.chzn-drop').show();
+                    $("#withotEmpsChoises").prop('disabled', false);
+                }
+            });
+
+
+            $('#withotEmpsChoises').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#withoutEmps').prop('disabled', true);
+                    // $('#projects').prop('disabled', true).trigger("liszt:updated");
+                    $('#employees').next().find('div.chzn-drop').hide();
+                }
+                else {
+                    $('#withoutEmps').prop('disabled', false);
+                    // $('#projects').prop('disabled', false).trigger("liszt:updated");
+                    $('#employees').next().find('div.chzn-drop').show();
+                }
+            });
+            /////////////////////////////////////////////////////////////////////////
+
+            //click on reAssigend button.
+            //reset the form
+            $('#reassign').click(function () {
+                location.reload();
+            });
+            //////////////////////////////////
+
+            //click in icon of from date
+            //fire calender
+            $('#dateFromIcon').click(function () {
+                $('#fromDate').focus();
+            });
+            //////////////////////////////////////
+
+            //click in icon of to date
+            //fire calender
+            $('#toDateIcon').click(function () {
+                $('#toDate').focus();
+            })
+            ////////////////////////////////////
+
+            //////////////////////////////////
+
+            //click in icon of from end  date
+            //fire calender
+            $('#fromendDateIcon').click(function () {
+                $('#fromendDate').focus();
+            });
+            //////////////////////////////////////
+
+            //click in icon of to end  date
+            //fire calender
+            $('#toendDateIcon').click(function () {
+                $('#toendDate').focus();
+            })
+            ////////////////////////////////////
+
+            //choose the delay tasks check box
+            //disable all other status
+            $('.delayTasks').click(function () {
+                if ($(this).is(':checked')) {
+                    $('.normalTasks').attr("disabled", "disabled");
+                } else {
+                    $('.normalTasks').removeAttr('disabled');
+                }
+            });
+
+            $('.normalTasks').click(function () {
+                if ($(this).is(':checked')) {
+                    $('.delayTasks').attr("disabled", "disabled");
+                } else {
+                    $('.delayTasks').removeAttr('disabled');
+                }
+            });
+
+            $.validator.addMethod("MinMaxValidation", function (value, element, options) {
+                var isValid = false;
+                debugger;
+                var FromValue = $('#fromDate').val();
+                var ToValue = $('#toDate').val();
+                if ($('#toDate').val() != "" && $('#fromDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
+                    isValid = false;
+                else
+                    isValid = true;
+                return isValid;
+            });
+            $.validator.addMethod("MinMaxEndDateValidation", function (value, element, options) {
+                var isValid = false;
+                debugger;
+                var FromValue = $('#fromendDate').val();
+                var ToValue = $('#toendDate').val();
+                if ($('#toendDate').val() != "" && $('#fromendDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
+                    isValid = false;
+                else
+                    isValid = true;
+                return isValid;
+            });
+            $('.submit').live("click", function () {
+                debugger;
+                $('#toDate').rules("add", { MinMaxValidation: true, messages: { MinMaxValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+                $('#fromDate').rules("add", { MinMaxValidation: true, messages: { MinMaxValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+
+                $('#toendDate').rules("add", { MinMaxEndDateValidation: true, messages: { MinMaxEndDateValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+                $('#fromendDate').rules("add", { MinMaxEndDateValidation: true, messages: { MinMaxEndDateValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+            })
+            //////////////////////////////////////////////////////
+        });
+</script>
+<style>
+
+    .radio-inline + .radio-inline, .checkbox-inline + .checkbox-inline {
+        margin-top: 0px;
+        margin-right: 0px;
+    }
+
+    .radio-inline + .radio-inline, .checkbox-inline + .checkbox-inline {
+        margin-top: 0;
+        margin-left: 0px;
+    }
+</style>

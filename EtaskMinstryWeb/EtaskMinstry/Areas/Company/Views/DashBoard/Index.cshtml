@@ -1,0 +1,516 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.Models.Company
+@using EtaskMinstry.AppCode
+
+@{
+    ViewBag.Title = "حالة المهام";
+}
+
+<div class="tabbable page-tabs">
+    <ul class="nav nav-tabs" id="navTabs">
+        @*------------------------Start Done Action Link---------------------*@
+        <li class="active">
+            @*<a class="tab dactive-tab" href="/Company/DashBoard?index?taskType=@DashBoaedTaskType.Empfinish">
+                <i class="fa fa-hourglass-3"></i>@System.Configuration.ConfigurationManager.AppSettings["Done"]
+                <span class="label label-danger" id="lblCounts">
+                    @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Empfinish, DateTime.Now)
+                </span>
+            </a>*@
+
+            @Ajax.RawActionLink("<i class='fa fa-check'></i>"
+                      + System.Configuration.ConfigurationManager.AppSettings["Done"]
+                      + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Empfinish, DateTime.Now)
+                      + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Empfinish },
+                new AjaxOptions
+                {
+                    UpdateTargetId = "divTasks",
+                    InsertionMode = InsertionMode.Replace,
+                    LoadingElementId = "loadding",
+                    LoadingElementDuration = 10,
+                    HttpMethod = "Post"
+                }, new { @class = "tab dactive-tab" + "" })
+
+        </li>
+        @*------------------------End Done Action Link---------------------*@
+
+        @*------------------------Start Delay Action Link------------------*@
+        <li>
+
+
+            @*<a class="tab dactive-tab" href="/Company/DashBoard/index?taskType=@DashBoaedTaskType.Delayed">
+                <i class="fa fa-hourglass-3"></i>@System.Configuration.ConfigurationManager.AppSettings["Delay"]
+                <span class="label label-danger" id="lblCounts">
+                    @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Delayed, DateTime.Now)
+                </span>
+            </a>*@
+            @Ajax.RawActionLink("<i class='fa fa-hourglass-3'></i>"
+                      + System.Configuration.ConfigurationManager.AppSettings["Delay"]
+                      + ".<span class='label label-danger' id='lblCounts'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Delayed, DateTime.Now)
+                      + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
+                new AjaxOptions
+                {
+                    UpdateTargetId = "divTasks",
+                    InsertionMode = InsertionMode.Replace,
+                    LoadingElementId = "loadding",
+                    LoadingElementDuration = 10,
+                    HttpMethod = "Post"
+                }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        @*------------------------End Delay Action Link--------------------*@
+
+        @*------------------------Start Rejected Action Link---------------*@
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-ban'></i>"
+                  + System.Configuration.ConfigurationManager.AppSettings["Rejected"]
+                  + ".<span class='label label-danger'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.EmpReject, DateTime.Now)
+                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.EmpReject },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        @*------------------------End Rejected Action Link-----------------*@
+
+        @*------------------------Start Pending Action Link----------------*@
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-pause'></i>"
+                  + System.Configuration.ConfigurationManager.AppSettings["Pending"]
+                  + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Susspended, DateTime.Now)
+                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        @*------------------------End Pending Action Link------------------*@
+
+
+        @*------------------------Start DoneToday Action Link--------------*@
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-check'></i>"
+                  + System.Configuration.ConfigurationManager.AppSettings["DoneToday"]
+                  + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.FinishToday, DateTime.Now)
+                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.FinishToday },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        @*------------------------End DoneToday Action Link----------------*@
+
+
+        @*------------------------Start NotAssigned Action Link-------------*@
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-thumb-tack'></i>"
+                  + System.Configuration.ConfigurationManager.AppSettings["NotAssigned"]
+                  + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.NeedAssign, DateTime.Now)
+                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NeedAssign },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        @*------------------------End NotAssigned Action Link----------------*@
+
+    </ul>
+    <div class="tab-content">
+        <div class="tab-container tab-container2">
+            @* --------------------  Start Partial Table Return With Result------- *@
+            <div class="panel panel-default">
+
+                @* -----------------Start  Panel Header -------------- *@
+                <div class="panel-heading">
+                    <h6 class="panel-title">
+                        <i class="fa fa-tasks"></i>
+                        <span id="panelTitle">
+
+                        </span>
+                    </h6>
+                    <span class="pull-right label label-danger" id="lblCount"></span>
+                </div>
+                @* -----------------End  Panel Header -------------- *@
+
+
+                @* -----------------Start Search Panel -------------- *@
+                @*<div class="panel-body">
+                        <div class="panel-group">
+                            <div class="panel panel-info">
+                                <div class="panel-heading">
+                                    <h6 class="panel-title panel-trigger">
+                                        <a data-toggle="collapse" href="#panel-search">بحث</a>
+                                    </h6>
+                                </div>
+                                <div id="panel-search" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <form class="form-horizontal">
+                                            <div class="row">
+                                                <div class="form-group col-sm-6">
+                                                    <label class="col-sm-4 control-label">عنوان المهمة: </label>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control">
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="text-right">
+                                                <input type="submit" class="btn btn-primary" value="بحث"> <input type="submit" class="btn btn-primary" value="عرض الكل">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+                @* -----------------End Search Panel ---------------- *@
+
+
+
+                @* --------------------  Start Partial Table Return With Result---------- *@
+                <div id="divTasks" class="datatable-tasks">
+                    @{ Html.RenderPartial("PartialDBCompTask", (IEnumerable<EtaskMinstry.Models.Company.DaskBoardCompanyTaskVM>)ViewData["CompanyTask"]);}
+                </div>
+                @* --------------------  End Partial Table Return With Result---------- *@
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetTasksbypage(page, taskType) {
+
+       $.ajax({
+           url: "/Company/DashBoard/GetTasksbypage",
+           data: {
+               taskType: taskType,
+               page: page
+           },
+           type: 'Get',
+           success: function (data) {
+               $("#divTasks").html(data);
+           },
+           error: function (xhr, status, error) {
+               console.error("Error loading tasks:", error);
+           }
+       });
+
+    }
+
+    $(document).ready(function () {
+
+
+        $('.copy_text').click(function (e) {
+            e.preventDefault();
+            var copyText = $(this).attr('href');
+
+            document.addEventListener('copy', function (e) {
+                e.clipboardData.setData('text/plain', copyText);
+                e.preventDefault();
+            }, true);
+
+            document.execCommand('copy');
+            console.log('copied text : ', copyText);
+
+        });
+    });
+        $(function () {
+
+
+            //---------------------Start Tap Content Header -----------------
+            var navString = $("#navTabs li").find('a:first').text();
+            //var navCount = $("#navTabs li").find('span:first').text();
+
+            var navSelected =  navString.substring(0, navString.indexOf('.'));
+            var navCount =  navString.substring(5, navString.indexOf('.') +2);
+                document.getElementById("panelTitle").textContent=navSelected;
+                document.getElementById("lblCount").textContent=navCount;
+
+            $("#navTabs li").click(function(e){
+                var navString =$(this).find('a:first').text();
+
+                //Get Count of Selected Tab
+                var navCount = $(this).find('span:first').text();
+
+                //Get Text of Selected Tab
+                var navSelected =  navString.substring(0, navString.indexOf('.'));
+
+                document.getElementById("panelTitle").textContent=navSelected;
+                document.getElementById("lblCount").textContent=navCount;
+
+                e.preventDefault();
+                $('#navTabs li').removeClass('active');
+                $(this).addClass('active');
+
+            });
+            //---------------------End Tap Content Header -----------------
+
+
+            if (window.location.href.indexOf('taskType') != -1) {
+                var status = window.location.href.split('taskType=')[1];
+                $('li').removeClass('z-active');
+                if (status.indexOf('DoneToday') != -1) {
+                    $('.DoneToday').parent().addClass('z-active');
+                } else if (status.indexOf('reloadAssign') != -1) {
+                    $('.NotAssigned').parent().addClass('z-active');
+                } else if (status.indexOf('Pending') != -1) {
+                    $('.reloadSusspend').parent().addClass('z-active');
+                } else if (status.indexOf('Rejected') != -1) {
+                    $('.reloadReject').parent().addClass('z-active');
+                } else if (status.indexOf('Delay') != -1) {
+                    $('.Delay').parent().addClass('z-active');
+                }else if (status.indexOf('Done') != -1) {
+                    $('.reloadFinish').parent().addClass('z-active');
+                }
+
+            }
+
+            // Array of Employees from viewBag
+            var emps = @Html.Raw(
+        Json.Encode((ViewBag.Employee)));
+            //---------------------------------------------------
+            var CurrentEmp = 0;
+            var CurrentTask = 0;
+            var approvConfirmation;
+            // Switch Tab Action Handling
+            $('.z-tab').click(function () {
+                $('.z-tab').removeClass('z-active');
+                $(this).addClass('z-active');
+                $(this).find('a')[0].click();
+            });
+
+            //relaod tab Data
+            function RelaodTab(Tabselector)
+            {
+                $(Tabselector).click();
+                $(Tabselector).next()[0].innerHTML = parseInt($(Tabselector).next()[0].innerHTML) - 1;
+            }
+
+
+
+            //************** F O R  R E A S S I G N  S C E N A R I O *********************************//
+
+            //Define Reassign Modal
+            modal = new Modal({
+                title: ' إعاده أسناد المهمة', //title of the popup
+                message: '', // message text  notes: overrided if there're  id form
+                type: '',  // type of the modal 'alert', 'confirm' or 'form'
+                id: 'dialogForm',  // id of the form to show it on the modal
+                onAccept: function () { e },// call back runs after modal accept,
+                onCancel: function () { e } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            // Handle Reassign Icon CLick
+            $('.assign').live("click",function (e) {
+
+                e.preventDefault();
+
+                var elem = e.target;
+                CurrentEmp = $(this).attr('currentemp');
+                CurrentTask = $(this).attr('taskid');
+                var emp = $(this).attr('currentemp');
+                //Append options on select dropdownlist employee without old employee assigned to it before
+                $('#ddlEmployees').empty();
+                $('#ddlEmployees').append($('<option>', {
+                    value: "0",
+                    text: "اختــر الموظف",
+                }));
+                for (var i = 0; i < emps.length; i++) {
+
+                    if(emps[i].Value != CurrentEmp)
+                    {
+                        $("#ddlEmployees").append($('<option>', {
+                            value: emps[i].Value,
+                            text: emps[i].Text,
+                        }));
+                    }
+                }
+                debugger
+                if(($(this).attr('startdate')=="" || typeof $(this).attr('startdate') == typeof undefined) && ($(this).attr('enddate')=="" ||typeof $(this).attr('enddate') == typeof undefined))
+                {
+                    if(CurrentEmp==0)
+                    {
+                        $("#dialogForm").closest('.pop-box').find('.modal_title').text('أسناد المهمة');
+                    }
+                    debugger
+                    //Modal.showMessage('إسناد المهمة', 'لا يمكن أسناد المهمة الا بعد تحديد تاريخ البدايه والنهايه');
+                }
+                else
+                {
+                    if(CurrentEmp==0)
+                    {
+                        $("#dialogForm").closest('.pop-box').find('.modal_title').text('أسناد المهمة');
+                    }
+                }
+                //End of appending options
+                modal.show(); //open the  modal
+            });
+
+            $(".Resume").live('click',function(e){
+                e.preventDefault();
+
+                var elem = e.target;
+
+                var id = $(this).attr('TaskID');
+
+                var url = "/Company/Company/UnPendTask";// ReassignUrl
+                $.post(url, { taskID: id}, function (data) {
+                    console.log(data);
+
+                    RelaodTab($('.reloadSusspend'));
+
+
+                    //closePopUP
+                    modal.hide();
+                });
+
+            });
+            //Handle Close Reassign poup or
+            $('.closepopup, .btnClose').click(function (e) {
+                e.preventDefault();
+                $('#ddlEmployees').val(0); // reset emp DropDownList value
+                $('#error')[0].innerHTML = ""; //ClearValidation Text
+                modal.hide(); // hides the modal
+            });
+            //Handle  confirmation button to reassign tasks.
+            $('#btnConfirm').click(function (e) {
+                var type= $(".z-active a").text();
+                //validate  Required Validation onEmpValue
+                if ($('#ddlEmployees').val() == 0) {
+                    $('#error')[0].innerHTML = "يجب أختيار موظف";
+                }
+                    //Validate not to the Same Employee Reassign
+                else if ($('#ddlEmployees').val() == CurrentEmp) {
+                    $('#error')[0].innerHTML = "لا يمكن إعاده أسناد لنفس الموظف";
+                }
+                else //Case Valid Data
+                {
+                    $('#error').innerHTML = ""; //Clear Validation Text
+                    var url = "/Company/Company/ReAssignTask";// ReassignUrl
+                    $.post(url, { taskID: CurrentTask, iEmployeeID: $('#ddlEmployees').val() }, function (data) {
+                        console.log(data);
+                        if (data == 'True') { // متوقفة
+
+                            if(type=="معلقة"){
+                                RelaodTab($('.reloadSusspend'));
+                            }else{
+                                RelaodTab($('.reloadReject'));
+                            }
+                            // $('.reloadAssign').click();
+                            // $('.reloadAssign').next()[0].innerHTML = parseInt($('.reloadAssign').next()[0].innerHTML) - 1;
+                        }
+                        else if (data == 'False') //غير مسندة
+                        {
+                            RelaodTab($('.reloadAssign'));
+                        }
+                        //closePopUP
+                        modal.hide();
+                    });
+                }
+            });
+
+
+
+            //********************F O R  T A S K  A P P R O V E  A N D  U N A P P R O V E***********************//
+            //Handle Company Approve EndTask
+            //  $('.Approve').live("click", function () {
+
+
+
+            $(document).on('click', '.Approve', function () {
+
+                CurrentTask = $(this).attr('taskid');
+                approvConfirmation = new Modal({
+                    title: 'تأكيد', //title of the popup
+                    message: 'هل انت متأكد من اعتماد المهمة ؟', // message text  notes: overrided if there're  id form
+                    type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                    id: '',  // id of the form to show it on the modal
+                    onAccept: function () {
+
+                        var url = "/Company/Company/CompanyAcceptTask";// ReassignUrl
+                        $.post(url, { iTaskID: CurrentTask }, function (data) {
+                            if (data == 'True') {
+                                // RelaodTab($('.reloadFinish'));
+                                Modal.showMessage({
+                                    title: ' قبول مهمة', message: 'تم قبول المهمة بنجاح', type: 'alert', onAccept: function () {
+
+                                    }, time: 5
+                                });
+                                approvConfirmation.hide();
+                                location.reload();
+                               // RelaodTab($('.reloadFinish'));
+                            }
+                            else
+                                Modal.showMessage('قبول مهمة', 'لم تتم العملية بنجاح');
+                            approvConfirmation.hide();
+                        });
+
+                    },
+                    onCancel: function () {
+                        approvConfirmation.hide();
+                    } // call back runs after modal cancel default  is false , closes the modal.
+
+                });
+                approvConfirmation.show();
+            });
+
+
+            $(document).on('click', '.UnApprove', function () {
+
+                CurrentTask = $(this).attr('taskid');
+                approvConfirmation = new Modal({
+                    title: 'تأكيد', //title of the popup
+                    message: 'هل انت متأكد من رفض المهمة ؟', // message text  notes: overrided if there're  id form
+                    type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                    id: '',  // id of the form to show it on the modal
+                    onAccept: function () {
+
+                        var url = "/Company/Company/CompanyRejectTask";
+                        $.post(url, { iTaskID: CurrentTask }, function (data) {
+                            if (data == 'True') {
+
+                                // RelaodTab($('.reloadFinish'));
+                                Modal.showMessage({
+                                    title: ' رفض مهمة', message: 'تم الانهاء بنجاح', type: 'alert', onAccept: function () {
+
+                                    }, time: 5
+                                });
+                                approvConfirmation.hide();
+                                RelaodTab($('.reloadFinish'));
+                            }
+                            else
+                                Modal.showMessage('رفض مهمة', 'لم تتم العملية بنجاح');
+                            approvConfirmation.hide();
+                        });
+
+                    },
+                    onCancel: function () {
+                        approvConfirmation.hide();
+                    } // call back runs after modal cancel default  is false , closes the modal.
+
+                });
+                approvConfirmation.show();
+            });
+
+        });
+
+
+</script>

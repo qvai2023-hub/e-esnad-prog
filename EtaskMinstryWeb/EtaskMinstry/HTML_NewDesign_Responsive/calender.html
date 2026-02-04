@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>E-snad</title>
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+        <!--css-->
+        <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="css/bootstrap-arabic.min.css" rel="stylesheet" type="text/css"/>
+        <link href="css/normalize.css" rel="stylesheet" type="text/css"/>
+        <link href="css/animate.css" rel="stylesheet" type="text/css"/>
+        <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <!-- Modernizr -->
+        <script src="js/modernizr.js"></script>
+    </head>
+
+    <body class="full-width page-condensed">
+    
+    
+    <!-- Navbar -->
+	<div class="navbar navbar-inverse" role="navigation">
+		<div class="navbar-header">
+			
+			<a class="navbar-brand" href="#"><img src="img/logo.png" alt="Londinium"></a>
+		</div>
+
+		
+	</div>
+	<!-- /navbar -->
+    
+    
+    <!-- calender wrapper -->
+        <div class="calender">
+            <div class="row">
+                <div class="container">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary btn-lg fire-calendar" data-toggle="modal" data-target="#myModal">
+                      التاريخ
+                    </button>
+                    <hr>
+                    <form>
+                         <div class='input-group date'>
+                                <input type='text' class="form-control" readonly/>
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                               <div class="calendar-popup">
+                                    <div class="calender">
+                                        <div class="calender-header text-center">
+                                            <span class="previous"><i class="fa fa-arrow-right" aria-hidden="true"></i></span>
+                                            <div class="dropdown month">
+                                              <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">ربيع أول 
+                                              <span class="caret"></span></button>
+                                              <ul class="dropdown-menu">
+                                                <li><a href="#">ربيع ثانى</a></li>
+                                                <li><a href="#">رجب</a></li>
+                                              </ul>
+                                            </div>
+                                            <div class="dropdown year">
+                                              <button class="btn dropdown-toggle" type="button" data-toggle="dropdown"> 1439 
+                                              <span class="caret"></span></button>
+                                              <ul class="dropdown-menu">
+                                                <li><a href="#">1440</a></li>
+                                                <li><a href="#">1439</a></li>
+                                              </ul>
+                                            </div>
+                                            <span class="next"><i class="fa fa-arrow-left" aria-hidden="true"></i></span>
+                                        </div>
+                                        <div class="calender-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <th>سبت</th>
+                                                    <th>أحد</th>
+                                                    <th>أثنين</th>
+                                                    <th>ثلاثاء</th>
+                                                    <th>أربعاء</th>
+                                                    <th>خميس</th>
+                                                    <th>جمعه</th>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td class="today">2</td>
+                                                        <td>3</td>
+                                                        <td>4</td>
+                                                        <td>5</td>
+                                                        <td>6</td>
+                                                        <td>7</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>8</td>
+                                                        <td>9</td>
+                                                        <td>10</td>
+                                                        <td>11</td>
+                                                        <td>12</td>
+                                                        <td>13</td>
+                                                        <td>14</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>15</td>
+                                                        <td>16</td>
+                                                        <td>17</td>
+                                                        <td>18</td>
+                                                        <td>19</td>
+                                                        <td>20</td>
+                                                        <td>21</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>22</td>
+                                                        <td>23</td>
+                                                        <td>24</td>
+                                                        <td>25</td>
+                                                        <td>26</td>
+                                                        <td>27</td>
+                                                        <td>28</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>29</td>
+                                                        <td>30</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="calender-footer clearfix">
+                                            <span class="del"><i class="fa fa-trash"></i></span>
+                                            <span class="close" data-dismiss="modal"><i class="fa fa-times"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </form>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-body">
+                                <div class="calendar-popup">
+                                    <div class="calender">
+                                        <div class="calender-header text-center">
+                                            <span class="previous"><i class="fa fa-arrow-right" aria-hidden="true"></i></span>
+                                            
+                                            <div class="dropdown month">
+                                              <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">ربيع أول 
+                                              <span class="caret"></span></button>
+                                              <ul class="dropdown-menu">
+                                                <li><a href="#">ربيع ثانى</a></li>
+                                                <li><a href="#">رجب</a></li>
+                                              </ul>
+                                            </div>
+                                            <div class="dropdown year">
+                                              <button class="btn dropdown-toggle" type="button" data-toggle="dropdown"> 1439 
+                                              <span class="caret"></span></button>
+                                              <ul class="dropdown-menu">
+                                                <li><a href="#">1440</a></li>
+                                                <li><a href="#">1439</a></li>
+                                              </ul>
+                                            </div>
+                                            <span class="next"><i class="fa fa-arrow-left" aria-hidden="true"></i></span>
+                                        </div>
+                                        <div class="calender-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <th>سبت</th>
+                                                    <th>أحد</th>
+                                                    <th>أثنين</th>
+                                                    <th>ثلاثاء</th>
+                                                    <th>أربعاء</th>
+                                                    <th>خميس</th>
+                                                    <th>جمعه</th>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td class="today">2</td>
+                                                        <td>3</td>
+                                                        <td>4</td>
+                                                        <td>5</td>
+                                                        <td>6</td>
+                                                        <td>7</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>8</td>
+                                                        <td>9</td>
+                                                        <td>10</td>
+                                                        <td>11</td>
+                                                        <td>12</td>
+                                                        <td>13</td>
+                                                        <td>14</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>15</td>
+                                                        <td>16</td>
+                                                        <td>17</td>
+                                                        <td>18</td>
+                                                        <td>19</td>
+                                                        <td>20</td>
+                                                        <td>21</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>22</td>
+                                                        <td>23</td>
+                                                        <td>24</td>
+                                                        <td>25</td>
+                                                        <td>26</td>
+                                                        <td>27</td>
+                                                        <td>28</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>29</td>
+                                                        <td>30</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="calender-footer clearfix">
+                                            <span class="del"><i class="fa fa-trash"></i></span>
+                                            <span class="close" data-dismiss="modal"><i class="fa fa-times"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+</div>
+	<!-- /calender wrapper -->
+    
+    
+     <!-- Footer -->
+    <div class="footer clearfix">
+        <div class="pull-left">&copy; 2015 إي تاسك مزود الخدمة المعتمد للعمل عن بعد - تم تطويره بواسطة <a href="#">كيوفيجن</a></div>
+    	<div class="pull-right icons-group">
+    		<a href="#"><i class="icon-screen2"></i></a>
+    		<a href="#"><i class="icon-balance"></i></a>
+    		<a href="#"><i class="icon-cog3"></i></a>
+    	</div>
+    </div>
+    <!-- /footer -->
+    
+
+      
+<script src="js/jquery-1.11.2.min.js" type="text/javascript"></script> 
+<script src="js/bootstrap.min.js" type="text/javascript"></script> 
+<script src="js/scripts.js" type="text/javascript"></script> 
+</body>
+</html>

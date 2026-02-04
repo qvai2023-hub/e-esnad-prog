@@ -1,0 +1,128 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Admin.Models.CompanyVM>
+@if (Model.Any())
+{
+    <div id="list">
+
+        @{
+
+            var grid = new WebGrid(Model);
+            var gridColumns = new List<WebGridColumn>();
+
+            if (Model.All(i => i.IsDeleted == false))
+
+            {
+                gridColumns.Add(grid.Column("Name", "الأسم", @<text>@Html.EncodedActionLink((string)item.Name, "Details", "Company", "Admin", new { id = item.Id }, null)</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("Phone", "الهاتف", @<text>@item.Phone</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "ThirdColumn"));
+gridColumns.Add(grid.Column("CommercialRegister", "السجل التجاري", @<text>@item.CommercialRegister</text>, "FourthColumn"));
+gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+gridColumns.Add(grid.Column("tasksCount", " عدد المهام للشهر الحالى", @<text>  @item.tasksCount /@item.DonetasksCount</text>, "SixthColumn"));
+
+gridColumns.Add(grid.Column("Password", "كلمة المرور", @<a href="#" onclick="createPopup('@item.Password');return false;"><i class="fa fa-key"></i></a>, "SeventhColumn"));
+
+gridColumns.Add(grid.Column("Edit", "تعديل",@<text>
+        <a href="/Admin/Company/AddEdit/@item.Id"><span class="fa fa-edit" title="" data-original-title="تعديل"></span></a>
+    </text>));
+
+    @*gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="fa fa-trash deleteBtn" id="@item.Id" title="" data-original-title="حذف">
+    <i href="javascript:void(0);" class="" id="@item.Id"></i>*@
+    gridColumns.Add(grid.Column("Delete", "حذف",@<text>
+        <span class="fa fa-trash has-tip deleteEmp" title="" id="@item.Id" data-original-title="حذف">
+            <i href="javascript:void(0);" class="icon-trash-1"></i>
+        </span>
+
+
+
+        @*gridColumns.Add(grid.Column("Delete", "حذف",@<text>
+        <span class="iconbox has-tip deleteEmp" title="" data-original-title="حذف">
+            <i href="javascript:void(0);" class="icon-trash-1" id="@item.Id"></i>
+            </span>*@
+    </text>));
+}
+        }
+        @grid.GetHtml(columns: gridColumns.ToArray(),
+                        tableStyle: "table table-bordered dataTable  table-responsive",
+                headerStyle: "",
+                      footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+
+    </div>
+    <div style="width: fit-content; color: #D3D2D2; font-size: 12px; font-weight: bold; padding: 5px; background-color: #2c3e50; text-align: center; "> عدد النتائج  :  @Model.Count() </div>
+
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            <tr>
+                <td colspan="1" style="text-align: center">
+                    لا يوجد بيانات
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+<script>
+
+    applyClassesToWebGrid();
+        var DeleteRow = new Modal({
+              title: 'حذف', //title of the popup
+              message: 'تأكيد عملية الحذف', // message text  notes: overrided if there're  id form
+              type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+              id: '',  // id of the form to show it on the modal
+              onAccept: function () {
+                  debugger
+                  var currentController = '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()';
+                  currentController = currentController.substr(0, 1).toUpperCase() + currentController.substr(1);
+
+                  $.ajax({
+                      type: 'Post',
+                      url: '@Url.Action("Delete")',
+
+                      data: { id: SelectedItemId, CurrenClass: currentController },
+                      success: function (data) {
+                          debugger
+                          console.log('success')
+                          @*$.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("Index")',
+
+                                success: function (data) {
+                                   // console.log($(data).find('#list').text())
+                                }
+                            });*@
+                      },
+                      error: function (e) {
+                          console.log('error')
+                      },
+                      complete: function (data) {
+                          debugger
+                          DeleteRow.hide();
+                         // $("#btnSearch").click();
+                          Search();
+
+                      }
+                  });
+              },// call back runs after modal accept,
+              onCancel: function () {
+                  DeleteRow.hide();
+              } // call back runs after modal cancel default  is false , closes the modal.
+          });
+    $(".fa-trash").on('click', function (e) {
+        // alert("dd");
+        e.preventDefault();
+        debugger
+        SelectedItemId = $(this).attr('id');
+        DeleteRow.show();
+    })
+
+</script>

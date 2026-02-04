@@ -1,0 +1,354 @@
+﻿@model EtaskMinstry.Models.Employee.TaskExtensionsVM
+@using EtaskMinstry;
+
+
+
+<div class="col-md-12">
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#comments"><i class="fa fa-comment"></i>التعليقات</a></li>
+            <li><a data-toggle="tab" href="#attach"><i class="fa fa-paperclip"></i>المرفقات</a></li>
+        </ul>
+
+        <div class="tab-content">
+            @*التعليقات*@
+            <div id="comments" class="tab-pane fade in active">
+                <div id="CommentArea">
+                                @foreach (var comment in Model.Comments)
+                                {
+                                    if (comment.CommentStatusId == (int)TaskCommentStatus.Reported)
+                                    {
+                                        <div class="comment-msg nobg" style="background-color: pink">
+                                            @if (comment.IsFromCompany)
+                                            {
+                                                <h2>مسؤول الشركة </h2>
+                                            }
+                                            else
+                                            {
+                                                if (comment.EmpID == MvcApplication.userData.userId)
+                                                {
+                                                    <h2>@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID).ToString() </h2>
+                                                    <h1><input type="hidden" id="hdnEmpName" value="@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID)" /></h1>
+
+                                                }
+                                            }
+                                            @if (comment.EmpID == MvcApplication.userData.userId || comment.IsFromCompany)
+                                            {
+                                                <div class="com-date">
+                                                    @if (MvcApplication.IsGregDate)
+                                                    {
+                                                        @comment.CreatedDate.ToGregArabicDateTime()
+                                                    }
+                                                    else
+                                                    {
+                                                        @comment.CreatedDate.ToHijriArabicDateTime()
+                                                    }
+                                                </div>
+                                                <div class="clear"></div>
+                                                @comment.Comment
+                                            }
+                                        </div>
+                                    }
+
+                                    else if (!(comment.CommentStatusId == (int)TaskCommentStatus.Hidden))
+                                    {
+                                        //if (!(comment.Task.EmpID != MvcApplication.userData.userId))
+                                        //{
+
+                                        <div class="comment-msg nobg">
+                                            @if (comment.IsFromCompany)
+                                            {
+                                                <h2>
+                                                    مسؤول الشركة
+                                                </h2>
+                                            }
+                                            else
+                                            {
+                                                if (comment.EmpID == MvcApplication.userData.userId || comment.EmpID != MvcApplication.userData.userId)
+                                                {
+                                                    <h2> @EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID).ToString() </h2>
+                                                    <h1><input type="hidden" id="hdnEmpName" value="@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID)"/></h1>
+                                                }
+                                            }
+                                            @if (comment.EmpID == MvcApplication.userData.userId || comment.EmpID != MvcApplication.userData.userId || comment.IsFromCompany)
+                                            {
+                                                <div class="com-date">
+                                                    @if (MvcApplication.IsGregDate)
+                                                    {
+                                                        @comment.CreatedDate.ToGregArabicDateTime()
+                                                    }
+                                                    else
+                                                    {
+                                                        @comment.CreatedDate.ToHijriArabicDateTime()
+                                                    }
+                                                </div>
+                                                    <div class="clear"></div>
+                                                    @comment.Comment
+
+                                                    @*<div class="comment-options go-left hideShowDiv">
+
+                                                    <a href="#" id="@comment.TaskCommentID" class="inline-element has-tip Report" title="إبلاغ تعليق غير لائق">
+                                                        <i class="icon-flag"></i>
+                                                    </a>
+
+                                            </div>*@
+                                            }
+                                        </div>
+                                    }//if EmpID
+                                    @*}*@//else if hidden or pendding
+                                }
+
+                </div>
+                            
+
+                        @if (!(@Model.StatusID == (int)TaskStatus.Done || Model.StatusID == (int)TaskStatus.Approved || Model.StatusID == (int)TaskStatus.Pending || !Model.iscurrentEmp))
+                        {
+                                <div class="form-group">
+                                    <label>التعليق : </label>
+                                    @Html.TextAreaFor(model => model.CommentText, new
+                                           {
+                                               @class = "form-control",
+                                               rows = 4,
+                                               scroll = "no"
+                                           })
+                                <div id="trCommentvalidation" style="color: red; text-align: center; font-size: small"></div>
+
+                            </div>
+                            @*<button type="submit" class="btn btn-primary">إرسال</button>*@
+                            <input type="button" id="btnAddComment" class="btn btn-primary" value="إرسال">
+                            }
+            </div>
+
+            @*المرفقات*@
+            <div id="attach" class="tab-pane fade">
+                <table id="tblAttachment" class="comment-grid" width="100%" border="0" cellspacing="1">
+                    @foreach (var attach in Model.TaskAttachment)
+                    {
+                        if (QvLib.QVUtil.IO.IsFileExist("/Upload/Task/" + attach.FileName))
+                        {
+                            <div class="form-group">
+                                <label>الملف :</label>
+                                <label>@Html.ActionLink(attach.FileName, "DownloadAttachment", new { fileName = attach.FileName })   </label>
+
+                            </div>
+
+
+                            <div class="form-group">
+                                <label>الوصف :</label>
+                                <label>@attach.Description </label>
+
+                            </div>
+
+                        }
+                    }
+
+                </table>
+                <hr />
+                <br />
+                @if (Model.StatusID == (int)TaskStatus.Inprogress && Model.EmployeeID == MvcApplication.userData.userId)
+                {
+                    using (Html.BeginForm("AddAttachment", "Tasks", FormMethod.Post, new { area = "Employee", enctype = "multipart/form-data", id = "attachform" }))
+                    {
+                        <input type="hidden" name="taskID" id="taskID" value="@Model.TaskID" />
+                        <div class="form-group">
+                            <label>وصف ملف جديد : </label>
+                            <input type="text" id="txtFileDescription" name="txtFileDescription" class="form-control" />
+
+                        </div>
+                        <div class="form-group">
+                            <label>ملف جديد : </label>
+
+                            @Html.Partial("PartialUploadFile")
+                            <br />
+                            <br />
+
+                            <div id="trUploadvalidation" style="color: red; text-align: right; font-size: small"></div>
+
+
+                            @*<span id="RecaptchaValidation" style="display: none; color: red;">رجاء المرور من اختبار التحقق من الهوية بشكل صحيح.</span>
+                            <div id="recap" class="recap">
+                                <div id="recapElem"></div>
+                                <div class="g-recaptcha" data-sitekey="@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]"></div>
+                            </div>*@
+                        </div>
+                        <a class="action-btn btn btn-primary" id="btnAddAttchment">
+                            <i class="icon-upload-cloud"></i>
+                            ارفاق
+                        </a>
+                    }
+                } 
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit' async defer></script>
+@*<script src='https://www.google.com/recaptcha/api.js' async defer></script>*@
+<script type="text/javascript">
+    var isFirstClick = true;
+    var isValidReCap = false;
+
+    var recaptcha_id;
+    var onloadCallback = function () {
+        debugger;
+        recaptcha_id = grecaptcha.render('recapElem', {
+            'sitekey': '@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]',
+            'callback': correctCaptcha
+        });
+    };
+    var correctCaptcha = function (response) {
+
+        debugger;
+        var recapResponse = grecaptcha.getResponse(recaptcha_id);
+        if (recapResponse) {
+            isValidReCap = true;
+        }
+    };
+
+
+
+    $(function () {
+        $('#btnAddAttchment').click(function (e) {
+            debugger;
+            e.preventDefault();
+
+            //correctCaptcha();
+            //if (!isValidReCap) {
+            //    $("#RecaptchaValidation").show();
+            //} else {
+            //    $("#RecaptchaValidation").hide();
+            //}
+
+            if ($('#hiddenfileName').val() == "" ) {
+                $('#trUploadvalidation')[0].innerHTML = "يجب أختيار ملف";
+                return;
+            }
+
+            //if (isValidReCap == false) {
+            //    $("#RecaptchaValidation").show();
+            //    return;
+            //}
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            debugger
+            if (!varchar350.test($('#txtFileDescription').val().trim())) {
+                $('#trUploadvalidation')[0].innerHTML = "يجب ان لا يزيد عدد الحروف الوصف عن 350حرف و غير مسموح بكتابه رموز خاصه";
+                return;
+            }
+            else {
+                $('#trUploadvalidation')[0].innerHTML = "";
+                var url = "/Employee/tasks/AddAttachment";
+                $("#attachform").submit();
+            }
+        });
+
+
+
+        //Handle Add Comment 
+        $('#btnAddComment').click(function (e) {
+            //e.preventDefault();
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            if ($('#CommentText').val().trim() == "") {
+                $('#trCommentvalidation')[0].innerHTML = " يجب الا تترك الخانات فارغه ";
+                return;
+            }
+            else if (!varchar350.test($('#CommentText').val().trim())) {
+                $('#trCommentvalidation')[0].innerHTML = "يجب ان لا يزيد عدد الحروف الوصف عن 350حرف و غير مسموح بكتابه رموز خاصه";
+                return;
+            }
+            else {
+                var url = "/Employee/Tasks/AddComment";
+                $(this).attr("disabled", "disabled");             
+                $.post(url, { taskId: '@Model.TaskID', strComment: $('#CommentText').val(), iEmployeeID: '@Model.EmployeeID' }, function (data) {
+                    if (data != "0") {
+                        var commentdiv = "<div class='comment-msg nobg'> ";
+                        if ("@EtaskMinstry.MvcApplication.userData.isCompany" == "True") {
+                            commentdiv += " <h2> مسؤول الشركة</h2>   <div class='com-date'>  @if (MvcApplication.IsGregDate)
+                                                                                             {@DateTime.Now.ToGregArabicDateTime()
+                                                                                             }
+                                                                                             else
+                                                                                             {  @DateTime.Now.ToHijriArabicDateTime() } </div>"
+                        } else {
+                            commentdiv += "<h2>" + $('#hdnEmpName').val() + "" + "</h2>   <div class='com-date'> @if (MvcApplication.IsGregDate)
+                                                                                                                 {@DateTime.Now.ToGregArabicDateTime()
+                                                                                                                 }
+                                                                                                                 else
+                                                                                                                 {  @DateTime.Now.ToHijriArabicDateTime() }  </div>"
+                            commentdiv += " <div class='clear'></div>" + $('#CommentText').val();
+                            //commentdiv += '<div class="comment-options go-left hideShowDiv" >';
+                            //commentdiv += ' <a href="#" id="' + data + '"   class="inline-element has-tip Report" title="إبلاغ تعليق غير لائق">';
+                            //commentdiv += ' <i class="icon-flag"></i></a>';
+                            //commentdiv += "</div>";
+                            if ($('#CommentText').val() != "") {
+                                $('#CommentArea')[0].innerHTML += commentdiv;
+                            }
+                            $('#CommentText').val('');
+                            $('#trCommentvalidation')[0].innerHTML = "";
+                        }
+                    } else {
+                        $('#trCommentvalidation')[0].innerHTML = "";
+                    }
+                    if ($('#CommentText').val() == "")
+                    { $('#btnAddComment').removeAttr("disabled"); }
+                });
+            }          
+        });
+        $('#CommentText').on('change', function () {
+            $('#btnAddComment').removeAttr("disabled");
+        });
+        /////////////////////////////////////////////
+
+        $('.hide').click(function (e) {
+            var elemet = $(this);
+            var iconid = $(this).attr("id");
+            var commentID = $(this).attr("id").split('_')[0].trim();
+            e.preventDefault();
+            var url = "/Employee/tasks/HideComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.comment-msg').css('background-color', 'gray');
+                    //elemet.closest('.hideShowDiv ').children().toggle();
+                   
+                }
+                else {
+                }
+
+            });
+        });
+
+
+        $('.show').click(function (e) {
+            var elemet = $(this);
+            var iconid = $(this).attr("id");
+            var commentID = $(this).attr("id").split('_')[0].trim();
+            e.preventDefault();
+            var url = "/Employee/tasks/ShowComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.comment-msg').css('background-color', 'white');
+                    //elemet.closest('.hideShowDiv ').children().toggle();
+                }
+                else {
+                }
+
+            });
+        });
+        $(document).on('click', '.Report', function (e) {
+            // $('.Report').click(function (e) {
+            var commentID = $(this).attr("id");
+            e.preventDefault();
+
+            var elemet = $(this);
+            var url = "/Employee/tasks/ReportComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.comment-msg').css('background-color', 'pink');
+                    //elemet.closest('.hideShowDiv').remove();
+                }
+                else {
+                }
+            });
+        });
+    });
+
+</script>

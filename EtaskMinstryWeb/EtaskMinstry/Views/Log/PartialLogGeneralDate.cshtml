@@ -1,0 +1,107 @@
+﻿@{
+    Layout = null;
+}
+
+
+@model List<Dictionary<string, object>>
+@{
+    ViewBag.Title = "سجل العمليات";
+    string ItemDate = "";
+}
+
+        @if (Model.Count() > 0)
+            {
+            <input type="hidden" value="@ViewBag.total" id="hiddenTotal" />
+            <input type="hidden" id="HF_Remain" value="@ViewBag.Remain" />
+            <ul class="activity">
+                @foreach (var col in Model)
+                {
+                    foreach (var row in col)
+                    {
+
+                        if (row.Key == "updates")
+                        {
+                            string[] updates = row.Value.ToString().Split(new string[] { "#" }, System.StringSplitOptions.None);
+                            foreach (var item in updates)
+                            {
+
+                                <li>
+                                    <i class="fa fa-bell text-danger"></i>
+                                    <span> @Html.Raw(item) </span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            if (row.Key == "date_hijri")
+                            {
+                                if ((row.Value.ToString()) != ItemDate)
+                                {
+                                    <div class="date">@Html.Raw(row.Value.ToString())</div>
+                                    <span class="hiddenDate">@(ItemDate = (row.Value.ToString()))</span>
+                                }
+                            }
+                            else if (row.Key != "action_id" && row.Value != "")
+                            {
+                                <li>
+                                    <i class="fa fa-check text-success"></i>
+                                    <span> @Html.Raw(row.Value) </span>
+                                </li>
+                            }
+                        }
+
+
+                    }
+                }
+
+           </ul>
+        }
+
+        else
+        {
+            <div class="empty">
+                لا يوجد بيانات
+            </div>
+        }
+
+<style>
+    .spnVal {
+        color: #AFB42B;
+        font-weight: bold;
+    }
+
+    .hiddenDate {
+        display: none;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            debugger
+            total = $('#hiddenTotal').val();
+            remain = $("#HF_Remain").val();
+            debugger
+            if (skip != 0) {
+                remain = remain - skip;
+                if (remain < 10)
+                    $("#lnkMore").hide();
+            }
+            else if (total != undefined && remain != undefined) {
+                if (remain <= 10)
+                    $("#lnkMore").hide();
+                else
+                    $("#lnkMore").show();
+            }
+
+        }, 100);
+    })
+
+    $(function () {
+
+    });
+
+</script>
+

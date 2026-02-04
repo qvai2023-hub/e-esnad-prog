@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="https://localhost:44300/Etask.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/QvApi.Entities" />
+  <xs:element name="GetTeleworkersEvaluation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="PeriodStart" type="xs:dateTime" />
+        <xs:element minOccurs="0" name="PeriodEnd" type="xs:dateTime" />
+        <xs:element minOccurs="0" name="ClientReference" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetTeleworkersEvaluationResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/QvApi.Entities" minOccurs="0" name="GetTeleworkersEvaluationResult" nillable="true" type="q1:ArrayOfEvaluation" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

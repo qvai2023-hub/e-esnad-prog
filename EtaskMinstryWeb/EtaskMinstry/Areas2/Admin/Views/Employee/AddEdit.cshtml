@@ -1,0 +1,465 @@
+﻿@using EtaskMinstry
+@model EtaskMinstry.Areas.Admin.Models.CompanyEmployeeVM
+
+@{
+    ViewBag.Title = "اضافة / تعديل موظف";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Scripts/QVUploader/QVUploader.css" rel="stylesheet" />
+<script src="~/Scripts/QVUploader/QVUploader.js"></script>
+
+<script src="~/Scripts/Employee/_PartialUploadImage.js"></script>
+<script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit' async defer></script>
+
+
+@Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.Id)
+@Html.HiddenFor(model => model.EmpID)
+
+<!-- Right labels -->
+<form class="form-horizontal" method="post" role="form">
+    <div class="panel panel-default">
+        <div class="panel-heading"><h6 class="panel-title"><i class="fa fa-edit"></i> تعديل / اضافه </h6></div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.CompanyID):</label>
+                <div class="col-sm-10">
+                    @Html.DropDownList("CompanyID", ViewBag.Company as SelectList, "اختر...",
+                    new
+                    {
+                        @id = "CompanyID",
+                        Class = "form-select"
+                    })
+                    <br />
+                    @Html.HiddenFor(model => model.CompanyID, new { @name = "HF_Company" })
+                    @Html.ValidationMessageFor(model => model.CompanyID, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Name):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-textbox" })
+                    <br />
+                    @Html.HiddenFor(model => model.Name, new { @name = "HF_Name" })
+
+                    @Html.ValidationMessageFor(model => model.Name, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Gender):</label>
+                <div class="col-sm-10">
+                    @Html.RadioButtonFor(model => model.Gender, true) ذكر
+                    @Html.RadioButtonFor(model => model.Gender, false) أنثى
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Gender, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.JobTitle):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.JobTitle, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.JobTitle, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Address):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.Address, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Address, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+@if (Model == null && ViewBag.Message == null || Model != null && Model.Id == 0 && ViewBag.IsValiRecap == false)
+{
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Email):</label>
+        <div class="col-sm-10">
+            @Html.TextBoxFor(model => model.Email, new { @class = "form-textbox" })
+            <br />
+            @Html.ValidationMessageFor(model => model.Email, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+        </div>
+    </div>
+}
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Mobile):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.Mobile, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Mobile, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.IsActive):</label>
+                <div class="col-sm-10">
+                    @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.IsActive, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Birthdate):</label>
+              
+                  <div class="col-sm-3">
+                      <div class='input-group date'>
+                          @Html.TextBoxFor(model => model.Birthdate, new {  @class = "form-control", @readonly = "readonly" })
+                       
+                            <span class="input-group-addon">
+                              <span class="fa fa-calendar"></span>
+                          </span>
+                          </div>
+                        
+                          @Html.ValidationMessageFor(model => model.Birthdate, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                      </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.NationalID):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.NationalID, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.NationalID, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.NationaIDImage):</label>
+                <div class="col-sm-10">
+                    <div id="nationalImg">
+                        @Html.Partial("PartialUploadImage", Model, new ViewDataDictionary { { "ProperyToBind", "NationaIDImage" } })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.LaborOfficeID):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.LaborOfficeID, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.LaborOfficeID, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.SequenceNumber):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.SequenceNumber, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.SequenceNumber, null,
+                new
+                {
+                    Style = "Color:red;",
+                    @id = "TitleValidation"
+                })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.ImageName):</label>
+                <div class="col-sm-10">
+                    <div id="nationalImg">
+                        @Html.Partial("PartialUploadImage", Model, new ViewDataDictionary { { "ProperyToBind", "ImageName" } })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+
+                <span id="RecaptchaValidation" style="display: none; color: red;">رجاء المرور من اختبار التحقق من الهوية بشكل صحيح.</span>
+                <div id="recap" class="recap">
+                    <div id="recapElem"></div>
+                    @*<div class="g-recaptcha" data-sitekey="@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]"></div>*@
+                </div>
+            </div>
+
+
+
+            <div class="form-actions text-right">
+                <input type="submit" value="حفظ" class="btn btn-primary" onclick="Saveclick(this);" />&nbsp;
+                <a href="/Admin/Employee/Index" class="btn btn-primary">الرجوع للقائمة</a>
+            </div>
+
+        </div>
+    </div>
+</form>
+<!-- /right labels -->
+
+<script>
+    var isFirstClick = true;
+    var isValidReCap = false;
+    function Saveclick(event) { 
+        correctCaptcha();
+        if (!isValidReCap) {
+            $("#RecaptchaValidation").show();
+        } else {
+            $("#RecaptchaValidation").hide();
+        }
+
+    }
+    //$(function () {
+    var recaptcha_id;
+    var onloadCallback = function () {
+        debugger;
+        recaptcha_id = grecaptcha.render('recapElem', {
+            'sitekey': '@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]',
+                'callback': correctCaptcha
+            });
+        };
+    var correctCaptcha = function (response) {
+
+            debugger;
+            var recapResponse = grecaptcha.getResponse(recaptcha_id);
+            if (recapResponse) {
+                isValidReCap = true;
+            }
+        };
+        //});
+
+</script>
+
+
+@if (ViewBag.Message != null)
+{
+    <script>
+
+        $(document).ready(function () {
+            var isValid = true;
+
+            $('.field-validation-error').each(function (i, obj) {
+                if ($(this).css('display') != 'none') {
+                    isValid = false;
+                    return false;
+                }
+            });
+            if (isValid)//model is valid and it has been saved  truely
+            {
+                Modal.showMessage({ title: ' حفظ', message: 'تم حفظ العملية بنجاح', type: 'alert', onAccept: function () { window.location.href = "/Admin/Employee/AddEdit"; }, time: false });
+
+            } else// model is not valid
+            {
+                Modal.hide();
+            }
+
+        });
+
+    </script>
+}
+@if (ViewBag.IsValiRecap == false)
+{
+    <script>
+        $(document).ready(function () {
+            $("#RecaptchaValidation").show();
+        });
+    </script>
+}
+<script>
+    //get web.config variables for _PartialUploadImage.js file
+    var Extentions = "@System.Configuration.ConfigurationManager.AppSettings["ImageExtensions"]";
+    var size = "@System.Configuration.ConfigurationManager.AppSettings["maxfileSize"]";
+
+    $(document).ready(function () {
+        //stop textboxes from autoComplete
+        $("form :input").attr("autocomplete", "off");
+    debugger
+        // Add Calendar To TextBoxs .
+        var Isgreg = "@(MvcApplication.IsGregDate)";
+        if (Isgreg == "True") {
+            //datepicker
+            var fullmonth_array = $.datepicker.regional['ar'].monthNames
+            $('#Birthdate').datepicker(
+                {
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: '1920:2016',
+                    monthNamesShort: fullmonth_array
+                },
+           $.datepicker.regional["ar"]);
+            //
+        } else {
+            $('#Birthdate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+            });
+        }
+        //delete bithdate textbox value
+        $('.iconbox .icon-trashA').live('click', function (e) {
+            debugger;
+            e.preventDefault();
+            $("#Birthdate").val("");
+        });
+        //rehire employee
+        $('#NationalID').change(function () {
+            var iRehiredEmployeeId = 0;
+            var reHireConfirmation = new Modal({
+                title: 'إعادة توظيف', //title of the popup
+                message: 'هذا الموظف تم مسحه من شركتكم سالفا. هل تريد إعادة توظيفه؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("RehireDeletedEmp")',
+                        dataType: 'json',
+                        data: { EmpId: iRehiredEmployeeId },
+                        success: function (data) {
+                            window.location.href = "/Admin/Employee/AddEdit?empid=" + iRehiredEmployeeId;
+                        },
+                        error: function (e) {
+                        },
+                        complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true") {
+                                Notify("success", "تم إعادة التوظيف.يمكنك تعديل البيانات.", 3000);
+                                $("#btnSearch").click();
+                            } else
+                                Notify("danger", "لم تتم إعادة التوظيف", 3000);
+                        }
+                    });
+
+                    reHireConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    reHireConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            reHireConfirmation.hide();
+
+            var NationalId = $('#NationalID').val();
+
+            if (NationalId.length >= 10) {
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("CheckDeletedEmpNationlID")',
+                    dataType: 'json',
+                    data: { "NationalID": NationalId },
+                    success: function (response) {
+                        response = JSON.stringify(response);
+                        if (response > 0) {
+                            iRehiredEmployeeId = response;
+                            reHireConfirmation.show();
+                        }
+                        else {
+                            iRehiredEmployeeId = 0;
+                            reHireConfirmation.hide();
+                        }
+                    }
+                });
+            }
+
+        })
+    });
+    //$("#Email").attr("disabled", "disabled");
+    $("#CompanyID").change(function() {
+        if ($("#CompanyID").val() != "") {
+
+            $("#Email").removeAttr("disabled");
+        } else {
+            $("#Email").attr("disabled", "disabled");
+        }
+        debugger;
+        if ($('#Name').val()!="") {
+            $('#Name').removeData('previousValue');
+            $('#AddEditEmpForm').validate().element('#Name');
+        }
+
+    })
+
+</script>
+
+<style>
+    .ui-datepicker .ui-datepicker-title select {
+        float: none;
+        -webkit-appearance: menulist !important;
+        box-sizing: border-box;
+        align-items: center;
+        border: 1px solid #A9A6A6;
+        border-image-source: initial;
+        border-image-slice: initial;
+        border-image-width: initial;
+        border-image-outset: initial;
+        border-image-repeat: initial;
+        white-space: pre;
+        -webkit-rtl-ordering: logical;
+        color: black;
+        background-color: white;
+        cursor: default;
+        border-radius: 1px;
+        height: inherit;
+        font-size: 11px;
+        background-image: none;
+        padding: 0;
+        box-shadow: none;
+    }
+</style>
+
+
+
+
+
+

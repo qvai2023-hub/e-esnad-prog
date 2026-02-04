@@ -1,0 +1,90 @@
+﻿@using EtaskMinstry;
+@model EtaskMinstry.Models.CustomTxtbox
+
+<script>
+    $(function () {
+        //choose tybe from dropdown Search
+        //$(".dropdown-menu > li > input[type='submit']").click(function (e) {
+        //    debugger;
+        //   // $('#search').submit();
+        //    var type = $(this).attr("typeSearch");
+        //    if ($("#search").valid() == true) {
+
+        //        Search(type);
+        //        e.preventDefault();
+
+        //    }
+        //});
+        var type = "";
+        $(".optionstatus").change(function () {
+            debugger;
+             type = $(this).val();
+
+        })
+        $("#btnSearch").click(function (e) {
+            debugger;
+          
+            // $('#search').submit();
+          //  var type = $(this).attr("typeSearch");
+            if ($("#search").valid() == true) {
+                if (type == "") {
+                    type = 0;
+                }
+                Search(type);
+                e.preventDefault();
+
+            }
+        });
+    });
+    //Task Search
+    function Search(status) {
+        debugger;
+        var res = "@string.IsNullOrEmpty(EtaskMinstry.MvcApplication.userData.CompanyId.ToString())";
+        if (res) {
+            if ("@EtaskMinstry.MvcApplication.userData.isCompany" == 'True')
+                window.location.href = "/company/Company/Index?s=" + status + "&t=" + $('#txtQuickSearch').val() + "";
+            else
+                window.location.href = "/Employee/Tasks/Index?s=" + status + "&t=" + $('#txtQuickSearch').val() + "";
+        }
+    }
+</script>
+
+
+<div class="task-search">
+
+    @using (Html.BeginForm(null, null, null, FormMethod.Post, new { id = "search", name = "searchForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "ErrorMessage" })
+        <div class="input-group">
+            
+                @Html.TextBoxFor(model => model.Search, new
+                        {
+                            @class = "form-control",
+                            @id = "txtQuickSearch",
+                            @placeholder = "البحث فى المهام"
+                        })
+
+               
+                <span class="input-group-addon">
+                    <input type="submit" id="btnSearch" class="btn btn-primary" value="بحث" />
+                </span>
+            <select class="form-control optionstatus">
+                <option value="0" id="new">كل المهام</option>
+                <option value="@((int)TaskStatus.New)" id="new">جديده</option>
+                <option value="@((int)TaskStatus.Inprogress)" id="inprogress">جارى العمل</option>
+                <option value="@((int)TaskStatus.Done)" id="done">إنتهت</option>
+                <option value="@((int)TaskStatus.Pending)" id="pending">معلقه</option>
+             
+            </select>
+              
+            </div>
+
+         @Html.ValidationMessageFor(model => model.Search)
+           
+         
+    }
+
+
+</div>
+

@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h3 class="paragraph-title">مساعدة</h3>
+
+<div class="clear"></div>
+<div class="form-group">
+    <ul class="icon-grid">
+        <li>
+            <a href="~/Upload/Help/startnow.pdf" class="animate-this" download>
+                <span class="xtra-icon-holder">
+                    <i class="fa fa-paper-plane margin-icon"></i>
+                </span>
+                <br>
+                	ابدأ الآن   
+            </a>
+        </li>
+
+        <li>
+          
+            <a href="~/Upload/Help/heplforcompany.pdf" class="animate-this" download>
+                <span class="xtra-icon-holder">
+                    <i class="fa fa-briefcase margin-icon"></i>
+                </span>
+                <br>
+               	دليل مستخدم الشركات 
+            </a>
+        </li>
+             <li>
+            <a href="http://qvsupport.tawfier.com/" target="_blank" class="animate-this">
+                <span class="xtra-icon-holder">
+                    <i class="fa fa-support margin-icon"></i>
+                </span>
+                <br>
+                	الدعم الفني 
+            </a>
+        </li>
+        @*<li>
+            <a href="/Company/report/ProjectReport" class="animate-this">
+                <span class="xtra-icon-holder">
+                    <i class="fa fa-question-circle margin-icon"></i>
+                </span>
+                <br>
+                	الأسئلة الشائعة 
+            </a>
+        </li>
+
+        <li>
+            <a href="/Company/report/ProjectReport" class="animate-this">
+                <span class="xtra-icon-holder">
+                    <i class="fa fa-support margin-icon"></i>
+                </span>
+                <br>
+                	الدعم الفني 
+            </a>
+        </li>*@
+    </ul>
+</div>
+<style>
+    .margin-icon {
+    margin-top: 14px;
+    }
+
+    .xtra-icon-holder {
+         padding-top: 0 !important;
+     padding-right:  0 !important;
+     padding-bottom: 0 !important;
+     padding-left:  0 !important;
+    width: 70px !important;
+    height: 70px !important;
+    }
+
+    a[href$='.pdf'] {
+    background-image:none;
+    }
+</style>

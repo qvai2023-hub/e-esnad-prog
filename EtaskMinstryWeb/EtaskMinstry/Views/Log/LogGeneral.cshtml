@@ -1,0 +1,280 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+    ViewBag.Title = "سجل العمليات ";
+}
+
+
+
+@* --------------------------------------Start Search Panel----------------------------------------- *@
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h6 class="panel-title panel-trigger">
+            <a data-toggle="collapse" href="#panel-search">بحث</a>
+        </h6>
+    </div>
+    <div id="panel-search" class="panel-collapse collapse">
+        <div class="panel-body">
+            <form class="form-horizontal">
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label class="col-sm-4 control-label">الصفحة: </label>
+                        <div class="col-sm-8">
+                            @Html.DropDownList("pageId", ViewBag.pages as SelectList, "--اختر الصفحة--", new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-sm-6">
+
+                        <label class="col-sm-4 control-label">الموظف: </label>
+                        <div class="col-sm-8">
+                            @Html.DropDownList("empId", ViewBag.employees as SelectList, "--اختر الموظف--", new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+
+                        <label class="col-sm-4 control-label">العمليه: </label>
+                        <div class="col-sm-8">
+                            @Html.DropDownList("actionId", ViewBag.actions as SelectList, "--اختر العملية--", new { @class = "form-control" })
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-sm-6">
+
+                        <label class="col-sm-4 control-label">  من: </label>
+                        <div class="col-sm-8">
+                            <div class='input-group date'>
+                                @Html.TextBox("fromDate", null, new { @id = "startDate", @class = "form-control", @readonly = "readonly" })
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label class="col-sm-4 control-label">إلى: </label>
+                        <div class="col-sm-8">
+                            <div class='input-group date'>
+                                @Html.TextBox("toDate", null, new { @id = "endDate", @class = "form-control", @readonly = "readonly" })
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                               </div>
+
+                            </div>
+                        <span class="errorMsg" style="display:none; color:red">يجب ان يكون تاريخ بداية البحث اقل من تاريخ النهاية</span>
+
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <input name="Submit0" id="btnSearchTask" type="button" class="submit-btn btn btn-primary" style="height: 29px;" value="بحث">
+                    <input name="Submit1" id="ShowAllData" type="submit" class="btn btn-primary" style="height: 29px;" value="عرض الكل">
+                </div>
+                <span style="display: inline-block; text-align: left;margin-right: 332px;">
+                    <img id="loadongbar" src="/Content/Main/images/loadingBar.gif" style="display: none" />
+                </span>
+            </form>
+        </div>
+    </div>
+</div>
+@* --------------------------------------End Search Panel------------------------------------------- *@
+
+
+
+@* -------------------------------------Start Get Log Data From  PartialLogGeneralDate  ------------ *@
+<div class="panel panel-default">
+
+    <div class="panel-body">
+        <div id="countDiv" class="panel-activity">
+            @Html.Action("GetLogGeneralData", "Log", new { CompanyId = EtaskMinstry.MvcApplication.userData.userId })
+        </div>
+    </div>
+</div>
+
+@* --------------------------------------End Get Log Datal From  PartialLogGeneralDate  ------------ *@
+
+
+@* --------------------------------------Start Read More Ajax Call  -------------------------------- *@
+<div class="row text-center">
+    <div class="col-md-12">
+
+        @Ajax.ActionLink("المزيد", "GetLogGeneralData", null,
+     new AjaxOptions()
+     {
+         UpdateTargetId = "countDiv",
+         InsertionMode = InsertionMode.InsertAfter,
+         OnComplete = "scroll",
+         LoadingElementId = "loadongbar",
+         LoadingElementDuration = 200
+     },
+     new
+     {
+         @id = "lnkMore",
+         @class = "more btn btn-primary load"
+     })
+    </div>
+</div>
+
+@* --------------------------------------End Read More Ajax Call  ------------------------------------ *@
+
+
+<script>
+
+    var skip = 0;
+    var sDate = "";
+    var eDate = "";
+    var isSarch = false;
+    var showAll = false;
+    var total = "";
+    var empId = 0;
+    var actionId = 0;
+    var pageId = 0;
+    var remain = "";
+    var compID = @EtaskMinstry.MvcApplication.userData.userId
+    $(function () {
+        //debugger
+
+        // get count of all avialble log data.
+        //then hide the more btn if the we retrieved all log data.
+        total = $('#hiddenTotal').val();
+
+        if (skip + 10 >= total || typeof total === 'undefined') {
+            $('.more').hide();
+        }
+        /////////////////////////////////////////////////////
+
+        //wrap textbox of start and end date by calender style
+        //$('#startDate,#endDate').calendarsPicker({
+        //    changeMonth: true, changeYear: true,
+        //    minDate: -24000,
+        //    maxDate: +0, showTrigger: '#calImg',
+        //    calendar: $.calendars.instance('ummalqura'),
+        //    dateFormat: 'dd/mm/yyyy',
+        //    Range: "-70:+0"
+        //});
+        var Isgreg = "@(EtaskMinstry.MvcApplication.IsGregDate)";
+        if (Isgreg == "True") {
+            //datepicker Grerg
+            //$("#startDate").datepicker($.datepicker.regional["ar"]);
+            //$("#endDate").datepicker($.datepicker.regional["ar"]);
+            //
+            $('#startDate,#endDate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('Gregorian'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '2021:2050'
+            });
+        }
+        else {
+            //calendar Hijrii
+            $('#startDate,#endDate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+            });
+        }
+        /////////////////////////////////////////////////////////
+
+        //when click on more btn get next 10 log data.
+        $('#lnkMore').click(function () {
+            debugger;
+            skip += 10;
+            if (isSarch) {
+                skip = 0;
+                //total = "";
+                //remain = "";
+                $("#countDiv").html("");
+
+            }
+            sDate = $("#startDate").val();
+            eDate = $("#endDate").val();
+            pageId = $("#pageId").val();
+            actionId = $("#actionId").val();
+            empId = $("#empId").val();
+            $(this).attr("href", "/Log/GetLogGeneralData?skip=" + skip + "&fromDate=" + sDate + "&toDate=" + eDate + "&controllerId=" + pageId + "&employeeId=" + empId + "&actionId=" + actionId);
+            //debugger
+            //$.ajax({
+            //    type: 'Post',
+            //    url: "/Log/GetLogGeneralData",
+            //    dataType: 'json',
+            //    data: { "skip": skip, "fromDate": sDate, "toDate": eDate, "controllerId": pageId, "employeeId": empId, "actionId": actionId },
+            //    success: function (data) {
+            //        alert("11")
+            //        // $("#list").html(data);
+            //    }
+            //});
+
+            if (skip + 10 >= total) {
+                $('.more').hide();
+            }
+        });
+        /////////////////////////////////////////////////////////
+
+        //when click on search btn
+        // check for date validation
+        //if true call the function of the more btn
+        // to get log data according to search criteria.
+        $('#btnSearchTask').click(function () {
+  debugger
+            var sDate = $('#startDate').val();
+            var eDate = $('#endDate').val();
+            if (sDate !== "" && eDate !== "") {
+                if (HijridateCompare(sDate, eDate) == -1 || HijridateCompare(sDate, eDate) == 0) {
+                    $('.errorMsg').hide();
+                    isSarch = true;
+                    $('#lnkMore').click();
+                } else {
+                    $('.errorMsg').show();
+                }
+            } else {
+                isSarch = true;
+                $('#lnkMore').click();
+
+            }
+
+        });
+        //////////////////////////////////////////////
+
+        //Show all data for specific task
+        $("#ShowAllData").click(function () {
+            debugger
+            sDate = $("#startDate").val();
+            eDate = $("#endDate").val();
+            pageId = $("#pageId").val('0');
+            actionId = $("#actionId").val('0');
+            empId = $("#empId").val('0');
+            isSarch = true;
+            $('#lnkMore').click();
+        });
+        //////////////////////////////////////
+    });
+
+    //scrol to the log data to show
+    //all new logs.
+    function scroll() {
+        if (!isSarch) {
+            $("html, body").animate({ scrollTop: $(document).height() - $(window).height() - 100 }, 2500);
+        }
+        isSarch = false;
+    }
+
+
+
+    ////////////////////////////////////////////////////
+</script>
+
+
+
+

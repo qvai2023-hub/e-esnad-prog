@@ -1,0 +1,29 @@
+﻿.loadedImage{
+    margin-left:5px;
+    width:100px !important;
+    display:none;
+}
+.fileUpload {
+}
+
+.lblUploadCheck {
+}
+
+.chbxUpload {
+}
+
+
+.btnNonBrowseUpload {
+}
+
+.spanUpload {
+
+
+}
+
+.clearUpload {
+}
+
+.clearUpload:hover {
+    cursor:pointer;
+}

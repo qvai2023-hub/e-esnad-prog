@@ -1,0 +1,213 @@
+﻿<!-- start popUp-->
+@*<div style="position: fixed; right: 50%; display: none; top: 30%; z-index: 100;" class="modal_template modal">
+        <div class="block-dim"></div>
+        <div class="pop-box" style="width: 500px; position: relative; right: -50%; z-index: 2000;">
+            <div class="pop-title">
+                <a class="pop-close modal_btn_cancel" style="cursor: pointer;"></a>
+                <h2 class="modal_title"></h2>
+            </div>
+            <div class="pop-content">
+                <strong><div class="modal_content"></div></strong>
+                <div class="entery-form">
+                    <div style="margin-top: 65px;" class="left-text">
+                        <input type="submit" id="btn-sub" class="modal_btn_accept submit-btn" value="موافق"/>
+                        <input type="submit" class="modal_btn_cancel submit-btn" value="اغلاق" />
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>*@
+
+@*<div style="position: fixed; right: 50%; display: none; top: 30%; z-index: 100;" class="modal_template modal">*@
+    <div class="modal_template modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog pop-box" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="pop-title">
+                        <a class="pop-close modal_btn_cancel" style="cursor: pointer;"></a>
+                        <h4 class="modal_title"></h4>
+                    </div>
+                </div>
+                <div class="pop-content modal-body">
+                    @*<strong>*@
+                    <div class="modal_content">
+                    </div>
+                    @*</strong>*@
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" id="btn-sub" class="btn btn-primary modal_btn_accept submit-btn" value="موافق" />
+                    <input type="submit" class="modal_btn_cancel btn  btn-defaul" value="اغلاق" />
+                    @*<button type="button" class="btn btn-default" data-dismiss="modal">إلغاء</button>*@
+                    @*<button type="button" class="btn btn-primary">حفظ</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*</div>*@
+
+
+
+
+    @*<div class="modal_template modal" id="confirmDeleteModal" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="pop-title">
+                        <a class="pop-close modal_btn_cancel" style="cursor: pointer;"></a>
+                        <h2 class="modal_title"></h2>
+                    </div>
+                    <div class="pop-content">
+                       <div class="modal_content"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" id="btn-sub" class="btn btn-primary modal_btn_accept submit-btn" value="موافق" />
+                        <input type="submit" class="btn btn-default modal_btn_cancel submit-btn" value="اغلاق" />
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+    <!--End popUp-->
+
+
+    <script type="text/javascript">
+
+        $(document).on('click', '#btn-sub', function () {
+
+            $("#btn-sub").attr('disabled', 'disabled');
+        });
+        function Modal(options) {
+            debugger
+            var settings =
+                {
+                    title: '',
+                    message: '',
+                    id: '',
+                    type: 'form',
+                    onAccept: false,
+                    onCancel: false
+                };
+            //  alert(options)
+            $.extend(settings, options);
+            $this_class = this; debugger;
+            var my_modal_id = 'modal_' + Math.floor((Math.random() * 1000) + 1);
+            var modal_object = $('.modal_template').clone().removeClass('modal_template');
+            modal_object.attr('id', my_modal_id);
+
+
+
+            this.init = function () {
+                debugger;
+                modal_object.find('.modal_title').html(settings.title);
+                if (settings.id != '')
+                    modal_object.find('.modal_content').append($('#' + settings.id));
+                else
+                    modal_object.find('.modal_content').html(settings.message);
+
+                $('body').prepend(modal_object);
+            }
+
+
+            modal_object.find('.modal_btn_accept').click(function () {
+                // alert("sss"+my_modal_id)
+                if (settings.onAccept)
+                    settings.onAccept($('#' + my_modal_id));
+
+            });
+
+            modal_object.find('.modal_btn_cancel').click(function () {
+                if (settings.onCancel)
+                    settings.onCancel($('#' + my_modal_id));
+                else
+                    $this_class.hide();
+            });
+            this.show = function () {
+                debugger;
+                $('#' + my_modal_id).show();
+                switch (settings.type) {
+                    case 'confirm':
+                        modal_object.find('.modal_btn_cancel, .modal_btn_accept').show();
+                        break;
+                    case 'alert':
+                        modal_object.find('.modal_btn_cancel').hide();
+                        break;
+                    case 'alertMessage':
+                        modal_object.find('.modal_btn_accept, .modal_btn_cancel').hide();
+                        modal_object.find('.pop-close').show();
+                        break;
+                    default:
+                        modal_object.find('.modal_btn_accept, .modal_btn_cancel').hide();
+                        break;
+                }
+            }
+
+            this.hide = function () {
+                $('#' + my_modal_id).hide();
+            }
+
+            this.init();
+        }
+
+        Modal.hide = function () {
+            $('.modal').hide();
+
+        }
+        Modal.showMessage = function (options, message) {
+            var settings =
+            {
+                title: '',
+                message: '',
+                type: 'alert',
+                onAccept: function (e) {
+                    $(e).hide();
+                },
+                time: 5000
+            };
+
+            if (message !== undefined) {
+                settings =
+                {
+                    title: options,
+                    message: message,
+                    type: 'alert',
+                    onAccept: function (e) {
+                        $(e).hide();
+                    },
+                    time: 5000
+                };
+            }
+            else
+                $.extend(settings, options);
+
+            var messageModal = new Modal(settings)
+            messageModal.show();
+            if (settings.time !== false)
+                setTimeout(function () { messageModal.hide(); }, settings.time);
+        }
+
+        //Type
+
+        function Notify(type, message, time_to_close) {
+            debugger
+            var $notify = $('<div style="margin:10px;margin-bottom: 30px;"/>')
+                .addClass('alert')
+                .addClass('alert-' + type)
+                .html(message)
+                .click(function () {
+                    $notify.remove();
+                });
+
+            $('.breadcrumb-line').after($notify);
+
+            if (time_to_close == undefined)
+                time_to_close = 5000;
+            if (time_to_close !== false)
+                setTimeout(function () {
+                    $notify.remove();
+                }, time_to_close);
+
+        }
+
+    </script>

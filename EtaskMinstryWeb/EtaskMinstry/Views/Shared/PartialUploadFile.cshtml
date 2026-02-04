@@ -1,0 +1,119 @@
+﻿@using EtaskMinstry;
+@*<div class="editor-field">*@
+            <input type="file" id="fileImage" name="fileImage" class="btn btn-success form-control"/>
+            <img width="20" height="20" id="imgSt" style="display:none"/>
+            <input type="hidden" name="hiddenfileName" id="hiddenfileName"/>
+            <input type="hidden" id="isFileValid" />
+            <span class="UploadErrorMsg">
+            </span>
+@*</div>*@
+@{
+    Layout = null;
+}
+<script>
+    $('#fileImage').change(function (evt) {
+        //////////////////////////// for Update Img Src When FileUpload Changed
+        debugger;
+        var files = evt.target.files;
+       // var type = evt.target.files[0].type;
+        var Extentions = "@System.Configuration.ConfigurationManager.AppSettings["FileExtentions"]";
+        var size = "@System.Configuration.ConfigurationManager.AppSettings["maxfileSize"]";
+        var fileType = "";
+        var picReader = new FileReader();
+        if (files.length > 0) {
+            picReader.readAsBinaryString(files[0]);
+        } else {
+            $('#hiddenfileName').val("");
+            $("#imgSt").attr('src', '/Content/Main/images/PDF-icon.png').hide();
+            $('.UploadErrorMsg').text('');
+        }
+        picReader.onload = function (e) {
+            fileType = e.target.result.trim().substring(0, 10);
+
+            if (files.length > 0) {
+                var ext = files[0].name.split('.').pop().toLowerCase();
+
+                var bReturn = CheckIsValid(Extentions, ext, fileType);
+                if (bReturn == false) {
+                    $('.UploadErrorMsg').text('غير مسموح بنوع الملف').css('color', 'red');
+                    $("#imgSt").hide();
+                    return false;
+                }
+                else if (files[0].size > size) {
+                    $('.UploadErrorMsg').text('يجب ان لا يتجاوز حجم الملف 4 ميجا').css('color', 'red');
+                    $("#imgSt").hide();
+                    return false;
+                }
+                else {
+                    var reader = new window.FileReader();
+                    reader.onload = (function () {
+                        return function (e) {
+                            $('.UploadErrorMsg').text('');
+                            if (ext == 'pdf') {
+                                $("#imgSt").attr('src', '/Content/Main/images/PDF-icon.png').show();
+                            }
+                            else if (ext == 'doc' || ext == 'docx') {
+                                $("#imgSt").attr('src', '/Content/Main/images/Word-icon.png').show();
+                            }
+                            else if (ext == 'xls' || ext == 'xlsx') {
+                                $("#imgSt").attr('src', '/Content/Main/images/Excel-icon.png').show();
+                            }
+                            else if (ext == 'txt') {
+                                $("#imgSt").attr('src', '/Content/Main/images/txt-icon.png').show();
+                            }
+                            else {
+                                $("#imgSt").attr('src', '/Content/Main/images/img-icon.png').css({ 'width': '50px', 'height': '50px' }).show();
+                            }
+
+                            $('.UploadErrorMsg').text('تم رفع الملف بنجاح').css('color', 'green');
+                            $('#hiddenfileName').val(files[0].name);
+                            $('#trUploadvalidation')[0].innerHTML = '';
+                        };
+                    })(files[0]);
+                    reader.readAsDataURL(files[0]);
+                }
+            }
+        };
+       
+        
+        $.validator.addMethod("maxfilesize", function (value, element) {
+            return element.files[0].size < 1024 * 1024 * 2;
+        }, 'حجم هذا الملف لايمكن ان يتجاوز 2 ميجابايت');
+
+        $.validator.addMethod("limitfiletype", function (value, element) {
+
+            var ext = value.split('.').pop().toLowerCase();
+            return ext == 'jpg' || ext == 'jpeg' || ext == 'png';
+        }, 'امتداد هذا الملف غير مسموح به');
+    });
+
+    function CheckIsValid(Extentions, ext, fileType) {
+        var valid = false;
+
+        if (Extentions.indexOf(ext) >= 0) {
+            //for pdf, PDF
+            if (fileType.indexOf("%PDF") >= 0) {
+                valid = true;
+            }
+                //DOCX, PPTX, XLSX
+            else if (fileType.indexOf("PK") >= 0) {
+                valid = true;
+            }
+                //DOC, DOT, PPS, PPT, XLA, XLS, WIZ
+            else if (fileType.indexOf("ÐÏ.à¡±.á") >= 0 || fileType.indexOf("ÐÏà¡±á") >= 0) {
+                valid = true;
+            }
+                //JFIF, JPE, JPEG, JPG
+            else if (fileType.indexOf("ÿØÿà") >= 0) {
+                valid = true;
+            }
+                //PNG
+            else if (fileType.indexOf("PNG") >= 0) {
+                valid = true;
+            }
+
+        }
+        else { valid = false; }
+        return valid;
+    }
+</script>

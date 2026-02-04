@@ -1,0 +1,321 @@
+﻿@model EtaskMinstry.Areas.Employee.Models.EmployeeVM
+
+@{
+    ViewBag.Title = "Index";
+}
+
+
+
+
+
+<div class="grid_7">
+    @*  <h3 class="sec-title">بيانات أساسية </h3>*@
+    <div class="dash-details-box" style="line-height: 36px;">
+        <dl>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Name) :</span>@Html.DisplayFor(model => model.Name)</dd>
+             <dd><span class="rec-lbl">@Html.LabelFor(model => model.Gender) :</span>@{if(Model.Gender==true){<span>ذكر</span>}
+                                                                                       else
+                                                                                       {<span>أنثى</span>}}</dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Birthdate):</span> @Html.DisplayFor(model => model.Birthdate)
+            </dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Email)  :</span>
+                <label id="lblEmail">@Html.DisplayFor(model => model.Email)</label>@Html.TextBoxFor(model => model.Email, new { @style = "display:none;" })
+                <span id="confirmbtns" style="display: none">
+                    <a href="javascript:void(0);" id="breConfirm" class="accepted-icon"></a>
+                    <a href="javascript:void(0);" id="Cancel" class="refused-icon"></a>
+                </span>
+                <a href="javascript:;" id="btnChangeEmail">تعديل </a>
+
+            </dd>
+            
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.Address) :</span><label id="lblAddress"> @Html.DisplayFor(model => model.Address)</label>
+                @Html.TextBoxFor(model => model.Address, new { @style = "display:none;" })
+                <span id="BtnsAddress" style="display: none">
+                    <a href="javascript:void(0);" id="SaveAddress" class="accepted-icon"></a>
+                    <a href="javascript:void(0);" id="CancelAddress" class="refused-icon"></a>
+                </span>
+                <a href="javascript:;" id="btnChangeAddress">تعديل </a>
+            </dd>
+
+              <dd><span class="rec-lbl">@Html.LabelFor(model => model.Mobile) :</span><label id="lblMobile"> @Html.DisplayFor(model => model.Mobile)</label>
+                @Html.TextBoxFor(model => model.Mobile, new { @style = "display:none;" })
+                <span id="BtnsMobile" style="display: none">
+                    <a href="javascript:void(0);" id="SaveMobile" class="accepted-icon"></a>
+                    <a href="javascript:void(0);" id="CancelMobile" class="refused-icon"></a>
+                </span>
+                <a href="javascript:;" id="btnChangeMobile">تعديل </a>
+            </dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.OldPassword) :</span><label id="lblPassword"> **********</label>
+               
+                <span id="BtnsPassword" style="display: none">
+                    <a href="javascript:void(0);" id="SavePassword" class="accepted-icon"></a>
+                    <a href="javascript:void(0);" id="CancelPassword" class="refused-icon"></a>
+                </span>
+                <a href="javascript:;" id="btnChangePassword">تعديل </a>
+            </dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.LaborOfficeID) :</span>@Html.DisplayFor(model => model.LaborOfficeID)</dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.SequenceNumber) :</span>@Html.DisplayFor(model => model.SequenceNumber)</dd>
+            <dd><span class="rec-lbl">@Html.LabelFor(model => model.NationalID) :</span>@Html.DisplayFor(model => model.NationalID)</dd>
+        </dl>
+
+
+
+
+    </div>
+    <br>
+
+    <div id="confirmPanel" style="display: none" class=" alert alert-warning">
+        <i class="icon-attention"></i>
+        لقد قمت بتغيير البريد الالكتروني هل تريد الحفظ .. علما بأن هذا البريد الالكتروني سيكون اسم المستخدم الخص بحسابك
+                       <a class="action-btn" id="btnUpdateEmail">نعم</a>
+        <a class="action-btn" id="btnCancel">لا</a>
+    </div>
+
+    <div style="display:none"  id="ChangePasswordDiv">
+    <table id="ChangePasswordTable" class="comment-grid" width="80%" border="0" cellspacing="1">
+        <tbody>
+            <tr>
+                <td width="46%" class="srch-lbl">@Html.LabelFor(model => model.OldPassword)
+                </td>
+                <td width="54%">
+                    @Html.PasswordFor(model => model.OldPassword, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.OldPassword, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="46%" class="srch-lbl">@Html.LabelFor(model => model.NewPassword)
+                </td>
+                <td width="54%">
+                    @Html.PasswordFor(model => model.NewPassword, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.NewPassword, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                </td>
+            </tr>
+            <tr>
+                <td width="46%" class="srch-lbl">@Html.LabelFor(model => model.ConfirmNewPassword)
+                </td>
+                <td width="54%">
+                    @Html.PasswordFor(model => model.ConfirmNewPassword, new { @class = "form-textbox" })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.ConfirmNewPassword, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "TitleValidation"
+                    })
+                </td> <label id="error" style="color:red"></label>
+                <label id="success" style="color:green"></label>
+            </tr>
+           
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <input type="button" value="حفظ" id="btnSavePassword" /> <input type="button" value="إلغاء" id="btnCancelPassword" />
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+</div>
+
+
+
+
+<style>
+    .btn-fix {
+        width: 100px;
+        height: 25px;
+        padding-top: 2px;
+        display: inline-block;
+        color: white !important;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+
+        $('#btnChangeEmail').on("click", function () {
+
+            $("#btnChangeEmail,#lblEmail").hide();
+            $("#Email,#confirmbtns").show();
+
+        });
+
+
+        $("#breConfirm").live("click", function () {
+
+            $("#confirmPanel").show();
+        });
+
+        $("#Cancel,#btnCancel").live("click", function () {
+            $("#confirmPanel,#Email,#confirmbtns").hide();
+            $("#btnChangeEmail,#lblEmail").show();
+
+        });
+
+        $("#btnUpdateEmail").live("click", function () {
+
+            var email = $("#Email").val();
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("ChangeEmail")',
+                 dataType: 'json',
+                 data: { Email: email },
+                 success: function (data) {
+
+                     $("#lblEmail").text(email);
+                     $("#confirmPanel,#Email,#confirmbtns").hide();
+                     $("#btnChangeEmail,#lblEmail").show();
+
+                 }
+             });
+
+        });
+
+        $("#btnChangeAddress").live("click", function () {
+
+            $("#btnChangeAddress,#lblAddress").hide();
+            $("#Address,#BtnsAddress").show();
+        });
+
+        $("#SaveAddress").live("click", function () {
+
+            var address = $("#Address").val();
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("ChangeAddress")',
+                     dataType: 'json',
+                     data: { Address: address },
+                     success: function (data) {
+
+                         $("#lblAddress").text(address);
+                         $("#Address,#BtnsAddress").hide();
+                         $("#btnChangeAddress,#lblAddress").show();
+
+                     }
+                 });
+        });
+
+
+        $("#CancelAddress").live("click", function () {
+
+            $("#Address,#BtnsAddress").hide();
+            $("#btnChangeAddress,#lblAddress").show();
+        });
+
+
+
+        $("#btnChangeMobile").live("click", function () {
+
+            $("#btnChangeMobile,#lblMobile").hide();
+            $("#Mobile,#BtnsMobile").show();
+        });
+
+        $("#SaveMobile").live("click", function () {
+
+            var mobile = $("#Mobile").val();
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("ChangeMobile")',
+                dataType: 'json',
+                data: { Mobile: mobile },
+                success: function (data) {
+
+                    $("#lblMobile").text(mobile);
+                    $("#Mobile,#BtnsMobile").hide();
+                    $("#btnChangeMobile,#lblMobile").show();
+
+                }
+            });
+        });
+
+
+        $("#CancelMobile").live("click", function () {
+
+            $("#Mobile,#BtnsMobile").hide();
+            $("#btnChangeMobile,#lblMobile").show();
+        });
+
+
+        $("#btnChangePassword").live("click", function () {
+
+            $("#btnChangePassword").hide();
+            $("#ChangePasswordDiv").slideDown("slow");
+        });
+
+        $("#btnCancelPassword").live("click", function () {
+            ClearChangePass();
+        });
+
+        $("#ConfirmNewPassword,#NewPassword").blur(function () {
+
+            var newpass = $("#NewPassword").val();
+            var confnewPass = $("#ConfirmNewPassword").val();
+
+            if (newpass != confnewPass) {
+                $("#error").text("الخانات غير متطابقة");
+            } else {
+                $("#error").text("");
+            }
+
+        });
+
+        $("#btnSavePassword").live("click", function (e) {
+            var oldpass = $("#OldPassword").val();
+            var newpass = $("#NewPassword").val();
+            var confnewPass = $("#ConfirmNewPassword").val();
+            if (newpass == confnewPass) {
+            $.ajax({
+                url: "/Security/ChangePassword",
+                dataType: "json",
+                type: "POST",
+                data: { "OldPassword": oldpass, "NewPassword": newpass },
+                success: function (result) {
+                    if (result == false) {
+                        $("#error").text("كلمة المرور غير صحيحة");
+                    } else {
+                        $("#error").text(" ");
+                        $("#success").text("تم تغيير كلمة المرور بنجاح");
+                        ClearChangePass();
+                        setTimeout(function () { $("#success").text(""); }, 1000);
+                    }
+                },
+                error: function (result) {
+
+
+                    alert("error");
+                }
+            });
+            } else {
+                $("#error").text("الخانات غير متطابقة");
+            }
+        });
+    });
+
+
+    function ClearChangePass() {
+        
+        $("#ChangePasswordDiv").slideUp("slow");
+        $("#btnChangePassword").show();
+        $("#OldPassword").val("");
+        $("#NewPassword").val("");
+        $("#ConfirmNewPassword").val("");
+        
+    }
+</script>
+

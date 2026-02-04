@@ -1,0 +1,424 @@
+﻿@model EtaskMinstry.Models.EmployeeTask.EmployeeTaskListVM
+@using EtaskMinstry;
+@using EtaskMinstry.Models.Status;
+@using EtaskMinstry.CustomHelpers;
+@{
+    ViewBag.Title = " إدارة المهام";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+    //Layout = "~/Views/Shared/_LayoutNoSearchOld.cshtml";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<ul class="nav nav-tabs">
+    <li class="active">
+        @Ajax.RawActionLink("<i class='fa fa-tasks'></i> الكل", "GetTasks", null, new { status = 0 },
+    new AjaxOptions
+    {
+        UpdateTargetId = "divTasks",
+        InsertionMode = InsertionMode.Replace,
+        LoadingElementId = "loadding",
+        LoadingElementDuration = 10,
+        HttpMethod = "Get"
+    }, new { @class = "tab dactive-tab" + "", @dataStatus = 0, onclick = "UpdateHeader('كل المهام')" })
+    </li>
+    @foreach (StatusDisplay TaskStatus in ViewBag.status)
+    {
+        <li>
+            @if (TaskStatus.Name != "مرفوضة" && TaskStatus.Name != "مقبولة" && TaskStatus.Name != "غيرمعتمدة")
+            {
+                @Ajax.RawActionLink(String.Concat("<i class='", TaskStatus.DesignClass, "'></i>", TaskStatus.Name, (TaskStatus.Name == "جديدة") ? "<span class='label label-success'>" + (string)ViewBag.NewCount + "</span>" : (TaskStatus.Name == "انتهت") ? "<span class='label label-success'>" + (string)ViewBag.EndedCount + "</span>" : ""), "GetTasks", null, new { status = TaskStatus.ID },
+                new AjaxOptions
+                {
+                    UpdateTargetId = "divTasks",
+                    InsertionMode = InsertionMode.Replace,
+                    LoadingElementId = "loadding",
+                    LoadingElementDuration = 10,
+                    HttpMethod = "Get"
+                }, new { @class = "tab dactive-tab", @dataStatus = TaskStatus.ID, onclick = "UpdateHeader('" + TaskStatus.Name + "," + TaskStatus.Count + "')" })
+            }
+        </li>
+    }
+</ul>
+
+
+<div class="tab-content">
+    <!-- Tasks table -->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h6 class="panel-title"><i class="fa fa-tasks"></i> <span id="tableheader">كل المهام </span></h6>
+            <span id="listcount" class="pull-right label label-danger">@ViewBag.count</span>
+        </div>
+        <div class="panel-body">
+            <div class="panel-group">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h6 class="panel-title panel-trigger">
+                            <a data-toggle="collapse" href="#panel-search">بحث</a>
+                        </h6>
+                    </div>
+                    <div id="panel-search" class="panel-collapse collapse">
+                        <div class="panel-body">
+
+                            <!--tab content-->
+                            @using (Ajax.BeginForm("GetTasks", "Tasks", new AjaxOptions
+                            {
+                                InsertionMode = InsertionMode.Replace,
+                                UpdateTargetId = "divTasks",
+                                LoadingElementId = "loadding",
+                                LoadingElementDuration = 30
+                            }, new { area = "Employee", id = "SearchForm" }))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <div class="row">
+                                    @Html.Hidden("priorityId")
+                                    @Html.Hidden("status")
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label">عنوان المهمة: </label>
+                                        <div class="col-sm-8">
+                                            @Html.TextBox("taskTitle", "", new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label">الأهمية: </label>
+                                        <div class="col-sm-8">
+
+
+                                            <div class="Priorbtns btn-group" data-toggle="buttons">
+                                                <label class="btn btn-xs btn-info" id="1">
+                                                    <input type="radio" name="options"> عادية
+                                                </label>
+                                                <label class="btn btn-xs btn-success" id="2">
+                                                    <input type="radio" name="options"> متوسطة
+                                                </label>
+                                                <label class="btn btn-xs btn-warning" id="3">
+                                                    <input type="radio" name="options"> مرتفعة
+                                                </label>
+                                                <label class="btn btn-xs btn-danger" id="4">
+                                                    <input type="radio" name="options"> مرتفعة جدا
+                                                </label>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+
+                                        <label class="col-sm-4 control-label">تاريخ البداية من: </label>
+                                        <div class="col-sm-8">
+                                            <div class='input-group date'>
+                                                @Html.TextBox("fDate", "", new { @class = "form-control", @style = "margin-left:47px;", @readonly = "true" })
+                                                <span class="input-group-addon">
+                                                    <span class="fa fa-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p class="errorMsgDate" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                            يجب ان يكون تاريخ النهاية اكبر من تاريخ البداية
+                                        </p>
+                                    </div>
+                                    <div class="form-group col-sm-6">
+
+                                        <label class="col-sm-4 control-label">إلى: </label>
+                                        <div class="col-sm-8">
+                                            <div class='input-group date'>
+                                                @Html.TextBox("tDate", "", new { @class = "form-control", @readonly = "true" })
+                                                <span class="input-group-addon">
+                                                    <span class="fa fa-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p class="errorMsgEndDate" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                            يجب ان يكون تاريخ النهاية اكبر من تاريخ البداية
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+
+                                        <label class="col-sm-4 control-label">تاريخ النهاية من: </label>
+
+                                        <div class="col-sm-8">
+                                            <div class='input-group date'>
+                                                <input readonly type="text" id="fromenddate" name="FromEndDate" class="form-control" style="margin-left:47px;" />
+                                                <span class="input-group-addon">
+                                                    <span class="fa fa-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-sm-6">
+
+                                        <label class="col-sm-4 control-label">إلى: </label>
+                                        <div class="col-sm-8">
+                                            <div class='input-group date'>
+                                                <input readonly type="text" id="toendtdate" name="ToEndDate" class="form-control" />
+                                                <span class="input-group-addon">
+                                                    <span class="fa fa-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <input name="Submit0" id="btnSearch" type="submit" class="btn btn-primary" value="بحث">
+                                    <input name="Submit0" id="btnShowAll" type="submit" class="btn btn-primary" value="عرض الكل">
+
+
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divTasks">
+            @*@Html.Action("GetTasks", "Tasks")*@
+            @{ Html.RenderPartial("PartialEmpTask", (EtaskMinstry.Models.EmployeeTask.EmployeeTaskListVM)ViewData["SearchResult"]); }
+
+        </div>
+    </div>
+    <!-- /tasks table -->
+    <!--tab content end-->
+
+</div>
+
+<style>
+    .form-select {
+        width: 150px;
+    }
+
+    .form-textbox {
+        width: 160px;
+    }
+</style>
+<script src="~/Scripts/ui/ui.datepicker.js"></script>
+<script src="~/Scripts/ui/i18n/jquery-ui-i18n.js"></script>
+<script src="~/Scripts/ui/i18n/ui.datepicker-ar.js"></script>
+<script>
+    function UpdateHeader(StatusNameCount){
+        debugger
+        $('#tableheader').html(StatusNameCount.split(",")[0]);
+        if(StatusNameCount.split(",")[1]!=null)
+            $('#listcount').html(StatusNameCount.split(",")[1]);
+        else
+            $('#listcount').html('@ViewBag.NewCount');
+    }
+
+    (function () {
+        console.log("Hello index!");
+        //priority buttons new design//
+        $( ".Priorbtns label").click(function() {
+            $('#priorityId').val(this.id);
+            console.log(this.id);
+        });
+
+        //***************************************************************//
+        $( ".dactive-tab" ).on("click", function() {
+            $(this).parent().addClass("active");
+            $(this).parent().siblings().removeClass("active");
+        });
+        //***************************************************************//
+
+        //***************************************************************//
+        //Check Date Greg OR Hijrii
+        var Isgreg ="@(MvcApplication.IsGregDate)";
+        debugger
+        if(Isgreg=="True")
+        {
+            //datepicker Grerg
+            $("#fDate").datepicker($.datepicker.regional[ "ar" ]);
+            $("#tDate").datepicker($.datepicker.regional[ "ar" ]);
+            $("#fromenddate").datepicker($.datepicker.regional[ "ar" ]);
+            $("#toendtdate").datepicker($.datepicker.regional[ "ar" ]);
+        }
+        else
+        {
+            //calendar Hijrii
+            $('#fDate,#tDate,#fromenddate,#toendtdate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+               });
+
+        }
+
+        //in search case fill textbox
+        var taskTitle =  "@(Request.QueryString["t"] == null ? "" : Request.QueryString["t"])";
+        $("#taskTitle").val(taskTitle);
+        debugger;
+        var currentStatus= @(Request.QueryString["s"]==null? "0" :Request.QueryString["s"]);
+        $('[datastatus]').not('.subtab').removeClass('active-tab').addClass('dactive-tab');
+        $('[datastatus=' + currentStatus + ']').not('.subtab').removeClass('dactive-tab').addClass('active-tab');
+        var status="";
+        var taskTitle = "";
+        var priority = 0;
+        var width = 0;
+        $('.tab').on('click', function () {
+            var currenttab = $(this).attr('id');
+            //add current data valuse to hidden fields to keep a track of search criteria.
+            $('#status').val($(this).attr('dataStatus'));
+            //////////////////////////////////////////////////////////////////////////////
+            $('.errorMsg').hide();
+            $('.errorMsgDate').hide();
+            $('#priorityId').val(0);
+            $('#taskTitle').val('');
+            $('#fDate').val('');
+            $('#tDate').val('');
+            $("#fromenddate").val('');
+            $("#toendtdate").val('');
+            $('#priorityId').val(0);
+            $('.custom-bar .strenth-colors').css('width', '0px');
+        });
+        //click on show all button.........
+        $('#btnShowAll').click(function () {
+            $('.errorMsg').hide();
+            $('.errorMsgDate').hide();
+            $('#priorityId').val(0);
+            $('#taskTitle').val('');
+            $('#fDate').val('');
+            $('#tDate').val('');
+            $("#fromenddate").val('');
+            $("#toendtdate").val('');
+            $('#priorityId').val(0);
+            $('.custom-bar .strenth-colors').css('width', '0px');
+        });
+        ////////////////////////////////////
+
+        //add validation rule to search name
+        //debugger;
+        //$('#taskTitle').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,150}$" });
+        //$('#fDate').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,20}$" });
+        //$('#tDate').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,20}$" });
+        //$('#fromenddate').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,20}$" });
+        //$('#toendtdate').rules("add", { regex: "^[a-zA-Z0-9\u0600-\u06ff,. /\s_-]{0,20}$" });
+        ////click on search button
+        //check validation of date and title.
+        $('#btnSearch')
+            .click(function(e) {
+                var sDate = $('input[type=text]#fDate').val();
+                var eDate = $('input[type=text]#tDate').val();
+                if (!$('#taskTitle').valid() && $('#taskTitle').val() != "") {
+                    $('.errorMsg').show();
+                } else {
+                    $('.errorMsg').hide();
+                }
+                if (sDate !== "" && eDate !== "") {
+                    if (HijridateCompare(sDate, eDate) == -1 || HijridateCompare(sDate, eDate) == 0) {
+                        $('.errorMsgDate').hide();
+                    } else {
+                        e.preventDefault();
+                        $('.errorMsgDate').show();
+                    }
+                }
+
+                // Check End Date .
+                var sEndDate = $('input[type=text]#fromenddate').val();
+                var eEndDate = $('input[type=text]#toendtdate').val();
+                if (sEndDate !== "" && eEndDate !== "") {
+                    if (dateCompare(sEndDate, eEndDate) == -1 || HijridateCompare(sEndDate, eEndDate) == 0) {
+                        $('.errorMsgEndDate').hide();
+                    } else {
+                        e.preventDefault();
+                        $('.errorMsgEndDate').show();
+                    }
+                }
+            });
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        //apply calender to from and end date
+        //$('#fDate, #tDate').calendarsPicker({
+        //    changeMonth: true, changeYear: true,
+        //    minDate: -24000,
+        //    maxDate: +0, showTrigger: '#calImg',
+        //    calendar: $.calendars.instance('ummalqura'),
+        //    dateFormat: 'dd/mm/yyyy',
+        //    Range: "-70:+0"
+        //});
+        /////////////////////////////////////////////////////////
+
+
+
+
+        // Change Color Of Priority and Change PriorityID in DB .
+        @*$('.custom-bar').click(function (e) {
+            var leftPiont = (((e.pageX - $(this).offset().left) - 88) / 88 * -100);
+            var obj = $(this).children('.strenth-colors');
+
+            $(this).removeAttr('title');
+
+            var OldWidth = $(this).children('.strenth-colors').width() / 88 * 100;
+
+            var iPriorityID;
+
+            if (parseInt(leftPiont) >= 0 && parseInt(leftPiont) <= 25) {
+                $(obj).css('width', '25%').attr('title', 'عادىة');
+                iPriorityID = '@((int)TaskPriority.Noraml)';
+            }
+
+            if (parseInt(leftPiont) >= 25 && parseInt(leftPiont) <= 50) {
+                $(obj).css('width', '50%').attr('title', 'متوسطة');
+                iPriorityID = '@((int)TaskPriority.Average)';
+            }
+
+            if (parseInt(leftPiont) >= 50 && parseInt(leftPiont) <= 75) {
+                $(obj).css('width', '75%').attr('title', 'مرتفعة');
+                iPriorityID = '@((int)TaskPriority.High)';
+            }
+
+            if (parseInt(leftPiont) >= 75 && parseInt(leftPiont) <= 100) {
+                $(obj).css('width', '100%').attr('title', 'مرتفعة جدا');
+                iPriorityID = '@((int)TaskPriority.VeryHigh)';
+            }
+
+            $('#priorityId').val(iPriorityID);
+            width = $(obj).width();
+        });*@
+
+        //$('.custom-bar').mousemove(function (e) {
+        //    priority = $('#priorityId').val();
+        //    var leftPiont = (((e.pageX - $(this).offset().left) - 88) / 88 * -100);
+        //    var obj = $(this).children('.strenth-colors');
+
+        //    $(this).removeAttr('title');
+
+        //    var OldWidth = $(this).children('.strenth-colors').width() / 88 * 100;
+
+        //    var iPriorityID;
+
+        //    if (parseInt(leftPiont) >= 0 && parseInt(leftPiont) <= 25) {
+        //        $(obj).css('width', '25%').attr('title', 'عادىة');
+        //    }
+
+        //    if (parseInt(leftPiont) >= 25 && parseInt(leftPiont) <= 50) {
+        //        $(obj).css('width', '50%').attr('title', 'متوسطة');
+        //    }
+
+        //    if (parseInt(leftPiont) >= 50 && parseInt(leftPiont) <= 75) {
+        //        $(obj).css('width', '75%').attr('title', 'مرتفعة');
+        //    }
+
+        //    if (parseInt(leftPiont) >= 75 && parseInt(leftPiont) <= 100) {
+        //        $(obj).css('width', '100%').attr('title', 'مرتفعة جدا');
+        //    }
+        //}).mouseout(function () {
+        //    var currentPriorty = $('#priorityId').val()
+        //    if (currentPriorty == priority) {
+        //        $('.custom-bar .strenth-colors').css('width', width+'px');
+        //    }
+        //});
+
+    })();
+
+</script>

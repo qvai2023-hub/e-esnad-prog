@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<script src="~/Scripts/jquery-1.7.1.min.js"></script>
+<h2>Index</h2>
+
+<input type="text" id="taskId" /> <br />
+<div>
+
+    isChanged: <span id="ischanged"></span><br />
+    OldStatus: <span id="oldstatus"></span><br />
+    NewStatus: <span id="newstatus"></span><br />
+
+
+</div>
+<button id="UpdateStatus">CheckStatus</button><br />
+
+<button id="Accept">Employee Accept</button> <br /> 
+<button id="Reject">Employee Reject</button><br />
+<button id="Complete">Employee Complete</button><br />
+<br />
+<br />
+<button id="Approve">Company Approves </button><br />
+<button id="Disapprove">Company Disapproves</button><br />
+<button id="Archive">Archive</button><br />
+<button id="Pause">Pause</button><br />
+<button id="Reassign">ReAssign</button><br />
+<button id="Reopen">Reopen</button><br />
+
+<script>
+    
+    $("button").on("click", function () {
+
+        var taskId = $("#taskId").val();
+        var action = $(this).attr("id");
+
+        $.ajax({
+            url: "DoTaskAction",
+            type: "POST",
+            data: { iTaskId: taskId, strAction: action },
+            dataType: "json",
+            success: function (res) {
+                $("#ischanged").html(res.IsChanged.toString());
+                $("#oldstatus").html(res.OldStatus);
+                $("#newstatus").html(res.NewStatus);
+            }
+
+        });
+    });
+</script>

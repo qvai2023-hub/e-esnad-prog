@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="71ff921aee88433cbe590255abf2d0a8" Name="Diagram1" ZoomLevel="90">
+        <EntityTypeShape EntityType="EtaskMinstryModel.Attachment" Width="1.5" PointX="9.375" PointY="15.5" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.CommentStatu" Width="1.5" PointX="8.2345268932331948" PointY="11.45915383634118" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.ControllerName" Width="1.5" PointX="9.88901126472699" PointY="11.535256361372422" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.HoliDay" Width="1.5" PointX="10.735752011991922" PointY="6.9321053060386824" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Message" Width="1.5" PointX="7.8303598034336979" PointY="13.617084509514777" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Notification" Width="1.5" PointX="7.4032706336133511" PointY="28.025403840479164" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.NotificationCollection" Width="1.5" PointX="5.7515286699643031" PointY="25.491834503361879" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.NotificationType" Width="1.5" PointX="11" PointY="14.5" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Priority" Width="1.5" PointX="2.8494474416828934" PointY="27.250315842800919" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.RecurrenceTask" Width="1.5" PointX="11.683452514784156" PointY="29.044226764256241" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.RecurrenceTaskEmp" Width="1.5" PointX="8.0831672121226639" PointY="5.2104091966573192" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.RecurrenceType" Width="1.5" PointX="0.49445667699652568" PointY="6.539121705358439" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Setting" Width="1.5" PointX="7.3078913927580658" PointY="1.7812070556828785" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.SIGNAL_R_SESSION" Width="1.5" PointX="7.0359544414263" PointY="23.517649512513376" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Status" Width="1.5" PointX="10.551270357589829" PointY="26.59025923655846" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Task" Width="1.5" PointX="5.75" PointY="14.25" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.TaskComment" Width="1.5" PointX="6.4822921187068765" PointY="1.9716909536960028" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.TaskLog" Width="1.5" PointX="3.1776888217673118" PointY="9.3125417126866719" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.TaskTLog" Width="1.5" PointX="5.0869083838010711" PointY="18.837869861553362" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.UserType" Width="1.5" PointX="9.795223344953369" PointY="1.26638083218894" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.WeekEnd" Width="1.5" PointX="11.824949260719562" PointY="8.9253410589533591" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Attachment_Task" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskComment_CommentStatus" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Message_UserType" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Notification_NotificationType" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_NotificationCollection_Notification" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_NotificationCollection_UserType" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_Priority" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_RecurrenceTask_RecurrenceType" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_RecurrenceTaskEmp_RecurrenceTask" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_RecurrenceTask" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_PushNotificatication_UserType" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_Status" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskTLog_Status" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskComment_Task" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskLog_Task" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskTLog_Task" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.TotalLog" Width="1.5" PointX="6.3089082102798422" PointY="8.28309482721756" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Project" Width="1.5" PointX="15.25" PointY="5.25" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_RecurrenceTask_Project" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_Project" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.LogGeneral" Width="1.5" PointX="17.5" PointY="7.875" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_LogGeneral_ControllerName" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.ContactU" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.TimeUnit" Width="1.5" PointX="3.375" PointY="0.625" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_TimeUnit" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskTLog_TimeUnit" ManuallyRouted="true" >
+          <ConnectorPoint PointX="4.8125025" PointY="3.1821907552083331" />
+          <ConnectorPoint PointX="4.8125025" PointY="19.815424595853372" />
+          <ConnectorPoint PointX="5.125" PointY="19.815424595853372" />
+        </AssociationConnector>
+        <AssociationConnector Association="EtaskMinstryModel.FK_TimeUnit_TimeUnit" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Company" Width="1.5" PointX="0.75" PointY="10.875" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_HoliDay_Company" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_LogGeneral_Company" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Project_Company" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_Company" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_WeekEnd_Company" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Attendance" Width="1.5" PointX="5.25" PointY="33.25" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.Employee" Width="1.5" PointX="3" PointY="31.375" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Attendance_Employee" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Employee_Company" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_LogGeneral_Employee" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_Task_Employee" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_TaskComment_Employee" />
+        <EntityTypeShape EntityType="EtaskMinstryModel.UserAccount" Width="1.5" PointX="12" PointY="17.5" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_UserAccount_Company" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_UserAccount_Employee" />
+        <AssociationConnector Association="EtaskMinstryModel.FK_UserAccount_UserType" />
+        </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

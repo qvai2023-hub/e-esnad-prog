@@ -1,0 +1,399 @@
+﻿@model EtaskMinstry.Models.Common.TaskExtensionsCommonVM
+@using EtaskMinstry;
+<script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit' async defer></script>
+<div class="tab-container tab-container2">
+    <div class="tab-btns-warp">
+        <a class="tab active-tab" tab="1">
+            <i class="icon-chat"></i>
+            تعليقات</a>
+
+        <a class="tab dactive-tab" tab="2">            <i class="icon-attach"></i>
+
+            المرفقات</a>
+    </div>
+    <!--tab content-->
+    <div id="comments" class="tab_cont tab1" style="display: block;">
+        <table class=" comment-grid" width="100%" border="0" cellspacing="1">
+             <tbody>
+                 <tr> 
+                      <tr>
+                <td colspan="2" id="CommentArea">
+                    @foreach (var comment in Model.Comments)
+                    {
+                        if (comment.CommentStatusId == (int)TaskCommentStatus.Reported)
+                        {
+                        <div class="comment-msg nobg" style="background-color: pink">
+                            @if (comment.IsFromCompany)
+                            {
+                                <h2>مسؤول الشركة </h2>
+                            }
+                            else
+                            {
+                                <h2>@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID) </h2>
+                            }
+                            <div class="com-date">@(MvcApplication.IsGregDate ? comment.CreatedDate.ToGregArabicDateTime() : comment.CreatedDate.ToHijriArabicDateTime())</div>
+                            <div class="clear"></div>
+                            @comment.Comment
+                        </div> 
+                        }
+
+                        else if (!(comment.CommentStatusId == (int)TaskCommentStatus.Hidden && !EtaskMinstry.MvcApplication.userData.isCompany))
+                        {
+                        <div class="comment-msg nobg">
+
+                            @if (comment.IsFromCompany)
+                            {
+                                <h2>مسؤول الشركة </h2>
+                            }
+                            else
+                            {
+                                <h2>@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID) </h2>
+                            }
+                            <div class="com-date">@(MvcApplication.IsGregDate ? comment.CreatedDate.ToGregArabicDateTime() : comment.CreatedDate.ToHijriArabicDateTime())</div>
+                            <div class="clear"></div>
+                            @comment.Comment
+                            <div class="comment-options go-left hideShowDiv" >
+                              
+                                @if (ViewBag.IsEditEnable == true)
+                                {
+                                    if (comment.CommentStatusId == (int)TaskCommentStatus.Hidden)
+                                    {
+                                        
+                                         <a href="#" id="@comment.TaskCommentID"   class=" has-tip Report" style="display: none" title="إبلاغ تعليق غير لائق">
+                                    <i class="icon-flag"></i>
+                                </a> 
+                                    <a id='@comment.TaskCommentID _show' class="inline-element has-tip show" title="عرض">
+                                        <i class="icon-ok-circle"></i>
+                                    </a>
+                                    <a id='@comment.TaskCommentID _hide'class="inline-element has-tip hide" title="إخفاء" >
+                                        <i class="icon-minus-circle" style="display: none"></i>
+                                    </a>                            
+                                    }
+                                    else
+                                    {
+                                        if (!comment.IsFromCompany && (comment.EmpID != Model.Createdby))
+                                        {
+                                                <a href="#" id="@comment.TaskCommentID"   class=" has-tip Report"  title="إبلاغ تعليق غير لائق">
+                                    <i class="icon-flag" ></i>
+                                </a> 
+                                        }
+                                    
+                               if (ViewBag.IsEditEnable == true) {
+                                    <a  id='@comment.TaskCommentID _show' class="inline-element has-tip show" title="عرض" >
+                                        <i class="icon-ok-circle" style="display: none"></i>
+                                    </a>
+                                    <a  id='@comment.TaskCommentID _hide' class="inline-element has-tip hide" title="إخفاء" >
+                                        <i class="icon-minus-circle"></i>
+                                    </a>
+                                }
+                                    }
+                                }
+                            </div>
+                        </div>  
+                        }
+                    }
+
+                </td>
+            </tr>
+                 </tr>               
+       @if (!(Model.IsArchived))
+{
+    //(!(Model.StatusID == (int)EtaskMinstry.TaskStatus.Approved || Model.StatusID == (int)EtaskMinstry.TaskStatus.NotAproved || Model.StatusID == (int)EtaskMinstry.TaskStatus.Rejected))
+    if (ViewBag.IsEditEnable)
+    {
+        <tr>
+            <td width="23%" class="srch-lbl">التعليق :</td>
+            <td width="77%">
+                @Html.TextAreaFor(model => model.CommentText, new
+                        {
+                            @class = "txt-area",
+                            style = "height: 50px;",
+                            scroll = "no"
+                        })
+                <br />
+                <div id="trCommentvalidation" colspan="2" style="color: red; text-align: center; font-size: small"></div>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td align="left">             
+                <input type="button" id="btnAddComment" class="submit-btn go-left" value="إرسال">             
+            </td>
+        </tr>
+    }
+}
+        </table>
+    </div>
+
+    <div id="attach-files" style="display: none;" class="tab2 tab_cont">
+        <table id ="tblAttachment" class="comment-grid" width="100%" border="0" cellspacing="1">
+            @foreach (var attach in Model.TaskAttachment)
+            {
+                if(QvLib.QVUtil.IO.IsFileExist("/Upload/Task/" + attach.FileName))
+                {
+                <tr>
+                    <td width="15%" class="srch-lbl">الملف :</td>
+                    <td width="85%">@Html.ActionLink(attach.FileName, "DownloadAttachment", new { fileName = attach.FileName })    </td>
+                </tr>
+                <tr class="desc-row">
+                    <td class="srch-lbl">الوصف :</td>
+                    <td>@attach.Description</td>
+                </tr>
+                }
+            }
+
+        </table>
+        @if (@Model.StatusID != (int)TaskStatus.Done && @Model.StatusID != (int)TaskStatus.Approved && @Model.StatusID != (int)TaskStatus.NotAproved)
+{
+    if (ViewBag.IsEditEnable)
+    {
+        using (Html.BeginForm("AddAttachment", "Common", FormMethod.Post, new { area = "Common", enctype = "multipart/form-data", id = "attachform" }))
+        {
+            <input type="hidden" name="taskID" id="taskID" value="@Model.TaskID" />
+            <table class="comment-grid" width="100%" border="0" cellspacing="1">
+
+                <tr>
+                    <td class="srch-lbl">وصف ملف جديد:</td>
+                    <td>
+                        <input type="text" id="txtFileDescription" name="txtFileDescription" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="srch-lbl">ملف جديد :</td>
+                    <td>
+                        @*<input id="upload" name="upload"/>    *@
+                        @Html.Partial("PartialUploadFile")
+                        <br />
+                        <div id="trUploadvalidation" style="color: red; text-align: right; font-size: small"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+
+
+                    <td>
+
+
+                        <span id="RecaptchaValidation" style="display: none; color: red;">رجاء المرور من اختبار التحقق من الهوية بشكل صحيح.</span>
+                        <div id="recap" class="recap">
+                            <div id="recapElem"></div>
+                            @*<div class="g-recaptcha" data-sitekey="@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]"></div>*@
+                        </div>
+                    </td>
+                </tr>
+                <tr></tr>
+                <tr>
+                    <td colspan="2" style="text-align: left">
+                        <a class="action-btn" id="btnAddAttchment">
+                            <i class=" icon-upload-cloud"></i>
+                            ارفاق
+                        </a>
+                    </td>
+                </tr>
+
+            </table>
+        }
+    }
+}
+    </div>
+    <!--tab content end-->
+</div>
+<script>
+    var isFirstClick = true;
+    var isValidReCap = false;
+  
+    //$(function () {
+    var recaptcha_id;
+    var onloadCallback = function () {
+        debugger;
+        recaptcha_id = grecaptcha.render('recapElem', {
+            'sitekey': '@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]',
+            'callback': correctCaptcha
+        });
+    };
+    var correctCaptcha = function (response) {
+
+        debugger;
+        var recapResponse = grecaptcha.getResponse(recaptcha_id);
+        if (recapResponse) {
+            isValidReCap = true;
+        }
+    };
+    //});
+
+</script>
+
+<script type="text/javascript">
+
+
+
+    $(function () {
+
+        /************** A T T A C H M E N T  A C T I O N S **************/
+        //Handle Add Attachment 
+        $('#btnAddAttchment').click(function (e) {
+            debugger;
+            e.preventDefault();
+
+            correctCaptcha();
+            if (!isValidReCap) {
+                $("#RecaptchaValidation").show();
+            } else {
+                $("#RecaptchaValidation").hide();
+            }
+            if ($('#hiddenfileName').val() == "" && !isValidReCap) {
+                $('#trUploadvalidation')[0].innerHTML = "يجب أختيار ملف";
+                return;
+            }
+
+            if (isValidReCap == false) {
+                $("#RecaptchaValidation").show();
+                return;
+            }
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            debugger
+            if (!varchar350.test($('#txtFileDescription').val().trim())) {
+                $('#trUploadvalidation')[0].innerHTML = "يجب ان لا يزيد عدد الحروف الوصف عن 350حرف و غير مسموح بكتابه رموز خاصه";
+                return;
+            }
+            else {
+                $('#trUploadvalidation')[0].innerHTML = "";
+                var url = "/Common/Common/AddAttachment";
+                //submit Attach Data
+                $("#attachform").submit();
+            }
+        });
+        /************** C O M M E N T S  A C T I O N S **************/
+        //Handle Add Comment 
+
+       
+        $('#btnAddComment').click(function (e) {           
+            
+            //e.preventDefault();
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            if ($('#CommentText').val().trim() == "") {
+                debugger
+                $('#trCommentvalidation')[0].innerHTML = " يجب الا تترك الخانات فارغه ";
+                return;
+            }
+            else if (!varchar350.test($('#CommentText').val().trim())) {
+                debugger
+                $('#trCommentvalidation')[0].innerHTML = "يجب ان لا يزيد عدد الحروف الوصف عن 350حرف و غير مسموح بكتابه رموز خاصه";
+                return;
+            }
+            else {
+                var url = "/Common/Common/AddComment";
+                $(this).attr("disabled", "disabled");                
+                $.post(url, { taskId: '@Model.TaskID', strComment: $('#CommentText').val(), iEmployeeID: '@MvcApplication.userData.userId' }, function (data) {
+                    if (data != null) {
+                        debugger;
+                        var commentdiv = "<div class='comment-msg nobg'> ";
+                        if ("@EtaskMinstry.MvcApplication.userData.isCompany" == "True")
+                                commentdiv += " <h2> مسؤول الشركة</h2>   <div class='com-date'>@(MvcApplication.IsGregDate ? DateTime.Now.ToGregArabicDateTime() : DateTime.Now.ToHijriArabicDateTime())</div>"
+                        else if ("@EtaskMinstry.MvcApplication.userData.userId" == "@Model.Createdby")
+                                commentdiv += "<h2>@Model.CreatedbyName" + "</h2>   <div class='com-date'> @(MvcApplication.IsGregDate ? DateTime.Now.ToGregArabicDateTime() : DateTime.Now.ToHijriArabicDateTime()) </div>"
+                       else
+                                commentdiv += "<h2>@Model.EmployeeName" + "</h2>   <div class='com-date'> @(MvcApplication.IsGregDate ? DateTime.Now.ToGregArabicDateTime() : DateTime.Now.ToHijriArabicDateTime()) </div>"
+                            commentdiv += " <div class='clear'></div>" + $('#CommentText').val()
+                            commentdiv += '<div class="comment-options go-left hideShowDiv" >';
+                            if (!data.isCompany && ("@EtaskMinstry.MvcApplication.userData.userId" != "@Model.Createdby")) {
+                                commentdiv += ' <a href="#" id="' + data + '"   class=" has-tip Report" title="إبلاغ تعليق غير لائق">';
+
+                                commentdiv += ' <i class="icon-flag"></i></a>';
+                            }
+                        if ("@ViewBag.IsEditEnable" == "True") {
+                            commentdiv += '<a id="' + data + '_show" class="inline-element has-tip show" title="عرض">'
+                            commentdiv += '<i class="icon-ok-circle" style="display: none"></i> </a>';
+                            commentdiv += ' <a id="' + data + '_hide"class="inline-element has-tip hide" title="إخفاء" >';
+                            commentdiv += '<i class="icon-minus-circle"></i></a>';
+                        }
+                            commentdiv += "</div>";
+                            if ($('#CommentText').val() != "") {
+                                $('#CommentArea')[0].innerHTML += commentdiv;
+                            }
+                            $('#CommentText').val('');
+                            $('#trCommentvalidation')[0].innerHTML = "";
+                           
+                        }
+                        else {
+                            $('#trCommentvalidation')[0].innerHTML = "";
+                    }
+                    if ($('#CommentText').val() == "")
+                    { $('#btnAddComment').removeAttr("disabled"); }
+                });                
+            }
+            
+        });
+
+        $('#CommentText').on('change', function () {
+            $('#btnAddComment').removeAttr("disabled");
+        });
+        //Handle Hide Comment 
+        $(document).on('click', '.hide', function (e) {
+            debugger
+            // $('.hide').click(function (e) {
+            var elemet = $(this);
+            var iconid = $(this).attr("id");
+            var commentID = $(this).attr("id").split('_')[0].trim();
+            e.preventDefault();
+            var url = "/Common/Common/HideComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.hideShowDiv').children('.hide').children('i').hide();
+                    elemet.closest('.hideShowDiv').children('.show').children('i').show();
+                    $(elemet).prev().prev().removeClass("inline-element").hide();
+
+                }
+            });
+        });
+        //Handle ShowComment 
+        $(document).on('click', '.show', function (e) {
+            debugger
+            // $('.show').click(function (e) {
+            var elemet = $(this);
+            var iconid = $(this).attr("id");
+            var commentID = $(this).attr("id").split('_')[0].trim();
+            e.preventDefault();
+            var url = "/Common/Common/ShowComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.hideShowDiv').children('.show').children('i').hide();
+                    elemet.closest('.hideShowDiv').children('.hide').children('i').show();
+                    $(elemet).prev().removeClass("inline-element").show();
+
+                }
+            });
+        });
+
+        //Handle Report Comment 
+        $(document).on('click', '.Report', function (e) {
+            //$('.Report').click(function (e) {
+            var commentID = $(this).attr("id");
+            var elemet = $(this);
+            e.preventDefault();
+            var url = "/Common/Common/ReportComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.comment-msg').css('background-color', 'pink');
+                    elemet.closest('.hideShowDiv').remove();
+                }
+            });
+        });
+
+    });
+
+</script>
+
+<style>
+    .action-btn{
+        width: 131px;
+        padding-top: 6px;
+        }
+    .tab-container.tab-container2 {
+        margin-top: 491px;
+    }
+
+    .hide,.show,.Report {
+        cursor: pointer;
+    }
+</style>
+

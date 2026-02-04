@@ -1,0 +1,95 @@
+﻿
+@model IEnumerable<EtaskMinstry.Areas.Admin.Models.CompanyEmployeeVM>
+@if (Model.Any())
+{
+    <div id="list">
+
+        @{
+
+            var grid = new WebGrid(Model);
+            var gridColumns = new List<WebGridColumn>();
+
+            if (Model.Any())
+            {
+
+                gridColumns.Add(grid.Column("EmpName", "الأسم", @<text>@item.Name</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("CompanyID", "الشركة", @<text>@item.CompanyName</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("JobTitle", "الوظيفة", @<text>@item.jobTitle</text>, "SecondColumn"));
+gridColumns.Add(grid.Column("Gender", "النوع", @<text> @(item.Gender == true ? "ذكر" : "أنثى")</text>, "ThirdColumn"));
+gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "FourthColumn"));
+gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+gridColumns.Add(grid.Column("tasksCount", " عدد المهام للشهر الحالى", @<text>  @item.tasksCount /@item.DonetasksCount</text>, "SixthColumn"));
+gridColumns.Add(grid.Column("Password", "كلمة المرور", @<a href="#" onclick="createPopup('@item.Password');return false;"><i class="fa fa-key"></i></a>, "SeventhColumn"));
+gridColumns.Add(grid.Column("Edit", "تعديل", @<text>
+        <a href="/Admin/Employee/AddEdit/@item.Id"><span class="fa fa-edit" title="" data-original-title="تعديل"></span></a>
+    </text>));
+gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="fa fa-trash " id="@item.Id" title="" data-original-title="حذف">
+
+            <i href="javascript:void(0);" id="@item.Id"></i>
+        </span></text>));
+}
+        }
+        @grid.GetHtml(columns: gridColumns.ToArray(),
+               tableStyle: "table table-bordered dataTable no-footer",
+              headerStyle: "",
+              footerStyle: "pagerbar",
+              mode: WebGridPagerModes.All,
+              numericLinksCount: 5,
+              firstText: "الاول",
+              previousText: "السابق",
+              nextText: "التالى",
+              lastText: "الاخير"
+     )
+
+    </div>
+    <div style="width: fit-content; color: #D3D2D2; font-size: 12px; font-weight: bold; padding: 5px; background-color: #2c3e50; text-align: center; "> عدد النتائج  :  @Model.Count() </div>
+}
+else
+{
+    <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+        <tbody>
+            @*<tr class="table-alternat-header">
+                    <td>
+                        المهمة
+                    </td>
+
+                </tr>*@
+            <tr>
+                <td colspan="1" style="text-align: center">
+                    لا يوجد بيانات
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+<div class="modal" id="passpopup">
+    <div class="modal-dialog pop-box" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="pop-title">
+                    <h4 class="modal_title">كلمة المرور</h4>
+                </div>
+            </div>
+            <div class="modal-body" id="divPass" style="text-align: center;">
+              
+            </div>
+            <div class="modal-footer">
+                <input type="button" id="passpopupClose" class="modal_btn_cancel btn  btn-defaul" value="اغلاق" />
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function createPopup(passVal) {
+        document.getElementById("passpopup").style.display = "block";
+        $("#divPass").html(passVal);
+    }
+    $("#passpopupClose").click(function () {
+        document.getElementById("passpopup").style.display = "none";
+
+    }) ;
+
+</script>

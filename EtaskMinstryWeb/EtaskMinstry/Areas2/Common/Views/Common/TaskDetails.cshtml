@@ -1,0 +1,981 @@
+﻿@using EtaskMinstry
+@model  EtaskMinstry.Models.Common.TaskDetailCommonVM
+@{
+    ViewBag.Title = "تفاصيل المهمة";
+}
+
+
+@*...................................Reassign PopUP.........................................*@
+<div id="dialogForm" class="popup-content modal">
+    <h2></h2>
+    <table style="width: 100%">
+        <tr>
+           <td class="srch-lbl"><strong>  المسئول :</strong></td>
+            <td>@Html.DropDownList("ddlEmployees", ViewBag.Emplyees as SelectList, "الموظف المسئول ")</td>
+        </tr>     
+        <tr>
+            <td id="error" colspan="2" style="color: red; font-size: small; text-align: center"></td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: left">
+                <input type="button" id="btnConfirm" class="submit-btn" value="تأكيد" style="width: 100px;">
+                <input type="button" class="submit-btn btnClose" value="الغاء" style="width: 100px;" />
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+
+
+@*...............................End Reassign popUp...........................................*@
+<h3 class="paragraph-title">
+    <i class="icon-task"></i>
+    <a href="/Common/Common/Index">المهام</a> <i class=" icon-left-open-big"></i><span title="@Model.Title">@Model.Title.SubString(40)</span>
+   @if (ViewBag.IsEditEnable == true)
+   {  
+     @*<div class="task-options go-left">
+    
+         @if (Model.StatusID != (int)TaskStatus.Approved && !Model.IsArchived && Model.StatusID != (int)TaskStatus.Done) //Reassign in Case of not Finished Or Not Archeived or" finished@Employee (added from bug sheet )"
+         {
+             if (Model.EmpID == null || Model.EmpID == 0)
+             {
+            <a class="inline-action-link has-tip assign" title="إسناد">
+                <i class="icon-retweet"></i>
+            </a>
+             }
+             else
+             {
+             <a class="inline-action-link has-tip assign" title="إعادة إسناد">
+                <i class="icon-retweet"></i>
+            </a>
+             }
+         }
+
+        @if (Model.StatusID == (int)TaskStatus.Pending)   //UnPend  in Case of Pending 
+        {         
+            <a class="inline-action-link has-tip unpend" title="إعادة تفعيل">
+                <i class="icon-play-1"></i>
+            </a>
+        }
+        else if
+        (
+       !Model.IsArchived && //archived 
+       Model.StatusID != (int)TaskStatus.Done && //  Done
+       Model.StatusID != (int)TaskStatus.NotAproved &&//NotAproved
+       Model.StatusID != (int)TaskStatus.Approved &&//Approved 
+       Model.StatusID != (int)TaskStatus.Rejected && //Rejected from Employee
+       Model.EmpID != null && Model.EmpID.Value != 0  //If Not assigned for any employee
+       )
+        {
+            <a class="inline-action-link has-tip pend" title="إيقاف">
+                <i class="icon-pause-1"></i>
+            </a>    
+        }
+        else if (Model.StatusID == (int)TaskStatus.Done) //Evalute Task InCase of EmpDone 
+        {
+            <a class="inline-action-link has-tip Approve" title="اعتماد">
+                <i class="icon-ok-circle"></i>
+            </a>
+            <a class="inline-action-link has-tip UnApprove" title="رفض">
+                <i class=" icon-cancel-circle"></i>
+            </a>
+        }
+    </div>*@
+   }
+</h3>
+@*<a href="/Log/index?taskId=@Model.TaskID" class="task-log-link">سجل العمليات</a>*@
+ @Html.EncodedActionLink("سجل العمليات", "index", "Log", "", new { taskId = @Model.TaskID }, new { Class = "task-log-link" })
+<div class="srch-lbl" style="float: right">الموظف مسؤول :<span id="td_EmpName" class="task-options">@Html.DisplayFor(model => model.EmployeeName) </span></div>
+<div class="clear">
+</div>
+<div class="pull-left" style="width:300px;">
+<div class="form-group">
+    <h2 class="sec-title">
+        <span class="flat-icon"><i class="icon-align-right"></i></span>
+        شرح المهمة</h2>
+    <div class="divider-line"></div>
+      <div class="task-desc-text long-text">
+        @if (Model.StatusID == (int)TaskStatus.New && (ViewBag.IsEditEnable == true))
+        { 
+           @Html.TextAreaFor(model => model.Description, new
+      {
+          Class = "form-textbox",
+          style = "width:270px;height:100px;",
+          id = "txtDesc",
+      })
+            
+        }
+        else
+        {
+        @Html.DisplayFor(model => model.Description)
+        }
+          
+    </div>
+    <div id="vldDescription" class="error" style="color: red; text-align: center; font-size: small"></div>
+    <div class="clearfix"></div>
+</div>
+<div class="form-group">
+    <h2 class="sec-title">
+        <span class="flat-icon"><i class=" icon-stopwatch"></i></span>
+       اجمالى الوقت المستغرق:  
+        </h2>   
+    @*@if (Model.StatusID == (int)TaskStatus.New)
+    { 
+          <div class="total-h go-left total_time" style="padding-left:0px">0.00 ساعة</div> 
+    }
+    else
+    {*@
+      <div class="total-h go-left total_time" style="padding-left:0px">@Model.ActualTime</div> 
+    @*}*@
+    <div class="divider-line"></div>
+    <div class="time-sheet-slider">
+        <ul class="slides">
+            @foreach (var tlog in Model.TimeDetails)
+            {      
+                <li>
+                    <div class="day">
+                        <i class="icon-calendar"></i>
+                        @tlog.LogDate
+                    </div>
+                    <div class="estimated-time">
+                        <span>@tlog.LogTime</span>
+                    </div>
+                </li>            
+            }
+        </ul>
+     
+    </div>
+    @if (Model.TimeDetails.Count > 2)
+    {
+   
+       <a id="arrow-left" class="time-sheet-slider-arrow-left">
+            <i class="icon-left-open-big"></i>
+        </a>
+        <a id="arrow-right" class="time-sheet-slider-arrow-right">
+            <i class="icon-right-open-big"></i>
+        </a>
+    }
+    <div class="clearfix"></div>
+</div>
+</div>
+
+<div style="float: right; width: 480px; padding-bottom: 30px;">
+<table width="100%" border="0" cellspacing="1" class="task-grid">   
+
+    <tr>
+        <td  width="30%" class="srch-lbl">أنشأت في :</td>
+        <td width="80%">@Html.DisplayFor(model => model.CreatedDate)</td>
+      
+    </tr>
+    <tr>
+         <td width="30%" class="srch-lbl">المشروع:</td>
+        @if (Model.StatusID == (int)TaskStatus.New && (ViewBag.IsEditEnable == true))
+        {
+            <td width="80%">
+                @Html.DropDownListFor(model => model.ProjectID, ViewBag.Project as SelectList, "لا يوجد مشروع", new { id = "ProjectID"})
+                @*@Html.DropDownList("ProjectID", ViewBag.Project as SelectList, "لا يوجد مشروع",
+                    new
+                    {
+                        @id = "ProjectID",
+                        Class = "form-select",
+                        style = "width: 200px;"
+                    })*@
+
+                @Html.HiddenFor(model => model.ProjectID, new {@name = "HF_Project"})
+            </td>
+        }
+        else
+        {
+            <td width="80%">
+                @Html.DisplayFor(model => model.Project)
+            </td>
+        } 
+    </tr>
+     <tr>    
+        <td width="30%" class="srch-lbl">متأخرة :</td>
+         <td width="80%" id="td_CurrentDelay"> @(Model.IsDelayed ? "نعم" : "لا")</td>
+    </tr>
+
+    @if (Model.StatusID == (int)TaskStatus.New || Model.StatusID == (int)TaskStatus.Inprogress)
+    { 
+    <tr>
+         <td width="30%" class="srch-lbl">المؤشر الزمنى :</td>
+         <td width="30%" class=""><div class="strenth-bar strenth-bar2"><div class="strenth-colors" style="width: @Model.Progressbar%;" title="@Model.Progressbar%"></div></div></td>
+    </tr>
+    }
+
+    <tr>  
+        <td width="30%" class="srch-lbl">الحالة الحالية :</td>
+        <td width="80%" id="td_CurrentStatus">@Html.DisplayFor(model => model.StatusName)</td>
+
+    </tr>
+    <tr>
+        
+    </tr>
+    <tr>
+        <td width="30%" class="srch-lbl">وقت بدايه المهمة :</td>
+        <td>
+            @if (Model.StatusID == (int)TaskStatus.Approved || Model.IsArchived || Model.StatusID == (int)TaskStatus.Pending || Model.StatusID == (int)TaskStatus.Inprogress || Model.StatusID == (int)TaskStatus.Done || Model.StatusID == (int)TaskStatus.Accepted || Model.StatusID == (int)TaskStatus.Rejected || Model.StatusID == (int)TaskStatus.NotAproved)
+            {
+                @Model.StartDate
+            }
+            else
+            {
+                if (ViewBag.IsEditEnable == true)
+                {
+                    @Html.TextBoxFor(model => model.StartDate, new
+            {
+                Class = "form-textbox",
+                style = "width:100px;",
+                id = "dtStartDate",
+                Readonly = "readonly"
+            })
+                    <div id="vldStartDate" class="error" style="color: red; text-align: center; font-size: small"></div>
+                }
+                else
+                {  @Model.StartDate}
+            }
+        </td>
+      
+    </tr>
+    <tr>
+          <td width="30%" class="srch-lbl">وقت نهاية المهمة  :</td>
+        <td>
+            @if ((Model.StatusID == (int)TaskStatus.Approved || Model.IsArchived || Model.StatusID == (int)TaskStatus.Done))
+            {
+                @Model.EndDate
+            }
+            else
+            {
+                if (ViewBag.IsEditEnable == true)
+                {
+
+                    @Html.TextBoxFor(model => model.EndDate, new
+               {
+                   Class = "form-textbox",
+                   style = "width:100px;",
+                   id = "dtEndDate",
+                   Readonly = "readonly"
+               })
+                    <div id="vldEndDate" class="error" style="color: red; text-align: center; font-size: small"></div>
+                }
+                else
+                { @Model.EndDate }
+            }
+        </td>
+    </tr>
+    @if (Model.StatusID == (int)TaskStatus.Done || Model.StatusID == (int)TaskStatus.Approved || Model.StatusID == (int)TaskStatus.NotAproved)
+    {
+        <tr>
+            <td width="30%" class="srch-lbl">وقت تسليم المهمة:</td>
+            <td>
+                @Model.FinishDate
+            </td>
+        </tr>
+    }
+    <tr>
+        <td  width="30%" class="srch-lbl">الوقت المقدر:</td>
+
+        <td>
+            @if ((Model.StatusID == (int)TaskStatus.Approved || Model.IsArchived || Model.StatusID == (int)TaskStatus.Done))
+            {
+                @Html.DisplayFor(model => model.EstimatedTime)
+            }
+            else
+            {
+                if (ViewBag.IsEditEnable == true)
+                {
+                    if (Model.ExpectedTime == 0)
+                    {@Html.TextBoxFor(model => model.ExpectedTime, new { id = "txtDuration", style = "width:40px", disabled = "disabled" })  }
+                    else
+                    {@Html.TextBoxFor(model => model.ExpectedTime, new { id = "txtDuration", style = "width:40px" })  }
+                     @Html.DropDownListFor(model => model.TimeUnitID, ViewBag.TimeUnit as SelectList, "اختر الوحدة", new { id = "ddlTimeUnit", style = "width:90px" })
+                    <div id="vldDuration" class="error" style="color: red; text-align: center; font-size: small"></div>
+                }
+                else
+                {
+                     @Html.DisplayFor(model => model.EstimatedTime)                    
+                }
+            }
+        </td>
+    </tr>  
+    <tr>
+          <td width="30%" class="srch-lbl">الأهمية :</td>
+        <td width="80%">
+            @if ((Model.StatusID == (int)TaskStatus.Approved) ||  Model.IsArchived || (Model.StatusID == (int)TaskStatus.Done))
+            {
+              
+            <div class="strenth-bar" taskid="Model.TaskID" title="@Model.priorityName" onclick="HandlePriorityChange" canchange="0" style="cursor:auto">
+                <div class="strenth-colors" style="width: @(Model.PriorityID * 25)% ;">
+                </div>
+            </div>
+            }
+            else
+            {
+                if (ViewBag.IsEditEnable == true)
+                {
+                    <div class="strenth-bar" taskid="Model.TaskID" title="Model.Priority" onclick="HandlePriorityChange" canchange="1">
+                        <div class="strenth-colors" style="width: @(Model.PriorityID * 25)%;">
+                        </div>
+                    </div>
+                }
+
+                else
+                {
+                    <div class="strenth-bar" taskid="Model.TaskID" title="@Model.priorityName" onclick="HandlePriorityChange" canchange="0" style="cursor:auto">
+                        <div class="strenth-colors" style="width: @(Model.PriorityID * 25)% ;">
+                        </div>
+                    </div>
+                }
+            }     
+        </td>
+    </tr>
+</table>
+      @if ((!(Model.StatusID == (int)TaskStatus.Approved) && !Model.IsArchived && !(Model.StatusID == (int)TaskStatus.Done) && (ViewBag.IsEditEnable == true)))
+      {
+<div style=" float: left;margin-top:inherit;">       
+   <input type="button"id="btnUpdateTask" class="submit-btn" value="تأكيد" style="width: 100px;">
+   <input type="button" class="submit-btn btnClose" id="btnCancel" value="الغاء" style="width: 100px;" />          
+</div>
+      }
+    </div>
+<div id="divTaskextensions">
+    @Html.Action("TaskExtensions", "Common")
+</div>
+<script>
+
+    //for time scroller
+    var actualtime ={
+        index: 0,
+        step: 0,
+        TimeCount: 0
+
+    }
+    var temp = @Model.TimeDetails.Count();
+    actualtime.TimeCount = @Model.TimeDetails.Count();
+    debugger;
+    //for Scroll right
+    actualtime.index = actualtime.TimeCount - 2;
+
+    //check if value even or odd
+    function isEven(value) {
+        if (value%2 == 0)
+            return true;
+        else
+            return false;
+    }
+    actualtime.step = temp / 2;
+    var bReturn = isEven(temp);
+    if (bReturn) {
+        if( actualtime.step != 1)
+            actualtime.step = actualtime.step - 1;
+        else {
+            actualtime.step = actualtime.step;
+        }
+
+    } else {
+        if( actualtime.step != 1)
+            actualtime.step = actualtime.step - 0.5;
+        else {
+            actualtime.step = actualtime.step;
+        }
+
+    }
+    $('#arrow-right').click(function () {
+        if(actualtime.index != actualtime.TimeCount){
+            if (actualtime.step >=1) {
+
+                $(".slides li").animate({ left: "+=214" });
+                actualtime.step--;
+                actualtime.index--;
+
+            }
+
+            else if (actualtime.step == 0) { actualtime.step = 0;}
+
+        }
+
+    });
+
+    //for Scroll left
+    $('#arrow-left').click(function () {
+        if (actualtime.index == (actualtime.TimeCount - 2))
+        {
+            actualtime.index = (actualtime.TimeCount - 2);
+        }
+        else if (actualtime.step >= 0) {
+            actualtime.index++;
+            actualtime.step++;
+            $(".slides li").animate({ left: "-=214" });
+        }
+
+    });
+
+
+
+    $('.long-text').readmore({
+        speed: 75,
+        maxHeight: 55
+    });
+    var approvConfirmation;
+    //hold Current Employee ID in case of reassifn
+    var CurrentEmp ='@Model.EmpID';
+    var PriorityID= '@Model.PriorityID';
+    $(function () {
+        //Clear "-" incase if Empty Date
+        if($("#dtStartDate").val()=="-")
+            $("#dtStartDate").val("");
+        if($("#dtEndDate").val()=="-")
+            $("#dtEndDate").val("");
+
+        $(document).ready(function()
+        {
+            if('@Model.IsAttach'== "True")
+            {
+                $('.dactive-tab').click();
+            }
+        });
+        //*************F O R  U I  P R I O R I T Y  C O N T R O L  A N D  H I J R I  C A L E N D E R  ***********//
+        // Priority Control .
+
+        $('.strenth-bar').click(function (e)
+        {
+            if( $(this).attr('canchange')==1)
+            {
+                var leftPiont = (((e.pageX - $(this).offset().left) - 88) / 88 * -100);
+                var obj = $(this).children('.strenth-colors');
+                $(this).removeAttr('title');
+                var OldWidth = $(this).children('.strenth-colors').width() / 88 * 100;
+                //var PriorityID;
+                if (parseInt(leftPiont) >= 0 && parseInt(leftPiont) <= 25) {
+                    $('#trSubmit').show();
+                    $(obj).css('width', '25%');
+                    PriorityID=1;
+                }
+                if (parseInt(leftPiont) >= 25 && parseInt(leftPiont) <= 50) {
+                    $('#trSubmit').show();
+                    $(obj).css('width', '50%');
+                    PriorityID=2;
+                }
+                if (parseInt(leftPiont) >= 50 && parseInt(leftPiont) <= 75) {
+                    $('#trSubmit').show();
+                    $(obj).css('width', '75%');
+                    PriorityID=3;
+                }
+                if (parseInt(leftPiont) >= 75 && parseInt(leftPiont) <= 100) {
+                    $('#trSubmit').show();
+                    $(obj).css('width', '100%');
+                    PriorityID=4;
+                }
+            }
+            else
+            {
+                $(this).css("cursor","auto");
+            }
+        });
+
+
+        //show Submit Button
+        $('#txtDuration,#ddlTimeUnit,#txtDesc,#ProjectID').on('change',function(){
+            $('#trSubmit').show();
+        });
+
+        $("#ddlTimeUnit").change(function (evt) {
+            debugger
+            var val = $(this).val();
+            if ($(this).val() == "") {
+                $('#txtDuration').attr("disabled", "disabled");
+            }
+            else {
+                $('#txtDuration').removeAttr("disabled");
+            }
+        });
+
+        $('#dtEndDate,#dtStartDate').click(function()
+        {
+            $('#trSubmit').show();
+        });
+
+        //Check Date Greg OR Hijrii
+        var Isgreg ="@(MvcApplication.IsGregDate)";
+        if(Isgreg=="True")
+        {
+            $('#dtEndDate').datepicker($.datepicker.regional[ "ar" ]);
+            $('#dtStartDate').datepicker($.datepicker.regional[ "ar" ]);
+        }
+        else
+        {
+            $('#dtEndDate,#dtStartDate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: "1400:1500"
+            });
+        }
+        //************** F O R  R E A S S I G N  S C E N A R I O *********************************//
+        //Define Reassign Modal
+        modal = new Modal({
+            title: ' إعاده أسناد المهمة', //title of the popup
+            message: '', // message text  notes: overrided if there're  id form
+            type: '',  // type of the modal 'alert', 'confirm' or 'form'
+            id: 'dialogForm',  // id of the form to show it on the modal
+            onAccept: function () {e},// call back runs after modal accept,
+            onCancel: function () {e} // call back runs after modal cancel default  is false , closes the modal.
+        });
+
+        var GregORHijriiDateNow;
+        var Isgreg ="@(MvcApplication.IsGregDate)";
+        if(Isgreg=="True")
+        {
+            GregORHijriiDateNow='@QvLib.QVUtil.Date.GDateNow("dd/MM/yyyy")';
+        }
+        else
+        {
+            GregORHijriiDateNow='@QvLib.QVUtil.Date.HDateNow("dd/MM/yyyy")';
+        }
+
+
+        // Handle Reassign Icon CLick
+        $('.assign').click(function (e) {
+            e.preventDefault();
+            debugger;
+            if('@Model.StartDate'  =="-"  || '@Model.EndDate' == "-")
+            {
+                if(CurrentEmp=="0")
+                {
+                    $("#dialogForm").closest('.pop-box').find('.modal_title').text('أسناد المهمة');
+                }
+                if(CurrentEmp !="0")
+                {
+                    $("#ddlEmployees option[value=" + CurrentEmp + "]").hide();
+                }
+                Modal.showMessage(' إعاده أسناد المهمة', 'لا يمكن أسناد المهمة الا بعد تحديد تاريخ البدايه والنهايه');
+            }
+            else
+            {
+
+                if(HijridateCompare($('#dtEndDate').val(), GregORHijriiDateNow) < 0){
+
+                    $('#btnUpdateTask').click();
+                }
+                else{
+                    if(CurrentEmp=="0")
+                    {
+                        $("#dialogForm").closest('.pop-box').find('.modal_title').text('أسناد المهمة');
+                    }
+                    if(CurrentEmp !="0")
+                    {
+                        $("#ddlEmployees option[value=" + CurrentEmp + "]").hide();
+                    }
+                    $('#btnUpdateTask').click();
+                    modal.show(); //open the  modal
+                }
+            }
+        });
+        //Handle Close Reassign poup or
+        $('.closepopup, .btnClose').click(function (e) {
+            e.preventDefault();
+            $('#ddlEmployees').val(0); // reset emp DropDownList value
+            $('#error')[0].innerHTML =""; //ClearValidation Text
+            modal.hide(); // hides the modal
+        });
+        //Handle  confirmation button to reassign tasks.
+        $('#btnConfirm').click(function () {
+            debugger
+            //validate  Required Validation onEmpValue
+            if ($('#ddlEmployees').val() == 0) {
+                $('#error')[0].innerHTML = "يجب أختيار موظف";
+            }
+                //Validate not to the Same Employee Reassign
+            else if ($('#ddlEmployees').val() ==CurrentEmp )
+            {
+                $('#error')[0].innerHTML = "لا يمكن إعاده أسناد لنفس الموظف";
+            }
+            else //Case Valid Data
+            {
+                debugger
+                $('#error').innerHTML = ""; //Clear Validation Text
+                var url = "/Common/Common/ReAssignTask";// ReassignUrl
+                $.post(url, { taskID: '@Model.TaskID', iEmployeeID: $('#ddlEmployees').val() }, function (data) {
+                    if (data == 'True') {
+                        debugger
+
+                        //Set CurrentEmp with new value
+                        CurrentEmp = $('#ddlEmployees').val() ;
+                        $("#ddlEmployees option").show();
+                        //update UI
+                        $('#td_EmpName')[0].innerHTML = $('#ddlEmployees option:selected').text();
+
+                        //Clear Employee dropDown Value
+                        $('#ddlEmployees').val(0);
+                        //Clear Error
+                        $('#error')[0].innerHTML ="";
+                    }else
+                    {
+                        debugger
+
+                    }
+                    //closePopUP
+                    modal.hide();
+                });
+            }
+        });
+        //***********************************F O R  P E N D / U N P E N D  S C E N A R I O *********************************//
+        //Handle PendTask Click
+        $('.pend').live('click', function (e) {
+            debugger
+            var elem = $(e.target);
+            //     var elem=$(event.target);
+            if (elem.hasClass('icon-pause-1'))
+            {
+                // elem=($(event.target).parent());
+                elem=($(e.target).parent());
+            }
+
+            //Set PendTask URL
+            var url = "/Common/Common/PendTask";
+            $.post(url, { taskID: '@Model.TaskID'}, function (data) {
+                if (data == 'True') {
+                    debugger
+                    //Incase of Sucess
+                    //UPdateUI
+                    elem.removeClass("pend");
+                    elem.addClass("unpend");
+                    elem.find(".icon-pause-1").removeClass("icon-pause-1").addClass("icon-play-1");
+                    $('#td_CurrentStatus')[0].innerHTML ='معلقة';
+
+                    //Toggle PEND and unpend
+                    elem.attr('title','إعادة تفعيل');
+                    elem.attr('data-original-title','إعادة تفعيل');
+
+                }
+            });
+            elem.unbind('click');
+        });
+
+        //Handle UnpendTask Click
+        $('.unpend').live('click',function(e) {
+            debugger
+            // var elem=$(event.target);
+            var elem = $(e.target);
+            if (elem.hasClass('icon-play-1'))
+            {
+                elem=($(e.target).parent());
+            }
+            if(HijridateCompare($('#dtEndDate').val(), GregORHijriiDateNow) < 0){
+
+                $('#btnUpdateTask').click();
+            }
+            else{
+                debugger
+                //Set UNPend URL
+                var url = "/Common/Common/UnPendTask";
+                $.post(url, { taskID: '@Model.TaskID' }, function(data) {
+                    if (data) {
+                        debugger
+                        //Incase of Sucess
+                        //UPdate UI
+                        elem.removeClass("unpend");
+                        elem.addClass("pend");
+                        elem.find(".icon-play-1").removeClass("icon-play-1").addClass("icon-pause-1");
+                        $('#td_CurrentStatus')[0].innerHTML = data;
+                        $('#td_CurrentDelay')[0].innerHTML ='لا';
+                        //Toggle PEND and unpend
+
+                        elem.attr('title','إيقاف');
+                        elem.attr('data-original-title','إيقاف');
+                        $('#btnUpdateTask').click();
+                    }
+                });
+
+                $(".modal_btn_accept").show();
+                Modal.showMessage('اعادة تفعيل', 'تم التفعيل المهمة بنجاح.');
+            }
+
+            //modal.show();
+
+            elem.unbind('click');
+
+        });
+
+        //********************F O R  T A S K  A P P R O V E  A N D  U N A P P R O V E***********************//
+        //Handle Company/Employee Approve EndTask
+        $(document).on('click', '.Approve', function(){
+            approvConfirmation = new Modal({
+                title: 'تأكيد', //title of the popup
+                message: 'هل انت متأكد من اعتماد المهمة ؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("CompanyAcceptTask")',
+                        dataType: 'json',
+                        data: { iTaskID:  @Model.TaskID },
+                        success: function (data) {
+                        },
+                        error: function (e) {
+                        }, complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true")
+                                Modal.showMessage({ title: ' قبول مهمة', message: 'تم قبول المهمة بنجاح', type: 'alert', onAccept: function () { window.location.href = "/Common/Common/TaskDetails/@Model.TaskID"; }, time: false });
+                            else
+                                Modal.showMessage('قبول مهمة', 'لم تتم العملية بنجاح');
+                        }
+                    });
+
+                    approvConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    approvConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            approvConfirmation.show();
+        });
+        //Handle Company/Employee UnApprove EndTask
+        $(document).on('click', '.UnApprove', function(){
+            debugger
+            approvConfirmation = new Modal({
+                title: 'تأكيد', //title of the popup
+                message: 'هل انت متأكد من رفض المهمة ؟', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("CompanyRejectTask")',
+                        dataType: 'json',
+                        data: { iTaskID:  "@Model.TaskID" },
+                        success: function (data) {
+                        },
+                        error: function (e) {
+                        }, complete: function (data) {
+                            if (data.responseText.toLowerCase() == "true")
+                                Modal.showMessage({ title: ' رفض مهمة', message: 'تم الرفض بنجاح', type: 'alert', onAccept: function () { window.location.href = "/Common/Common/TaskDetails/@Model.TaskID"; }, time: false });
+                            else
+                                Modal.showMessage('رفض مهمة', 'لم تتم العملية بنجاح');
+                        }
+                    });
+
+                    approvConfirmation.hide();
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    approvConfirmation.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+            approvConfirmation.show();
+        });
+        //***************************F O R  E D I T  T A S K  I N F O  *********************************//
+        $("#txtDuration").keydown(function(e){
+            var key = e.which;
+
+            // backspace, tab, left arrow, up arrow, right arrow, down arrow, delete, numpad decimal pt, period, enter
+            if (key != 8 && key != 9 && key != 37 && key != 38 && key != 39 && key != 40 && key != 46 && key != 110 && key != 190 && key != 13){
+                if (key < 48){
+                    e.preventDefault();
+                }
+                else if (key > 57 && key < 96){
+                    e.preventDefault();
+                }
+                else if (key > 105) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        //Handle UPdate Task Info
+        $('#btnUpdateTask').click(function (e) {
+            debugger
+            e.preventDefault();
+            var isValid = true;
+
+
+            $('#vldSummary').innerHTML="";
+            $('#vldDescription').innerHTML="";
+            if ('@(Model.StatusID == (int)TaskStatus.New)'=='True')
+            {
+                var regxDescription  = "^[a-zA-Z0-9\u0600-\u06ff,./\s _-]{0,}$";
+                var matchDescription = $('#txtDesc').val().match(regxDescription);
+                if (matchDescription == null) {
+                    $('#vldDescription')[0].innerHTML= " غير مسموح بكتابه رموز خاصه";
+                    isValid=false
+                }
+
+            }
+
+
+            var startdate ;
+            var GregORHijriiDateNow;
+            var Isgreg ="@(MvcApplication.IsGregDate)";
+            if(Isgreg=="True")
+            {
+                GregORHijriiDateNow='@QvLib.QVUtil.Date.GDateNow("dd/MM/yyyy")';
+            }
+            else
+            {
+                GregORHijriiDateNow='@QvLib.QVUtil.Date.HDateNow("dd/MM/yyyy")';
+            }
+            //Clear Validators
+            if( '@(Model.StatusID != (int)TaskStatus.Inprogress && Model.StatusID != (int)TaskStatus.Pending && Model.StatusID != (int) TaskStatus.Accepted && Model.StatusID !=(int)TaskStatus.Rejected && Model.StatusID != (int)TaskStatus.NotAproved)'   == 'True')
+            {
+                startdate = $('#dtStartDate').val();
+
+                if( typeof  ($('#vldStartDate')[0]) === 'undefined' || ($('#vldStartDate')[0]) === null ){
+                    //alert("true");
+                }
+                else
+
+                { $('#vldStartDate')[0].innerHTML ="";}
+            }
+            else
+                startdate = '@Model.StartDate';
+            $('#vldEndDate')[0].innerHTML ="";
+            $('#vldDuration')[0].innerHTML ="";
+            //Validate Date
+            //Notvalidate Inprogress Tasks
+            if( '@(Model.StatusID != (int)TaskStatus.Inprogress)' == 'True')
+            {
+                if($('#dtStartDate').val() =='')
+                {
+                    //$('#vldStartDate')[0].innerHTML = "يجب الايترك تاريخ البدايه فارغا"
+                    //isValid = false;
+                }
+                else if( startdate !='-' &&  HijridateCompare(startdate, GregORHijriiDateNow) < 0)
+                {
+                    $('#vldStartDate')[0].innerHTML = "تاريخ البدايه يجب وان يكون اكبر من او يساوى تاريخ اليوم";
+                    isValid = false;
+                }
+            }
+
+            //Duration time must be required when ddl time unit has value
+
+
+
+            if($("#ddlTimeUnit").val()!="")
+            {
+                if($("#txtDuration").val()=="" || $("#txtDuration").val()=="0.00")
+                {
+                    $('#vldDuration')[0].innerHTML ="يجب اختيار وقت مقدر";
+                    isValid = false;
+                }
+
+                if($("#txtDuration").val()!="")
+                    {
+                var regxExpectedTime  = "^[0-9]{1,3}([.,][0-9]{1,2})?$";
+                var matchExpectedTime = $('#txtDuration').val().match(regxExpectedTime);
+                if (matchExpectedTime == null) {
+                    $('#vldDuration')[0].innerHTML= " ادخل (1-3) رقم قبل العلامة و(1-2) رقم بعد العلامة مثل (12.5 ,0.5) او رقم صحيح";
+                    isValid=false
+                }
+                }
+            }
+            if( '@(Model.StatusID != (int)TaskStatus.New)'   == 'True')
+            {
+                ProjectID = '@Model.ProjectID';
+            }
+            else
+            { ProjectID = $('#ProjectID').val() ; }
+            if($('#dtEndDate').val() =='')
+            {
+                //$('#vldEndDate')[0].innerHTML = "يجب الايترك تاريخ النهايه فارغا"
+                //isValid = false;
+            }
+            else if(  HijridateCompare($('#dtEndDate').val(), GregORHijriiDateNow) < 0)
+            {
+                $('#vldEndDate')[0].innerHTML = "تاريخ النهايه يجب وان يكون اكبر من او يساوى تاريخ اليوم";
+                isValid = false;
+            }
+            else  if(HijridateCompare($('#dtEndDate').val(), startdate ) < 0)
+            {
+                $('#vldEndDate')[0].innerHTML = "تاريخ النهايه يجب وان يكون اكبر من او يساوى تاريخ البدايه";
+                isValid = false;
+            }
+            if(isValid)
+            {
+                debugger
+                //Set Edit URL
+                var url = "/Common/Common/EditTask";
+                var Taskdata = {taskID: '@Model.TaskID' ,
+                    ProrityID:PriorityID,
+                    StartDate: startdate,
+                    EndDate: $('#dtEndDate').val(),
+                    Duration :$('#txtDuration').val()=="" ? 0:$('#txtDuration').val(),
+                    timeUnitID :$('#ddlTimeUnit').val()=="" ? null:$('#ddlTimeUnit').val(),
+                    projectID:$('#ProjectID').val(),
+                    desc : $('#txtDesc').val(),
+                } ;
+                $.post(url, Taskdata, function (data) {
+                    debugger
+                    if (data =="DurationError" ) {
+                        isValid = false;
+                        $('#vldDuration')[0].innerHTML="الوقت المقدر أكبر من الوقت المتاح";
+                    }
+                    else if(data == "Sucess")
+                    {
+                        debugger
+                        Notify("success", "تم الحفظ بنجاح", 3000);
+                        @* window.location.href = "/Company/Company/TaskDetails/@Model.TaskID";*@
+                    }
+                });
+            }
+        });
+
+        //Cancel Edit
+        $('#btnCancel').click(function (e) {
+            e.preventDefault();
+            //redirect to Task Main page
+            window.location.href = "/Common/Common/TaskDetails/@Model.TaskID";
+        });
+
+        /////////////////////////////
+        //Compare HIjriDate
+        //in format of dd/mm/yyyy
+        //return 0 if equl
+        //1 if first greater
+        //-1 if first smaller
+        //-2 if error
+        function HijridateCompare(date1, date2) {
+            if (date1.split('/').length < 3 || date2.split('/').length < 3)
+                return -2;
+            if (parseInt(date1.split('/')[2]) > parseInt(date2.split('/')[2]))
+                return 1;
+            else if (parseInt(date1.split('/')[2]) < parseInt(date2.split('/')[2]))
+                return -1;
+            else if (parseInt(date1.split('/')[1]) > parseInt(date2.split('/')[1]))
+                return 1;
+            else if (parseInt(date1.split('/')[1]) < parseInt(date2.split('/')[1]))
+                return -1;
+            else if (parseInt(date1.split('/')[0]) > parseInt(date2.split('/')[0]))
+                return 1;
+            else if (parseInt(date1.split('/')[0]) < parseInt(date2.split('/')[0]))
+                return -1;
+            else return 0;
+        }
+    });
+
+</script>
+<style>
+    #ddlEmployees {
+        width: 147px;
+    }
+
+    .comment-msg h2 {
+
+width: 200px;
+}
+
+    .action-btn {
+width: 135px;
+padding-top: 6px;
+}
+     .barCol{
+    width:40%;
+    text-align:right;
+    }
+</style>
+
+
+
+

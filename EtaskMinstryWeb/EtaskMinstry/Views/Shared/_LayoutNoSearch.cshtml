@@ -1,0 +1,860 @@
+﻿@using EtaskMinstry
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    @{
+        if (EtaskMinstry.MvcApplication.userData != null)
+        {
+            if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Admin)
+            {
+                <title>إدارة الشركات</title>
+            }
+            else if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Company)
+            {
+
+
+                <title>إدارة مهام الشركة</title>
+            }
+            else
+            {
+                <title>إدارة مهام الموظف</title>
+            }
+
+        }}
+    <!--css-->
+    <link rel="shortcut icon" href="~/Content/Main/images/favicon.ico" />
+
+    <link href="~/Content/Site/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/Site/css/bootstrap-arabic.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/normalize.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/animate.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Site/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <link href="~/Content/Main/jquery.calendars.picker.css" rel="stylesheet" />
+
+    <link href="~/Content/Site/css/style.css" rel="stylesheet" type="text/css" />
+    @*<link href="~/Content/Main/internal.css" rel="stylesheet" />*@
+    <link href="~/Content/Main/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Content/Main/Developers.css" rel="stylesheet" />
+    <link href="~/Content/Main/chosen.css" rel="stylesheet" />
+
+    <!-- Modernizr -->
+    <script src="~/Content/Site/js/modernizr.js"></script>
+
+    <script src="~/Scripts/jquery.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="~/Scripts/menu.js"></script>
+    @*<script type="text/javascript" src="~/Scripts/jquery-1.7.1.min.js"></script>*@
+    @*<script src="~/Scripts/jquery-1.7.1.js"></script>*@
+
+    <script src="~/Scripts/jquery-1.8.3.js"></script>
+    <script type="text/javascript" src="~/Scripts/GlobalScript.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+
+    @*<script type="text/javascript" src="~/Scripts/dropdown.js"></script>*@
+    <script type="text/javascript" src="~/Scripts/tool-tip.js"></script>
+    <script type="text/javascript" src="~/Scripts/chosen.jquery.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/highcharts.js"></script>
+    <script type="text/javascript" src="~/Scripts/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+
+
+    <script src="~/Scripts/readmore.min.js" type="text/javascript"></script>
+
+    @* for Calender*@
+    <script type="text/javascript" src="~/Scripts/jquery.calendars.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.calendars.plus.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.calendars.picker.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.calendars.ummalqura.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery.calendars-ar.js"></script>
+
+    @* for hide show search *@
+    <script type="text/javascript" src="~/Scripts/Search.js"></script>
+
+    @*<script src="~/Content/Site/js/jquery-1.11.2.min.js"></script>*@
+    @*<script src="~/Scripts/jquery-ui.min.js"></script>*@
+
+
+    <script>
+
+
+        window.onload = function () {
+            var path = window.location.pathname;
+            $('.navigation li a[href="' + path + '"]').parent().addClass('active');
+
+
+      };
+
+      $(function () {
+            $(".navigation li").on("click", function () {
+              debugger;
+              $(this).addClass("active");
+              $(this).siblings().removeClass("active");
+          });
+
+            $('#pagingNum a').click(function () {
+              $('#pagingNum a').removeClass('current');
+              $(this).addClass('current');
+              console.log($(this))
+          })
+
+            $('.has-tip').tooltip();
+            $(".chzn-select").chosen();
+
+
+            $(".SetIsactive").on("change", function () {
+                var id = $(this).attr("id");
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("SetIsActive")',
+                    dataType: 'json',
+                    data: { "Id": id }
+                });
+            });
+
+            //$("#btnSearch").on("click", function (e) {
+            //    e.preventDefault();
+            //    debugger;
+            //    Search();
+            //});
+
+            //$("#btnShowAll").on("click", function (e) {
+            //    debugger;
+            //    e.preventDefault();
+            //    //Clear();
+            //    Search();
+            //});
+
+            $('#txtQuickSearch').val('@Request.QueryString["t"]');
+            $('.tab').click(function () {
+                $('.tab').removeClass('active-tab').addClass('dactive-tab');
+
+                if ($(this).parent().parent().hasClass("more-tasks")) {
+                    $(".more-tasks li a").css('background-color', 'white');
+                    $(this).css('background-color', 'rgba(211, 140, 51, 0.21)');
+                    $("#more-tasks").addClass('active-tab').removeClass('dactive-tab');
+                } else
+                    $(this).addClass('active-tab').removeClass('dactive-tab');
+
+                $('.tab_cont').hide();
+                $('.tab' + $(this).attr('tab')).show();
+            });
+
+
+
+            $('.delete_attch').click(function () {
+                $(this).parent().parent().next().hide('slow');
+                $(this).parent().parent().hide('slow');
+            });
+
+            var SelectedItemId = 0;
+
+            var DeleteRow = new Modal({
+                title: 'حذف', //title of the popup
+                message: 'تأكيد عملية الحذف', // message text  notes: overrided if there're  id form
+                type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                id: '',  // id of the form to show it on the modal
+                onAccept: function () {
+
+                    var currentController = '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()';
+                    currentController = currentController.substr(0, 1).toUpperCase() + currentController.substr(1);
+                    debugger
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("Delete")',
+                        dataType: 'json',
+                        data: { id: SelectedItemId, CurrenClass: currentController },
+                        success: function (data) {
+
+                        },
+                        error: function (e) {
+
+                        },
+                        complete: function (data) {
+
+                            DeleteRow.hide();
+                            $("#btnSearch").click();
+                            //for DashBOard Delte
+                            //if (currentController.toLowerCase() == 'dashboard') {
+
+                            //    $('.reloadAssign').click();
+                            //    $('.reloadAssign').next()[0].innerHTML = parseInt($('.reloadAssign').next()[0].innerHTML) - 1;
+                            //}
+                            //if (data.responseText.toLowerCase() == "true") {
+                            //    Notify("success ", "تم الحذف بنجاح", 3000);
+                            //    $("#btnSearch").click();
+                            //}else
+                            //    Notify("danger", "لم يتم الحذف ", 3000);
+                        }
+                    });
+                },// call back runs after modal accept,
+                onCancel: function () {
+                    DeleteRow.hide();
+                } // call back runs after modal cancel default  is false , closes the modal.
+            });
+
+          $(document).on('click', '.fa-trash', function (e) {
+              //alert("dd");
+               e.preventDefault();
+              debugger
+              SelectedItemId = $(this).attr('id');
+              console.log(DeleteRow.init())
+              DeleteRow.show();
+          });
+          //$(".fa-trash").on('click', function (e) {
+          //    alert("dd");
+          //  //  e.preventDefault();
+          //    debugger
+          //    SelectedItemId = $(this).attr('id');
+          //    console.log(DeleteRow.init())
+          //    DeleteRow.show();
+          //})
+          //Open Confirmation popUp when Click on Delete icon.
+          //$('.iconbox .icon-trash-1').on('click', function (e) {
+          $(document).on('click', '.iconbox .icon-trash-1', function (e) {
+              //alert("ssss");
+               // e.preventDefault();
+
+                SelectedItemId = $(this).attr('id');
+
+                DeleteRow.show();
+            });
+
+
+            $('#deletedId').click(function () {
+
+                var currentController = '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()';
+                currentController = currentController.substr(0, 1).toUpperCase() + currentController.substr(1);
+                debugger
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("Delete")',
+
+                    data: { id: $('#deletedItem').val(), CurrenClass: currentController },
+                    success: function (data) {
+                        $('#confirmDeleteModal').modal('hide');
+
+                        $.ajax({
+                            type: 'Get',
+                            url: '@Url.Action("Index")',
+
+                            success: function (data) {
+                                console.log($(data).find('#list').text())
+                            }
+                        });
+                    },
+                    error: function (e) {
+                        //alert('errror')
+                        console.log(e)
+                    }
+                });
+
+            })
+            $('.deleteBtn').click(function () {
+
+                SelectedItemId = $(this).attr('id');
+                $('#deletedItem').val(SelectedItemId)
+                $('#confirmDeleteModal').modal('show');
+
+
+            });
+
+
+
+            // To Implement Pager Functionality & To Prevent Show Grid In new Page .
+            $("th a,tfoot .pagerbar a").live("click", function () {
+                $('#SearchForm').attr('action',
+                    $('#SearchForm').attr('action').split('?')[0] + "?" + $(this).attr("href").split('?')[1]).submit();
+                return false;
+            });
+
+
+        });
+
+        //});
+        //Compare HIjriDate
+        //in format of dd/mm/yyyy
+        //return 0 if equl
+        //1 if first greater
+        //-1 if first smaller
+        //-2 if error
+        function HijridateCompare(date1, date2) {
+            if (date1.split('/').length < 3 || date2.split('/').length < 3)
+                return -2;
+            if (parseInt(date1.split('/')[2]) > parseInt(date2.split('/')[2]))
+                return 1;
+            else if (parseInt(date1.split('/')[2]) < parseInt(date2.split('/')[2]))
+                return -1;
+            else if (parseInt(date1.split('/')[1]) > parseInt(date2.split('/')[1]))
+                return 1;
+            else if (parseInt(date1.split('/')[1]) < parseInt(date2.split('/')[1]))
+                return -1;
+            else if (parseInt(date1.split('/')[0]) > parseInt(date2.split('/')[0]))
+                return 1;
+            else if (parseInt(date1.split('/')[0]) < parseInt(date2.split('/')[0]))
+                return -1;
+            else return 0;
+        }
+        ///////////////////////////////////////////////////////////////////////////
+        //});
+        //Compare GregDate
+        //in format of dd/mm/yyyy
+        //return 0 if equl
+        //1 if first greater
+        //-1 if first smaller
+        //-2 if error
+        function dateCompare(date1, date2) {
+            if (date1.split('/').length < 3 || date2.split('/').length < 3)
+                return -2;
+            if (parseInt(date1.split('/')[2]) > parseInt(date2.split('/')[2]))
+                return 1;
+            else if (parseInt(date1.split('/')[2]) < parseInt(date2.split('/')[2]))
+                return -1;
+            else if (parseInt(date1.split('/')[1]) > parseInt(date2.split('/')[1]))
+                return 1;
+            else if (parseInt(date1.split('/')[1]) < parseInt(date2.split('/')[1]))
+                return -1;
+            else if (parseInt(date1.split('/')[0]) > parseInt(date2.split('/')[0]))
+                return 1;
+            else if (parseInt(date1.split('/')[0]) < parseInt(date2.split('/')[0]))
+                return -1;
+            else return 0;
+        }
+        //apply classes to web grid.................................................
+        function applyClassesToWebGrid() {
+            debugger;
+            //to replace href from # to void
+            $(".pagerbar td a").each(function () {
+                if ($(this).text().length < 4) {
+                    $(this).addClass('number');
+                    //$(this).attr("href", "javascript:void(0);");
+                }
+                else {
+                    $(this).addClass('pgr');
+                    //$(this).attr("href", "javascript:void(0);");
+                }
+            });
+
+            $(".pagerbar td").contents().each(function () {
+                if ($(this).is(":not('a')") && $(this).is(":not('span')") && $(this).text() != ' ') {
+                    $(this).wrap("<span class='active' />");
+                }
+            });
+
+            // Apply Css For Links
+            $('li a.cat-active').each(function () {
+                if (this.href.toLowerCase() == window.location.href.toLowerCase()) {
+                    $(this).css({ "color": "#bd7d0e" });
+                }
+            });
+        }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    </script>
+</head>
+<body>
+
+
+    <!-- Navbar -->
+    <div class="navbar navbar-inverse" role="navigation">
+        <span id="siteseal">
+            <script type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=CBz77MT7PolSVNwGIdRSsC9YpeVwWaE1epeFFX6YKzEtty7LK75DC5aWhK3S"></script>
+        </span>
+        <div class="navbar-header">
+
+            <a class="navbar-brand" href="#"><img src="~/Content/Site/img/logo.png" alt="Londinium" /></a><a class="sidebar-toggle"><i class="fa fa-align-justify"></i></a>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-icons">
+
+                <i class="fa fa-th"></i>
+            </button>
+            <button type="button" class="navbar-toggle offcanvas">
+                <i class="fa fa-align-justify"></i>
+            </button>
+        </div>
+
+        <ul class="nav navbar-nav navbar-right collapse" id="navbar-icons">
+
+            <li>
+                <div class="date-range">
+
+                    @if (MvcApplication.IsGregDate)
+                    {
+                        string[] date = DateTime.Now.ToGregArabicDate().Split(' ', '\t');
+                        <i class="text-right">@date[1]</i>
+                        <b><i> @date[2]@date[3]</i> <i class="text-right">@date[5]</i></b>
+                    }
+                    else
+                    {
+                        string[] date = DateTime.Now.ToHijriArabicDate().Split(' ', '\t');
+                        <i class="text-right">@date[1]</i>
+                        <b><i> @date[2]@date[3]</i> <i class="text-right"> @date[5]</i></b>
+
+                    }
+                </div>
+            </li>
+            <li class="dropdown">
+                @Html.Partial("PushNotification", new EtaskMinstry.Models.PushNotificationVM(0, 8))
+            </li>
+            @if (!HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Contains("/company/company/index") && !HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Contains("/employee/tasks"))
+            {
+
+                 <li>
+             
+                <a href="#" class="search-icon"><i class="fa fa-search fa-lg"></i></a>
+            
+            </li>
+            }
+                     
+        </ul>
+    </div>
+    <!-- /navbar -->
+    @* end ssl sectificat*@
+
+    @Html.Partial("Modal")
+
+    <!-- Page container -->
+    <div class="page-container sidebar-right">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-content">
+                <div><br /></div>
+             
+                <!-- User dropdown -->
+                <div class="user-menu dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      @if (EtaskMinstry.MvcApplication.userData != null)
+{
+    @*<img alt="" src="/Upload/company/@EtaskMinstry.MvcApplication.userData.logo" />*@
+}
+else
+{    <img alt="" src="http://placehold.it/300" />
+}
+                        <div class="user-info">
+
+                            @if (EtaskMinstry.MvcApplication.userData != null)
+                            {
+                                @EtaskMinstry.MvcApplication.userData.userName
+                                if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Admin)
+                                {
+                                    <span>
+                                        ادمن
+                                    </span>
+                                }
+                                else if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Company)
+                                {
+                                    <span>
+                                           شركة - @EtaskMinstry.MvcApplication.userData.companyName
+ 
+                                    </span>
+                                }
+                                else
+                                {  <span>
+                                    موظف
+                                </span>
+                                }
+                            }
+                        </div>
+                    </a>
+                    <div class="popup dropdown-menu dropdown-menu-right">
+                        <div class="thumbnail">
+                            <div class="thumb">
+@if (EtaskMinstry.MvcApplication.userData != null)
+{
+    @*<img alt="" src="/Upload/company/@EtaskMinstry.MvcApplication.userData.logo" />*@
+}
+else
+{    <img alt="" src="http://placehold.it/300" />
+                                }
+                                @*<div class="thumb-options">
+                                    <span>
+                                        <a href="#" class="btn btn-icon btn-success"><i class="fa fa-pencil"></i></a>
+                                        <a href="#" class="btn btn-icon btn-success"><i class="fa fa-trash"></i></a>
+                                    </span>
+                                </div>*@
+                            </div>
+
+                            <div class="caption text-center">
+                                <h6>
+                                    @if (EtaskMinstry.MvcApplication.userData != null)
+                                    {
+                                        @EtaskMinstry.MvcApplication.userData.userName
+                                        if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Admin)
+                                        {
+                                            <small>
+                                                ادمن
+                                            </small>
+                                        }
+                                        else if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Company)
+                                        {
+                                            <small>
+                                                شركة - @EtaskMinstry.MvcApplication.userData.companyName
+
+
+                                            </small>
+                                        }
+                                        else
+                                        {  <small>
+                                            موظف
+                                        </small>
+                                        }
+                                    }
+
+                            </h6>
+                        </div>
+                    </div>
+
+                    <ul class="list-group">
+                            <li class="list-group-item">
+
+                                <a href="/Security/ChangePassword"><i class="fa fa-key"></i> تغيير كلمة المرور</a><a href="/Security/Logout" class="pull-right text-danger"><i class="fa fa-lock"></i> تسجيل خروج</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- /user dropdown -->
+            <!-- Main navigation -->
+            @if (EtaskMinstry.MvcApplication.userData != null)
+            {
+                <ul class="navigation">
+                    @*//if (EtaskMinstry.MvcApplication.userData.isCompany)
+                    // user company*@
+                    @if (EtaskMinstry.MvcApplication.userData.UserTypeId == 3)
+                {
+                        @*<a class="cusor_menu" style="top: 42px;"></a>*@
+                            <li>
+                                <a class="testMenu" href="@(EtaskMinstry.MvcApplication.userData.isCompany ? "/Company/DashBoard" : "/Employee/DashBoardEmp")">
+                                    <span>الرئيسية</span> <i class="fa fa-television"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="/Company/Company/index">
+                                    <span>المهام</span> <i class="fa fa-tasks"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="/Company/Project">
+                                    <span>المشروعات</span> <i class="fa fa-table"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="/Company/employee">
+                                    <span>الموظفين</span> <i class="fa fa-briefcase"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Log/LogGeneral">
+                                    <span>سجل العمليات</span><i class="fa fa-history"></i>
+                                </a>
+                            </li>
+                            <li>
+                        
+                                    <a href="#" data-toggle="collapse" data-target="#submenu-1">
+                                        <i class="fa fa-database" aria-hidden="true"></i>
+                                        <span>التقارير</span>
+                                        <i class="fa fa-fw fa-angle-down pull-right"></i>
+                                    </a>
+                                    <ul id="submenu-1" class="collapse">
+                                        <li><a href="/Company/report/ProjectReport"><i class="fa fa-angle-double-left"></i> <span>تقرير مهام كل مشروع</span></a></li>
+                                        <li><a href="/Company/report/TaskReportPreperation"><i class="fa fa-angle-double-left"></i><span>تقرير المهام</span></a></li>
+                                        <li><a href="/Company/report/EmployeeReport"><i class="fa fa-angle-double-left"></i><span>تقرير  مهام كل موظف</span></a></li>
+
+                                        @if (EtaskMinstry.MvcApplication.userData.HasAttendanceReport == true)
+                                        {
+                                            <li><a href="/Attendance/AttendanceReport?companyId=@EtaskMinstry.MvcApplication.userData.CompanyId"><i class="fa fa-angle-double-left"></i><span>تقرير الحضور والانصراف</span></a></li>
+                                        }
+                                        @if (EtaskMinstry.MvcApplication.userData.BriefTaskReport)
+                                        {
+                                            <li><a href="/Company/report/BriefTasksReport?companyId=@EtaskMinstry.MvcApplication.userData.CompanyId"><i class="fa fa-angle-double-left"></i><span>تقرير المهام المختصر</span></a></li>
+
+                                        }
+                                    </ul>
+                                
+                            </li>
+                        
+                            <li>
+                                
+                                    <a href="#" data-toggle="collapse" data-target="#submenu-2">
+                                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                                        <span>الإحصائيات</span>
+                                        <i class="fa fa-fw fa-angle-down pull-right"></i>
+                                </a>
+                                    <ul id="submenu-2" class="collapse">
+                                        <li><a href="/Company/report/TaskChart"><i class="fa fa-angle-double-left"></i> <span> احصائيات المهام</span></a></li>
+                                        <li><a href="/Company/Report/TasksByMonthsChart"><i class="fa fa-angle-double-left"></i><span> احصائيات المهام السنوية</span></a></li>
+                                       </ul>
+                            
+                            </li>
+
+                            <li>
+                                <a href="/Log/index/">
+                                    <span>سجل المهام</span> <i class="fa fa-archive"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="#" data-toggle="collapse" data-target="#submenu-3">
+                                    <i class="fa fa-question" aria-hidden="true"></i>
+                                    <span>مساعدة</span>
+                                    <i class="fa fa-fw fa-angle-down pull-right"></i>
+                                </a>
+                                <ul id="submenu-3" class="collapse">
+                                    <li><a href="~/Upload/Help/startnow.pdf" download=download><i class="fa fa-angle-double-left"></i> <i class="fa fa-download  fa-lg pull-right" aria-hidden="true"></i><span>إبدأ الأن</span></a></li>
+                                    <li><a href="~/Upload/Help/heplforcompany.pdf" download=download><i class="fa fa-angle-double-left"></i><i class="fa fa-download fa-lg pull-right" aria-hidden="true"></i><span>دليل مستخدم الشركه</span></a></li>
+                                    <li><a href="https://tsys.qvtest.com/" target="_blank"><i class="fa fa-angle-double-left"></i> الدعـــم الفنــي</a></li>
+                                </ul>
+                            </li>
+
+                      
+                    }
+
+                    // user employee
+                    else if (EtaskMinstry.MvcApplication.userData.UserTypeId == 2)
+                    {
+                        
+                            <li>
+                                <a href="/Employee/DashBoardEmp">
+                                    <span>الرئيسية</span> <i class="fa fa-television"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="/Employee/Tasks">
+                                    <span>المهام</span> <i class="fa fa-tasks"></i>
+                                </a>
+                            </li>
+
+
+                            <li>
+                        
+                                    <a href="#" data-toggle="collapse" data-target="#submenu-1">
+                                        <i class="fa fa-database" aria-hidden="true"></i>
+                                        <span>التقارير</span>
+                                        <i class="fa fa-fw fa-angle-down pull-right"></i>
+                                </a>
+                                    <ul id="submenu-1" class="collapse">
+                                        <li><a href="/Employee/report/ProjectReport"><i class="fa fa-angle-double-left"></i> <span>تقرير مهام كل مشروع</span></a></li>
+                                        <li><a href="/Employee/report/TaskReportPreperation"><i class="fa fa-angle-double-left"></i><span>تقرير المهام</span></a></li>
+                                       </ul>
+                                
+                            </li>
+
+                            <li>
+                                <a href="#" data-toggle="collapse" data-target="#submenu-2">
+                                    <i class="fa fa-question" aria-hidden="true"></i>
+                                    <span>مساعده</span>
+                                    <i class="fa fa-fw fa-angle-down pull-right"></i>
+                                </a>
+                                <ul id="submenu-2" class="collapse">
+                                    <li><a href="~/Upload/Help/startnow.pdf" download=download><i class="fa fa-angle-double-left"></i> <i class="fa fa-download  fa-lg pull-right" aria-hidden="true"></i><span>إبدأ الأن</span></a></li>
+                                    <li><a href="~/Upload/Help/helpforemployee.pdf" download=download><i class="fa fa-angle-double-left"></i><i class="fa fa-download fa-lg pull-right" aria-hidden="true"></i><span>دليل مستخدم الموظف</span></a></li>
+                                    <li><a href="http://qvsupport.tawfier.com/" target="_blank"><i class="fa fa-angle-double-left"></i> الدعـــم الفنــي</a></li>
+                                </ul>
+
+                            </li>
+                       
+                    }
+                    // user admin
+                    else
+                    {
+                        
+                            <li><a href="/Admin/Company/Index"><span>الرئيسية</span> <i class="fa fa-television"></i></a></li>
+
+                            <li>
+                                <a href="/Admin/employee/Index"><span>الموظفين</span> <i class="fa fa-briefcase"></i></a>
+                            </li>
+
+                    }
+                </ul>
+            }
+            <!-- /main navigation -->
+
+        </div>
+    </div>
+    <!-- /sidebar -->
+    <!-- Page content -->
+    <div class="page-content">
+            @* General Search *@
+           @if (!HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Contains("/company/company/index") && !HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Contains("/employee/tasks") && !HttpContext.Current.Request.Url.AbsoluteUri.ToLower().Contains("/company/project"))
+           {
+
+            @Html.Partial("PartialSearchTask", new EtaskMinstry.Models.CustomTxtbox())
+            }
+        <!-- Page header -->
+        <div class="page-header">
+            <div class="page-title">
+                @{
+                    if (EtaskMinstry.MvcApplication.userData != null)
+                    {
+                        if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Admin)
+                        {
+                            <h3> إدارة</h3>
+                        }
+                        else if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Company)
+                        {
+                            <h3>@ViewBag.Title <small>إدارة مهام الشركة</small></h3>
+                        }
+                        else
+                        {
+                            <h3>@ViewBag.Title <small>إدارة مهام الموظف</small></h3>
+                        }
+
+                    }}
+
+            </div>
+        </div>
+        <!-- /page header -->
+        <!-- Breadcrumbs line -->
+        <div class="breadcrumb-line">
+            <ul class="breadcrumb">
+                <li><a href="#">الرئيسية</a></li>
+
+                @{
+                    if (EtaskMinstry.MvcApplication.userData != null)
+                    {
+                        if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Admin)
+                        {
+                            <li class="active">@ViewBag.Title</li>
+                        }
+                        else if (EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Company)
+                        {
+                            <li class="active">@ViewBag.Title</li>
+                        }
+                        else
+                        {
+                            <li class="active">@ViewBag.Title</li>
+                        }
+
+                    }}
+
+
+            </ul>
+        </div>
+        <!-- /breadcrumbs line -->
+        <br />
+        <!-- Tasks table -->
+        <div class="tabbable page-tabs">
+
+                        @RenderBody()   
+            <div id="loadding" style="display: none;position: absolute;">
+                </div>
+                @*</div>
+                </div>
+            </div>*@
+            </div>
+            <!-- /Tasks table -->
+            <!-- Footer -->
+            <div class="footer clearfix">
+                <div class="pull-left">
+                    <footer>
+                        جميع الحقوق محفوظة ©
+                        برنامج إدارة المهام
+                        @System.Configuration.ConfigurationManager.AppSettings["devYear"]
+                        -
+                        تم التطوير بواسطة <a target="_blank" href="https://qvsite.com/">Q-Vision</a>
+                    </footer>
+                </div>
+                <div class="pull-right icons-group">
+                    <a href="#"><i class="icon-screen2"></i></a>
+                    <a href="#"><i class="icon-balance"></i></a>
+                    <a href="#"><i class="icon-cog3"></i></a>
+                </div>
+            </div>
+            <!-- /footer -->
+
+
+        </div>
+    <!-- /page content -->
+
+    </div>
+<!-- /page container -->
+
+  
+    <script type="text/javascript">
+        $(function () {
+            $('.has-tip').tooltip();
+            $(".chzn-select").chosen();
+        });
+    </script>
+@*<script>
+       
+
+        function ValidateRegExp(searchString) {
+        var regx = "^[a-zA-Z0-9\u0600-\u06ff,./\s _-]{0,350}$";
+        var match = ($(searchString).val()).match(regx);
+        if (match == null) {
+            $(searchString).css("background-color", "#ffeeee")
+            return false;
+        } else {
+            $(searchString).css("background-color", "#fff")
+            return true;
+        }
+    }
+
+    function ValidateEmail(email) {
+        var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (re.test($(email).val()) || $(email).val() == "") {
+            $(email).css("background-color", "#fff")
+            return true;
+        } else {
+            $(email).css("background-color", "#ffeeee")
+            return false;
+        }
+
+    }
+
+</script>*@
+
+<style>
+    #sitelock_shield_logo {
+        z-index: 100001;
+    }
+
+    .active-menu a {
+        color: #767475 !important;
+    }
+</style>
+
+    <!-- Layout Scripts -->
+    @*<script src="~/Scripts/datatables.min.js"></script>*@
+    <script src="~/Scripts/moment.js"></script>
+    @*<script src="~/Scripts/timepicker.min.js"></script>*@
+    <script src="~/Scripts/daterangepicker.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/application.js"></script>
+    <script src="~/Scripts/scripts.js"></script>
+
+    <script>
+        //$(function() {
+
+        
+        //if (matchMedia('only screen and (max-width: 480px)').matches) {
+        //    // smartphone/iphone... maybe run some small-screen related dom scripting?
+        //    alert("query")
+        //    //$("input").focus(function () {
+        //    //    debugger
+        //    //    //alert("Handler for .focus() called.");
+        //    //    //$(".calendars-popup").css("overflow", "visiblity !important")
+        //    //});
+
+        //}
+        //})
+    </script>
+</body>
+</html>

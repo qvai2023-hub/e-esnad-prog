@@ -1,0 +1,347 @@
+﻿@using EtaskMinstry
+@using Resources
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Admin.Models.CompanyEmployeeVM>
+@*@model EtaskMinstry.Areas.Company.Models.CompanyEmployeeVM*@
+@{
+    ViewBag.Title = " الموظفين";
+}
+
+         <!--Add-->
+<div class="panel-heading">
+
+    <div class="pull-right">
+
+        <a id="addPath" href="/Admin/Employee/AddEdit" class="btn btn-xs btn-success">إضافة <i class="fa fa-plus"></i></a>
+        @*@Html.EncodedActionLink("إضافة موظف", "AddEdit", "Employee", "Admin",new { id = 0 }, new { Class = "btn btn-xs btn-success", id = "btnAdd" })*@
+
+
+    </div>
+</div>
+<!--/Add-->
+<!-- Tasks table -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+
+        <h6 class="panel-title"> @ViewBag.Title</h6>
+        <span class="pull-right label label-danger">@ViewBag.count</span>
+
+
+    </div>
+    <!--Search-->
+    <div class="panel-body">
+        <div class="panel-group">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h6 class="panel-title panel-trigger">
+                        <a data-toggle="collapse" href="#panel-search">بحث</a>
+                    </h6>
+                </div>
+                <div id="panel-search" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <form action="/Admin/Company/Index" method="post" class="form-horizontal">
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label class="col-sm-4 control-label">اسم الشركة: </label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBox("Name", "", new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+
+                                    <label class="col-sm-4 control-label">السجل التجاري: </label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBox("CommercialRegister", "", new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+
+                                    <label class="col-sm-4 control-label">البريد الالكتروني: </label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBox("Email", "", new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+
+                                <input type="button" id="btnSearch" value="بحث" class="btn btn-primary" />
+                                <input name="Submit0" id="btnShowAll" type="button" class="btn btn-primary" value="عرض الكل" />
+
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/Search-->
+
+    <div class="datatable-tasks">
+
+
+        @if (Model.Any())
+        {
+            <div id="list">
+
+                @{
+
+            var grid = new WebGrid(Model);
+                var gridColumns = new List<WebGridColumn>();
+
+                if (Model.Any())
+                {
+                    gridColumns.Add(grid.Column("EmpName", "الأسم", @<text>@item.Name</text>, "FirstColumn"));
+                    gridColumns.Add(grid.Column("CompanyID", "الشركة", @<text>@item.CompanyName</text>, "SecondColumn"));
+                    gridColumns.Add(grid.Column("JobTitle", "الوظيفة", @<text>@item.jobTitle</text>, "SecondColumn"));
+                    gridColumns.Add(grid.Column("Gender", "النوع", @<text> @(item.Gender == true ? "ذكر" : "أنثى")</text>, "ThirdColumn"));
+                    gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "FourthColumn"));
+                    gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+
+                    gridColumns.Add(grid.Column("Edit", "تعديل",@<text>
+                <a href="/Admin/Employee/AddEdit/@item.Id"><span class="fa fa-edit" title="" data-original-title="تعديل"></span></a>
+                    </text>));
+                    gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="fa fa-trash " title="" data-original-title="حذف">
+
+                    <i href="javascript:void(0);" id="@item.Id"></i>
+                </span></text>));
+
+                    }
+                }
+                @grid.GetHtml(columns: gridColumns.ToArray(),
+                       tableStyle: "table table-bordered dataTable no-footer",
+                      headerStyle: "",
+                      footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+
+            </div>
+        }
+        else
+        {
+            <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+                <tbody>
+                    <tr class="table-alternat-header">
+                        <td>
+                            المهمة
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td colspan="1" style="text-align: center">
+                            لا يوجد بيانات
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+<script>
+        $(function () {
+            //$("#btnSearchToggle").click(function () {
+
+            //    $("#SearchDiv").slideToggle("normal");
+            //});
+
+            $(".SetIsactive").live("change", function () {
+                var id = $(this).attr("id");
+
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("SetIsActive")',
+                    dataType: 'json',
+                    data: { "EmpID": id }
+                });
+            });
+            //add validation rule to search name
+            var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+            $('#strTitle').rules("add", { regex: "@ValidationResource.RevString150" });
+            $('#strJobTitleSearch').rules("add", { regex: "@ValidationResource.RevString150" });
+            //$('#strEmailSearch').rules("add", { regex: re });
+            $('#strEmailSearch').rules("add", { regex: "@ValidationResource.revSearchMail" });
+            $("#btnSearch").live("click", function (e) {
+                debugger;
+                e.preventDefault();
+                $('.errorMsgName').hide();
+                $('.errorMsgEmail').hide();
+                $('.strJobTitleSearch').hide();
+                var isValid = true;
+                if (!$('#strTitle').valid()) {
+                    isValid = false;
+                    $('.errorMsgName').show();
+                }
+                else {
+                    $('.errorMsgName').hide();
+                }
+                if (!$('#strJobTitleSearch').valid()) {
+                    $('.errorMsgJob').show();
+                    isValid = false;
+                }
+                else { $('.errorMsgJob').hide(); }
+
+                if (!$('#strEmailSearch').valid()) {
+                    $('.errorMsgEmail').show();
+                    isValid = false;
+                }
+                else { $('.errorMsgEmail').hide(); }
+
+                var searchstring = $("#strTitle").val();
+                var searchJobTitle = $("#strJobTitleSearch").val();
+
+                var companyName = $("#CompanyID").val();
+                var gender = $("#genderDDL").val();
+                var isActive = $("#ActiveDDL").val();
+                var email = $("#strEmailSearch").val();
+                if (isValid) {
+                    var mySearchData = { "Name": searchstring,"companyName": companyName, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email };
+                    $.ajax({
+                        type: 'Post',
+                        url: '@Url.Action("Search")',
+                        dataType: 'html',
+                        data: AddAntiForgeryToken(mySearchData),
+                        //data: { "Name": searchstring, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email },
+                        async: false,
+                        success: function (data) {
+
+                            $("#list").html(data);
+                        }
+                    });
+                }
+            });
+
+            var AddAntiForgeryToken = function (data) {
+                data.__RequestVerificationToken = $('#_CRSFform input[name=__RequestVerificationToken]').val(); return data;
+            };
+            $("#btnShowAll").live("click", function (e) {
+                e.preventDefault();
+                Clear();
+                var searchstring = $("#strTitle").val();
+                var searchJobTitle = $("#strJobTitleSearch").val();
+                var companyName = $("#CompanyID").val();
+                var gender = $("#genderDDL").val();
+                var isActive = $("#ActiveDDL").val();
+                var email = $("#strEmailSearch").val();
+                var mySearchData = { "Name": searchstring, "companyName": companyName, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email };
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("Search")',
+                    dataType: 'html',
+                    data: AddAntiForgeryToken(mySearchData),
+                    // data: { "Name": searchstring, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email },
+                    async: false,
+                    success: function (data) {
+
+                        $("#list").html(data);
+                    }
+                });
+            });
+
+        });
+        var ele = "";
+        $(".deleteEmp").on("click", function () {
+            ele = $(this).closest('tr');
+
+        });
+
+        $(".modal_btn_accept").on("click", function () {
+            debugger;
+            ele.hide();
+            $('.modal').hide();
+        });
+
+        function Clear() {
+            $("#strEmailSearch").val("")
+            $("#strTitle").val("");
+            $("#strJobTitleSearch").val("");
+            $("#genderDDL").val("null");
+            $("#ActiveDDL").val("null");
+            $("#CompanyID").val("");
+        }
+</script>
+<style>
+    #list .fav-grid {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .FirstColumn {
+        width: 39%;
+        text-align: center;
+    }
+
+    .SecondColumn {
+        width: 19%;
+        text-align: center;
+    }
+
+
+    .ThirdColumn {
+        width: 16%;
+        text-align: center;
+    }
+
+    .FourthColumn, .fivethColumn {
+        width: 14%;
+        text-align: center;
+    }
+
+    .table {
+        display: table;
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+    }
+
+        .table tr td {
+            border-bottom: solid 1px #CCC;
+            padding: 5px;
+        }
+
+    .tblHeader {
+        background-repeat: repeat-x;
+        font-weight: bold;
+        text-align: center;
+        height: 25px;
+        border: 0;
+    }
+
+        .tblHeader th {
+            padding-top: 4px;
+        }
+
+            .tblHeader th a {
+                color: #FFF !important;
+                padding-top: 4px;
+            }
+
+    .pagerbar {
+        text-align: center;
+    }
+
+    table thead tr th, table thead tr td, table tfoot tr th, table tfoot tr td {
+        text-align: center !important;
+    }
+
+
+</style>
+
+<script>
+
+    applyClassesToWebGrid();
+
+</script>

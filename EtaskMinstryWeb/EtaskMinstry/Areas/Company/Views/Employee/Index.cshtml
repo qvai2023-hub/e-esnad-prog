@@ -1,0 +1,338 @@
+﻿@using EtaskMinstry
+@using Resources
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Company.Models.CompanyEmployeeVM>
+@*@model EtaskMinstry.Areas.Company.Models.CompanyEmployeeVM*@
+@{
+    ViewBag.Title = "إدارة الموظفين";
+}
+
+
+<div class="clear"></div>
+@*<div class="tab-container">*@
+
+
+@if (Model.Any())
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h6 class="panel-title"><i class="fa fa-tasks"></i> إدارة الموظفين </h6>
+            @*<span class="pull-right label label-danger">126</span>*@
+        </div>
+        @* -----------------Start Search Panel -------------- *@
+        <div class="panel-body">
+            <div class="panel-group">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h6 class="panel-title panel-trigger">
+                            <a data-toggle="collapse" href="#panel-search">بحث</a>
+                        </h6>
+                    </div>
+                    <div id="panel-search" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            @using (Html.BeginForm("Search", "Employee", FormMethod.Post, new { @id = "_CRSFform" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary()
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label">اسم الموظف: </label>
+                                        <div class="col-sm-8">
+                                            @Html.TextBox("strTitle", "", new { @class = "form-control" })<br />
+                                            <p class="errorMsgName" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                                يجب ان لا تزيد كلمة البحث عن 150 حرف وعدم استخدام رموز خاصة
+                                            </p>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label"> الوظيفه: </label>
+                                        <div class="col-sm-8">
+                                            @Html.TextBox("strJobTitleSearch", "", new { @class = "form-control" })
+                                            <p class="errorMsgJob" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                                يجب ان لا تزيد كلمة البحث عن 150 حرف وعدم استخدام رموز خاصة
+                                            </p>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label"> البريد: </label>
+                                        <div class="col-sm-8">
+                                            @Html.TextBox("strEmailSearch", "", new { @class = "form-control" })
+                                            <p class="errorMsgEmail" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                                البريد الإلكترونى غير صحيح
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label"> النوع: </label>
+                                        <div class="col-sm-8">
+                                            <select id="genderDDL" class="form-control">
+                                                <option value="null">اختر...</option>
+                                                <option value="true">ذكر</option>
+                                                <option value="false">انثى</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-sm-6">
+                                        <label class="col-sm-4 control-label"> الحالة: </label>
+                                        <div class="col-sm-8">
+                                            <select id="ActiveDDL" class="form-control">
+                                                <option value="null">اختر...</option>
+                                                <option value="true">فعال</option>
+                                                <option value="false">غير فعال</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <input id="btnSearch" type="button" class="btn btn-primary" value="بحث">
+                                    <input name="Submit0" id="btnShowAll" type="button" class="btn btn-primary" value="عرض الكل">
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* -----------------End Search Panel ---------------- *@
+
+      
+        <div class="datatable-tasks table-responsive" id="list">
+
+            @{
+
+                            var grid = new WebGrid(Model);
+                            var gridColumns = new List<WebGridColumn>();
+
+                            if (Model.Any())
+                            {
+                                gridColumns.Add(grid.Column("EmpName", "الأسم", @<text>@item.Name</text>, "FirstColumn"));
+                                gridColumns.Add(grid.Column("JobTitle", "الوظيفة", @<text>@item.jobTitle</text>, "SecondColumn"));
+                                gridColumns.Add(grid.Column("Gender", "النوع", @<text> @(item.Gender == true ? "ذكر" : "أنثى")</text>, "ThirdColumn"));
+                                gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "FourthColumn"));
+                                gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+                                gridColumns.Add(grid.Column("Edit", "تفاصيل", @<text> @Html.EncodedActionLink("", "Details", "Employee", "Company", new { empid = @item.Id }, new { @class = "detailsIcon" })
+                                  
+                                </text>, "FifthColumn"));
+                               
+                            }
+
+            }
+            @grid.GetHtml(columns: gridColumns.ToArray(),
+                   tableStyle: "table table-bordered dataTable ",
+        // headerStyle: "table-alternat-header",
+                    footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+             )
+
+        </div>
+    </div>
+
+
+                }
+                else
+                {
+
+                    @*--------------------Start Table when no data found----------------*@
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h6 class="panel-title"><i class="fa fa-tasks"></i> الأرشيف </h6>
+                            <span class="pull-right label label-danger">126</span>
+                        </div>
+                        <div class="datatable-tasks">
+                            <table class="table table-bordered">
+                                <thead>
+                                <th>الموظف</th>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="1" style="text-align: center">
+                                            لا يوجد بيانات
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                            @*--------------------End Table when no data found----------------*@
+
+
+                }
+@*</div>*@
+
+<script>
+    $(function () {
+        //$("#btnSearchToggle").click(function () {
+
+        //    $("#SearchDiv").slideToggle("normal");
+        //});
+
+        $(document).ready(function () {
+
+            $(".detailsIcon").addClass("fa fa-server");
+        });
+
+
+        $(".SetIsactive").on("change", function () {
+            var id = $(this).attr("id");
+
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("SetIsActive")',
+                dataType: 'json',
+                data: { "EmpID": id }
+            });
+        });
+        //add validation rule to search name
+        var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        $('#strTitle').rules("add", { regex: "@ValidationResource.RevString150" });
+        $('#strJobTitleSearch').rules("add", { regex: "@ValidationResource.RevString150" });
+        //$('#strEmailSearch').rules("add", { regex: re });
+        $('#strEmailSearch').rules("add", { regex: "@ValidationResource.revSearchMail" });
+        $("#btnSearch").live("click", function (e) {
+            debugger;
+            e.preventDefault();
+            $('.errorMsgName').hide();
+            $('.errorMsgEmail').hide();
+            $('.strJobTitleSearch').hide();
+            var isValid = true;
+            if (!$('#strTitle').valid()) {
+                isValid = false;
+                $('.errorMsgName').show();
+            }
+            else {
+                $('.errorMsgName').hide();
+            }
+            if (!$('#strJobTitleSearch').valid()) {
+                $('.errorMsgJob').show();
+                isValid = false;
+            }
+            else { $('.errorMsgJob').hide(); }
+
+            if (!$('#strEmailSearch').valid()) {
+                $('.errorMsgEmail').show();
+                isValid = false;
+            }
+            else { $('.errorMsgEmail').hide(); }
+
+            var searchstring = $("#strTitle").val();
+            var searchJobTitle = $("#strJobTitleSearch").val();
+
+
+            var gender = $("#genderDDL").val();
+            var isActive = $("#ActiveDDL").val();
+            var email = $("#strEmailSearch").val();
+            if (isValid) {
+                var mySearchData = { "Name": searchstring, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email };
+                $.ajax({
+                    type: 'Post',
+                    url: '@Url.Action("Search")',
+                    dataType: 'html',
+                    data: AddAntiForgeryToken(mySearchData),
+                    //data: { "Name": searchstring, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email },
+                    async: false,
+                    success: function (data) {
+                        debugger;
+                        $("#list").html(data);
+                        //$(document).find(".detailsIcon").addClass("fa fa-server");
+                    }
+                });
+            }
+        });
+
+        var AddAntiForgeryToken = function (data) {
+            data.__RequestVerificationToken = $('#_CRSFform input[name=__RequestVerificationToken]').val(); return data;
+        };
+        $("#btnShowAll").live("click", function (e) {
+            e.preventDefault();
+            Clear();
+            var searchstring = $("#strTitle").val();
+            var searchJobTitle = $("#strJobTitleSearch").val();
+            var gender = $("#genderDDL").val();
+            var isActive = $("#ActiveDDL").val();
+            var email = $("#strEmailSearch").val();
+            var mySearchData = { "Name": searchstring, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email };
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("Search")',
+                dataType: 'html',
+                data: AddAntiForgeryToken(mySearchData),
+                // data: { "Name": searchstring, "bGender": gender, "JobTitle": searchJobTitle, "IsActive": isActive, "Email": email },
+                async: false,
+                success: function (data) {
+
+                    $("#list").html(data);
+                }
+            });
+        });
+
+    });
+    var ele = "";
+    $(".deleteEmp").on("click", function () {
+        ele = $(this).closest('tr');
+
+    });
+
+    $(".modal_btn_accept").on("click", function () {
+        debugger;
+        ele.hide();
+        $('.modal').hide();
+    });
+
+    function Clear() {
+        $("#strEmailSearch").val("")
+        $("#strTitle").val("");
+        $("#strJobTitleSearch").val("");
+        $("#genderDDL").val("null");
+        $("#ActiveDDL").val("null");
+    }
+</script>
+<style>
+    th {
+        text-align: center;
+    }
+    .FirstColumn, .SecondColumn, .ThirdColumn, .FourthColumn, .FifthColumn {
+        text-align: center;
+    }
+    
+    
+     #list .fav-grid {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+   
+
+    .table {
+        display: table;
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+    }
+
+        .table tr td {
+            border-bottom: solid 1px #CCC;
+            padding: 5px;
+        }
+
+    .pagerbar {
+        text-align: center;
+    }
+</style>

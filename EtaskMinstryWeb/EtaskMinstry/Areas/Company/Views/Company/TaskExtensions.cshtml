@@ -1,0 +1,373 @@
+﻿@model EtaskMinstry.Models.Company.TaskExtensionsVM
+@using EtaskMinstry;
+<script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit' async defer></script>
+
+@{
+    Layout = null;
+}
+
+<div class="col-md-12">
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#comments"><i class="fa fa-comment"></i>التعليقات</a></li>
+            <li><a data-toggle="tab" href="#attach"><i class="fa fa-paperclip"></i>المرفقات</a></li>
+        </ul>
+
+        <div class="tab-content">
+            @*التعليقات*@
+            <div id="comments" class="tab-pane fade in active">
+                <div class="comments-list">
+                    <ul class="list-unstyled" id="CommentArea">
+
+                        @foreach (var comment in Model.Comments)
+                        {
+                            if (comment.CommentStatusId == (int)TaskCommentStatus.Reported)
+                            {
+                                <li>
+
+                                    @if (comment.IsFromCompany)
+                                    {
+                                        <h5>مسؤول الشركة </h5>
+                                    }
+                                    else
+                                    {
+                                        <h5>@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID) </h5>
+                                    }
+                                    @*<div class="com-date">@(MvcApplication.IsGregDate ? comment.CreatedDate.ToGregArabicDateTime() : comment.CreatedDate.ToHijriArabicDateTime())</div>*@
+                                    <div class="clear"></div>
+                                    <span class="date">@(MvcApplication.IsGregDate ? comment.CreatedDate.ToGregArabicDateTime() : comment.CreatedDate.ToHijriArabicDateTime()) </span>
+                                    <p>
+                                        @comment.Comment
+                                    </p>
+                                </li>
+                            }
+
+                            else if (!(comment.CommentStatusId == (int)TaskCommentStatus.Hidden && !EtaskMinstry.MvcApplication.userData.isCompany))
+                            {
+
+                                if (comment.IsFromCompany)
+                                {
+                                    <h5>مسؤول الشركة </h5>
+                                }
+                                else
+                                {
+                                    <h5>@EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName((int)comment.EmpID) </h5>
+                                }
+                                <div class="clear"></div>
+                                <span class="date">
+                                    @(MvcApplication.IsGregDate ? comment.CreatedDate.ToGregArabicDateTime() : comment.CreatedDate.ToHijriArabicDateTime())
+                                </span>
+                                <p>
+                                    @comment.Comment
+                                </p>
+
+
+                                if (EtaskMinstry.MvcApplication.userData.isCompany)
+                                {
+                                    if (comment.CommentStatusId == (int)TaskCommentStatus.Hidden)
+                                    {
+
+                                        <div class="actions">
+                                            <a id='@comment.TaskCommentID _hide' data-toggle="tooltip" title="اخفاء"><i class="fa fa-minus-circle fa-lg" style="display: none"></i></a>
+                                            <a id='@comment.TaskCommentID _show' data-toggle="tooltip" title="عرض"><i class="fa fa-check-circle fa-lg"></i></a>
+                                            <a id="@comment.TaskCommentID" data-toggle="tooltip" style="display: none" title="إبلاغ تعليق غير لائق"><i class="fa fa-flag fa-lg"></i></a>
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+                                        if (!comment.IsFromCompany)
+                                        {
+                                            <a id="@comment.TaskCommentID" data-toggle="tooltip" title="إبلاغ تعليق غير لائق">
+                                                <i class="fa fa-flag fa-lg"></i>
+                                            </a>
+
+                                        }
+
+                                        <a id='@comment.TaskCommentID _hide' data-toggle="tooltip" title="اخفاء">
+                                            <i class="fa fa-minus-circle fa-lg"></i>
+                                        </a>
+                                        <a id='@comment.TaskCommentID _show' data-toggle="tooltip" title="عرض">
+                                            <i class="fa fa-check-circle fa-lg" style="display: none"></i>
+                                        </a>
+
+                                    }
+                                }
+
+                            }
+                        }
+
+                    </ul>
+
+                </div>
+                @if (!(Model.IsArchived))
+                {
+                    <div class="form-group">
+                        <label>التعليق : </label>
+                        @Html.TextAreaFor(model => model.CommentText, new
+                   {
+                       @class = "form-control",
+                       rows = 4,
+                       scroll = "no"
+                   })
+                        <div id="trCommentvalidation" style="color: red; text-align: center; font-size: small"></div>
+
+                    </div>
+                    @*<button type="submit" class="btn btn-primary">إرسال</button>*@
+                    <input type="button" id="btnAddComment" class="btn btn-primary" value="إرسال">
+
+                }
+
+
+
+            </div>
+
+            @*المرفقات*@
+            <div id="attach" class="tab-pane fade">
+                <table id="tblAttachment" class="comment-grid" width="100%" border="0" cellspacing="1">
+                    @foreach (var attach in Model.TaskAttachment)
+                    {
+                        if (QvLib.QVUtil.IO.IsFileExist("/Upload/Task/" + attach.FileName))
+                        {
+                               <div class="form-group">
+                    <label>الملف :</label>
+                   <label>@Html.ActionLink(attach.FileName, "DownloadAttachment", new { fileName = attach.FileName })   </label>
+
+                </div>
+                        
+                        
+                         <div class="form-group">
+                    <label>الوصف :</label>
+                   <label>@attach.Description </label>
+
+                </div>
+                          
+                        }
+                    }
+
+                </table>
+                <hr />
+                <br />
+                @if (@Model.StatusID != (int)TaskStatus.Done && @Model.StatusID != (int)TaskStatus.Approved && @Model.StatusID != (int)TaskStatus.NotAproved)
+                {
+                    using (Html.BeginForm("AddAttachment", "Company", FormMethod.Post, new { area = "Company", enctype = "multipart/form-data", id = "attachform" }))
+                    {      
+                         <input type="hidden" name="taskID" id="taskID" value="@Model.TaskID" />
+                       
+                    <div class="form-group">
+                    <label>وصف ملف جديد : </label>
+                    <input type="text" id="txtFileDescription" name="txtFileDescription" class="form-control" />
+
+                </div>
+                <div class="form-group">
+                    <label>ملف جديد : </label>
+
+                    @Html.Partial("PartialUploadFile")
+                    <br />
+                    <br />
+
+                    <div id="trUploadvalidation" style="color: red; text-align: right; font-size: small"></div>
+
+
+                    @*<span id="RecaptchaValidation" style="display: none; color: red;">رجاء المرور من اختبار التحقق من الهوية بشكل صحيح.</span>
+                    <div id="recap" class="recap">
+                        <div id="recapElem"></div>
+                    </div>*@
+                </div>
+                    <a class="action-btn btn btn-primary" id="btnAddAttchment">
+                        <i class="icon-upload-cloud"></i>
+                        ارفاق
+                    </a>
+
+                    }
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    var isFirstClick = true;
+    var isValidReCap = false;
+
+    //$(function () {
+    var recaptcha_id;
+    var onloadCallback = function () {
+        debugger;
+        recaptcha_id = grecaptcha.render('recapElem', {
+            'sitekey': '@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]',
+            'callback': correctCaptcha
+        });
+    };
+    var correctCaptcha = function (response) {
+
+        debugger;
+        var recapResponse = grecaptcha.getResponse(recaptcha_id);
+        if (recapResponse) {
+            isValidReCap = true;
+        }
+    };
+    //});
+
+</script>
+
+<script type="text/javascript">
+
+
+
+    $(function () {
+
+        /************** A T T A C H M E N T  A C T I O N S **************/
+        //Handle Add Attachment
+        $('#btnAddAttchment').click(function (e) {
+            debugger;
+            e.preventDefault();
+
+            //correctCaptcha();
+            //if (!isValidReCap) {
+            //    $("#RecaptchaValidation").show();
+            //} else {
+            //    $("#RecaptchaValidation").hide();
+            //}
+            /*            if ($('#hiddenfileName').val() == "" && !isValidReCap) {*/
+            if ($('#hiddenfileName').val() == "" ) {
+                $('#trUploadvalidation')[0].innerHTML = "يجب أختيار ملف";
+                return;
+            }
+
+            //if (isValidReCap == false) {
+            //    $("#RecaptchaValidation").show();
+            //    return;
+            //}
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            debugger
+            if (!varchar350.test($('#txtFileDescription').val().trim())) {
+                $('#trUploadvalidation')[0].innerHTML = "يجب ان لا يزيد عدد الحروف الوصف عن 350حرف و غير مسموح بكتابه رموز خاصه";
+                return;
+            }
+            else {
+                $('#trUploadvalidation')[0].innerHTML = "";
+                var url = "/Company/Company/AddAttachment";
+                //submit Attach Data
+                $("#attachform").submit();
+            }
+        });
+        /************** C O M M E N T S  A C T I O N S **************/
+        //Handle Add Comment
+
+
+        $('#btnAddComment').click(function (e) {
+
+            //e.preventDefault();
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            if ($('#CommentText').val().trim() == "") {
+                debugger
+                $('#trCommentvalidation')[0].innerHTML = " يجب الا تترك الخانات فارغه ";
+                return;
+            }
+            else if (!varchar350.test($('#CommentText').val().trim())) {
+                debugger
+                $('#trCommentvalidation')[0].innerHTML = "يجب ان لا يزيد عدد الحروف الوصف عن 350حرف و غير مسموح بكتابه رموز خاصه";
+                return;
+            }
+            else {
+                var url = "/Company/Company/AddComment";
+                $(this).attr("disabled", "disabled");
+                $.post(url, { taskId: '@Model.TaskID', strComment: $('#CommentText').val(), iEmployeeID: '@Model.EmployeeID' }, function (data) {
+                    if (data != null) {
+                        debugger;
+                        var commentdiv = "<div class='comment-msg nobg'> ";
+                        if ("@EtaskMinstry.MvcApplication.userData.isCompany" == "True")
+                            commentdiv += " <h5> مسؤول الشركة</h5>   <div class='com-date'>@(MvcApplication.IsGregDate ? DateTime.Now.ToGregArabicDateTime() : DateTime.Now.ToHijriArabicDateTime())</div>"
+                        else
+                            commentdiv += "<h5>@Model.EmployeeName" + "</h5>   <div class='com-date'> @(MvcApplication.IsGregDate ? DateTime.Now.ToGregArabicDateTime() : DateTime.Now.ToHijriArabicDateTime()) </div>"
+                        commentdiv += " <div class='clear'></div>" + $('#CommentText').val()
+                        commentdiv += '<div class="comment-options go-left hideShowDiv" >';
+                        if (!data.isCompany) {
+                            commentdiv += ' <a href="#" id="' + data + '"   class=" has-tip Report" title="إبلاغ تعليق غير لائق">';
+
+                            commentdiv += ' <i class="icon-flag"></i></a>';
+                        }
+                        commentdiv += '<a id="' + data + '_show" class="inline-element has-tip show" title="عرض">'
+                        commentdiv += '<i class="icon-ok-circle" style="display: none"></i> </a>';
+                        commentdiv += ' <a id="' + data + '_hide"class="inline-element has-tip hide" title="إخفاء" >';
+                        commentdiv += '<i class="icon-minus-circle"></i></a>';
+                        commentdiv += "</div>";
+                        if ($('#CommentText').val() != "") {
+                            $('#CommentArea')[0].innerHTML += commentdiv;
+                        }
+                        $('#CommentText').val('');
+                        $('#trCommentvalidation')[0].innerHTML = "";
+
+                    }
+                    else {
+                        $('#trCommentvalidation')[0].innerHTML = "";
+                    }
+                    if ($('#CommentText').val() == "")
+                    { $('#btnAddComment').removeAttr("disabled"); }
+                });
+            }
+
+        });
+
+        $('#CommentText').on('change', function () {
+            $('#btnAddComment').removeAttr("disabled");
+        });
+        //Handle Hide Comment
+        $(document).on('click', '.hide', function (e) {
+            debugger
+            // $('.hide').click(function (e) {
+            var elemet = $(this);
+            var iconid = $(this).attr("id");
+            var commentID = $(this).attr("id").split('_')[0].trim();
+            e.preventDefault();
+            var url = "/Company/Company/HideComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.hideShowDiv').children('.hide').children('i').hide();
+                    elemet.closest('.hideShowDiv').children('.show').children('i').show();
+                    $(elemet).prev().prev().removeClass("inline-element").hide();
+
+                }
+            });
+        });
+        //Handle ShowComment
+        $(document).on('click', '.show', function (e) {
+            debugger
+            // $('.show').click(function (e) {
+            var elemet = $(this);
+            var iconid = $(this).attr("id");
+            var commentID = $(this).attr("id").split('_')[0].trim();
+            e.preventDefault();
+            var url = "/Company/Company/ShowComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.hideShowDiv').children('.show').children('i').hide();
+                    elemet.closest('.hideShowDiv').children('.hide').children('i').show();
+                    $(elemet).prev().removeClass("inline-element").show();
+
+                }
+            });
+        });
+
+        //Handle Report Comment
+        $(document).on('click', '.Report', function (e) {
+            //$('.Report').click(function (e) {
+            var commentID = $(this).attr("id");
+            var elemet = $(this);
+            e.preventDefault();
+            var url = "/Company/Company/ReportComment";
+            $.post(url, { iCommentID: commentID }, function (data) {
+                if (data == "True") {
+                    elemet.closest('.comment-msg').css('background-color', 'pink');
+                    elemet.closest('.hideShowDiv').remove();
+                }
+            });
+        });
+
+    });
+
+</script>

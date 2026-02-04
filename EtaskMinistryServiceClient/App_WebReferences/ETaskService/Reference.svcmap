@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="927feb82-52c1-46da-9517-88ce3b3f28c6" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="https://services.etask-proj.com:880/Etask.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="Etask.wsdl" MetadataType="Wsdl" ID="af093398-8b20-47d1-acb2-6477fdaa08ea" SourceId="1" SourceUrl="https://services.etask-proj.com:880/Etask.svc?wsdl" />
+    <MetadataFile FileName="Etask.disco" MetadataType="Disco" ID="d9ba7892-6fcd-449a-a693-ac1454adf849" SourceId="1" SourceUrl="https://services.etask-proj.com:880/Etask.svc?disco" />
+    <MetadataFile FileName="Etask.xsd" MetadataType="Schema" ID="8ac41832-ff79-4e7c-90f1-62bf9f3ffb80" SourceId="1" SourceUrl="https://services.etask-proj.com:880/Etask.svc?xsd=xsd1" />
+    <MetadataFile FileName="Etask1.xsd" MetadataType="Schema" ID="b9c69c1a-5419-446b-8356-694dd6ccda9b" SourceId="1" SourceUrl="https://services.etask-proj.com:880/Etask.svc?xsd=xsd0" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

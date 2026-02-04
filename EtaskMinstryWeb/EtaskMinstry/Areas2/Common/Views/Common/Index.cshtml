@@ -1,0 +1,523 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.Models.Common
+@using Resources
+
+
+@{
+    ViewBag.Title = " إدارة مهام الموظفين";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+
+<h3 class="paragraph-title">إدارة مهام الموظفين  <span class="titledynamic">  </span>
+ <div class="page-options">
+  <a href="javascript:;" id="btnSearchToggle" class="page-options-link2">  بحث فى المهام</a>
+     <a href="/Common/TaskCommon/SaveData" class="page-options-link">إضافة مهمة</a>
+     </div>
+    </h3>
+<div class="clear">
+                        </div>
+<div class="tab-container tab-container2">
+    <div class="tab-btns-warp" style="width: 100%;">
+
+        @*        <a href="#" class="tab dactive-tab" tab="1">مهام حالية</a>
+        <a href="#" tab="2" class="tab dactive-tab">أرشيف المهام</a>
+         <a href="#" tab="3" class="dactive-tab tab">التقارير</a>
+        <a href="#" tab="3" class="dactive-tab tab">المشروعات</a>*@
+        <div class="dropdown">
+            <a href="#" tab="1" class="tab dactive-tab" id="more-tasks" data-toggle="dropdown">أخرى
+                                     <span class="caret-down"></span>
+            </a>
+            <ul class="dropdown-menu more-tasks" role="menu" aria-labelledby="more-tasks">
+            </ul>
+        </div>
+
+
+        @foreach (TaskStatus state in (TaskStatus[])Enum.GetValues(typeof(TaskStatus)))
+        {
+          
+            @Ajax.ActionLink(System.Configuration.ConfigurationManager.AppSettings[state.ToString()],
+                             "GetTasks",
+                             new { iStatus = (int)state },
+                             new AjaxOptions
+                                 {
+                                     UpdateTargetId = "divTasks",
+                                     InsertionMode = InsertionMode.Replace,
+                                     LoadingElementId = "loadding",
+                                     LoadingElementDuration = 10,
+                                     HttpMethod = "Get"
+                                 }, new
+                                     {
+                                         @class = state == TaskStatus.All ? "tab active-tab" : "tab dactive-tab",
+                                         @dataStatus = (int)state,
+                                         // @style = (state == TaskStatus.All || state == TaskStatus.Delay) ? "width:25px" : ""
+                                     })
+        }
+   
+        @Ajax.ActionLink(System.Configuration.ConfigurationManager.AppSettings["Archive"], "GetTasks",
+                         new { bIsArchived = true },
+                         new AjaxOptions
+                             {
+                                 UpdateTargetId = "divTasks",
+                                 InsertionMode = InsertionMode.Replace,
+                                 LoadingElementId = "loadding",
+                                 LoadingElementDuration = 10,
+                                 HttpMethod = "Get"
+                             }, new
+                                 {
+                                     @class = "tab dactive-tab",
+                                     @dataStatus = "Archive",
+                                      
+                                 })
+    
+        @Ajax.ActionLink(System.Configuration.ConfigurationManager.AppSettings["NotAssigned"], "GetTasks",
+                         new
+                             {
+                                 bIsNotAssigned = true,
+                                 iStatus = 0
+                             },
+                         new AjaxOptions
+                             {
+                                 UpdateTargetId = "divTasks",
+                                 InsertionMode = InsertionMode.Replace,
+                                 LoadingElementId = "loadding",
+                                 LoadingElementDuration = 10,
+                                 HttpMethod = "Get"
+                             }, new
+                                 {
+                                     @class = "tab dactive-tab subtab",
+                                     @dataStatus = "Assign"
+                                 })
+
+    </div>
+  
+    <!--tab content-->
+
+    <div @*id="SearchDiv"*@>
+         
+        @using (Ajax.BeginForm("GetTasks", "Common"
+            , new AjaxOptions
+            {
+                InsertionMode = InsertionMode.Replace,
+                UpdateTargetId = "divTasks",
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 30,
+                HttpMethod = "POST"
+            }, new
+                {
+                    @id = "SearchForm"
+                }))
+        { 
+            @Html.Hidden("bIsArchived")
+            @Html.Hidden("bIsNotAssigned")
+            @Html.Hidden("PriorityID")
+            @Html.Hidden("iStatus")
+            @Html.AntiForgeryToken()
+            <div id="searchdesign" style="display: none">
+            <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table; margin-top: 45px;">
+                <tbody>
+                    <tr>
+                        <td colspan="4">
+                            <label class="rec-lbl">عنوان المهمة</label>
+                            @Html.TextBox("strTitle", "", new { @class = "form-textbox" })
+                            <span id="spnStatuse">
+                                <label class="rec-lbl" style="margin-right: 30px">الأهمية</label>
+                                <div class="strenth-bar custom-bar">
+                                    <div class="strenth-colors" style="width: 0px"></div>
+                                </div>
+                            </span>
+
+                        
+                                <p class="errorMsg" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                يجب ان لا تزيد كلمة البحث عن 150 حرف وعدم استخدام رموز خاصة
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <span class="rec-lbl">الموظف :</span>
+                            @Html.DropDownList("EmpID", ViewBag.Employee as SelectList, "الكل",
+                                               new
+                                                   {
+                                                       @id = "EmpID",
+                                                       Class = "form-select",
+                                                       style = "width: 379px;"
+                                                   })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <span class="rec-lbl">المشروع :</span>
+                            @Html.DropDownList("ProjectID", ViewBag.Project as SelectList, "الكل",
+                                               new
+                                                   {
+                                                       @id = "ProjectID",
+                                                       Class = "form-select",
+                                                       style = "width: 379px;"
+                                                   })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <span style="margin-right: 4px">
+                                <label class="rec-lbl">تاريخ بداية من</label>
+@*                                @Html.TextBox("FromStartDate", "", new { @class = "form-textbox", @style = "margin-left:47px;",@readonly=""  })*@
+                                <input type="text" id="fromstartdate" name="FromStartDate" class="form-textbox" style="margin-left: 47px;"/>
+                                <label class="rec-lbl">إلى</label>
+@*                                @Html.TextBox("ToStartDate", "", new { @class = "form-textbox", @style = "width: 145px;" ,@readonly=""})</span>*@
+                                  <input type="text" id="tostartdate" name="ToStartDate" class="form-textbox" style="margin-left: 47px;"/></span>
+
+                            <p class="errorMsgStartDate" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                يجب ان يكون تاريخ النهاية اكبر من تاريخ البداية
+                            </p>
+                            <br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <span style="margin-right: -4px">
+                                <label class="rec-lbl">تاريخ النهاية من</label>
+@*                                @Html.TextBox("FromEndDate", "", new { @class = "form-textbox", @style = "margin-left:47px;",@readonly="" })*@
+                                 <input type="text" id="fromenddate" name="FromEndDate" class="form-textbox" style="margin-left:47px;"/>
+
+                                <label class="rec-lbl">إلى</label>
+@*                                @Html.TextBox("ToEndDate", "", new { @class = "form-textbox", @style = "width: 145px;" ,@readonly=""})</span>*@
+                                 <input type="text" id="toendtdate" name="ToEndDate" class="form-textbox" style="margin-left:47px;"/>
+
+                            <p class="errorMsgEndDate" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
+                                يجب ان يكون تاريخ النهاية اكبر من تاريخ البداية
+                            </p>
+                            <br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="go-left">
+                            <div>
+                                <input name="Submit0" id="btnSearch" type="submit" class="submit-btn" value="بحث">
+                                <input name="Submit0" id="btnShowAll" type="submit" class="submit-btn" value="عرض الكل">
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table> 
+           </div>
+        }
+        <div id="divTasks">
+            @*@Html.Action("GetTasks", "Company")*@
+            @{ Html.RenderPartial("PartialTaskCommon", (IEnumerable<EtaskMinstry.Models.Common.TaskCommonVM>)ViewData["CommonTask"]);}
+
+        </div>
+    </div>
+
+    <!--tab content end-->
+</div>
+
+<style>
+    .form-select {
+        width: 150px;
+    }
+
+    .form-textbox {
+        width: 160px;
+    }
+    .table tr td {
+        padding: 1px !important;
+        word-break: break-all;
+    }
+
+</style>
+
+<script>
+    $(function() {
+        //Check Date Greg OR Hijrii
+    var Isgreg ="@(MvcApplication.IsGregDate)";          
+        if(Isgreg=="True")
+        {
+            //datepicker Grerg
+            $("#fromstartdate").datepicker($.datepicker.regional[ "ar" ]);
+            $("#tostartdate").datepicker($.datepicker.regional[ "ar" ]);
+            $("#fromenddate").datepicker($.datepicker.regional[ "ar" ]);
+            $("#toendtdate").datepicker($.datepicker.regional[ "ar" ]);
+            //   
+        }
+        else
+        {
+            //calendar Hijrii
+            $('#fromstartdate,#tostartdate,#fromenddate,#toendtdate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy'
+            });        
+        }       
+
+        /*$("#btnSearchToggle").click(function () {
+
+            $("#searchdesign").slideToggle("normal");
+        });*/    
+       //in search case fill textbox 
+        var taskTitle =  "@(Request.QueryString["t"] == null ? "" : Request.QueryString["t"])";
+        $("#strTitle").val(taskTitle);
+        
+        var currentStatus= @(Request.QueryString["s"] == null ? "0" : Request.QueryString["s"]);
+        var isArchive =    "@(Request.QueryString["isArchive"] == null ? "0" : Request.QueryString["isArchive"])";
+        var bIsNotAssigned = "@(Request.QueryString["isNotAssign"] == null ? "0" : Request.QueryString["isNotAssign"])";
+
+        $('[datastatus]').not('.subtab').removeClass('active-tab').addClass('dactive-tab');
+        if(isArchive == "True"){
+            $('[datastatus=Archive]').not('.subtab').removeClass('dactive-tab').addClass('active-tab');
+        }else if(bIsNotAssigned== "True" || currentStatus > 5){
+            $('[id=more-tasks]').not('.subtab').removeClass('dactive-tab').addClass('active-tab');
+        }else{
+            $('[datastatus=' + currentStatus + ']').not('.subtab').removeClass('dactive-tab').addClass('active-tab');
+        }
+
+        $(".more-tasks").append($('<li>').append($('a[datastatus=@((int)TaskStatus.Approved)]').removeClass('tab').removeClass('dactive-tab').addClass("subtab")));
+        $(".more-tasks").append($('<li>').append($('a[datastatus=@((int)TaskStatus.NotAproved)]').removeClass('tab').removeClass('dactive-tab').addClass("subtab")));
+        $(".more-tasks").append($('<li>').append($('a[datastatus=@((int)TaskStatus.Accepted)]').removeClass('tab').removeClass('dactive-tab').addClass("subtab")));
+        $(".more-tasks").append($('<li>').append($('a[datastatus=@((int)TaskStatus.Rejected)]').removeClass('tab').removeClass('dactive-tab').addClass("subtab")));
+        $(".more-tasks").append($('<li>').append($('a[datastatus=@((int)TaskStatus.Delay)]').removeClass('tab').removeClass('dactive-tab').addClass("subtab")));
+        $(".more-tasks").append($('<li>').append($('a[datastatus="Assign"]').removeClass('tab').removeClass('dactive-tab')));
+
+        $(".more-tasks").append($('<li role="presentation" class="divider"></li>'));
+        //$(".more-tasks").append($('<li><a href="/Company/Project/">عرض المشروعات</a></li>'));
+
+        $('.tab,.subtab').on('click', function() {            
+            if ($(this).attr('datastatus') == '@((int)TaskStatus.Approved)')
+            {
+                $(".titledynamic").html('> معتمدة');
+            }
+            else if ($(this).attr('datastatus') == '@((int)TaskStatus.NotAproved)')
+            {
+                $(".titledynamic").html('> غير معتمدة');
+            }
+           else if ($(this).attr('datastatus') == '@((int)TaskStatus.Accepted)')
+            {
+                $(".titledynamic").html('> مقبولة');
+            }
+            else if ($(this).attr('datastatus') == '@((int)TaskStatus.Rejected)')
+            {
+                $(".titledynamic").html('> مرفوضة');
+            }
+            else if ($(this).attr('datastatus') == '@((int)TaskStatus.Delay)')
+            {
+                $(".titledynamic").html('> متأخرة');
+            }
+            else if ($(this).attr('datastatus') == 'Assign')
+            {
+                $(".titledynamic").html('> غير مسندة');
+            }
+            // alert($(this).attr('datastatus'));
+
+            // To Set bIsArchived Parameter Null .
+            $('#bIsArchived').val('');
+            $('#bIsNotAssigned').val('');
+            $("#SearchDiv").show();
+            $("#ReportsDiv").hide();
+
+            if ($(this).attr('id') == 'more-tasks')
+                $(this).addClass('active-tab');
+
+            else {
+                $(".more-tasks li a").css('background-color', '');
+                $(".more-tasks li a").css('color','');
+                if ($(this).attr('tab') == 'Report') {
+
+                    $('#SearchDiv').hide();
+                    $('#ReportsDiv').show();
+
+                } else {
+
+                    // To Click Show All Button Set Hidden Field With Status .
+                    $('#iStatus').val($(this).attr('datastatus'));
+
+                    if ($(this).attr('datastatus') == 'Assign') {
+                        $('#bIsNotAssigned').val(true);
+                        $('#iStatus').val('0');
+                       
+                    }
+
+                    if ($(this).attr('datastatus') == 'Archive') {
+                        $('#bIsArchived').val(true);
+                        $('#iStatus').val('0');
+                       
+                    }
+                   
+                    //  $('#btnShowAll').click();
+                }
+            }
+        });
+
+        $(function(){
+            debugger;
+            $(".tab-btns-warp > a").each(function () {
+                debugger;
+               $(this).addClass("maintab");
+            })
+        
+        
+        })
+        $('.maintab').live('click', function() {     
+            debugger
+            if($(".titledynamic").html() != "  ")
+                $(".titledynamic").html("");
+           
+        });
+
+        $('.more-tasks li a').click(function() { 
+            $('.more-tasks li a').removeClass('active-tab');
+            $(this).addClass('active-tab');          
+            $("#SearchDiv").show();
+            $("#ReportsDiv").hide();
+        });
+
+        $('#btnShowAll').click(function() {
+            debugger;
+            $('#EmpID').val(0);
+            $('#strTitle').val('');
+            $('.errorMsg').hide();
+            $("#fromstartdate").val('');
+            $("#tostartdate").val('');
+            $("#fromenddate").val('');
+            $("#toendtdate").val('');
+            $('.custom-bar .strenth-colors').css('width', '0px');
+            $('#PriorityID').val(0);
+            $('.errorMsgEndDate').hide();
+            $('.errorMsgStartDate').hide();
+            $('#ProjectID').val(0);
+        });
+
+        //add validation rule to search name
+        $('#strTitle').rules("add", { regex:  "@ValidationResource.RevString150" });
+
+        $('#btnSearch').click(function(e) {
+
+            // Remove Validation If Valid .
+            if (!$('#strTitle').valid() && $('#strTitle').val() != "")
+                $('.errorMsg').show();
+            else
+                $('.errorMsg').hide();
+
+            // Check Start Date .
+            var sDate = $('input[type=text]#fromstartdate').val();
+            var eDate = $('input[type=text]#tostartdate').val();
+
+            if (sDate !== "" && eDate !== "") {
+                if (dateCompare(sDate, eDate) == -1 || dateCompare(sDate, eDate) == 0) {
+                    $('.errorMsgStartDate').hide();
+                } else {
+                    e.preventDefault();
+                    $('.errorMsgStartDate').show();
+                }
+            }
+
+            // Check End Date .
+            var sEndDate = $('input[type=text]#fromenddate').val();
+            var eEndDate = $('input[type=text]#toendtdate').val();
+
+            if (sEndDate !== "" && eEndDate !== "") {
+                if (dateCompare(sEndDate, eEndDate) == -1 || dateCompare(sEndDate, eEndDate) == 0) {
+                    $('.errorMsgEndDate').hide();
+                } else {
+                    e.preventDefault();
+                    $('.errorMsgEndDate').show();
+                }
+            }
+            
+            // $('#SearchForm').submit();
+
+            //  return false;
+            
+        });
+     
+       
+
+        // Change Color Of Priority and Change PriorityID in DB .
+        $('.strenth-bar').live('click', function(e) {
+
+            // For Dimed Bar For Archived and Done Tasks .
+            if (!$(this).hasClass('Static-bar')) {
+                var leftPiont = (((e.pageX - $(this).offset().left) - 88) / 88 * -100);
+                var obj = $(this).children('.strenth-colors');
+
+                $(this).removeAttr('title');
+
+                var OldWidth = $(this).children('.strenth-colors').width() / 88 * 100;
+
+                var iPriorityID;
+
+                if (parseInt(leftPiont) >= 0 && parseInt(leftPiont) <= 25) {
+                    $(obj).css('width', '25%').attr('title', 'عادىة');
+                    iPriorityID = '@((int)TaskPriority.Noraml)';
+                }
+
+                if (parseInt(leftPiont) >= 25 && parseInt(leftPiont) <= 50) {
+                    $(obj).css('width', '50%').attr('title', 'متوسطة');
+                    iPriorityID = '@((int)TaskPriority.Average)';
+                }
+
+                if (parseInt(leftPiont) >= 50 && parseInt(leftPiont) <= 75) {
+                    $(obj).css('width', '75%').attr('title', 'مرتفعة');
+                    iPriorityID = '@((int)TaskPriority.High)';
+                }
+
+                if (parseInt(leftPiont) >= 75 && parseInt(leftPiont) <= 100) {
+                    $(obj).css('width', '100%').attr('title', 'مرتفعة جدا');
+                    iPriorityID = '@((int)TaskPriority.VeryHigh)';
+                }
+
+                $('#PriorityID').val(iPriorityID);
+
+                // For Search Tasks By Priority .
+                if (!$(this).hasClass('custom-bar')) {
+
+                    $('#loadding').fadeIn();
+
+                    $.ajax({
+                        url: "/Common/Common/ChangePriority",
+                        data: {
+                            TaskID: $(this).attr('TaskID'),
+                            PriorityID: iPriorityID
+                        },
+                        type: 'POST',
+                        complete: function(data) {
+
+                            if (data.responseText.toLowerCase() == "false") {
+                                Notify("danger", "حدث خطا لم يتم تغير الاولوية", 3000);
+                                $(obj).css('width', OldWidth + "%");
+                            }
+
+                        }
+                    });
+                }
+             
+
+            }
+        });
+        $(".tab").live('click', function(e) {
+            debugger
+            $('#strTitle').val('');     
+            $('#EmpID').val(0);  
+            $("#fromstartdate").val();
+            $("#tostartdate").val();
+            $("#fromenddate").val();
+            $("#toendtdate").val();
+            $('#PriorityID').val(0);                 
+            $('#ProjectID').val(0);
+        });
+    });
+
+    // To Get Position Of Clicked Area To Change Priority Slider .
+    function findPosX(obj) {
+        var curleft = 0;
+        if (obj.offsetParent) {
+            while (obj.offsetParent) {
+                curleft += obj.offsetLeft;
+                obj = obj.offsetParent;
+            }
+        } else if (obj.x) {
+            curleft += obj.x;
+        }
+        return curleft;
+    }
+</script>

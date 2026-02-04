@@ -1,0 +1,26 @@
+﻿@using EtaskMinstry;
+
+@model EtaskMinstry.Areas.Admin.Models.CompanyEmployeeVM
+
+
+<div class="editor-field">
+    <input type="button" class="submit-btn upload" value="تحميل">
+    <input type="file" class="fileImage" name="fileImage" accept="image/jpeg,image/png,image/jpg,image/bmp" style="Width: 200px; display: none;" />
+    <input type="button" class="submit-btn btnCancelFile" value="حذف" style="display: none">
+    @if ((string)ViewData["ProperyToBind"] == "ImageName")
+    {
+        @Html.Image(model => model.ImageName, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpImageName" })
+        @Html.HiddenFor(model => model.ImageName)
+        <img class="load" src="/Scripts/QVUploader/images/AjaxLoader.gif" title="جارى التحميل" style="display: none;">
+    }
+    else if ((string)ViewData["ProperyToBind"] == "NationaIDImage")
+    {
+        @Html.Image(model => model.NationaIDImage, "/Upload/Employee/", "/Content/Main/images/default-avatar.jpg", new { width = 80, height = 80, id = "EmpNationaIDImage" })
+        @Html.HiddenFor(model => model.NationaIDImage)
+        <img class="load" src="/Scripts/QVUploader/images/AjaxLoader.gif" title="جارى التحميل" style="display: none;">
+    }
+
+    <span class="UploadErrorMsg"></span>
+
+</div>
+

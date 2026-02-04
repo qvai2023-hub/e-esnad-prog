@@ -1,0 +1,236 @@
+﻿@using EtaskMinstry
+@model IEnumerable<EtaskMinstry.Models.Company.DaskBoardCompanyTaskVM>
+@if (Model.Any())
+{
+
+    <div id="list" class="table-responsive">
+        @{
+            var grid = new WebGrid(Model);
+            var gridColumns = new List<WebGridColumn>();
+
+
+            gridColumns.Add(grid.Column("Task", "المهمة", @<text>@Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)
+
+
+            </text>, "FirstColumn"));
+     gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Company/Company/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
+
+if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.Delayed))
+{
+
+gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("Status", "الحالة", @<text>@item.Status</text>, "FirstColumn"));
+gridColumns.Add(grid.Column("Delay", "مدة التأخير", @<text>@item.delayTime</text>, "FirstColumn"));
+
+
+
+}
+
+else if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.Empfinish))
+{
+gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("StartDate", "تاريخ التسليم", @<text>@item.HijriFinishDate </text>, "FirstColumn"));
+
+
+
+gridColumns.Add(grid.Column("Delayed", " متأخرة", @<text> @(item.IsDelayed ? "نعم" : "لا") </text>, "FirstColumn"));
+
+
+gridColumns.Add(grid.Column("Accept", "اعتماد", @<text><a taskid="@item.TaskID" href="javascript:void(0);" class="inline-action-link has-tip Approve" title="قبول">
+            <i class="fa fa-check-circle"></i>
+        </a></text>, "FourthColumn"));
+
+gridColumns.Add(grid.Column("Refused", "رفض", @<text><a taskid="@item.TaskID" href="javascript:void(0);" class="inline-action-link has-tip UnApprove" title="رفض">
+            <i class="fa fa-remove"></i>
+        </a></text>, "fivethColumn"));
+
+}
+
+else if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.EmpReject))
+{
+gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text>, "FirstColumn"));
+
+gridColumns.Add(grid.Column("StartDate", "تاريخ البداية", @<text>@item.HijriStartDate </text>, "FirstColumn"));
+gridColumns.Add(grid.Column("RejectedDate", "تاريخ الرفض", @<text>@item.HijriRejectedDate </text>, "FirstColumn"));
+
+    @*reassign*@
+    @*gridColumns.Add(grid.Column("ReAssign", "إعادة إسناد", @<text><a TaskID="@item.TaskID" CurrentEmp ="@item.EmpID" startdate="@item.StartDate" enddate"@item.EndDate"  href="javascript:void(0);" class="inline-action-link has-tip assign" title="إعادة إسناد">
+        <i class="icon-retweet"></i>
+    </a>
+        </text>, "FourthColumn"));*@
+
+
+}
+else if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.FinishToday))
+{
+    gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text>, "FirstColumn"));
+
+}
+
+else if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.NeedAssign))
+{
+    @*reassign*@
+    @*gridColumns.Add(grid.Column("Assign", " إسناد", @<text>
+            @if (item.StartDate == null || item.EndDate==null)
+                {
+    <a>
+            </a>
+                }
+                else
+                {
+    <a TaskID="@item.TaskID" CurrentEmp ="@item.EmpID" startdate="@item.StartDate" enddate"@item.EndDate" href="javascript:void(0);" class="inline-action-link has-tip assign" title=" إسناد">
+                <i class="icon-retweet"></i>
+            </a>           }
+
+                </text>, "FourthColumn"));*@
+
+    gridColumns.Add(grid.Column("Delete", "حذف", @<text><span class="test" title="" data-original-title="حذف">
+            <i class="fa fa-trash" currenclass="Task" id="@item.TaskID"></i>
+        </span></text>, "FourthColumn"));
+}
+else if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.Susspended))
+{
+gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text> , "FirstColumn"));
+
+gridColumns.Add(grid.Column("SuspendedDate", "تاريخ الايقاف", @<text>@item.HijriSuspendedDate</text>, "SecondColumn"));
+
+gridColumns.Add(grid.Column("EndDate", "تاريخ الانتهاء", @<text>@item.HijriFinishDate</text>, "ThirdColumn"));
+
+    @*reassign*@
+    @*gridColumns.Add(grid.Column("Assign", " إعادة إسناد", @<text><a TaskID="@item.TaskID" CurrentEmp ="@item.EmpID"  href="javascript:void(0);" class="inline-action-link has-tip assign suspend" startdate="@item.StartDate" enddate"@item.EndDate"  title=" إسناد">
+        <i class="icon-retweet"></i>
+    </a>
+        </text>, "FourthColumn"));*@
+
+    @*gridColumns.Add(grid.Column("Assign", " إعادة تفعيل", @<text><a TaskID="@item.TaskID" CurrentEmp ="@item.EmpID"  href="javascript:void(0);" class="inline-action-link has-tip Resume" title=" إعادة تفعيل">
+        <i class="icon-play-1"></i>
+    </a>
+        </text>, "FourthColumn"));*@
+
+
+}
+else if (Model.All(i => i.DBStatus == EtaskMinstry.AppCode.DashBoaedTaskType.New))
+{
+    gridColumns.Add(grid.Column("EmpName", "الموظف", @<text>@item.EmpName</text>, "FourthColumn"));
+gridColumns.Add(grid.Column("FinishDate", "تاريخ البداية", @<text>@item.HijriStartDate </text>, "FourthColumn"));
+gridColumns.Add(grid.Column("FinishDate", "تاريخ النهاية", @<text>@item.HijriEndDate </text>, "FourthColumn"));
+
+
+
+gridColumns.Add(grid.Column("Accept", "مؤشرالتقدم", @<text>
+        <div class="strenth-bar strenth-bar2"><div class="strenth-colors" style="width: @item.DelayPercentage%;"></div></div>
+    </text>, "barCol"));
+
+
+
+}
+
+
+        }
+
+        @grid.GetHtml(columns: gridColumns.ToArray(),
+                  tableStyle: "table table-bordered dataTable  ",
+                 headerStyle: "",
+                 footerStyle: "pagerbar",
+                 mode: WebGridPagerModes.All,
+                 numericLinksCount: 5,
+                 firstText: "الاول",
+                 previousText: "السابق",
+                 nextText: "التالى",
+                 lastText: "الاخير"
+
+        )
+
+        @* Custom Pager *@
+        <div class="custom-pager text-center mt-3">
+            @if (ViewBag.pagesNumber > 1)
+            {
+                <ul class="pagination">
+
+                    @* First Page *@
+                    <li class="page-item @(ViewBag.page == 1 ? "disabled" : "")">
+                        <a class="page-link" href="javascript:GetTasksbypage(1,@ViewBag.taskType);">الأول</a>
+                    </li>
+
+                    @* Previous Page *@
+                    <li class="page-item @(ViewBag.page == 1 ? "disabled" : "")">
+                        <a class="page-link" href="javascript:GetTasksbypage(@(ViewBag.page - 1),@ViewBag.taskType);">السابق</a>
+                    </li>
+
+                    @* Page Numbers *@
+                    @*@for (int i = 1; i <= ViewBag.pagesNumber; i++)
+        {
+            <li class="page-item @(i == ViewBag.page ? "active" : "")">
+                <a class="page-link" href="javascript:GetTasksbypage(@i,@ViewBag.taskType);">@i</a>
+            </li>
+        }*@
+
+                    <li class="page-item active">
+                        <a class="page-link" href="javascript:GetTasksbypage(@ViewBag.page,@ViewBag.taskType);">@ViewBag.page</a>
+                    </li>
+
+                    @* Next Page *@
+                    <li class="page-item @(ViewBag.page == ViewBag.pagesNumber ? "disabled" : "")">
+                        <a class="page-link" href="javascript:GetTasksbypage(@(ViewBag.page + 1),@ViewBag.taskType);">التالي</a>
+                    </li>
+
+                    @* Last Page *@
+                    <li class="page-item @(ViewBag.page == ViewBag.count ? "disabled" : "")">
+                        <a class="page-link" href="javascript:GetTasksbypage(@ViewBag.pagesNumber,@ViewBag.taskType);">الأخير</a>
+                    </li>
+
+                </ul>
+            }
+        </div>
+
+    </div>
+}
+else
+{
+    @*--------------------Start Table when no data found----------------*@
+    <div class="panel panel-default">
+
+        <div class="datatable-tasks">
+            <table class="table table-bordered">
+                <thead>
+
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="1" style="text-align: center">
+                            لا يوجد بيانات
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @*--------------------End Table when no data found----------------*@
+
+
+
+}
+<script>
+    $(document).ready(function () {
+
+        $('.copy_text').click(function (e) {
+            e.preventDefault();
+            var copyText = $(this).attr('href');
+
+            document.addEventListener('copy', function (e) {
+                e.clipboardData.setData('text/plain', copyText);
+                e.preventDefault();
+            }, true);
+
+            document.execCommand('copy');
+            console.log('copied text : ', copyText);
+
+        });
+
+     
+    });
+
+    
+    </script>

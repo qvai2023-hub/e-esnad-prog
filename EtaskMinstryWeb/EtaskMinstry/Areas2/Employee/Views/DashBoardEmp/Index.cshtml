@@ -1,0 +1,405 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.Models.Employee
+@using EtaskMinstry.AppCode
+
+@{
+    ViewBag.Title = "حالة المهام";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+@*<div class="page-header">
+    <div class="page-title">
+        <h3>الرئيسية <small>حالة المهام</small></h3>
+    </div>
+</div>*@
+
+   <div class="clear"> </div>
+        <!--task tabs-->
+       
+        @*<div class="tab-wrapper" style="min-width: 800px; width: 70%;">
+          <div data-role="z-tab" data-options='{"defaultTab": "tab1", "tabWidth": 90, "rounded": true,"shadows": true, "animation": {"effects": "fadeIn"}, "position": "top-right", "orientation":"vertical" }'>*@
+           <div class="tabbable page-tabs">
+    <ul class="nav nav-tabs">
+        <li class="active">
+            @Ajax.RawActionLink("<i class='fa fa-spinner'></i>" + System.Configuration.ConfigurationManager.AppSettings["Inprogress"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.Doing, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Doing },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-star'></i>" + System.Configuration.ConfigurationManager.AppSettings["New"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.NewAssigned, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NewAssigned },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-hourglass-3'></i>" + System.Configuration.ConfigurationManager.AppSettings["Delay"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.Delayed, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-pause'></i>" + System.Configuration.ConfigurationManager.AppSettings["Pending"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.Susspended, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+
+        <li>
+            @Ajax.RawActionLink("<i class='fa fa-check'></i>" + System.Configuration.ConfigurationManager.AppSettings["DoneToday"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.FinishToday, DateTime.Now) + "</span>", "GetTasks", null
+           , new { taskType = DashBoaedTaskType.FinishToday },
+            new AjaxOptions
+            {
+                UpdateTargetId = "divTasks",
+                InsertionMode = InsertionMode.Replace,
+                LoadingElementId = "loadding",
+                LoadingElementDuration = 10,
+                HttpMethod = "Post"
+            }, new { @class = "tab dactive-tab" + "" })
+        </li>
+
+
+    </ul>
+</div>
+
+                   <div class="tab-content">
+                       <!-- Tasks table -->
+                       <div class="panel panel-default">
+                           <div class="panel-heading">
+                               <h6 class="panel-title"><i class="fa fa-tasks"></i> <span id="tableheader">كل المهام </span></h6>
+                               <span id="listcount" class="pull-right label label-danger">@ViewBag.count</span>
+                           </div>
+                           <div id="divTasks">
+                               @{ Html.RenderPartial("~/Areas/Employee/Views/DashBoardEmp/PartialDBEmpTask.cshtml", (IEnumerable<EtaskMinstry.Models.Employee.DashBoardVM>)ViewData["EmployeeTask"]);}
+
+
+
+                           </div>
+                       </div>
+                   </div>
+
+
+
+                   <script>
+                       //***************************************************************//
+                       $(".dactive-tab").on("click", function () {
+                           console.log("clickkkk");
+                           $(this).parent().addClass("active");
+                           $(this).parent().siblings().removeClass("active");
+                       });
+                       //***************************************************************//
+                       $(function () {
+                           var todayDate = $("#todayDate").val();
+
+                           if (window.location.href.indexOf('taskType') != -1) {
+                               var status = window.location.href.split('taskType=')[1];
+                               $('li').removeClass('z-active');
+                               if (status.indexOf('New') != -1) {
+                                   $('.NewTab').parent().addClass('z-active');
+                               } else if (status.indexOf('Doing') != -1) {
+                                   $('.DoingTab').parent().addClass('z-active');
+                               } else if (status.indexOf('Delayed') != -1) {
+                                   $('.DelayTab').parent().addClass('z-active');
+                               } else if (status.indexOf('Susspended') != -1) {
+                                   $('.PendingTab').parent().addClass('z-active');
+                               } else if (status.indexOf('FinishToday') != -1) {
+                                   $('.FinishTab').parent().addClass('z-active');
+                               }
+
+                           }
+                           // Switch Tab Action Handling
+                           $('.z-tab').click(function () {
+                               $('.z-tab').removeClass('z-active');
+                               $(this).addClass('z-active');
+                               $(this).find('a')[0].click();
+                           });
+                           
+
+                           $(".modify_time").live("click", function () {
+                               debugger
+                               $(this).parent().hide();
+                               var itemvalue = $(this).prev().text();
+                               $(this).parent().siblings('').show();
+                               if (itemvalue == "0") {
+                                   $(this).parent().siblings('').find('input').val('');
+                               }
+                               else {
+                                   $(this).parent().siblings('').find('input').val(itemvalue);
+                               }
+
+                           });
+
+
+                           $(document).on("click", ".approved", function () {
+                               debugger;
+                               var elem = $(this);
+                               var duration = $(this).siblings('.time_value').val();
+                               var iTaskid = $(this).attr('taskid');
+                               $(this).parent().hide();
+                               $(this).parent().siblings('').show();
+                               var reg = /^-?\d+\.?\d*$/
+                               if (duration == "" || reg.test(duration) == false || duration > 24) {
+                                   Notify("danger", "يجب ادخال أرقام فقط و لا يزيد عن 24 ساعة ", 3000);
+                                   $(this).siblings('.time_value').val("");
+                               } else {
+
+
+                                   $.ajax({
+                                       type: 'Post',
+                                       url: '@Url.Action("UpdateTaskTime")',
+                                       dataType: 'json',
+                                       data: { iTaskid: iTaskid, Duration: duration },
+                                       success: function (data) {
+                                       },
+                                       error: function (e) {
+                                       },
+                                       complete: function (data) {
+                                           debugger;
+                                           if (data.responseText == "Error") {
+                                               Notify("danger", "لم تتم العملية بنجاح", 3000);
+                                           } else if (data.responseText == "ErrorMax") {
+                                               Notify("danger", "القيمة التي أدخلتها تتجاوز الحد الأقصى لهذا اليوم", 3000);
+                                           } else {
+                                               Notify("success", "تم اضافة الوقت بنجاح", 3000);
+                                               debugger
+                                               elem.closest('.ThirdColumn').siblings('.FourthColumn').find('.FinishTask').show();
+                                               //var newDuration = parseFloat(elem.parent().siblings().find(".actualTime").text()) + parseFloat(duration);
+                                               var newDuration = parseFloat(duration);
+                                               elem.parent().siblings().find(".actualTime").text(newDuration);
+                                           }
+                                       }
+                                   });
+                               }
+
+
+                           });
+
+
+                           var approvConfirmation;
+
+
+
+
+                           $(document).on("click", ".accepted-icon", function () {
+
+                               var iTaskid = $(this).attr('taskid');
+                               var elem = $(this);
+                               approvConfirmation = new Modal({
+                                   title: 'تأكيد', //title of the popup
+                                   message: 'هل انت متأكد من قبول المهمة ؟', // message text  notes: overrided if there're  id form
+                                   type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                                   id: '',  // id of the form to show it on the modal
+                                   onAccept: function () {
+
+                                       $.ajax({
+                                           type: 'Post',
+                                           url: '@Url.Action("Accept")',
+                                           dataType: 'json',
+                                           data: { iTaskID: iTaskid },
+                                           async: false,
+                                           success: function (data) {
+                                           },
+                                           error: function (e) {
+                                           },
+                                           complete: function (data) {
+                                               if (data.responseText.toLowerCase() == "true") {
+
+                                                   Notify("success", "تم قبول المهمة بنجاح", 3000);
+
+                                                   if (elem.parent().siblings('.Endate').text() != "") {
+
+                                                       if (elem.parent().siblings('.Endate').text().trim() == todayDate) {
+                                                           var countFT = $(".FinishTab").siblings(".task-counter").text();
+                                                           countFT = parseInt(countFT) + 1;
+                                                           $(".FinishTab").siblings(".task-counter").text(countFT);
+                                                       }
+
+                                                   }
+                                               } else
+                                                   Notify("danger", "لم تتم العملية بنجاح", 3000);
+                                           }
+                                       });
+
+                                       var status = "NewAssigned";
+
+                                       UpdateTable(status);
+                                       //update Count
+                                       var countNew = $(".NewTab").siblings(".task-counter").text();
+                                       countNew = parseInt(countNew) - 1;
+                                       $(".NewTab").siblings(".task-counter").text(countNew);
+
+                                       var countDoing = $(".DoingTab").siblings(".task-counter").text();
+                                       countDoing = parseInt(countDoing) + 1;
+                                       $(".DoingTab").siblings(".task-counter").text(countDoing);
+
+                                       approvConfirmation.hide();
+                                   },// call back runs after modal accept,
+                                   onCancel: function () {
+                                       approvConfirmation.hide();
+                                   } // call back runs after modal cancel default  is false , closes the modal.
+                               });
+                               approvConfirmation.show();
+
+                           });
+
+
+                           $(document).on("click", ".refused-icon", function () {
+
+                               var iTaskid = $(this).attr('taskid');
+
+                               approvConfirmation = new Modal({
+                                   title: 'تأكيد', //title of the popup
+                                   message: 'هل انت متأكد من رفض المهمة ؟', // message text  notes: overrided if there're  id form
+                                   type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                                   id: '',  // id of the form to show it on the modal
+                                   onAccept: function () {
+
+                                       $.ajax({
+                                           type: 'Post',
+                                           url: '@Url.Action("Reject")',
+                                           dataType: 'json',
+                                           data: { iTaskID: iTaskid },
+                                           success: function (data) {
+                                           },
+                                           error: function (e) {
+                                           },
+                                           complete: function (data) {
+                                               if (data.responseText.toLowerCase() == "true") {
+                                                   Notify("success", "تم رفض المهمة بنجاح", 3000);
+
+                                               } else
+                                                   Notify("danger", "لم تتم العملية بنجاح", 3000);
+                                           }
+                                       });
+
+
+                                       var status = "NewAssigned";
+
+                                       UpdateTable(status);
+                                       //update Count
+                                       var countNew = $(".NewTab").siblings(".task-counter").text();
+                                       countNew = parseInt(countNew) - 1;
+                                       $(".NewTab").siblings(".task-counter").text(countNew);
+
+
+                                       approvConfirmation.hide();
+                                   },// call back runs after modal accept,
+                                   onCancel: function () {
+                                       approvConfirmation.hide();
+                                   } // call back runs after modal cancel default  is false , closes the modal.
+                               });
+                               approvConfirmation.show();
+                           });
+
+
+
+                           $(document).on("click", ".FinishTask", function () {
+                               var elem = $(this);
+                               var iTaskid = $(this).attr('taskid');
+
+                               approvConfirmation = new Modal({
+                                   title: 'تأكيد', //title of the popup
+                                   message: 'هل انت متأكد من انهاء المهمة ؟', // message text  notes: overrided if there're  id form
+                                   type: 'confirm',  // type of the modal 'alert', 'confirm' or 'form'
+                                   id: '',  // id of the form to show it on the modal
+                                   onAccept: function () {
+
+                                       $.ajax({
+                                           type: 'Post',
+                                           url: '@Url.Action("Finish")',
+                                           dataType: 'json',
+                                           data: { iTaskID: iTaskid },
+                                           success: function (data) {
+                                               //update table aftre action
+
+                                           },
+                                           error: function (e) {
+                                           },
+                                           complete: function (data) {
+                                               if (data.responseText.toLowerCase() == "true") {
+                                                   debugger;
+                                                   Notify("success", "تم انهاء المهمة بنجاح", 3000);
+                                                   if (!$(".z-active").hasClass("Delay")) {
+                                                       elem.closest('tr').remove();
+                                                   }
+                                                   var status = $(".z-active").find(".z-link").attr("href").split("=")[1];
+                                                   UpdateTable(status);
+                                               } else
+                                                   Notify("danger", "لم تتم العملية بنجاح", 3000);
+                                           }
+                                       });
+
+
+
+
+                                       //update Count
+                                       debugger;
+                                       if (!$(".z-active").hasClass("Delay")) {
+                                           var countNew = $(".z-active").find(".task-counter").text();
+                                           countNew = parseInt(countNew) - 1;
+                                           $(".z-active").find(".task-counter").text(countNew);
+                                       }
+                                       else {
+
+                                           var countDoing = $(".DoingTab").siblings(".task-counter").text();
+                                           countDoing = parseInt(countDoing) - 1;
+                                           $(".DoingTab").siblings(".task-counter").text(countDoing);
+                                       }
+                                       approvConfirmation.hide();
+                                   },// call back runs after modal accept,
+                                   onCancel: function () {
+                                       approvConfirmation.hide();
+                                   } // call back runs after modal cancel default  is false , closes the modal.
+                               });
+                               approvConfirmation.show();
+                           });
+
+
+
+
+
+                           function UpdateTable(status) {
+
+                               $.ajax({
+                                   type: 'Post',
+                                   url: '@Url.Action("GetTasks")',
+                                   dataType: 'html',
+                                   data: { "taskType": status },
+                                   async: false,
+                                   success: function (data) {
+                                       debugger;
+                                       $("#divTasks").html(data);
+                                   }
+                               });
+
+
+                           }
+
+
+
+                       });
+
+
+                   </script>
+
+

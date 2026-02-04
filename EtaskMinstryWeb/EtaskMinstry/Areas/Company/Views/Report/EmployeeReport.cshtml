@@ -1,0 +1,179 @@
+﻿@model EtaskMinstry.Areas.Company.Models.ReportEmployeeTasks
+
+@using EtaskMinstry;
+@{
+    ViewBag.Title = "تقرير مهام كل موظف";
+    Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+}
+
+
+@using (Html.BeginForm("LoadEmployeeReport", "Report"))
+{
+    @Html.AntiForgeryToken()
+
+
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h6 class="panel-title panel-trigger">
+                <a data-toggle="collapse" href="#panel-search" class="collapsed">بحث</a>
+            </h6>
+        </div>
+        <div id="panel-search" class="panel-collapse collapse" style="height: 0px;">
+            <div class="panel-body">
+                <form>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label class="col-sm-2">إسم الموظف : </label>
+                            <div class="col-sm-6">
+                                @Html.DropDownListFor(e => e.employees, ViewBag.Employees as SelectList,
+                                     new
+                                     {
+                                         @id = "EmployeeID",
+                                         @placeholder = "اختر الموظف",
+                                         @class = "chzn-select chzn-rtl form-control",
+                                         @multiple = "multiple",
+                                         @tabindex = "1"
+                                     })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+
+                            <label class="col-sm-4 control-label">تاريخ البداية من: </label>
+                            <div class="col-sm-8">
+                                <div class='input-group date'>
+                                    @Html.TextBox("FromDate", "", new { @class = "form-control", @style = "margin-left:47px;", @readonly = "true" })
+                                    <span class="input-group-addon">
+                                        <span class="fa fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-group col-sm-6">
+
+                            <label class="col-sm-4 control-label">إلى: </label>
+                            <div class="col-sm-8">
+                                <div class='input-group date'>
+                                    @Html.TextBox("ToDate", "", new { @class = "form-control", @readonly = "true" })
+                                    <span class="input-group-addon">
+                                        <span class="fa fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            @Html.ValidationMessageFor(model => model.ToDate)
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+
+                            <label class="col-sm-4 control-label">تاريخ النهاية من: </label>
+
+                            <div class="col-sm-8">
+                                <div class='input-group date'>
+                                    @Html.TextBox("FromEndDate", "", new { @class = "form-control", @readonly = "true" })
+                                    <span class="input-group-addon">
+                                        <span class="fa fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-6">
+
+                            <label class="col-sm-4 control-label">إلى: </label>
+                            <div class="col-sm-8">
+                                <div class='input-group date'>
+                                    @Html.TextBox("ToEndDate", "", new { @class = "form-control", @readonly = "true" })
+                                    <span class="input-group-addon">
+                                        <span class="fa fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            @Html.ValidationMessageFor(model => model.ToEndDate)
+                        </div>
+                    </div>
+
+
+                    <div class="text-right">
+                        <input type="submit" class="btn btn-primary submit" value="تقرير" />
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+}
+<script src="~/Scripts/ui/ui.datepicker.js"></script>
+<script src="~/Scripts/ui/i18n/jquery-ui-i18n.js"></script>
+<script src="~/Scripts/ui/i18n/ui.datepicker-ar.js"></script>
+<script>
+
+    $("#EmployeeID").chosen({
+        placeholder_text_multiple: "اختر موظف",
+
+    });
+
+    $(".chzn-select").chosen();
+
+    //***************************************************************//
+    //Check Date Greg OR Hijrii
+    var Isgreg = "@(MvcApplication.IsGregDate)";
+    debugger
+    if (Isgreg == "True") {
+        //datepicker Grerg
+        $("#FromDate").datepicker($.datepicker.regional["ar"]);
+        $("#ToDate").datepicker($.datepicker.regional["ar"]);
+        $("#FromEndDate").datepicker($.datepicker.regional["ar"]);
+        $("#ToEndDate").datepicker($.datepicker.regional["ar"]);
+    }
+    else {
+        //calendar Hijrii
+        $('#FromDate,#ToDate,#FromEndDate,#ToEndDate').calendarsPicker({
+            changeMonth: true,
+            changeYear: true,
+            showTrigger: '#calImg',
+            calendar: $.calendars.instance('ummalqura'),
+            dateFormat: 'dd/mm/yyyy',
+            yearRange: '1418:1450'
+        });
+
+    }
+    //***************************************************************//
+
+    $.validator.addMethod("MinMaxValidation", function (value, element, options) {
+        var isValid = false;
+        debugger;
+        var FromValue = $('#FromDate').val();
+        var ToValue = $('#ToDate').val();
+        if ($('#ToDate').val() != "" && $('#FromDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
+            isValid = false;
+        else
+            isValid = true;
+        return isValid;
+    });
+    $.validator.addMethod("MinMaxEndDateValidation", function (value, element, options) {
+        var isValid = false;
+        debugger;
+        var FromValue = $('#FromEndDate').val();
+        var ToValue = $('#ToEndDate').val();
+        if ($('#ToEndDate').val() != "" && $('#FromEndDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
+            isValid = false;
+        else
+            isValid = true;
+        return isValid;
+    });
+    $('.submit').live("click", function () {
+
+        debugger;
+        $('#ToDate').rules("add", { MinMaxValidation: true, messages: { MinMaxValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+        $('#FromDate').rules("add", { MinMaxValidation: true, messages: { MinMaxValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+
+        $('#FromEndDate').rules("add", { MinMaxEndDateValidation: true, messages: { MinMaxEndDateValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+        $('#ToEndDate').rules("add", { MinMaxEndDateValidation: true, messages: { MinMaxEndDateValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
+    })
+</script>

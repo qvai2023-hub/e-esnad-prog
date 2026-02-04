@@ -1,0 +1,323 @@
+﻿@using EtaskMinstry;
+@{
+    ViewBag.Title = "تقرير الحضور والانصراف";
+    if (ViewBag.companyId == null)
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+    }
+    }
+
+
+    @using (Html.BeginForm("ViewReport", "Attendance"))
+    {
+        @Html.AntiForgeryToken()
+
+
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h6 class="panel-title panel-trigger">
+                    <a data-toggle="collapse" href="#panel-search" class="collapsed">بحث</a>
+                </h6>
+            </div>
+            <div id="panel-search" class="panel-collapse collapse" style="height: 0px;">
+                <div class="panel-body">
+                    <form>
+                        <div class="row">
+                            @if (ViewBag.companyId == null)
+                            {
+                                <div class="form-group col-sm-6">
+
+                                    <label class="col-sm-4 control-label">مزود الخدمة  : </label>
+                                    <div class="col-sm-8">
+                                        <div class='input-group date'>
+                                            @Html.DropDownList("Provider", ViewBag.Providers as SelectList, "الكل",
+    new
+    {
+        @id = "Provider",
+        Class = "form-control",
+        required = "مطلوب"
+
+    })
+                                            @Html.ValidationMessage("Provider", "مطلوب",
+               new
+               {
+                   Style = "Color:red;",
+               })
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group col-sm-6">
+
+                                    <label class="col-sm-4 control-label">إسم الشركة : </label>
+                                    <div class="col-sm-8">
+                                        <div class='input-group date'>
+                                            @Html.DropDownList("CompanyId", new SelectList(ViewBag.companies, "Value", "Text"), "الكل",
+new
+{
+@id = "CompanyId",
+Class = "form-control"
+
+})
+                                        </div>
+                                    </div>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" name="CompanyId" value="@ViewBag.companyId">
+
+                            }
+                            <div class="form-group col-sm-6">
+
+                                <label class="col-sm-4 control-label">إسم الموظف : </label>
+                                <div class="col-sm-8">
+                                    <div class='input-group date'>
+                                        @Html.DropDownList("EmployeeId", new SelectList(ViewBag.employees, "Value", "Text"), "الكل",
+                                   new
+                                   {
+                                       @id = "EmployeeId",
+                                       Class = "form-control"
+
+                                   })
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+
+            <label class="col-sm-4 control-label"> من: </label>
+            <div class="col-sm-8">
+                <div class='input-group date'>
+                    @Html.TextBox("FromDate", "", new { @class = "form-control", @style = "margin-left:47px;", @readonly = "true" })
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar"></span>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+        <div class="form-group col-sm-6">
+
+            <label class="col-sm-4 control-label">إلى: </label>
+            <div class="col-sm-8">
+                <div class='input-group date'>
+                    @Html.TextBox("ToDate", "", new { @class = "form-control", @readonly = "true" })
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+                            @*<div class="form-group col-sm-6">
+
+                                <label class="col-sm-4 control-label">من : </label>
+                                <div class="col-sm-8">
+                                    <div class='input-group date'>
+                                        @Html.DropDownList("fromYear", new SelectList(ViewBag.years, "Value", "Text"), "الكل",
+                                   new
+                                   {
+                                       @id = "fromYear",
+                                       Class = "form-control"
+
+                                   })
+                                        @Html.DropDownList("fromMonth", new List<SelectListItem>(), "الكل",
+                                   new
+                                   {
+                                       @id = "fromMonth",
+                                       Class = "form-control"
+
+                                   })
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="form-group col-sm-6">
+
+            <label class="col-sm-4 control-label">الى : </label>
+            <div class="col-sm-8">
+                <div class='input-group date'>
+                    @Html.DropDownList("toYear", new SelectList(ViewBag.years, "Value", "Text"), "الكل",
+               new
+               {
+                   @id = "toYear",
+                   Class = "form-control"
+
+               })
+                    @Html.DropDownList("toMonth", new List<SelectListItem>(), "الكل",
+               new
+               {
+                   @id = "toMonth",
+                   Class = "form-control"
+
+               })
+                </div>
+            </div>
+
+        </div>*@
+                        </div>
+                        <div class="text-right">
+                            <input type="submit" class="btn btn-primary" value="تقرير" />
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    }
+    <script src="~/Scripts/ui/ui.datepicker.js"></script>
+    <script src="~/Scripts/ui/i18n/jquery-ui-i18n.js"></script>
+    <script src="~/Scripts/ui/i18n/ui.datepicker-ar.js"></script>
+    <script>
+    $('#CompanyId').change(function () {
+        debugger;
+        $.ajax({
+            type: 'post',
+            url: '/Attendance/GetEmployees?companyId='+$('#CompanyId').val(),
+            contentType: "application/json",
+            dataType: "json",
+            //data: { "companyId": $('#CompanyId').val() },
+            success: function (data) {
+                $("#EmployeeId").html("");
+                $("#EmployeeId").append($('<option/>', {
+                    value: "",
+                    text: "الكل"
+                }));
+                debugger
+                    $.each(data, function (index, item) {
+                        $("#EmployeeId").append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text
+                        }));
+                    });
+            }
+        });
+    });
+        $('#Provider').change(function () {
+            debugger;
+            $.ajax({
+                type: 'post',
+                url: '/Attendance/GetCompanies?provider=' + $('#Provider').val(),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    $("#CompanyId").html("");
+                    $("#CompanyId").append($('<option/>', {
+                        value: "",
+                        text: "الكل"
+                    }));
+                    debugger
+                    $.each(data, function (index, item) {
+                        $("#CompanyId").append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text
+                        }));
+                    });
+                }
+            });
+        });
+
+     //Check Date Greg OR Hijrii
+    var Isgreg = "@(MvcApplication.IsGregDate)";
+    debugger
+    if (Isgreg == "True") {
+        //datepicker Grerg
+        $("#FromDate").datepicker($.datepicker.regional["ar"]);
+        $("#ToDate").datepicker($.datepicker.regional["ar"]);
+
+    }
+    else {
+        //calendar Hijrii
+        $('#FromDate,#ToDate').calendarsPicker({
+            changeMonth: true,
+            changeYear: true,
+            showTrigger: '#calImg',
+            calendar: $.calendars.instance('ummalqura'),
+            dateFormat: 'dd/mm/yyyy',
+            yearRange: '1418:1450'
+        });
+
+    }
+    //***************************************************************//
+
+    $.validator.addMethod("MinMaxValidation", function (value, element, options) {
+        var isValid = false;
+        debugger;
+        var FromValue = $('#FromDate').val();
+        var ToValue = $('#ToDate').val();
+        if ($('#ToDate').val() != "" && $('#FromDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
+            isValid = false;
+        else
+            isValid = true;
+        return isValid;
+    });
+    $.validator.addMethod("MinMaxEndDateValidation", function (value, element, options) {
+        var isValid = false;
+        debugger;
+        var FromValue = $('#FromEndDate').val();
+        var ToValue = $('#ToEndDate').val();
+        if ($('#ToEndDate').val() != "" && $('#FromEndDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
+            isValid = false;
+        else
+            isValid = true;
+        return isValid;
+    });
+
+        $('#fromYear').change(function () {
+            debugger;
+            $.ajax({
+                type: 'post',
+                url: '/Attendance/GetMonths?Year=' + $('#fromYear').val(),
+                contentType: "application/json",
+                dataType: "json",
+                //data: { "companyId": $('#CompanyId').val() },
+                success: function (data) {
+                    $("#fromMonth").html("");
+                    $("#fromMonth").append($('<option/>', {
+                        value: "",
+                        text: "الكل"
+                    }));
+                    debugger
+                    $.each(data, function (index, item) {
+                        $("#fromMonth").append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text
+                        }));
+                    });
+                }
+            });
+        });
+        $('#toYear').change(function () {
+            debugger;
+            $.ajax({
+                type: 'post',
+                url: '/Attendance/GetMonths?Year=' + $('#toYear').val(),
+                contentType: "application/json",
+                dataType: "json",
+                //data: { "companyId": $('#CompanyId').val() },
+                success: function (data) {
+                    $("#toMonth").html("");
+                    $("#toMonth").append($('<option/>', {
+                        value: "",
+                        text: "الكل"
+                    }));
+                    debugger
+                    $.each(data, function (index, item) {
+                        $("#toMonth").append($('<option/>', {
+                            value: item.Value,
+                            text: item.Text
+                        }));
+                    });
+                }
+            });
+        });
+    </script>

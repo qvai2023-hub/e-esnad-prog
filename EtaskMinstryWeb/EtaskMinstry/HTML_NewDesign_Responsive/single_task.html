@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>E-snad</title>
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+        <!--css-->
+        <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link href="css/bootstrap-arabic.min.css" rel="stylesheet" type="text/css"/>
+        <link href="css/normalize.css" rel="stylesheet" type="text/css"/>
+        <link href="css/animate.css" rel="stylesheet" type="text/css"/>
+        <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+        <link href="css/style.css" rel="stylesheet" type="text/css"/>
+        <!-- Modernizr -->
+        <script src="js/modernizr.js"></script>
+    </head>
+
+    <body>
+
+
+    <!-- Navbar -->
+	<div class="navbar navbar-inverse" role="navigation">
+		<div class="navbar-header">
+
+			<a class="navbar-brand" href="#"><img src="img/logo.png" alt="Londinium"></a><a class="sidebar-toggle"><i class="fa fa-align-justify"></i></a>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-icons">
+
+				<i class="fa fa-th"></i>
+			</button>
+			<button type="button" class="navbar-toggle offcanvas">
+
+				<i class="fa fa-align-justify"></i>
+			</button>
+		</div>
+
+		<ul class="nav navbar-nav navbar-right collapse" id="navbar-icons">
+        <li><div class="date-range"><i>6</i> <b><i>جمادى أول</i> <i class="text-right">1436</i></b></div></li>
+			<li class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown">
+					<i class="fa fa-history"></i>
+					<span class="label label-default">2</span>
+				</a>
+				<div class="popup dropdown-menu dropdown-menu-left">
+					<div class="popup-header">
+						<a href="#" class="pull-left"><i class="fa fa-spinner"></i></a>
+						<span>سجل العمليات</span>
+						<a href="#" class="pull-right"><i class="fa fa-align-justify"></i></a>
+					</div>
+	                <ul class="activity">
+		                <li>
+		                	<i class="fa fa-check text-success"></i>
+		                	<div>
+			                	<a href="#">محمد</a> تم تسليم 2 مهمة <a href="#">مشروع أم الحمام</a>
+			                	<span>منذ 2 دقيقة</span>
+		                	</div>
+		                </li>
+		                <li>
+		                	<i class="fa fa-bell text-danger"></i>
+		                	<div>
+			                	 <a href="#">تنبيه</a> متوقف 2 مهمة <a href="#">لمدة يومين</a>
+			                	<span>منذ 14 دقيقة</span>
+		                	</div>
+		                </li>
+		                <li>
+		                	<i class="fa fa-flag text-success"></i>
+		                	<div>
+			                	تم تحديث السيرفر <a href="#"> تابع </a>
+			                	<span>منذ 2 ساعة</span>
+		                	</div>
+		                </li>
+		                <li>
+		                	<i class="fa fa-warning text-warning"></i>
+		                	<div>
+			                	لديك <a href="#">6 مهام جديدة</a> وهذا تذكير مني بذلك
+			                	<span>منذ 3 يوم</span>
+		                	</div>
+		                </li>
+	                </ul>
+                </div>
+			</li>
+
+			<li class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown">
+					<i class="fa fa-envelope"></i>
+					<span class="label label-default">6</span>
+				</a>
+				<div class="popup dropdown-menu dropdown-menu-left">
+					<div class="popup-header">
+						<a href="#" class="pull-left"><i class="fa fa-spinner"></i></a>
+						<span>الرسائل</span>
+						<a href="#" class="pull-right"><i class="fa fa-align-justify"></i></a>
+					</div>
+					<ul class="popup-messages">
+						<li class="unread">
+							<a href="#">
+								<img src="http://placehold.it/300" alt="" class="user-face">
+								<strong>Nesma marassy <i class="fa fa-paperclip"></i></strong>
+								<span>نص الرسالة نص الرسالة...</span>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<img src="http://placehold.it/300" alt="" class="user-face">
+								<strong>Nesma marassy <i class="fa fa-paperclip"></i></strong>
+								<span>نص الرسالة نص الرسالة...</span>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<img src="http://placehold.it/300" alt="" class="user-face">
+								<strong>Nesma marassy</strong>
+								<span>نص الرسالة نص الرسالة...</span>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<img src="http://placehold.it/300" alt="" class="user-face">
+								<strong>Nesma marassy</strong>
+								<span>نص الرسالة نص الرسالة...</span>
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<img src="http://placehold.it/300" alt="" class="user-face">
+								<strong>Nesma marassy</strong>
+								<span>نص الرسالة نص الرسالة...</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</li>
+
+
+
+		</ul>
+	</div>
+	<!-- /navbar -->
+
+
+   <!-- Page container -->
+ 	<div class="page-container sidebar-right">
+
+
+		<!-- Sidebar -->
+		<div class="sidebar">
+			<div class="sidebar-content">
+
+				<!-- User dropdown -->
+				<div class="user-menu dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<img src="http://placehold.it/300" alt="">
+						<div class="user-info">
+							Nesma marassy <span>Web Developer</span>
+						</div>
+					</a>
+					<div class="popup dropdown-menu dropdown-menu-right">
+					    <div class="thumbnail">
+					    	<div class="thumb">
+								<img alt="" src="http://placehold.it/300">
+								<div class="thumb-options">
+									<span>
+										<a href="#" class="btn btn-icon btn-success"><i class="fa fa-pencil"></i></a>
+										<a href="#" class="btn btn-icon btn-success"><i class="fa fa-trash"></i></a>
+									</span>
+								</div>
+						    </div>
+
+					    	<div class="caption text-center">
+					    		<h6>Nesma marassy <small>Web Developer</small></h6>
+					    	</div>
+				    	</div>
+
+				    	<ul class="list-group">
+							<li class="list-group-item"><i class="icon-pencil3 text-muted"></i> مهام مسندة <span class="label pull-right label-success">289</span></li>
+							<li class="list-group-item"><i class="icon-people text-muted"></i> المشروعات الجديدة <span class="label pull-right label-danger">892</span></li>
+							<li class="list-group-item"><i class="icon-stats2 text-muted"></i> تقارير <span class="label pull-right label-primary">92</span></li>
+							<li class="list-group-item"><a href="#"><i class="fa fa-key"></i> تغيير كلمة المرور</a><a href="#" class="pull-right text-danger"><i class="fa fa-lock"></i> تسجيل خروج</a></li>
+						</ul>
+					</div>
+				</div>
+				<!-- /user dropdown -->
+
+
+				<!-- Main navigation -->
+				<ul class="navigation">
+					<li><a href="#"><span>الرئيسية</span> <i class="fa fa-television"></i></a></li>
+					<li class="active">
+						<a href="#"><span>المهام</span> <i class="fa fa-tasks"></i></a>
+					</li>
+					<li>
+						<a href="#"><span>المشروعات</span> <i class="fa fa-table"></i></a>
+
+					</li>
+					<li>
+						<a href="#"><span>الموظفين</span> <i class="fa fa-briefcase"></i></a>
+
+					</li>
+					<li>
+						<a href="#"><span>سجل العمليات</span> <i class="fa fa-history"></i></a>
+
+					</li>
+					<li><a href="#"><span>سجل المهام</span> <i class="fa fa-archive"></i></a></li>
+                    <li><a href="#"><span>الرسائل</span> <i class="fa fa-envelope"></i></a></li>
+                    <li>
+                      <a href="#" data-toggle="collapse" data-target="#submenu-1"><i class="fa fa-file-o" aria-hidden="true"></i>
+                       <span>التقارير</span>  <i class="fa fa-fw fa-angle-down pull-right"></i></a>
+                      <ul id="submenu-1" class="collapse">
+                        <li><a href="#"><i class="fa fa-angle-double-left"></i> تقرير مهام كل مشروع</a></li>
+                        <li><a href="#"><i class="fa fa-angle-double-left"></i> تقرير المهام</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="#" data-toggle="collapse" data-target="#submenu-2"><i class="fa fa-question" aria-hidden="true"></i>
+                        <span>مساعده</span>
+                        <i class="fa fa-fw fa-angle-down pull-right"></i>
+                      </a>
+                      <ul id="submenu-2" class="collapse">
+                        <li><a href="/Upload/Help/startnow.pdf" download=""><i class="fa fa-angle-double-left"></i> <i class="fa fa-download  fa-lg pull-right" aria-hidden="true"></i><span>إبدأ الأن</span></a></li>
+                        <li><a href="/Upload/Help/helpforemployee.pdf" download=""><i class="fa fa-angle-double-left"></i><i class="fa fa-download fa-lg pull-right" aria-hidden="true"></i><span>دليل مستخدم الموظف</span></a></li>
+                        <li><a href="http://qvsupport.tawfier.com/" target="_blank"><i class="fa fa-angle-double-left"></i> دليل مستخدم الموظف</a></li>
+                      </ul>
+                    </li>
+
+				</ul>
+				<!-- /main navigation -->
+
+			</div>
+		</div>
+		<!-- /sidebar -->
+
+
+		<!-- Page content -->
+            <div class="page-content">
+                <!-- Page header -->
+                <div class="page-header">
+                    <div class="page-title">
+                        <h3>المهام <small>إدارة المهام</small></h3>
+                    </div>
+                </div>
+                <!-- /page header -->
+
+
+                <!-- Breadcrumbs line -->
+                <div class="breadcrumb-line">
+                    <ul class="breadcrumb">
+                        <li><a href="#">المهام</a></li>
+                        <li class="active">إسم المهمه</li>
+                    </ul>
+                    <div class="actions pull-right">
+                        <a href="#" data-toggle="tooltip" title="إيقاف"><i class="fa fa-pause fa-lg"></i></a>
+                        <a href="#" data-toggle="tooltip" title="تشغيل"><i class="fa fa-play fa-lg"></i></a>
+                        <a href="#" data-toggle="tooltip" title="إعادة إسناد"><i class="fa fa-retweet fa-lg"></i></a>
+                        <a href="#" data-toggle="tooltip" title="رفض"><i class="fa fa-close fa-lg"></i></a>
+                        <a href="#" data-toggle="tooltip" title="قبول"><i class="fa fa-check fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="messages">
+                    <div class="alert alert-success">
+                      <strong>Success!</strong> Indicates a successful or positive action.
+                    </div>
+                    <div class="alert alert-warning">
+                      <strong>Warning!</strong> Indicates a warning that might need attention.
+                    </div>
+                    <div class="alert alert-danger">
+                      <strong>Danger!</strong> Indicates a dangerous or potentially negative action.
+                    </div>
+                </div>
+                <!-- /breadcrumbs line -->
+                <div class="single-task">
+                        <div class="row">
+                          <h4>
+                            <a  href="log.html">
+                            سجل العمليات</a>
+                          </h4>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <div class="info">
+                                    <h4>تفاصيل المهمه</h4>
+                                    <ul class="list-unstyled">
+                                        <li>الموظف المسؤول : <span><input type="text" class="form-control"></span></li>
+                                        <li>المشروع : <span>إسم المشروع</span></li>
+                                        <li>الأهميه : 
+                                            <div class="btn-group" data-toggle="buttons">
+                                                <label class="btn btn-xs btn-info">
+                                                  <input type="radio" name="options" id="option1"> عادية
+                                                </label>
+                                                <label class="btn btn-xs btn-success">
+                                                  <input type="radio" name="options" id="option2"> متوسطة
+                                                </label>
+                                                <label class="btn btn-xs btn-warning">
+                                                  <input type="radio" name="options" id="option3"> مرتفعة
+                                                </label>
+                                                <label class="btn btn-xs btn-danger">
+                                                  <input type="radio" name="options" id="option4"> عاجلة
+                                                </label>
+                                            </div>
+                                        </li>
+                                        <li>انشئت فى : <span>18/04/1438</span></li>
+                                        <li>متأخره : <span>نعم</span></li>
+                                        <li>الحاله الحاليه : <span>جارى العمل</span></li>
+                                        <li>وقت بداية المهمه : <span>18/04/1438</span></li>
+                                        <li>وقت نهاية المهمه : <span>21/04/1438</span></li>
+                                        <li>الوقت المقدر : <span> 10 ساعات</span></li>
+                                        <li>مؤشر التقدم : 
+                                            <span>
+                                            <div class="progress progress-micro">
+													<div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+                                                        <span class="sr-only">50% تم</span>
+													</div>
+												</div>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="details">
+                                    <h4>شرح المهمه</h4>
+<!--                                    <p>هناك حقيقة مثبتة منذ زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي القارئ عن التركيز على الشكل الخارجي للنص أو شكل توضع الفقرات في الصفحة التي يقرأها. ولذلك يتم استخدام طريقة لوريم إيبسوم لأنها تعطي توزيعاَ طبيعياَ -إلى حد ما- للأحرف عوضاً عن استخدام "هنا يوجد محتوى نصي</p>-->
+                                    <form>
+                                        <div class="form-group">
+                                            <textarea class="form-control" rows="4"></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="time">
+                                    <h4>  
+                                        اجمالى الوقت المستغرق
+                                        <span class="total">20 <small>ساعه</small></span>
+                                    </h4>
+                                   
+                                    <ul class="list-unstyled">
+                                        <li><i class="fa fa-calendar"></i><span>الإثنين 2 ربيع الأول 1439</span>
+                                            <span class="edit">
+                                            <span class="editable"><input type="text" class="form-control"><span> ساعه</span></span>
+                                            <a href="#" data-toggle="tooltip" title="تعديل" ><i class="fa fa-pencil"></i></a>
+                                            </span>
+                                        </li>
+                                        
+                                        <li><i class="fa fa-calendar"></i><span>الإثنين 2 ربيع الأول 1439</span>
+                                            <span class="edit">
+                                            <span class="editable">2<span> ساعه</span></span>
+                                            <a href="#" data-toggle="tooltip" title="تعديل" ><i class="fa fa-pencil"></i></a>
+                                            </span>
+                                        </li>
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row btns">
+                            <div class="col-md-12 text-right">
+                                <button class="btn btn-primary">تأكيد</button>
+                                <button class="btn btn-primary">إلغاء</button>
+                            </div>
+                        </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                        <div class="tabs">
+                            <ul class="nav nav-tabs">
+                              <li class="active"><a data-toggle="tab" href="#comments"><i class="fa fa-comment"></i>التعليقات</a></li>
+                              <li><a data-toggle="tab" href="#attach"><i class="fa fa-paperclip"></i>المرفقات</a></li>
+                            </ul>
+
+                            <div class="tab-content">
+                              <div id="comments" class="tab-pane fade in active">
+                                   <div class="comments-list">
+                                       <ul class="list-unstyled">
+                                            <li>
+                                              <div class="actions">
+                                                    <a href="#" data-toggle="tooltip" title="إلغاء"><i class="fa fa-minus-circle fa-lg"></i></a>
+                                                    <a href="#" data-toggle="tooltip" title="عرض"><i class="fa fa-check-circle fa-lg"></i></a>
+                                                    <a href="#" data-toggle="tooltip" title="إبلاغ تعليق غير لائق"><i class="fa fa-flag fa-lg"></i></a>
+                                                </div>
+                                                <h5>إسم المستخدم</h5>
+                                                <span class="date">25 محرم 1433</span>
+                                                <p>هناك حقيقة مثبتة منذ زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي القارئ عن التركيز على الشكل الخارجي للنص</p>
+                                            </li>
+                                             <li>
+                                              <div class="actions">
+                                                    <a href="#" data-toggle="tooltip" title="إلغاء"><i class="fa fa-minus-circle fa-lg"></i></a>
+                                                    <a href="#" data-toggle="tooltip" title="عرض"><i class="fa fa-check-circle fa-lg"></i></a>
+                                                    <a href="#" data-toggle="tooltip" title="إبلاغ تعليق غير لائق"><i class="fa fa-flag fa-lg"></i></a>
+                                                </div>
+                                                <h5>إسم المستخدم</h5>
+                                                <span class="date">25 محرم 1433</span>
+                                                <p>هناك حقيقة مثبتة منذ زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي القارئ عن التركيز على الشكل الخارجي للنص</p>
+                                            </li>
+
+                                       </ul>
+                                   </div>
+                                    <form>
+                                        <div class="form-group">
+                                            <label>التعليق : </label>
+                                            <textarea class="form-control" rows="4"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">إرسال</button>
+                                    </form>
+                              </div>
+                              <div id="attach" class="tab-pane fade">
+                                    <form>
+                                        <div class="form-group">
+                                            <label>وصف ملف جديد : </label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>ملف جديد : </label>
+                                            <input type="file" class="btn btn-success">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">إرفاق</button>
+                                    </form>
+                              </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- Footer -->
+            <div class="footer clearfix">
+                <div class="pull-left">&copy; 2015 إي تاسك مزود الخدمة المعتمد للعمل عن بعد - تم تطويره بواسطة <a href="#">كيوفيجن</a></div>
+                <div class="pull-right icons-group">
+                    <a href="#"><i class="icon-screen2"></i></a>
+                    <a href="#"><i class="icon-balance"></i></a>
+                    <a href="#"><i class="icon-cog3"></i></a>
+                </div>
+            </div>
+            <!-- /footer -->
+        </div>
+		<!-- /page content -->
+        </div>
+	<!-- /page container -->
+
+
+
+
+
+<script src="js/jquery-1.11.2.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="js/moment.js"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/application.js"></script>
+<script type="text/javascript" src="js/scripts.js"></script>
+</body>
+</html>

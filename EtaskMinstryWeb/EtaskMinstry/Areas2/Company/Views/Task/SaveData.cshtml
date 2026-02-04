@@ -1,0 +1,895 @@
+﻿@using EtaskMinstry
+@model  EtaskMinstry.Models.Task.TaskAddEdit
+@{
+    ViewBag.Title = "حفظ المهمه";
+
+}
+
+
+<script src='https://www.google.com/recaptcha/api.js'></script>
+
+
+
+<div id="copyModal" class="popup-content">
+
+    <div class="pop-content modal-body">
+        @*<strong>*@
+        <div class="modal_content">
+            <span class="srch-lbl"><strong>  المهمه  :</strong></span>
+            @*<strong>*@
+            <div class="modal_content">
+                @Html.DropDownList("Task", ViewBag.Tasks as SelectList, new
+           {
+               @id = "CopyTask",
+               Class = "form-control"
+           })
+
+                <div class="modal-footer">
+                    <input type="button" id="btnConfirm" class="btn btn-success" value="تأكيد">
+                    <input type="button" id="btnCancel" class=" btnClose btn btn-danger" value="الغاء" />
+                </div>
+            </div>
+            @*</strong>*@
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- Right labels -->
+@using (Html.BeginForm("SaveTask", "Task", FormMethod.Post, new { id = "SaveData", enctype = "multipart/form-data", @class = "form-horizontal" }))
+{
+
+
+    @Html.ValidationSummary(true, "", new { @class = "ErrorMessage" })
+
+
+    @Html.HiddenFor(model => model.TaskID)
+    ///*-------------Panel Head---------------------- */
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h6 class="panel-title">
+                <i class="fa fa-edit"></i>   بدء مهمة جديدة
+            </h6>
+
+            @*نسخ من مهمة سابقة*@
+            <a href="javascript:void(0);" id="CopyFromOldTask" class="page-options-link2 pull-right btn btn-xs btn-success">
+                نسخ من مهمة سابقة
+            </a>
+        </div>
+        <div class="panel-body">
+            @*عنوان المهمة*@
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Title):</label>
+                <div class="col-sm-10">
+                    @Html.TextBoxFor(model => model.Title, new { @class = "form-control", @id = "Titletext" })
+                    @Html.ValidationMessageFor(model => model.Title, null, new { Style = "color:red;", @id = "TitleValidation" })
+                </div>
+            </div>
+            @*التاريخ*@
+            <div class="form-group">
+                @*تاريخ البدايه:*@
+                <div class="col-sm-6">
+                    <div class="row">
+                        <label class="col-sm-4 control-label text-right">@Html.LabelFor(model => model.StartDate):</label>
+                        <div class="col-sm-8">
+                            <div class='input-group date'>
+                                @Html.TextBoxFor(model => model.StartDate,
+                            new
+                            {
+                                Class = "form-control",
+                                id = "dtStartDate",
+                                Readonly = "readonly"
+                            })
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                            <br />
+
+                            @Html.ValidationMessageFor(model => model.StartDate, null, new { Style = "Color:red;" })
+                        </div>
+
+                    </div>
+                </div>
+                @*تاريخ النهاية:*@
+                <div class="col-sm-6">
+                    <div class="row">
+                        <label class="col-sm-4 control-label text-right">@Html.LabelFor(model => model.EndDate):</label>
+                        <div class="col-sm-8">
+                            <div class='input-group date'>
+                                @Html.TextBoxFor(model => model.EndDate, new
+                               {
+                                   Class = "form-control",
+                                   id = "dtEndDate",
+                                   Readonly = "readonly"
+                               })
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                            <br />
+                            @Html.ValidationMessageFor(model => model.EndDate, null, new { Style = "Color:red;" })
+                        </div>
+                        <span id="dateError" style="color: red; display: none;"></span>
+                    </div>
+                </div>
+            </div>
+            @*المشروع*@
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.ProjectID):</label>
+                <div class="col-sm-4">
+                    @Html.DropDownList("ProjectID", ViewBag.Project as SelectList, "اختر مشروع",
+                                       new
+                                       {
+                                           @id = "ProjectID",
+                                           Class = "form-control"
+                                       })
+
+                </div>
+            </div>
+            @*الوصف*@
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.Description):</label>
+                <div class="col-sm-10">
+                    @Html.TextAreaFor(model => model.Description, new
+                   {
+                       @class = "form-control",
+                       @cols = 5,
+                       @rows = 3,
+                       scroll = "no"
+                   })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.Description, null, new
+                   {
+                       Style = "Color:red;"
+                   })
+                </div>
+            </div>
+            @*إسناد المهمة*@
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.EmpID):</label>
+                <div class="col-sm-4">
+                    @Html.DropDownList("EmpID", ViewBag.Employee as SelectList, "اختر موظف",
+                                       new
+                                       {
+                                           @id = "EmpID",
+                                           Class = "form-control"
+                                       })
+                </div>
+            </div>
+            @*//الأهمية*@
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.PriorityID):</label>
+                <div class="col-sm-4">
+                    @Html.DropDownList("PriorityID", ViewBag.Priority as SelectList, "اختر الأهمية",
+                                       new
+                                       {
+                                           @id = "PriorityID",
+                                           Class = "form-control",
+                                       })
+
+                </div>
+                <div class="col-sm-2">
+                    @*<div class="periority-panel">
+                            <span class="label label-danger">مرتفعة جدا</span>
+                        </div>
+                        <div class="strenth-bar">
+                            <div class="strenth-colors" style="width: 0%;">
+                            </div>
+                        </div>*@
+
+                    @Html.ValidationMessageFor(model => model.PriorityID, null, new { Style = "Color:red;" })
+
+                </div>
+            </div>
+            @*الوقت*@
+            <div class="form-group">
+                <label class="col-sm-2 control-label text-right">@Html.LabelFor(model => model.ExpectedTime):</label>
+                <div class="col-sm-2">
+                    @Html.TextBoxFor(model => model.ExpectedTime, new
+                   {
+                       @id = "TimeExpectedID",
+                       @class = "form-control",
+                   })
+                </div>
+                <div class="col-sm-2">
+                    @Html.DropDownList("TimeUnitID", ViewBag.TimeUnit as SelectList, "اختر الوحدة",
+                                       new
+                                       {
+                                           @id = "TimeUnitID",
+                                           Class = "form-control",
+                                       })
+                    <br />
+                    @Html.ValidationMessageFor(model => model.ExpectedTime, null,
+                    new
+                    {
+                        Style = "Color:red;",
+                        @id = "ExpectedTimeValidation"
+                    })
+                </div>
+                <span id="ExpectedTimeError" style="color: red; display: none;"></span>
+            </div>
+
+            @*المرفقات*@
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h6 class="panel-title">
+                        <i class="fa fa-paperclip"></i> المرفقات
+                    </h6>
+                </div>
+                <div class="panel-body">
+                    <div class="form-bordered AttachedFiles">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label text-right">الملف:</label>
+                            <div class="col-sm-10">
+                                @*<input type="file" class="btn btn-success">*@
+
+
+                                <input id="UploadFile" type="button" class="btn btn-primary" value="تحميل">
+                                <br />
+                                <input type="file" name="TaskFileUploader" style="display: none;" class="btn btn-success" id="TaskFileUploader">
+                                <span id="fileName" style="display: none;"></span>
+                                <input id="btnCancelFile" type="button" class="submit-btn" value="حذف" style="display: none">
+                                <span id="errorUploadFile" style="display: none; color: red;" class="errorUploadFile">من فضلك اختر ملف</span>
+
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label text-right">الوصف:</label>
+                            <div class="col-sm-4">
+                                <input type="text" name="txtFileDesc" id="txtFileDesc" class="form-control">
+                                <br />
+                                <span id="errorDescFile" style="display: none; color: red;">يجب ان لا يزيد عدد الحروف عن 350 حرف و غير مسموح بكتابه رموز خاصه .</span>
+                            </div>
+                        </div>
+
+                        <div id="recap" style="display:none"><div class="g-recaptcha" data-sitekey="@System.Configuration.ConfigurationManager.AppSettings["RecaptchaSiteKey"]"></div></div>
+
+
+                        @if (Model != null)
+                        {
+                            String strFileDesc = "filedesc";
+                            int FileCount = 0;
+                            if (Model.Attachment != null)
+                            {
+                                foreach (TaskManagementModel.Attachment attachment in Model.Attachment)
+                                {
+                                    FileCount++;
+                                    <div class="form-group">
+                                        <div class="col-sm-10">
+                                            <div class="row">
+                                                <label class="col-sm-2 control-label text-right">الملف:</label>
+                                            </div>
+                                            <div class="row">
+                                                <label class="col-sm-2 control-label text-right">
+                                                    <span id='@strFileDesc@FileCount'>@attachment.Description</span>
+
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            }
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+            @*حفظ*@
+            <div class="form-actions text-right">
+                <input type="button" value="إضافة مهمة" id="btnSave" class="btn btn-primary">&nbsp;
+                <a href="/company/" value="إلغاء" class="btn btn-default">الغاء</a>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <input type="hidden" id="FilesDescription" name="FilesDescription" />
+    <input type="hidden" id="RemovedFiles" name="RemovedFiles" />
+
+}
+
+
+
+<script>
+    $(function () {
+
+
+        $("#TimeUnitID").change(function (evt) {
+            debugger
+            var val = $(this).val();
+            if ($(this).val() == "") {
+                $('#TimeExpectedID').rules("remove");
+                $('#TimeExpectedID').removeClass("{required:true,messages:{required:'الوقت المقدر مطلوب'}}");
+                $("#ExpectedTimeValidation").remove();
+                $('#TimeExpectedID').removeClass("input-validation-error");
+                $('#TimeExpectedID').val("");
+                $('#TimeExpectedID').attr("disabled", "disabled");
+            }
+            else {
+                $('#TimeExpectedID').removeAttr("disabled");
+                $('#TimeExpectedID').rules("add", { required: true, messages: { required: "الوقت المقدر مطلوب" } });
+            }
+        });
+
+        $("#TitleValidation").text("");
+        $(".form-control").removeClass("input-validation-error");
+
+        
+        ///////////////////////////
+        
+
+        if ('@((Model == null) && (TempData["Saved"] != null) && (bool)TempData["Saved"] && (TempData["RecaptchCheck"] != null) && (bool)TempData["RecaptchCheck"])' == 'True') {
+            debugger
+            Notify("success", "تم الحفظ بنجاح", 3000);
+            //window.location.href = "/Company/Company/Index";
+        }
+
+        if ('@((Model == null) && (TempData["Saved"] != null) && (bool)TempData["Saved"] && (TempData["RecaptchCheck"] == null))' == 'True') {
+            debugger
+            Notify("success", "تم الحفظ بنجاح", 3000);
+            //window.location.href = "/Company/Company/Index";
+        }
+
+        if ('@((Model != null) && (TempData["RecaptchCheck"] != null) && !(bool)TempData["RecaptchCheck"])' == 'True') {
+            Notify("danger", "تم حفظ بيانات المهمة ولم يتم حفظ المرفقات يرجى تعديل المهمة والضغط على رمز التحقق", 6000);
+            //setTimeout(function () { window.location.href = "/Company/Company/Index"; }, 3000);
+
+        }
+
+        if ('@((Model != null) && (TempData["Saved"] != null) && !(bool)TempData["Saved"])' == 'True')
+            Notify("danger", "لم يتم الحفظ بنجاح", 3000);
+
+        // Add Calendar To TextBoxs .
+
+
+        //Check Date Greg OR Hijrii
+        var Isgreg = "@(MvcApplication.IsGregDate)";
+        if (Isgreg == "True") {
+
+            $('#dtEndDate').datepicker($.datepicker.regional["ar-SA"] = {
+                changeMonth: true, // True if month can be selected directly, false if only prev/next
+                changeYear: true,
+                yearRange: '1900:2029'
+            });
+
+            $('#dtStartDate').datepicker($.datepicker.regional["ar-SA"] = {
+                changeMonth: true, // True if month can be selected directly, false if only prev/next
+                changeYear: true,
+                yearRange: '1900:2029'
+
+            });
+        }
+        else {
+
+            $('#dtEndDate,#dtStartDate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+            });
+        }
+        // Change Color Of Priority .
+        $('#PriorityID').change(function () {
+            $('.strenth-colors').css("width", ($(this).find(":selected").attr("value") * 22) + "px");
+        });
+
+        var fileCount = '@((Model == null || Model.Attachment == null) ? 0 : Model.Attachment.Count())';
+
+        // Add Files To Attachments Table .
+        //$("#btnAddFile").click(function () {
+        function AddFile() {
+            debugger
+            $("#recap").show();
+            $('#btnCancelFile').hide();
+            $("#errorUploadFile").hide();
+            $("#errorDescFile").hide();
+
+            // To Check Jquery Validation 350 char. .
+            if ($('#txtFileDesc').hasClass('input-validation-error')) {
+                $('#errorDescFile').show();
+                return false;
+            }
+
+            // To Check If User Select File Or Not .
+            if ($("#TaskFileUploader").val() == "") {
+                $("#errorUploadFile").show();
+
+            }
+            else {
+                debugger
+                fileCount++;
+                console.log(fileCount);
+                // Create New Input Type File To Get Values In Controller By Request .
+                var real = $("#TaskFileUploader");
+                var cloned = real.clone(true);
+
+                real.hide().attr("id", "TaskFileUploader" + fileCount);
+                cloned.insertAfter(real);
+
+                $(".AttachedFiles").append('<div class="form-group">' +
+                    '<label class="col-sm-2 control-label text-right">الملف:</label>' +
+                    ' <div class="col-sm-6">' +
+                    '<a href="javascript:void(0);" style="font-size:15px;">' + $("#fileName").html() + '</a>' +
+                    '</div>' +
+                    ' <div class="col-sm-2">' +
+                    '<a href="javascript:void(0);" class="Delete-icon deleteFile NewFile" title="حذف" style="float:left;"></a>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                    '<label class="col-sm-2 control-label text-right">الوصف:</label>' +
+                    ' <div class="col-sm-6">' +
+                    '<div id="filedesc' + fileCount + '" class="Description">' + $("#txtFileDesc").val() + '</div>' +
+                    '</div>' +
+                    '</div>');
+
+                $("#filedesc" + fileCount).after(real);
+
+                $("#fileName").hide();
+                $("#fileName").html("");
+                $("#UploadFile").show();
+                $("#txtFileDesc").val("");
+            }
+        }
+
+        // To View Browse Window .
+        $("#UploadFile").click(function () {
+            debugger
+            $("#TaskFileUploader").click();
+        });
+
+      
+
+        // To Detect If User Select File Or Not .
+        $("#TaskFileUploader").change(function (evt) {
+            console.log(fileCount);
+            debugger
+            $("#errorUploadFile").hide();
+
+            if ($(this).val() != null) {
+               // readFile(evt);
+                debugger
+                var files = evt.target.files;
+                var Extentions = "@System.Configuration.ConfigurationManager.AppSettings["FileExtentions"]";
+                var size = "@System.Configuration.ConfigurationManager.AppSettings["maxfileSize"]";
+                var fileType = "";
+                var picReader = new FileReader();
+                if (files.length > 0) {
+                    picReader.readAsBinaryString(files[0]);
+                    var fileNameIndex = $(this).val().lastIndexOf("\\") + 1;
+                    $("#fileName").show();
+                    $("#fileName").html($(this).val().substr(fileNameIndex));
+                    $("#UploadFile").hide();
+                    $('#btnCancelFile').show();
+                }
+                picReader.onload = function (e) {
+
+                    fileType = e.target.result.trim().substring(0, 10);
+
+                    if (files.length > 0) {
+                        var ext = files[0].name.split('.').pop().toLowerCase();
+
+                        var bReturn = CheckIsValid(Extentions, ext, fileType);
+                        if (bReturn == false) {
+                            $('.errorUploadFile').text('غير مسموح بنوع الملف').css('color', 'red');
+                            $('#btnCancelFile').hide();
+                            $('#TaskFileUploader').val('');
+                            $('.errorUploadFile').show();
+                            $("#fileName").hide();
+                            $("#fileName").html("");
+                            $("#UploadFile").show();
+                            $("#txtFileDesc").val("");
+                            return false;
+                        }
+                        else if (files[0].size > size) {
+                            $('.errorUploadFile').text('يجب ان لا يتجاوز حجم الملف 4 ميجا').css('color', 'red');
+                            $('#btnCancelFile').hide();
+                            $('#TaskFileUploader').val('');
+                            $('.errorUploadFile').show();
+                            $('#btnCancelFile').hide();
+                            $("#fileName").hide();
+                            $("#fileName").html("");
+                            $("#UploadFile").show();
+                            $("#txtFileDesc").val("");
+                            return false;
+                        }
+                        else {
+                            var reader = new window.FileReader();
+                            reader.onload = (function () {
+                                return function (e) {
+                                    $('.errorUploadFile').text('');
+                                    AddFile();
+                                    $('.errorUploadFile').text('تم رفع الملف بنجاح').css('color', 'green');
+                                    $('.errorUploadFile').show();
+                                    //$('#hiddenfileName').val(files[0].name);
+                                    //$('#trUploadvalidation')[0].innerHTML = '';
+                                };
+                            })(files[0]);
+                            reader.readAsDataURL(files[0]);
+                        }
+                    }
+                };
+
+
+                $.validator.addMethod("maxfilesize", function (value, element) {
+                    return element.files[0].size < 1024 * 1024 * 2;
+                }, 'حجم هذا الملف لايمكن ان يتجاوز 2 ميجابايت');
+
+                $.validator.addMethod("limitfiletype", function (value, element) {
+
+                    var ext = value.split('.').pop().toLowerCase();
+                    return ext == 'jpg' || ext == 'jpeg' || ext == 'png';
+                }, 'امتداد هذا الملف غير مسموح به');
+
+            }//if
+
+        });
+        function CheckIsValid(Extentions, ext, fileType) {
+            debugger
+            var valid = false;
+
+            if (Extentions.indexOf(ext) >= 0) {
+                //for pdf, PDF
+                if (fileType.indexOf("%PDF") >= 0) {
+                    valid = true;
+                }
+                    //DOCX, PPTX, XLSX
+                else if (fileType.indexOf("PK") >= 0) {
+                    valid = true;
+                }
+                    //DOC, DOT, PPS, PPT, XLA, XLS, WIZ
+                else if (fileType.indexOf("ÐÏ.à¡±.á") >= 0 || fileType.indexOf("ÐÏà¡±á") >= 0) {
+                    valid = true;
+                }
+                    //JFIF, JPE, JPEG, JPG
+                else if (fileType.indexOf("ÿØÿà") >= 0) {
+                    valid = true;
+                }
+                    //PNG
+                else if (fileType.indexOf("PNG") >= 0) {
+                    valid = true;
+                }
+
+            }
+            else { valid = false; }
+            return valid;
+        }
+        // Remove File From Attachments Table And Add It Into Hidden Filed To Delete File From Server And DB in Controller.
+        $('.deleteFile').live("click", function () {
+
+            if (!$(this).hasClass("NewFile"))
+                $("#RemovedFiles").val($("#RemovedFiles").val() + "," + $(this).prev().html());
+            $("#attach-files").find('tbody').append('<p class="DeleteSuccess" style="color:green">تم الحذف بنجاح</p>');
+            $(".DeleteSuccess").hide().fadeIn(1000).fadeOut(3000);
+            $(this).parent().parent().next().remove();
+            $(this).parent().parent().remove();
+
+        });
+
+        //$("#btnSave").click(function () {
+        //    debugger
+        //    var dataForm = $("#SaveData").serialize();
+        //    //var model = {
+        //    //    Name: "Shyju",
+        //    //    Location: "Detroit",
+        //    //    Interests: ["Code", "Coffee", "Stackoverflow"]
+        //    //};
+
+        //    $('#SaveData').submit();
+
+        //    debugger
+        //    event.preventDefault();
+
+        //    $("#dateError").hide();
+
+        //    $("#errorUploadFile").hide();
+
+        //    $('#ExpectedTimeError').hide();
+
+        //    $("#FilesDescription").val("");
+
+        //    if ($("#EmpID").val() != ""
+        //        && (
+        //            $("#dtStartDate").val() == ''
+        //                || $("#dtEndDate").val() == '')) {
+
+        //        $("#dateError").html(" يجب تحديد تاريخ البداية و النهاية").show();
+        //        return false;
+        //    }
+        //    // Add File Description Into Hidden Field .
+        //    for (var i = 0; i < $(".Description").length; i++) {
+        //        $("#FilesDescription").val($("#FilesDescription").val() + "," + $(".Description").eq(i).html());
+        //    }
+
+        //    debugger
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/Task/CheckDate",
+        //        async: false,
+        //        data: {
+        //            "dtStartDate": $('#dtStartDate').val(),
+        //            "dtEndDate": $('#dtEndDate').val()
+        //        },
+        //        success: function (data) {
+        //            debugger
+        //            if (data != "valid")
+        //                $('#dateError').html(data).show();
+
+        //            else if ($('#dtStartDate').val() != '' && $('#dtEndDate').val() != '' && $('#TimeExpectedID').val() != '' && $('#TimeUnitID').val() != '') {
+        //                $.ajax({
+        //                    type: "POST",
+        //                    url: "/Task/DateDifference",
+        //                    async: false,
+        //                    data: {
+        //                        "dtStartDate": $('#dtStartDate').val(),
+        //                        "dtEndDate": $('#dtEndDate').val(),
+        //                        "iTimeCount": $('#TimeExpectedID').val(),
+        //                        "iTimeUnit": $('#TimeUnitID').find(":selected").attr("value")
+        //                    },
+        //                    success: function (sdata) {
+        //                        debugger
+        //                        if (sdata.toLowerCase() == "false") {
+        //                            debugger
+        //                            $('#ExpectedTimeError').html('الوقت المقدر أكبر من الوقت المتاح').show();
+        //                        }
+        //                        else {
+        //                            debugger
+        //                            submit = true;
+        //                        }
+        //                    },
+        //                    complete: function (data) {
+        //                        debugger
+        //                        if ($("#SaveData").valid() && submit) {
+        //                            $("#btnSave").attr("disabled", "disabled");
+        //                            $("#SaveData").submit();
+                                    
+        //                        }
+        //                    }
+        //                });
+        //            }
+        //            else {
+        //                submit = true;
+        //            }
+        //        },
+        //        complete: function (data) {
+        //            debugger
+        //            if ($("#SaveData").valid() && submit) {
+        //                $("#btnSave").attr("disabled", "disabled");
+        //                //$(this).attr("disabled", "disabled");
+        //                $("#SaveData").submit();
+        //            }
+        //        }
+        //    });
+
+        //    if ($('#SaveData').valid()) {
+        //        $.ajax({
+        //            type: "POST",
+        //            url: "/Task/SaveTask",
+        //            async: false,
+        //            data: dataForm,
+        //            beforeSend: function () {
+        //                // Doing some loading gif stuff
+        //            },
+        //            success: function (result) {
+        //                debugger
+        //                alert("success")
+
+        //                Notify("success", "تم الحفظ بنجاح", 3000);
+        //                window.location.href = "/Company/Company/Index";
+        //            }
+        //            //, complete: function () {
+        //            //    debugger
+        //            //    $.validator.unobtrusive.parse('form');
+        //            //    // And so on.
+        //            //}
+        //        });
+        //    }
+
+
+
+        //});
+
+
+        // Save Task .
+        $("#btnSave").click(function () {
+            debugger
+            //$("#SaveData").attr("disabled", "disabled");
+            var submit = false;
+            if ($("#Titletext").val() == "") {
+                $("#TitleValidation").text("يجب ان لا تترك الخانات فارغة");
+                $("#Titletext").addClass("input-validation-error");
+            }
+
+            $("#dateError").hide();
+
+            $("#errorUploadFile").hide();
+
+            $('#ExpectedTimeError').hide();
+
+            $("#FilesDescription").val("");
+
+            if ($("#EmpID").val() != ""
+                && (
+                    $("#dtStartDate").val() == ''
+                        || $("#dtEndDate").val() == '')) {
+
+                $("#dateError").html(" يجب تحديد تاريخ البداية و النهاية").show();
+                return false;
+            }
+
+            // Add File Description Into Hidden Field .
+            for (var i = 0; i < $(".Description").length; i++) {
+                $("#FilesDescription").val($("#FilesDescription").val() + "," + $(".Description").eq(i).html());
+            }
+
+            debugger
+            $.ajax({
+                type: "POST",
+                url: "/Task/CheckDate",
+                async: false,
+                data: {
+                    "dtStartDate": $('#dtStartDate').val(),
+                    "dtEndDate": $('#dtEndDate').val()
+                },
+                success: function (data) {
+                    debugger
+                    if (data != "valid")
+                        $('#dateError').html(data).show();
+
+                    else if ($('#dtStartDate').val() != '' && $('#dtEndDate').val() != '' && $('#TimeExpectedID').val() != '' && $('#TimeUnitID').val() != '') {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Task/DateDifference",
+                            async: false,
+                            data: {
+                                "dtStartDate": $('#dtStartDate').val(),
+                                "dtEndDate": $('#dtEndDate').val(),
+                                "iTimeCount": $('#TimeExpectedID').val(),
+                                "iTimeUnit": $('#TimeUnitID').find(":selected").attr("value")
+                            },
+                            success: function (sdata) {
+                                debugger
+                                if (sdata.toLowerCase() == "false") {
+                                    debugger
+                                    $('#ExpectedTimeError').html('الوقت المقدر أكبر من الوقت المتاح').show();
+                                }
+                                else {
+                                    debugger
+                                    submit = true;
+                                }
+                            },
+                            complete: function (data) {
+                                debugger
+                                if ($("#SaveData").valid() && submit) {
+                                    $("#btnSave").attr("disabled", "disabled");
+                                    $("#SaveData").submit();
+                                    //$('form#id').submit(function () {
+                                    //    $(this).find('input[type=submit]').attr('disabled', 'disabled');
+                                    //});
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        submit = true;
+                    }
+                },
+                complete: function (data) {
+                    debugger
+                    if ($("#SaveData").valid() && submit) {
+                        $("#btnSave").attr("disabled", "disabled");
+                        //$(this).attr("disabled", "disabled");
+                        $("#SaveData").submit();
+                    }
+                }
+            });
+            //if ($("#SaveData").valid() && submit) {
+            //    $(this).attr("disabled", "disabled");
+            //    $("#SaveData").submit();
+            //}
+        });
+
+        //Validation rules.
+        $.validator.addMethod("regxVldStr350", function (value, element) {
+            return this.optional(element) || /^[a-zA-Z0-9\u0600-\u06ff,./\s_-]{1,350}$/.test(value);
+        }, '<br />يجب عدم استخدام رموز خاصة');
+
+        //add validation rule .
+        $('#txtFileDesc').rules("add", { regxVldStr350: true });
+
+        $('#btnCancelFile').click(function () {
+            $('#btnCancelFile').hide();
+            $('#TaskFileUploader').val('');
+            $("#fileName").html('');
+            $("#UploadFile").show();
+            $("#attach-files").find('tbody').append('<p class="DeleteSuccess" style="color:green">تم الحذف بنجاح</p>');
+            $(".DeleteSuccess").hide().fadeIn(1000).fadeOut(3000);
+        });
+
+
+
+        //$("#CopySubmit").click(function () {
+        //    debugger;
+        //    console.log('button Clicked');
+        //});
+
+
+        CopyDiv = new Modal({
+            title: 'نسخ من مهمة اخرى', //title of the popup
+            message: '', // message text  notes: overrided if there're  id form
+            type: '',  // type of the modal 'alert', 'confirm' or 'form'
+            id: 'copyModal',  // id of the form to show it on the modal
+            onAccept: function () { e },// call back runs after modal accept,
+            onCancel: function () { e } // call back runs after modal cancel default  is false , closes the modal.
+        });
+
+
+        //var CopyDiv = new Modal({
+        //    title: 'نسخ من مهمة اخرى', //title of the popup
+        //    message: 'اختر مهمة ', // message text  notes: overrided if there're  id form
+        //    type: '',  // type of the modal 'alert', 'confirm' or 'form'
+        //    id: 'copyModal',  // id of the form to show it on the modal
+        //    onAccept: function () {
+        //        $.ajax({
+        //            type: "POST",
+        //            url: "/Task/GetTask",
+        //            data: {
+        //                "taskId": $('#CopyTask').val(),
+        //            },
+        //            success: function (data) {
+        //                console.log(data);
+        //                $('#Titletext').val(data.Title);
+        //                $('#Description').val(data.Description);
+        //            }
+        //        });
+        //        CopyDiv.hide();
+        //    },// call back runs after modal accept,
+        //    onCancel: function () {
+        //        CopyDiv.hide();
+        //    } // call back runs after modal cancel default  is false , closes the modal.
+        //});
+
+        // Copy From Old Task .
+        $("#CopyFromOldTask").click(function () {
+            CopyDiv.show();
+        });
+        $("#btnCancel").click(function () {
+            CopyDiv.hide();
+        });
+
+        $('#btnConfirm').click(function () {
+            $.ajax({
+                type: "POST",
+                url: "/Task/GetTask",
+                data: {
+                    "taskId": $('#CopyTask').val(),
+                },
+                success: function (data) {
+                    console.log(data);
+                    $('#Titletext').val(data.Title);
+                    $('#Description').val(data.Description);
+                }
+            });
+            CopyDiv.hide();
+
+        });
+    });
+
+</script>
+
+

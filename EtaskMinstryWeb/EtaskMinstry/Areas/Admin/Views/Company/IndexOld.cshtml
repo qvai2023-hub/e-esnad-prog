@@ -1,0 +1,274 @@
+﻿@using EtaskMinstry
+@using EtaskMinstry.AppCode
+@model IEnumerable<EtaskMinstry.Areas.Admin.Models.CompanyVM>
+@{
+    ViewBag.Title = " إدارة الشركات";
+}
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<h3 class="paragraph-title">
+    إدارة الشركات
+    <div class="page-options">
+        <a href="javascript:;" id="btnSearchToggle" class="page-options-link2"> بحث فى الشركات</a>
+        @*<a href="/Company/Employee/AddEdit?id=0" id="btnAdd" class="page-options-link">إضافة</a>*@
+        @*<a href="/Admin/Company/AddEdit?id=0" class="page-options-link" id="btnAdd">إضافة</a>*@
+        @Html.EncodedActionLink("إضافة", "AddEdit", "Company", "Admin", new { id = 0 }, new { @class = "page-options-link" })
+
+    </div>
+</h3>
+<div id="SearchDiv" style="display: none">
+    <table width="100%" id="SearchTbl" border="0" cellspacing="0" class="fav-grid tab1" style="display: table; ">
+
+        <tbody>
+            <tr>
+                <td colspan="4">
+                    <label class="frm-lbl">اسم الشركة:</label>
+                    @Html.TextBox("strName", "", new { @class = "form-textbox required" })<br />
+
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3">
+                    <label class="frm-lbl">السجل التجاري:</label>
+                    @Html.TextBox("strCommercialRegister", "", new { @class = "form-textbox" })
+                    <br />
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3">
+                    <label class="frm-lbl">البريد الالكتروني:</label>
+                    @Html.TextBox("strEmailSearch", "", new { @class = "form-textbox" })
+                    <br />
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" class="go-left">
+                    <div>
+                        <input type="button" id="btnSearch" value="بحث" />
+                        <input name="Submit0" id="btnShowAll" type="button" class="submit-btn" value="عرض الكل">
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+@if (Model.Any())
+{
+    <div id="list">
+
+        @{
+            var grid = new WebGrid(Model);
+            var gridColumns = new List<WebGridColumn>();
+
+            if (Model.All(i => i.IsDeleted == false))
+            {
+                gridColumns.Add(grid.Column("Name", "الأسم", @<text>@Html.EncodedActionLink((string)item.Name, "Details", "Company", "Admin", new { id = item.Id }, null)</text>, "FirstColumn"));
+                gridColumns.Add(grid.Column("Phone", "الهاتف", @<text>@item.Phone</text>, "SecondColumn"));
+                gridColumns.Add(grid.Column("Email", "البريد الالكتروني", @<text>@item.Email</text>, "ThirdColumn"));
+                gridColumns.Add(grid.Column("CommercialRegister", "السجل التجاري", @<text>@item.CommercialRegister</text>, "FourthColumn"));
+                gridColumns.Add(grid.Column("IsActive", "الحالة", @<text>@(item.IsActive == true ? Html.Raw("<input type='checkbox' id='" + @item.Id + "' class='SetIsactive' checked />") : Html.Raw("<input id='" + @item.Id + "' type='checkbox' class='SetIsactive'  />")) </text>, "FifthColumn"));
+                gridColumns.Add(grid.Column("Edit", "تعديل",@<text><span class="iconbox has-tip" title="" data-original-title="تعديل">
+                @*   <a style="color:white" href="/Admin/Company/AddEdit?id=@item.Id"><i class="icon-edit-1"></i></a>*@
+                @Html.EncodedActionLink("", "AddEdit", "Company", "Admin", new { id = item.Id }, new { @class = "icon-edit-1", style = "color:white;text-decoration:none;" })
+            </span></text>));
+                gridColumns.Add(grid.Column("Delete", "حذف",@<text><span class="iconbox has-tip deleteEmp" title="" data-original-title="حذف">
+                <i href="javascript:void(0);" class="icon-trash-1" id="@item.Id"></i>
+            </span></text>));
+            }
+        }
+        @grid.GetHtml(columns: gridColumns.ToArray(),
+                      tableStyle: "fav-grid tab1",
+                      headerStyle: "table-alternat-header",
+                      footerStyle: "pagerbar",
+                      mode: WebGridPagerModes.All,
+                      numericLinksCount: 5,
+                      firstText: "الاول",
+                      previousText: "السابق",
+                      nextText: "التالى",
+                      lastText: "الاخير"
+
+             )
+    </div>
+            }
+            else
+            {
+                <table width="100%" border="0" cellspacing="0" class="fav-grid tab1" style="display: table;">
+                    <tbody>
+                        <tr class="table-alternat-header">
+                            <td>
+                                المهمة
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="1" style="text-align: center">
+                                لا يوجد بيانات
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+
+
+<script>
+    $(function () {
+
+        $(".SetIsactive").live("change", function () {
+            var id = $(this).attr("id");
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("SetIsActive")',
+                dataType: 'json',
+                data: { "Id": id }
+            });
+        });
+
+        //$("#btnSearchToggle").click(function () {
+
+        //    $("#SearchDiv").slideToggle("normal");
+        //});
+
+        $("#btnSearch").on("click", function (e) {
+            e.preventDefault();
+            Search();
+        });
+
+        $("#btnShowAll").on("click", function (e) {
+            debugger
+            e.preventDefault();
+            Clear();
+            Search();
+        });
+
+        $(".icon-trash").live('click', function () {
+            alert();
+        })
+
+    });
+
+    //var ele = "";
+    //$(".deleteEmp").on("click", function () {
+    //    ele = $(this).closest('tr');
+    //});
+
+    //$(".modal_btn_accept").live("click", function () {
+    //    ele.hide();
+    //    $('.modal').hide();
+    //});
+
+
+    function Search() {
+        var name = $("#strName").val();
+        var email = $("#strEmailSearch").val();
+        var commercialRegister = $("#strCommercialRegister").val();
+        if (ValidateRegExp($("#strName")) && ValidateRegExp($("#strCommercialRegister")) && ValidateEmail($("#strEmailSearch"))) {
+            $.ajax({
+                type: 'Post',
+                url: '@Url.Action("Search")',
+                dataType: 'html',
+                data: { "Name": name, "Email": email, "CommercialRegister": commercialRegister },
+                success: function (data) {
+                    $("#list").html(data);
+                }
+            });
+        }
+    }
+
+    function Clear() {
+        $("#strName").val("").css("background-color", "#fff");
+        $("#strEmailSearch").val("").css("background-color", "#fff");
+        $("#strCommercialRegister").val("").css("background-color", "#fff");
+    }
+
+    function ValidateRegExp(searchString){
+        var regx = "^[a-zA-Z0-9\u0600-\u06ff,./\s _-]{0,350}$";
+        var match = ($(searchString).val()).match(regx);
+        if (match == null) {
+            $(searchString).css("background-color", "#ffeeee")
+            return false;
+        } else {
+            $(searchString).css("background-color", "#fff")
+            return true;
+        }
+    }
+
+    function ValidateEmail(email) {
+        var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (re.test($(email).val()) || $(email).val() == "") {
+            $(email).css("background-color", "#fff")
+            return true;
+        } else {
+            $(email).css("background-color", "#ffeeee")
+            return false;
+        }
+
+    }
+
+</script>
+
+<style>
+    #list .fav-grid {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    #list td, #list th {
+        text-align: center;
+    }
+
+    .FirstColumn {
+        width: 20%;
+    }
+
+    .SecondColumn {
+        width: 15%;
+    }
+
+    .ThirdColumn {
+        width: 20%;
+    }
+
+    .FourthColumn {
+        width: 20%;
+    }
+
+    .FifthColumn {
+        width: 10%;
+    }
+
+    .table {
+        display: table;
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+    }
+
+        .table tr td {
+            border-bottom: solid 1px #CCC;
+            padding: 5px;
+        }
+
+    .tblHeader {
+        background-repeat: repeat-x;
+        font-weight: bold;
+        text-align: center;
+        height: 25px;
+        border: 0;
+    }
+
+        .tblHeader th {
+            padding-top: 4px;
+        }
+
+            .tblHeader th a {
+                color: #FFF !important;
+                padding-top: 4px;
+            }
+
+    .pagerbar {
+        text-align: center;
+    }
+</style>

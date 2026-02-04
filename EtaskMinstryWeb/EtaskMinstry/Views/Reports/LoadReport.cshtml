@@ -1,0 +1,18 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutReport.cshtml";
+}
+
+<div id="divrep" style="    width: 95%;height: 380px;text-align: center;margin-right: 10px;">@*style="width: 100%; height: 800px; text-align: center"*@
+    <iframe id="ifrmTasksReport"  src="@ViewBag.Src"
+     style="width: 107%; margin-right: -20px; height: 100%; direction: rtl; text-align: center;" frameborder="0"></iframe>
+</div>
+
+
+<script>
+    $(window).load(function () {
+        $('#ifrmTasksReport').contents().find("div [style*='overflow']:eq(1)").css("overflow", "")
+      //  alert("sss");
+        //$("#Pf5ac46846308459c802dc83576d3532a_1_oReportDiv").css(" overflow-x", "scroll")
+       
+    });
+</script>
