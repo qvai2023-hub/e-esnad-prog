@@ -50,6 +50,7 @@ namespace TaskManagementModel
         
         private GenericRepository<sp_Attendance_Result> _sp_Attendance_Result;
         private GenericRepository<sp_EmployeePerformanceReport_Result> _sp_EmployeePerformanceReport_Result;
+        private GenericRepository<ActivityLog> _activityLogRepository;
 
         public UnitOfWork(String strConnectionString)
         {
@@ -429,6 +430,14 @@ namespace TaskManagementModel
             get
             {
                 return _sp_EmployeePerformanceReport_Result ?? (_sp_EmployeePerformanceReport_Result = new GenericRepository<sp_EmployeePerformanceReport_Result>(_context));
+            }
+        }
+
+        public GenericRepository<ActivityLog> ActivityLogRepository
+        {
+            get
+            {
+                return _activityLogRepository ?? (_activityLogRepository = new GenericRepository<ActivityLog>(_context));
             }
         }
         #endregion

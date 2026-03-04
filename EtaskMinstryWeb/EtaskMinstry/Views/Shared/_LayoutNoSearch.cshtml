@@ -843,7 +843,7 @@ else
     <script>
         //$(function() {
 
-        
+
         //if (matchMedia('only screen and (max-width: 480px)').matches) {
         //    // smartphone/iphone... maybe run some small-screen related dom scripting?
         //    alert("query")
@@ -856,5 +856,11 @@ else
         //}
         //})
     </script>
+
+    @* Attendance Tracker - Auto checkout on browser close/inactivity *@
+    @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany)
+    {
+        <script src="~/Scripts/attendance-tracker.js"></script>
+    }
 </body>
 </html>

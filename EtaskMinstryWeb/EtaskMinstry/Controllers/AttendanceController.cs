@@ -20,11 +20,13 @@ namespace EtaskMinstry.Controllers
     {
         private AttendanceReportService attendanceReportService;
         private SharedService sharedService;
+        private UnitOfWork _unitOfWork;
+
         public AttendanceController()
         {
-           attendanceReportService = new AttendanceReportService();
+            attendanceReportService = new AttendanceReportService();
             sharedService = new SharedService();
-
+            _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
         }
         public ActionResult AttendanceReport(int? companyId)
         {
@@ -141,5 +143,221 @@ namespace EtaskMinstry.Controllers
             return Json(lst, JsonRequestBehavior.AllowGet);
         }
 
+        #region Activity Tracking APIs
+
+        /// <summary>
+        /// Logs user activity and returns current attendance ID
+        /// Called periodically by JavaScript tracker
+        /// </summary>
+        [HttpPost]
+        public JsonResult LogActivity(string activityType)
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { success = false, message = "Not an employee session" });
+                }
+
+                int empId = MvcApplication.userData.userId;
+                var currentDate = DateTime.Now.Date;
+
+                // Get today's attendance record
+                var attendance = _unitOfWork.AttendanceRepository.Get(
+                    a => a.EmpId == empId &&
+                         a.CheckIn.HasValue &&
+                         a.CheckIn.Value.Year == currentDate.Year &&
+                         a.CheckIn.Value.Month == currentDate.Month &&
+                         a.CheckIn.Value.Day == currentDate.Day &&
+                         !a.CheckOut.HasValue
+                ).LastOrDefault();
+
+                if (attendance == null)
+                {
+                    return Json(new { success = false, message = "No active attendance" });
+                }
+
+                // Log activity
+                var activityLog = new ActivityLog
+                {
+                    EmpId = empId,
+                    AttendanceId = attendance.Id,
+                    LastActivityTime = DateTime.Now,
+                    ActivityType = activityType ?? "heartbeat"
+                };
+
+                _unitOfWork.ActivityLogRepository.Insert(activityLog);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, attendanceId = attendance.Id });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Beacon checkout - called when browser/tab closes
+        /// Uses sendBeacon API which works even during page unload
+        /// </summary>
+        [HttpPost]
+        public JsonResult BeaconCheckout(int? attendanceId, string lastActivityTime)
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { success = false });
+                }
+
+                int empId = MvcApplication.userData.userId;
+                Attendance attendance = null;
+
+                if (attendanceId.HasValue)
+                {
+                    attendance = _unitOfWork.AttendanceRepository.GetByID(attendanceId.Value);
+                }
+                else
+                {
+                    var currentDate = DateTime.Now.Date;
+                    attendance = _unitOfWork.AttendanceRepository.Get(
+                        a => a.EmpId == empId &&
+                             a.CheckIn.HasValue &&
+                             a.CheckIn.Value.Year == currentDate.Year &&
+                             a.CheckIn.Value.Month == currentDate.Month &&
+                             a.CheckIn.Value.Day == currentDate.Day &&
+                             !a.CheckOut.HasValue
+                    ).LastOrDefault();
+                }
+
+                if (attendance == null || attendance.CheckOut.HasValue)
+                {
+                    return Json(new { success = false });
+                }
+
+                // Parse last activity time if provided, otherwise use now
+                DateTime checkoutTime = DateTime.Now;
+                if (!string.IsNullOrEmpty(lastActivityTime))
+                {
+                    if (DateTime.TryParse(lastActivityTime, out DateTime parsedTime))
+                    {
+                        checkoutTime = parsedTime;
+                    }
+                }
+
+                attendance.CheckOut = checkoutTime;
+                _unitOfWork.AttendanceRepository.Update(attendance);
+                _unitOfWork.Save();
+
+                return Json(new { success = true });
+            }
+            catch
+            {
+                return Json(new { success = false });
+            }
+        }
+
+        /// <summary>
+        /// Inactivity checkout - called when user confirms leaving after inactivity warning
+        /// Sets checkout time to last recorded activity
+        /// </summary>
+        [HttpPost]
+        public JsonResult InactivityCheckout(int? attendanceId)
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { success = false });
+                }
+
+                int empId = MvcApplication.userData.userId;
+                Attendance attendance = null;
+
+                if (attendanceId.HasValue)
+                {
+                    attendance = _unitOfWork.AttendanceRepository.GetByID(attendanceId.Value);
+                }
+                else
+                {
+                    var currentDate = DateTime.Now.Date;
+                    attendance = _unitOfWork.AttendanceRepository.Get(
+                        a => a.EmpId == empId &&
+                             a.CheckIn.HasValue &&
+                             a.CheckIn.Value.Year == currentDate.Year &&
+                             a.CheckIn.Value.Month == currentDate.Month &&
+                             a.CheckIn.Value.Day == currentDate.Day &&
+                             !a.CheckOut.HasValue
+                    ).LastOrDefault();
+                }
+
+                if (attendance == null || attendance.CheckOut.HasValue)
+                {
+                    return Json(new { success = false });
+                }
+
+                // Get last activity time for this attendance
+                var lastActivity = _unitOfWork.ActivityLogRepository.Get(
+                    a => a.AttendanceId == attendance.Id
+                ).OrderByDescending(a => a.LastActivityTime).FirstOrDefault();
+
+                DateTime checkoutTime = lastActivity?.LastActivityTime ?? DateTime.Now;
+                attendance.CheckOut = checkoutTime;
+                _unitOfWork.AttendanceRepository.Update(attendance);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, checkoutTime = checkoutTime.ToString("HH:mm:ss") });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get current attendance status for JavaScript tracker
+        /// </summary>
+        [HttpGet]
+        public JsonResult GetCurrentAttendance()
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { hasAttendance = false }, JsonRequestBehavior.AllowGet);
+                }
+
+                int empId = MvcApplication.userData.userId;
+                var currentDate = DateTime.Now.Date;
+
+                var attendance = _unitOfWork.AttendanceRepository.Get(
+                    a => a.EmpId == empId &&
+                         a.CheckIn.HasValue &&
+                         a.CheckIn.Value.Year == currentDate.Year &&
+                         a.CheckIn.Value.Month == currentDate.Month &&
+                         a.CheckIn.Value.Day == currentDate.Day &&
+                         !a.CheckOut.HasValue
+                ).LastOrDefault();
+
+                if (attendance == null)
+                {
+                    return Json(new { hasAttendance = false }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new
+                {
+                    hasAttendance = true,
+                    attendanceId = attendance.Id,
+                    checkInTime = attendance.CheckIn?.ToString("HH:mm:ss")
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return Json(new { hasAttendance = false }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        #endregion
     }
 }
