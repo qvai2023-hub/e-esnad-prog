@@ -3066,6 +3066,25 @@ namespace QvLib
 			}
 		}
 		# endregion
+
+		# region ApplicationSettings
+		public class ApplicationSettings
+		{
+			/// <summary>
+			/// Checks if the application is configured as Telesak based on ApplicationName in web.config
+			/// Returns null if ApplicationName is not configured
+			/// </summary>
+			public static bool? IsApplicationTelesak()
+			{
+				string appName = ConfigurationManager.AppSettings["ApplicationName"];
+				if (string.IsNullOrEmpty(appName))
+				{
+					return null; // ApplicationName not configured
+				}
+				return appName.Equals("Telesak", StringComparison.OrdinalIgnoreCase);
+			}
+		}
+		# endregion
 	}
 
 	# region Mail

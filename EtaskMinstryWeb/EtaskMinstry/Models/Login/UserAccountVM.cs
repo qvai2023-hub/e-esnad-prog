@@ -111,6 +111,21 @@ namespace EtaskMinstry.Models.Login
 
             if (user != null)
             {
+                // Check if ApplicationName is configured and user belongs to this application
+                bool? appIsTelesak = QvLib.Security.ApplicationSettings.IsApplicationTelesak();
+                if (appIsTelesak == null)
+                {
+                    // ApplicationName not configured - reject login
+                    return false;
+                }
+
+                bool userIsTelesak = user.IsTelesak ?? false;
+                if (appIsTelesak.Value != userIsTelesak)
+                {
+                    // User does not belong to this application
+                    return false;
+                }
+
                 //employee
                 if (user.EmpID != null)
                 {
