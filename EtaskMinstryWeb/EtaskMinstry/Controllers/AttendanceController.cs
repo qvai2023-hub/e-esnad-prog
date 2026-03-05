@@ -1,4 +1,4 @@
-﻿using EtaskMinstry.AppCode;
+using EtaskMinstry.AppCode;
 using EtaskMinstry.Services;
 using System;
 using System.Collections.Generic;
@@ -146,6 +146,23 @@ namespace EtaskMinstry.Controllers
         #region Activity Tracking APIs
 
         /// <summary>
+        /// Helper method to get today's active attendance for an employee
+        /// </summary>
+        private Attendance GetTodayActiveAttendance(int empId)
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+
+            return _unitOfWork.AttendanceRepository.Get(
+                a => a.EmpId == empId &&
+                     a.CheckIn.HasValue &&
+                     a.CheckIn >= today &&
+                     a.CheckIn < tomorrow &&
+                     !a.CheckOut.HasValue
+            ).LastOrDefault();
+        }
+
+        /// <summary>
         /// Logs user activity and returns current attendance ID
         /// Called periodically by JavaScript tracker
         /// </summary>
@@ -160,17 +177,7 @@ namespace EtaskMinstry.Controllers
                 }
 
                 int empId = MvcApplication.userData.userId;
-                var currentDate = DateTime.Now.Date;
-
-                // Get today's attendance record
-                var attendance = _unitOfWork.AttendanceRepository.Get(
-                    a => a.EmpId == empId &&
-                         a.CheckIn.HasValue &&
-                         a.CheckIn.Value.Year == currentDate.Year &&
-                         a.CheckIn.Value.Month == currentDate.Month &&
-                         a.CheckIn.Value.Day == currentDate.Day &&
-                         !a.CheckOut.HasValue
-                ).LastOrDefault();
+                var attendance = GetTodayActiveAttendance(empId);
 
                 if (attendance == null)
                 {
@@ -220,15 +227,7 @@ namespace EtaskMinstry.Controllers
                 }
                 else
                 {
-                    var currentDate = DateTime.Now.Date;
-                    attendance = _unitOfWork.AttendanceRepository.Get(
-                        a => a.EmpId == empId &&
-                             a.CheckIn.HasValue &&
-                             a.CheckIn.Value.Year == currentDate.Year &&
-                             a.CheckIn.Value.Month == currentDate.Month &&
-                             a.CheckIn.Value.Day == currentDate.Day &&
-                             !a.CheckOut.HasValue
-                    ).LastOrDefault();
+                    attendance = GetTodayActiveAttendance(empId);
                 }
 
                 if (attendance == null || attendance.CheckOut.HasValue)
@@ -281,15 +280,7 @@ namespace EtaskMinstry.Controllers
                 }
                 else
                 {
-                    var currentDate = DateTime.Now.Date;
-                    attendance = _unitOfWork.AttendanceRepository.Get(
-                        a => a.EmpId == empId &&
-                             a.CheckIn.HasValue &&
-                             a.CheckIn.Value.Year == currentDate.Year &&
-                             a.CheckIn.Value.Month == currentDate.Month &&
-                             a.CheckIn.Value.Day == currentDate.Day &&
-                             !a.CheckOut.HasValue
-                    ).LastOrDefault();
+                    attendance = GetTodayActiveAttendance(empId);
                 }
 
                 if (attendance == null || attendance.CheckOut.HasValue)
@@ -329,16 +320,7 @@ namespace EtaskMinstry.Controllers
                 }
 
                 int empId = MvcApplication.userData.userId;
-                var currentDate = DateTime.Now.Date;
-
-                var attendance = _unitOfWork.AttendanceRepository.Get(
-                    a => a.EmpId == empId &&
-                         a.CheckIn.HasValue &&
-                         a.CheckIn.Value.Year == currentDate.Year &&
-                         a.CheckIn.Value.Month == currentDate.Month &&
-                         a.CheckIn.Value.Day == currentDate.Day &&
-                         !a.CheckOut.HasValue
-                ).LastOrDefault();
+                var attendance = GetTodayActiveAttendance(empId);
 
                 if (attendance == null)
                 {
