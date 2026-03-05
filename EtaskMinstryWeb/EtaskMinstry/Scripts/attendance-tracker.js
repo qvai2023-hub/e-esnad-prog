@@ -26,6 +26,7 @@
         heartbeatTimer: null,
         inactivityTimer: null,
         timeoutTimer: null,
+        countdownInterval: null,
         isModalShown: false,
         isInitialized: false
     };
@@ -288,18 +289,32 @@
         var remaining = CONFIG.INACTIVITY_TIMEOUT / 1000; // Convert to seconds
         var countdownEl = document.getElementById('inactivityCountdown');
 
-        var countdownInterval = setInterval(function () {
-            remaining--;
-            if (remaining <= 0 || !state.isModalShown) {
-                clearInterval(countdownInterval);
-                return;
-            }
+        // Store interval in state so it can be cleared
+        if (state.countdownInterval) clearInterval(state.countdownInterval);
 
+        state.countdownInterval = setInterval(function () {
+            remaining--;
+
+            // Update display first
             var minutes = Math.floor(remaining / 60);
             var seconds = remaining % 60;
             countdownEl.textContent =
                 (minutes < 10 ? '0' : '') + minutes + ':' +
                 (seconds < 10 ? '0' : '') + seconds;
+
+            // Then check if we should stop
+            if (remaining <= 0) {
+                clearInterval(state.countdownInterval);
+                // Trigger checkout when countdown reaches 0
+                console.log('[AttendanceTracker] Countdown reached 0, performing checkout');
+                performInactivityCheckout();
+                return;
+            }
+
+            if (!state.isModalShown) {
+                clearInterval(state.countdownInterval);
+                return;
+            }
         }, 1000);
     }
 
@@ -320,17 +335,26 @@
      * Perform checkout due to inactivity
      */
     function performInactivityCheckout() {
+        console.log('[AttendanceTracker] Performing checkout, attendanceId:', state.attendanceId);
         $.ajax({
             url: URLS.inactivityCheckout,
             type: 'POST',
             data: { attendanceId: state.attendanceId },
             dataType: 'json',
             success: function (response) {
+                console.log('[AttendanceTracker] Checkout response:', response);
                 if (response.success) {
                     hideInactivityModal();
                     showCheckoutNotification(response.checkoutTime);
                     cleanup();
+                } else {
+                    console.error('[AttendanceTracker] Checkout failed:', response.message || 'Unknown error');
+                    alert('فشل تسجيل الخروج: ' + (response.message || 'خطأ غير معروف'));
                 }
+            },
+            error: function (xhr, status, error) {
+                console.error('[AttendanceTracker] Checkout AJAX error:', status, error);
+                alert('فشل الاتصال بالخادم: ' + error);
             }
         });
     }
@@ -361,6 +385,7 @@
         if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
         if (state.inactivityTimer) clearTimeout(state.inactivityTimer);
         if (state.timeoutTimer) clearTimeout(state.timeoutTimer);
+        if (state.countdownInterval) clearInterval(state.countdownInterval);
         state.isInitialized = false;
     }
 
