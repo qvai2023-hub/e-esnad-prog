@@ -389,7 +389,17 @@
     window.AttendanceTracker = {
         init: init,
         logActivity: logActivity,
-        checkout: sendBeaconCheckout
+        checkout: sendBeaconCheckout,
+        config: CONFIG,
+        // For testing: update config and restart timers
+        setConfig: function(newConfig) {
+            if (newConfig.INACTIVITY_WARNING) CONFIG.INACTIVITY_WARNING = newConfig.INACTIVITY_WARNING;
+            if (newConfig.INACTIVITY_TIMEOUT) CONFIG.INACTIVITY_TIMEOUT = newConfig.INACTIVITY_TIMEOUT;
+            console.log('[AttendanceTracker] Config updated:', CONFIG);
+            // Restart inactivity timer with new values
+            resetInactivityTimer();
+            console.log('[AttendanceTracker] Timer restarted. Warning in ' + (CONFIG.INACTIVITY_WARNING/1000) + 's');
+        }
     };
 
 })();
