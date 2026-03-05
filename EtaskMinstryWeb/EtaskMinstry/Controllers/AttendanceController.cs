@@ -1,4 +1,4 @@
-﻿using EtaskMinstry.AppCode;
+using EtaskMinstry.AppCode;
 using EtaskMinstry.Services;
 using System;
 using System.Collections.Generic;
@@ -20,11 +20,13 @@ namespace EtaskMinstry.Controllers
     {
         private AttendanceReportService attendanceReportService;
         private SharedService sharedService;
+        private UnitOfWork _unitOfWork;
+
         public AttendanceController()
         {
-           attendanceReportService = new AttendanceReportService();
+            attendanceReportService = new AttendanceReportService();
             sharedService = new SharedService();
-
+            _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
         }
         public ActionResult AttendanceReport(int? companyId)
         {
@@ -141,5 +143,275 @@ namespace EtaskMinstry.Controllers
             return Json(lst, JsonRequestBehavior.AllowGet);
         }
 
+        #region Activity Tracking APIs
+
+        /// <summary>
+        /// Helper method to get today's active attendance for an employee
+        /// SQL Server 2008 R2 compatible - fetch then filter in memory
+        /// </summary>
+        private Attendance GetTodayActiveAttendance(int empId)
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+
+            // Fetch open attendance records for this employee, then filter by date in memory
+            var openAttendances = _unitOfWork.AttendanceRepository.Get(
+                a => a.EmpId == empId && a.CheckOut == null
+            ).ToList();
+
+            // Filter by today's date in memory (avoids LINQ to Entities date comparison issues)
+            return openAttendances
+                .Where(a => a.CheckIn.HasValue &&
+                           a.CheckIn.Value >= today &&
+                           a.CheckIn.Value < tomorrow)
+                .OrderByDescending(a => a.Id)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Logs user activity and returns current attendance ID
+        /// Called periodically by JavaScript tracker
+        /// Uses direct SQL for ActivityLog (not in EDMX model)
+        /// </summary>
+        [HttpPost]
+        public JsonResult LogActivity(string activityType)
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { success = false, message = "Not an employee session" });
+                }
+
+                int empId = MvcApplication.userData.userId;
+                var attendance = GetTodayActiveAttendance(empId);
+
+                if (attendance == null)
+                {
+                    return Json(new { success = false, message = "No active attendance" });
+                }
+
+                // Log activity using direct SQL (ActivityLog not in EDMX)
+                // Extract SQL connection string from EF connection string
+                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+                string connStr = entityBuilder.ProviderConnectionString;
+                using (var conn = new SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string sql = @"INSERT INTO ActivityLog (EmpId, AttendanceId, LastActivityTime, ActivityType)
+                                   VALUES (@EmpId, @AttendanceId, @LastActivityTime, @ActivityType)";
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@EmpId", empId);
+                        cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
+                        cmd.Parameters.AddWithValue("@LastActivityTime", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@ActivityType", activityType ?? "heartbeat");
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                return Json(new { success = true, attendanceId = attendance.Id });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Beacon checkout - called when browser/tab closes
+        /// Uses sendBeacon API which works even during page unload
+        /// </summary>
+        [HttpPost]
+        public JsonResult BeaconCheckout(int? attendanceId, string lastActivityTime)
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { success = false });
+                }
+
+                int empId = MvcApplication.userData.userId;
+                Attendance attendance = null;
+
+                if (attendanceId.HasValue)
+                {
+                    attendance = _unitOfWork.AttendanceRepository.GetByID(attendanceId.Value);
+                }
+                else
+                {
+                    attendance = GetTodayActiveAttendance(empId);
+                }
+
+                if (attendance == null || attendance.CheckOut.HasValue)
+                {
+                    return Json(new { success = false });
+                }
+
+                // Parse last activity time if provided, otherwise use now
+                DateTime checkoutTime = DateTime.Now;
+                if (!string.IsNullOrEmpty(lastActivityTime))
+                {
+                    if (DateTime.TryParse(lastActivityTime, out DateTime parsedTime))
+                    {
+                        checkoutTime = parsedTime;
+                    }
+                }
+
+                attendance.CheckOut = checkoutTime;
+                _unitOfWork.AttendanceRepository.Update(attendance);
+                _unitOfWork.Save();
+
+                return Json(new { success = true });
+            }
+            catch
+            {
+                return Json(new { success = false });
+            }
+        }
+
+        /// <summary>
+        /// Inactivity checkout - called when user confirms leaving after inactivity warning
+        /// Sets checkout time to last recorded activity
+        /// </summary>
+        [HttpPost]
+        public JsonResult InactivityCheckout(int? attendanceId)
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new { success = false, message = "غير مصرح - userData null أو شركة" });
+                }
+
+                int empId = MvcApplication.userData.userId;
+                Attendance attendance = null;
+
+                if (attendanceId.HasValue)
+                {
+                    attendance = _unitOfWork.AttendanceRepository.GetByID(attendanceId.Value);
+                }
+                else
+                {
+                    attendance = GetTodayActiveAttendance(empId);
+                }
+
+                if (attendance == null)
+                {
+                    return Json(new { success = false, message = "لا يوجد حضور نشط - attendanceId: " + attendanceId });
+                }
+
+                if (attendance.CheckOut.HasValue)
+                {
+                    return Json(new { success = false, message = "تم تسجيل الخروج مسبقاً في: " + attendance.CheckOut.Value.ToString("HH:mm:ss") });
+                }
+
+                // Get last activity time using direct SQL (ActivityLog not in EDMX)
+                // Extract SQL connection string from EF connection string
+                DateTime? lastActivityTime = null;
+                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+                string connStr = entityBuilder.ProviderConnectionString;
+                using (var conn = new SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string sql = "SELECT TOP 1 LastActivityTime FROM ActivityLog WHERE AttendanceId = @AttendanceId ORDER BY LastActivityTime DESC";
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
+                        var result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            lastActivityTime = (DateTime)result;
+                        }
+                    }
+                }
+
+                DateTime checkoutTime = lastActivityTime ?? DateTime.Now;
+                attendance.CheckOut = checkoutTime;
+                _unitOfWork.AttendanceRepository.Update(attendance);
+                _unitOfWork.Save();
+
+                return Json(new { success = true, checkoutTime = checkoutTime.ToString("HH:mm:ss") });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get current attendance status for JavaScript tracker
+        /// </summary>
+        [HttpGet]
+        public JsonResult GetCurrentAttendance()
+        {
+            try
+            {
+                if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
+                {
+                    return Json(new {
+                        hasAttendance = false,
+                        debug = "userData is null or isCompany",
+                        isNull = MvcApplication.userData == null,
+                        isCompany = MvcApplication.userData?.isCompany
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                int empId = MvcApplication.userData.userId;
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
+                // Debug: Get all attendance records for this employee (fetch then filter)
+                var allAttendance = _unitOfWork.AttendanceRepository.Get(
+                    a => a.EmpId == empId
+                ).ToList();
+
+                // Debug: Filter today's records in memory
+                var todayRecords = allAttendance
+                    .Where(a => a.CheckIn.HasValue &&
+                               a.CheckIn.Value >= today &&
+                               a.CheckIn.Value < tomorrow)
+                    .ToList();
+
+                var attendance = GetTodayActiveAttendance(empId);
+
+                if (attendance == null)
+                {
+                    return Json(new {
+                        hasAttendance = false,
+                        debug = "No active attendance found",
+                        empId = empId,
+                        today = today.ToString("yyyy-MM-dd"),
+                        totalRecords = allAttendance.Count,
+                        todayRecordsCount = todayRecords.Count,
+                        todayRecordsInfo = todayRecords.Select(r => new {
+                            id = r.Id,
+                            checkIn = r.CheckIn.HasValue ? r.CheckIn.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
+                            checkOut = r.CheckOut.HasValue ? r.CheckOut.Value.ToString("yyyy-MM-dd HH:mm:ss") : null
+                        })
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new
+                {
+                    hasAttendance = true,
+                    attendanceId = attendance.Id,
+                    checkInTime = attendance.CheckIn?.ToString("HH:mm:ss")
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new {
+                    hasAttendance = false,
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        #endregion
     }
 }

@@ -687,7 +687,11 @@ color: #767475 !important;
     <script src="~/Scripts/application.js"></script>
     <script src="~/Scripts/scripts.js"></script>
 
-
+    @* Attendance Tracker - Auto checkout on browser close/inactivity *@
+    @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany)
+    {
+        <script src="~/Scripts/attendance-tracker.js"></script>
+    }
 
 </body>
 

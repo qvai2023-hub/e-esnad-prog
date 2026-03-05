@@ -21,7 +21,7 @@
     </div>*@
 
 @*<div style="position: fixed; right: 50%; display: none; top: 30%; z-index: 100;" class="modal_template modal">*@
-    <div class="modal_template modal" tabindex="-1" role="dialog">
+    <div class="modal_template modal" tabindex="-1" role="dialog" style="display: none;">
         <div class="modal-dialog pop-box" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -125,7 +125,11 @@
             });
             this.show = function () {
                 debugger;
-                $('#' + my_modal_id).show();
+                // Add backdrop
+                if (!$('.modal-backdrop-custom').length) {
+                    $('body').append('<div class="modal-backdrop-custom" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1040;"></div>');
+                }
+                $('#' + my_modal_id).css({ 'display': 'block', 'z-index': '1050' });
                 switch (settings.type) {
                     case 'confirm':
                         modal_object.find('.modal_btn_cancel, .modal_btn_accept').show();
@@ -145,6 +149,7 @@
 
             this.hide = function () {
                 $('#' + my_modal_id).hide();
+                $('.modal-backdrop-custom').remove();
             }
 
             this.init();
@@ -152,7 +157,7 @@
 
         Modal.hide = function () {
             $('.modal').hide();
-
+            $('.modal-backdrop-custom').remove();
         }
         Modal.showMessage = function (options, message) {
             var settings =
