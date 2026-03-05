@@ -349,7 +349,14 @@
                     cleanup();
                 } else {
                     console.error('[AttendanceTracker] Checkout failed:', response.message || 'Unknown error');
-                    alert('فشل تسجيل الخروج: ' + (response.message || 'خطأ غير معروف'));
+                    // If already checked out, stop the tracker and hide modal
+                    if (response.message && response.message.indexOf('تم تسجيل الخروج مسبقاً') >= 0) {
+                        hideInactivityModal();
+                        cleanup();
+                        alert('ملاحظة: ' + response.message);
+                    } else {
+                        alert('فشل تسجيل الخروج: ' + (response.message || 'خطأ غير معروف'));
+                    }
                 }
             },
             error: function (xhr, status, error) {
