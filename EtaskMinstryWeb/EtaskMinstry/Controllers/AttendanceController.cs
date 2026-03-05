@@ -283,7 +283,7 @@ namespace EtaskMinstry.Controllers
             {
                 if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
                 {
-                    return Json(new { success = false });
+                    return Json(new { success = false, message = "غير مصرح - userData null أو شركة" });
                 }
 
                 int empId = MvcApplication.userData.userId;
@@ -298,9 +298,14 @@ namespace EtaskMinstry.Controllers
                     attendance = GetTodayActiveAttendance(empId);
                 }
 
-                if (attendance == null || attendance.CheckOut.HasValue)
+                if (attendance == null)
                 {
-                    return Json(new { success = false });
+                    return Json(new { success = false, message = "لا يوجد حضور نشط - attendanceId: " + attendanceId });
+                }
+
+                if (attendance.CheckOut.HasValue)
+                {
+                    return Json(new { success = false, message = "تم تسجيل الخروج مسبقاً في: " + attendance.CheckOut.Value.ToString("HH:mm:ss") });
                 }
 
                 // Get last activity time using direct SQL (ActivityLog not in EDMX)
