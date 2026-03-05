@@ -171,6 +171,7 @@ namespace EtaskMinstry.Controllers
         /// <summary>
         /// Logs user activity and returns current attendance ID
         /// Called periodically by JavaScript tracker
+        /// Uses direct SQL for ActivityLog (not in EDMX model)
         /// </summary>
         [HttpPost]
         public JsonResult LogActivity(string activityType)
@@ -190,17 +191,22 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "No active attendance" });
                 }
 
-                // Log activity
-                var activityLog = new ActivityLog
+                // Log activity using direct SQL (ActivityLog not in EDMX)
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                using (var conn = new SqlConnection(connStr))
                 {
-                    EmpId = empId,
-                    AttendanceId = attendance.Id,
-                    LastActivityTime = DateTime.Now,
-                    ActivityType = activityType ?? "heartbeat"
-                };
-
-                _unitOfWork.ActivityLogRepository.Insert(activityLog);
-                _unitOfWork.Save();
+                    conn.Open();
+                    string sql = @"INSERT INTO ActivityLog (EmpId, AttendanceId, LastActivityTime, ActivityType)
+                                   VALUES (@EmpId, @AttendanceId, @LastActivityTime, @ActivityType)";
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@EmpId", empId);
+                        cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
+                        cmd.Parameters.AddWithValue("@LastActivityTime", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@ActivityType", activityType ?? "heartbeat");
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return Json(new { success = true, attendanceId = attendance.Id });
             }
@@ -294,12 +300,25 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false });
                 }
 
-                // Get last activity time for this attendance
-                var lastActivity = _unitOfWork.ActivityLogRepository.Get(
-                    a => a.AttendanceId == attendance.Id
-                ).OrderByDescending(a => a.LastActivityTime).FirstOrDefault();
+                // Get last activity time using direct SQL (ActivityLog not in EDMX)
+                DateTime? lastActivityTime = null;
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                using (var conn = new SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string sql = "SELECT TOP 1 LastActivityTime FROM ActivityLog WHERE AttendanceId = @AttendanceId ORDER BY LastActivityTime DESC";
+                    using (var cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
+                        var result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            lastActivityTime = (DateTime)result;
+                        }
+                    }
+                }
 
-                DateTime checkoutTime = lastActivity?.LastActivityTime ?? DateTime.Now;
+                DateTime checkoutTime = lastActivityTime ?? DateTime.Now;
                 attendance.CheckOut = checkoutTime;
                 _unitOfWork.AttendanceRepository.Update(attendance);
                 _unitOfWork.Save();
