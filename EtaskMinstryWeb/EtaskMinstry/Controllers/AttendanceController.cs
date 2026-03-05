@@ -192,7 +192,10 @@ namespace EtaskMinstry.Controllers
                 }
 
                 // Log activity using direct SQL (ActivityLog not in EDMX)
-                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                // Extract SQL connection string from EF connection string
+                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+                string connStr = entityBuilder.ProviderConnectionString;
                 using (var conn = new SqlConnection(connStr))
                 {
                     conn.Open();
@@ -301,8 +304,11 @@ namespace EtaskMinstry.Controllers
                 }
 
                 // Get last activity time using direct SQL (ActivityLog not in EDMX)
+                // Extract SQL connection string from EF connection string
                 DateTime? lastActivityTime = null;
-                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+                string connStr = entityBuilder.ProviderConnectionString;
                 using (var conn = new SqlConnection(connStr))
                 {
                     conn.Open();
