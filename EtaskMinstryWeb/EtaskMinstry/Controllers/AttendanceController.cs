@@ -147,19 +147,25 @@ namespace EtaskMinstry.Controllers
 
         /// <summary>
         /// Helper method to get today's active attendance for an employee
+        /// SQL Server 2008 R2 compatible - fetch then filter in memory
         /// </summary>
         private Attendance GetTodayActiveAttendance(int empId)
         {
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
 
-            return _unitOfWork.AttendanceRepository.Get(
-                a => a.EmpId == empId &&
-                     a.CheckIn.HasValue &&
-                     a.CheckIn >= today &&
-                     a.CheckIn < tomorrow &&
-                     !a.CheckOut.HasValue
-            ).LastOrDefault();
+            // Fetch open attendance records for this employee, then filter by date in memory
+            var openAttendances = _unitOfWork.AttendanceRepository.Get(
+                a => a.EmpId == empId && a.CheckOut == null
+            ).ToList();
+
+            // Filter by today's date in memory (avoids LINQ to Entities date comparison issues)
+            return openAttendances
+                .Where(a => a.CheckIn.HasValue &&
+                           a.CheckIn.Value >= today &&
+                           a.CheckIn.Value < tomorrow)
+                .OrderByDescending(a => a.Id)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -328,18 +334,17 @@ namespace EtaskMinstry.Controllers
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
 
-                // Debug: Count all attendance records for this employee
+                // Debug: Get all attendance records for this employee (fetch then filter)
                 var allAttendance = _unitOfWork.AttendanceRepository.Get(
                     a => a.EmpId == empId
                 ).ToList();
 
-                // Debug: Get today's records
-                var todayRecords = _unitOfWork.AttendanceRepository.Get(
-                    a => a.EmpId == empId &&
-                         a.CheckIn.HasValue &&
-                         a.CheckIn >= today &&
-                         a.CheckIn < tomorrow
-                ).ToList();
+                // Debug: Filter today's records in memory
+                var todayRecords = allAttendance
+                    .Where(a => a.CheckIn.HasValue &&
+                               a.CheckIn.Value >= today &&
+                               a.CheckIn.Value < tomorrow)
+                    .ToList();
 
                 var attendance = GetTodayActiveAttendance(empId);
 
@@ -354,8 +359,8 @@ namespace EtaskMinstry.Controllers
                         todayRecordsCount = todayRecords.Count,
                         todayRecordsInfo = todayRecords.Select(r => new {
                             id = r.Id,
-                            checkIn = r.CheckIn?.ToString("yyyy-MM-dd HH:mm:ss"),
-                            checkOut = r.CheckOut?.ToString("yyyy-MM-dd HH:mm:ss")
+                            checkIn = r.CheckIn.HasValue ? r.CheckIn.Value.ToString("yyyy-MM-dd HH:mm:ss") : null,
+                            checkOut = r.CheckOut.HasValue ? r.CheckOut.Value.ToString("yyyy-MM-dd HH:mm:ss") : null
                         })
                     }, JsonRequestBehavior.AllowGet);
                 }
