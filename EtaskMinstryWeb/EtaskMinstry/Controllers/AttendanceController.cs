@@ -316,15 +316,48 @@ namespace EtaskMinstry.Controllers
             {
                 if (MvcApplication.userData == null || MvcApplication.userData.isCompany)
                 {
-                    return Json(new { hasAttendance = false }, JsonRequestBehavior.AllowGet);
+                    return Json(new {
+                        hasAttendance = false,
+                        debug = "userData is null or isCompany",
+                        isNull = MvcApplication.userData == null,
+                        isCompany = MvcApplication.userData?.isCompany
+                    }, JsonRequestBehavior.AllowGet);
                 }
 
                 int empId = MvcApplication.userData.userId;
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
+                // Debug: Count all attendance records for this employee
+                var allAttendance = _unitOfWork.AttendanceRepository.Get(
+                    a => a.EmpId == empId
+                ).ToList();
+
+                // Debug: Get today's records
+                var todayRecords = _unitOfWork.AttendanceRepository.Get(
+                    a => a.EmpId == empId &&
+                         a.CheckIn.HasValue &&
+                         a.CheckIn >= today &&
+                         a.CheckIn < tomorrow
+                ).ToList();
+
                 var attendance = GetTodayActiveAttendance(empId);
 
                 if (attendance == null)
                 {
-                    return Json(new { hasAttendance = false }, JsonRequestBehavior.AllowGet);
+                    return Json(new {
+                        hasAttendance = false,
+                        debug = "No active attendance found",
+                        empId = empId,
+                        today = today.ToString("yyyy-MM-dd"),
+                        totalRecords = allAttendance.Count,
+                        todayRecordsCount = todayRecords.Count,
+                        todayRecordsInfo = todayRecords.Select(r => new {
+                            id = r.Id,
+                            checkIn = r.CheckIn?.ToString("yyyy-MM-dd HH:mm:ss"),
+                            checkOut = r.CheckOut?.ToString("yyyy-MM-dd HH:mm:ss")
+                        })
+                    }, JsonRequestBehavior.AllowGet);
                 }
 
                 return Json(new
@@ -334,9 +367,13 @@ namespace EtaskMinstry.Controllers
                     checkInTime = attendance.CheckIn?.ToString("HH:mm:ss")
                 }, JsonRequestBehavior.AllowGet);
             }
-            catch
+            catch (Exception ex)
             {
-                return Json(new { hasAttendance = false }, JsonRequestBehavior.AllowGet);
+                return Json(new {
+                    hasAttendance = false,
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                }, JsonRequestBehavior.AllowGet);
             }
         }
 
