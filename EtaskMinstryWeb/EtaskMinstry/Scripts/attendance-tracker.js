@@ -28,7 +28,8 @@
         timeoutTimer: null,
         countdownInterval: null,
         isModalShown: false,
-        isInitialized: false
+        isInitialized: false,
+        isCheckingOut: false
     };
 
     // URLs
@@ -231,12 +232,7 @@
             // Show modal
             $(modal).modal('show');
 
-            // Start timeout timer
-            state.timeoutTimer = setTimeout(function () {
-                performInactivityCheckout();
-            }, CONFIG.INACTIVITY_TIMEOUT);
-
-            // Update countdown
+            // Start countdown (handles checkout when it reaches 0)
             startCountdown();
         });
     }
@@ -345,6 +341,10 @@
      * Perform checkout due to inactivity
      */
     function performInactivityCheckout() {
+        // Prevent multiple checkout attempts
+        if (state.isCheckingOut) return;
+        state.isCheckingOut = true;
+
         console.log('[AttendanceTracker] Performing checkout, attendanceId:', state.attendanceId);
         $.ajax({
             url: URLS.inactivityCheckout,
