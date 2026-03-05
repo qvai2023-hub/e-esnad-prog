@@ -210,25 +210,35 @@
      */
     function showInactivityModal() {
         if (state.isModalShown) return;
-        state.isModalShown = true;
 
-        // Create modal if not exists
-        var modal = document.getElementById('inactivityModal');
-        if (!modal) {
-            modal = createInactivityModal();
-            document.body.appendChild(modal);
-        }
+        // First check if attendance is still active (might have been checked out by beacon)
+        checkCurrentAttendance(function (hasAttendance) {
+            if (!hasAttendance) {
+                console.log('[AttendanceTracker] No active attendance, stopping tracker');
+                cleanup();
+                return;
+            }
 
-        // Show modal
-        $(modal).modal('show');
+            state.isModalShown = true;
 
-        // Start timeout timer
-        state.timeoutTimer = setTimeout(function () {
-            performInactivityCheckout();
-        }, CONFIG.INACTIVITY_TIMEOUT);
+            // Create modal if not exists
+            var modal = document.getElementById('inactivityModal');
+            if (!modal) {
+                modal = createInactivityModal();
+                document.body.appendChild(modal);
+            }
 
-        // Update countdown
-        startCountdown();
+            // Show modal
+            $(modal).modal('show');
+
+            // Start timeout timer
+            state.timeoutTimer = setTimeout(function () {
+                performInactivityCheckout();
+            }, CONFIG.INACTIVITY_TIMEOUT);
+
+            // Update countdown
+            startCountdown();
+        });
     }
 
     /**
