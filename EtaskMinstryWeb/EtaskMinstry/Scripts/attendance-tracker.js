@@ -122,15 +122,6 @@
             sendBeaconCheckout();
         });
 
-        // visibilitychange - fires when tab becomes hidden/visible
-        document.addEventListener('visibilitychange', function () {
-            if (document.visibilityState === 'hidden') {
-                // Tab is being hidden - could be closing or switching
-                // Send beacon as precaution
-                sendBeaconCheckout();
-            }
-        });
-
         // pagehide - more reliable on mobile
         window.addEventListener('pagehide', function () {
             sendBeaconCheckout();
