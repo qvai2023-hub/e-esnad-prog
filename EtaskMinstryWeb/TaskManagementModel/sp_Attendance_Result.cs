@@ -16,8 +16,11 @@ namespace TaskManagementModel
         public Nullable<int> EmpID { get; set; }
         public string employeeName { get; set; }
         public string companyName { get; set; }
-        public Nullable<System.DateTime> CheckIn { get; set; }
-        public Nullable<System.DateTime> CheckOut { get; set; }
-        public string hours { get; set; }
+        public Nullable<System.DateTime> AttendanceDate { get; set; }
+        public string DayName { get; set; }
+        public string CheckInTime { get; set; }
+        public string CheckOutTime { get; set; }
+        public Nullable<int> DurationMinutes { get; set; }
+        public string DurationDisplay { get; set; }
     }
 }
