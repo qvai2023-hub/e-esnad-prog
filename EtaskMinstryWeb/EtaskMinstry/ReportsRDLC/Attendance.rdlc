@@ -33,17 +33,29 @@
           <DataField>companyName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="CheckIn">
-          <DataField>CheckIn</DataField>
+        <Field Name="AttendanceDate">
+          <DataField>AttendanceDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
-        <Field Name="CheckOut">
-          <DataField>CheckOut</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
+        <Field Name="DayName">
+          <DataField>DayName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="hours">
-          <DataField>hours</DataField>
+        <Field Name="CheckInTime">
+          <DataField>CheckInTime</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="CheckOutTime">
+          <DataField>CheckOutTime</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="DurationMinutes">
+          <DataField>DurationMinutes</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="DurationDisplay">
+          <DataField>DurationDisplay</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -223,7 +235,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>اسم الموظف</Value>
+                                  <Value>التاريخ</Value>
                                   <Style>
                                     <FontSize>12pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
@@ -263,7 +275,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!hours.Value</Value>
+                                  <Value>=Fields!DurationDisplay.Value</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -295,7 +307,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!CheckOut.Value</Value>
+                                  <Value>=Fields!CheckOutTime.Value</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -327,7 +339,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!CheckIn.Value</Value>
+                                  <Value>=Fields!CheckInTime.Value</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -359,7 +371,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!employeeName.Value</Value>
+                                  <Value>=Format(Fields!AttendanceDate.Value, "dd/MM/yyyy")</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -405,7 +417,7 @@
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>DS_attendance</DataSetName>
-            <Top>4.15078cm</Top>
+            <Top>5cm</Top>
             <Left>0cm</Left>
             <Height>1.6498cm</Height>
             <Width>18.70604cm</Width>
@@ -471,6 +483,71 @@
             <Height>0.89958cm</Height>
             <Width>4.37854cm</Width>
             <ZIndex>3</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="TextboxEmpLabel">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>  : اسم الموظف </Value>
+                    <Style>
+                      <FontSize>12pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>TextboxEmpLabel</rd:DefaultName>
+            <Top>2.5cm</Top>
+            <Left>16.07375cm</Left>
+            <Height>0.89958cm</Height>
+            <Width>2.5cm</Width>
+            <ZIndex>4</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="TextboxEmpName">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=First(Fields!employeeName.Value, "DS_attendance")</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>TextboxEmpName</rd:DefaultName>
+            <Top>2.5cm</Top>
+            <Left>11.69141cm</Left>
+            <Height>0.89958cm</Height>
+            <Width>4.37854cm</Width>
+            <ZIndex>5</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
