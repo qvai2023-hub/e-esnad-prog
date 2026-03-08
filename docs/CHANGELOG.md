@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed - Professional Report Format (Session a03)
+
+#### Controller
+- **AttendanceController.cs**: Added report parameters
+  - `StartDate` - Formatted start date (yyyy/MM/dd)
+  - `EndDate` - Formatted end date (yyyy/MM/dd)
+  - `ReportPeriod` - Arabic month name or date range
+
+#### Reports
+- **Attendance.rdlc**: Complete rebuild with professional layout
+  - 6 columns: م, التاريخ, اليوم, الحضور, الانصراف, عدد الساعات
+  - Employee grouping with Group Header
+  - Group Footer with subtotals (days + hours)
+  - Row number resets per employee
+  - Report header: company, period, date range
+  - Report footer: total employees, total work days
+  - Page footer: print date, page numbers
+  - Logo in page header
+  - RTL support with Arabic styling
+
+---
+
 ### Changed - Attendance Report Improvements (Session a02)
 
 #### Database

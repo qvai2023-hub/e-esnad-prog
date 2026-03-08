@@ -78,8 +78,8 @@ Display "لم يُسجل" (Not Recorded) instead of empty/blank.
 ## DEC-004: Employee Name as Header
 
 **Date:** 2026-03-08
-**Session:** a02
-**Status:** Partially Implemented
+**Session:** a02, a03
+**Status:** Fully Implemented
 
 ### Context
 Employee name was repeated on every row in the attendance table.
@@ -93,8 +93,60 @@ Show employee name once as a group header, with their attendance records listed 
 - More professional report layout
 
 ### Implementation
-- RDLC: Employee name added below company name
-- Future: Full group header with repeat for each employee
+- RDLC: TablixGroup on EmpID field
+- Group Header row with employee name (bold, highlighted)
+- Group Footer row with subtotals
+- Row number resets per employee using `RowNumber("EmployeeGroup")`
+
+---
+
+## DEC-005: Report Parameters for Date Range
+
+**Date:** 2026-03-08
+**Session:** a03
+**Status:** Implemented
+
+### Context
+Report needed to display the selected date range and period in Arabic.
+
+### Decision
+Add three report parameters: StartDate, EndDate, ReportPeriod.
+
+### Rationale
+- Shows user the exact date range selected
+- Arabic month names for better readability
+- Consistent formatting across report
+
+### Implementation
+- Controller: Format dates and Arabic month names
+- RDLC: Display parameters in report header
+
+---
+
+## DEC-006: Professional Report Structure
+
+**Date:** 2026-03-08
+**Session:** a03
+**Status:** Implemented
+
+### Context
+Report needed a professional, client-ready format.
+
+### Decision
+Implement structured report with:
+- Header: Logo, company name, period, date range
+- Body: Grouped data by employee with 6 columns
+- Footer: Totals and disclaimer
+
+### Rationale
+- Professional appearance
+- Clear data organization
+- Easy to print and export
+
+### Implementation
+- Complete RDLC rebuild with new structure
+- Blue color scheme (#3d85c6)
+- RTL support for Arabic text
 
 ---
 

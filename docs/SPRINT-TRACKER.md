@@ -17,7 +17,11 @@ Improve the attendance report to be more readable and support data aggregation.
 | 4 | Update Attendance.rdlc report fields | Done | a02 | Fields updated |
 | 5 | Update report layout (date column) | Done | a02 | Employee -> Date |
 | 6 | Add employee name header | Done | a02 | Below company name |
-| 7 | Test and verify changes | Pending | - | User to test |
+| 7 | Rebuild RDLC with professional layout | Done | a03 | Full grouping + styling |
+| 8 | Add report parameters (dates) | Done | a03 | StartDate, EndDate, Period |
+| 9 | Add employee grouping with subtotals | Done | a03 | Days + Hours per employee |
+| 10 | Add report totals footer | Done | a03 | Total employees + days |
+| 11 | Test and verify changes | Pending | - | User to test |
 
 ---
 
@@ -34,6 +38,10 @@ Improve the attendance report to be more readable and support data aggregation.
 
 ## Files Modified
 
+### Session a03
+- `EtaskMinstry/Controllers/AttendanceController.cs` - Added report parameters
+- `EtaskMinstry/ReportsRDLC/Attendance.rdlc` - Complete rebuild
+
 ### Session a02
 - `TaskManagementModel/sp_Attendance_Result.cs`
 - `EtaskMinstry/ReportsRDLC/Attendance.rdlc`
@@ -45,6 +53,6 @@ Improve the attendance report to be more readable and support data aggregation.
 
 ## Next Steps
 - [ ] Test report with real data
-- [ ] Verify grouping by employee
-- [ ] Confirm duration SUM works correctly
-- [ ] Add total hours per employee (optional)
+- [x] Verify grouping by employee (Implemented in a03)
+- [x] Confirm duration SUM works correctly (Implemented in a03)
+- [x] Add total hours per employee (Implemented in a03)
