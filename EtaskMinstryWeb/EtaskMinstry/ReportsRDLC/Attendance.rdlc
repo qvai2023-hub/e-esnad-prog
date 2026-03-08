@@ -993,31 +993,19 @@
     <ReportParameter Name="StartDate">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value></Value>
-        </Values>
-      </DefaultValue>
+      <AllowBlank>true</AllowBlank>
       <Prompt>StartDate</Prompt>
     </ReportParameter>
     <ReportParameter Name="EndDate">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value></Value>
-        </Values>
-      </DefaultValue>
+      <AllowBlank>true</AllowBlank>
       <Prompt>EndDate</Prompt>
     </ReportParameter>
     <ReportParameter Name="ReportPeriod">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value></Value>
-        </Values>
-      </DefaultValue>
+      <AllowBlank>true</AllowBlank>
       <Prompt>ReportPeriod</Prompt>
     </ReportParameter>
   </ReportParameters>
