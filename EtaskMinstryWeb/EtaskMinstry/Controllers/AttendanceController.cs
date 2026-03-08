@@ -111,13 +111,43 @@ namespace EtaskMinstry.Controllers
 
         public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate)
         {
-
             var data = attendanceReportService.GetAttendence(CompanyId, EmployeeId, FromDate, ToDate);
-            //if (EmployeeId != null)
-            //{
-            //    data[0].filteredEmployee = data[0].employeeName;
-            //}
+
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
+
+            // Format date range for report header
+            string startDateDisplay = "";
+            string endDateDisplay = "";
+            string reportPeriod = "";
+
+            if (!string.IsNullOrEmpty(FromDate) && !string.IsNullOrEmpty(ToDate))
+            {
+                CultureInfo arCulture = new CultureInfo("ar-SA");
+                arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+
+                DateTime fromDt = DateTime.ParseExact(FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateTime toDt = DateTime.ParseExact(ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+                startDateDisplay = fromDt.ToString("yyyy/MM/dd");
+                endDateDisplay = toDt.ToString("yyyy/MM/dd");
+
+                // Check if same month
+                if (fromDt.Month == toDt.Month && fromDt.Year == toDt.Year)
+                {
+                    reportPeriod = fromDt.ToString("MMMM yyyy", arCulture);
+                }
+                else
+                {
+                    reportPeriod = "من " + fromDt.ToString("MMMM yyyy", arCulture) + " إلى " + toDt.ToString("MMMM yyyy", arCulture);
+                }
+            }
+
+            // Add report parameters
+            ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", startDateDisplay));
+            ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", endDateDisplay));
+            ReportAgent.ReportParameters.Add(new ReportParameter("ReportPeriod", reportPeriod));
+
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_attendance", data));
             return Redirect("/Reports/Attendance");
         }
