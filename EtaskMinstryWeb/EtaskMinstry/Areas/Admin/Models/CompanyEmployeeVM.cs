@@ -551,6 +551,20 @@ namespace EtaskMinstry.Areas.Admin.Models
                         obj.Email = Email;
                         _unitOfWork.Employee.Update(obj);
 
+                        // Sync UserAccount.CompanyID when Employee.CompanyID changes
+                        var empUser = _unitOfWork.UserAccount.Get(x => x.EmpID == obj.EmpID).FirstOrDefault();
+                        if (empUser != null && empUser.CompanyID != obj.CompanyID)
+                        {
+                            empUser.CompanyID = obj.CompanyID;
+                            // Also sync IsTelesak from the new company
+                            var newCompanyAccount = _unitOfWork.UserAccount.Get(x => x.CompanyID == obj.CompanyID && x.IsCompany == true).FirstOrDefault();
+                            if (newCompanyAccount != null)
+                            {
+                                empUser.IsTelesak = newCompanyAccount.IsTelesak;
+                            }
+                            _unitOfWork.UserAccount.Update(empUser);
+                        }
+
                         _unitOfWork.Save();
                         //  NotificationHub.Send(Users.Employee(obj.EmpID), NotificationType.NewTask, "لقد تم تعديل في بياناتك من قبل الشركة ", @"/Employee/employee/" );
                         if (emailChanged)
