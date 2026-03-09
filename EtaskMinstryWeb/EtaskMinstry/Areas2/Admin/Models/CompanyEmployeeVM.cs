@@ -464,18 +464,15 @@ namespace EtaskMinstry.Areas.Admin.Models
                         obj.NationaIDImage = NationaIDImage;
                         _unitOfWork.Employee.Update(obj);
 
-                        // Sync all UserAccounts for this employee when CompanyID changes
-                        var empUsers = _unitOfWork.UserAccount.Get(x => x.EmpID == obj.EmpID).ToList();
-                        if (empUsers.Any(u => u.CompanyID != obj.CompanyID))
+                        // Sync UserAccount.CompanyID with Employee.CompanyID
+                        var empUser = _unitOfWork.UserAccount.Get(x => x.EmpID == obj.EmpID).FirstOrDefault();
+                        if (empUser != null && empUser.CompanyID != obj.CompanyID)
                         {
+                            empUser.CompanyID = obj.CompanyID;
                             var newCompanyAccount = _unitOfWork.UserAccount.Get(x => x.CompanyID == obj.CompanyID && x.IsCompany == true).FirstOrDefault();
-                            foreach (var eu in empUsers)
-                            {
-                                eu.CompanyID = obj.CompanyID;
-                                if (newCompanyAccount != null)
-                                    eu.IsTelesak = newCompanyAccount.IsTelesak;
-                                _unitOfWork.UserAccount.Update(eu);
-                            }
+                            if (newCompanyAccount != null)
+                                empUser.IsTelesak = newCompanyAccount.IsTelesak;
+                            _unitOfWork.UserAccount.Update(empUser);
                         }
 
                         _unitOfWork.Save();
