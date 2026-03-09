@@ -65,30 +65,28 @@ WHERE ua.IsCompany = 0
 GROUP BY ua.EmpID, e.Name
 HAVING COUNT(*) > 1;
 
--- Step 6: Delete duplicate UserAccounts — keep only the latest one per Employee
--- Preview first:
-SELECT del.ID, del.UserName, del.EmpID, del.CompanyID, 'WILL BE DELETED' AS Action
-FROM UserAccount del
-WHERE del.IsCompany = 0
-  AND del.ID NOT IN (
-    SELECT MAX(ua2.ID)
-    FROM UserAccount ua2
-    WHERE ua2.IsCompany = 0 AND ua2.EmpID IS NOT NULL
-    GROUP BY ua2.EmpID
+-- Step 6: Review ALL duplicate accounts side-by-side to decide which to keep
+-- Run this first to see full details of each duplicate:
+SELECT
+    ua.ID AS UserAccountID,
+    ua.EmpID,
+    e.Name AS EmployeeName,
+    ua.UserName,
+    ua.CompanyID AS UA_CompanyID,
+    e.CompanyID AS Emp_CompanyID,
+    CASE WHEN ua.CompanyID = e.CompanyID THEN 'YES' ELSE 'NO' END AS CompanyMatch,
+    ua.IsTelesak,
+    ua.UserTypeID,
+    ua.Password
+FROM UserAccount ua
+INNER JOIN Employee e ON ua.EmpID = e.EmpID
+WHERE ua.IsCompany = 0
+  AND ua.EmpID IN (
+    SELECT EmpID FROM UserAccount WHERE IsCompany = 0 AND EmpID IS NOT NULL
+    GROUP BY EmpID HAVING COUNT(*) > 1
   )
-  AND del.EmpID IN (
-    SELECT EmpID FROM UserAccount WHERE IsCompany = 0 GROUP BY EmpID HAVING COUNT(*) > 1
-  );
+ORDER BY ua.EmpID, ua.ID;
 
--- Uncomment to delete duplicates (keeps latest UserAccount per Employee):
--- DELETE FROM UserAccount
--- WHERE IsCompany = 0
---   AND ID NOT IN (
---     SELECT MAX(ua2.ID)
---     FROM UserAccount ua2
---     WHERE ua2.IsCompany = 0 AND ua2.EmpID IS NOT NULL
---     GROUP BY ua2.EmpID
---   )
---   AND EmpID IN (
---     SELECT EmpID FROM UserAccount WHERE IsCompany = 0 GROUP BY EmpID HAVING COUNT(*) > 1
---   );
+-- Step 7: Delete specific duplicate by ID after reviewing Step 6 results
+-- Replace <ID> with the UserAccount ID you want to delete:
+-- DELETE FROM UserAccount WHERE ID = <ID>;
