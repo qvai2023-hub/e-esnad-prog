@@ -37,8 +37,52 @@ INNER JOIN UserAccount comp_ua
 WHERE ua.IsCompany = 0
   AND ISNULL(ua.IsTelesak, 0) != ISNULL(comp_ua.IsTelesak, 0);
 
--- Step 4: Verify — should return 0 rows
+-- Step 4: Verify CompanyID fix — should return 0 rows
 SELECT ua.ID, ua.UserName, ua.CompanyID AS UA_CompanyID, e.CompanyID AS Emp_CompanyID
 FROM UserAccount ua
 INNER JOIN Employee e ON ua.EmpID = e.EmpID
 WHERE ua.CompanyID != e.CompanyID;
+
+-- ============================================================
+-- Step 5: Find duplicate UserAccount records per Employee
+-- (caused by UpdateRehireDeletedEmployee inserting without checking)
+-- ============================================================
+SELECT
+    ua.EmpID,
+    e.Name AS EmployeeName,
+    COUNT(*) AS AccountCount,
+    STRING_AGG(CAST(ua.ID AS VARCHAR), ', ') AS UserAccountIDs,
+    STRING_AGG(ua.UserName, ', ') AS UserNames
+FROM UserAccount ua
+INNER JOIN Employee e ON ua.EmpID = e.EmpID
+WHERE ua.IsCompany = 0
+GROUP BY ua.EmpID, e.Name
+HAVING COUNT(*) > 1;
+
+-- Step 6: Delete duplicate UserAccounts — keep only the latest one per Employee
+-- Preview first:
+SELECT del.ID, del.UserName, del.EmpID, del.CompanyID, 'WILL BE DELETED' AS Action
+FROM UserAccount del
+WHERE del.IsCompany = 0
+  AND del.ID NOT IN (
+    SELECT MAX(ua2.ID)
+    FROM UserAccount ua2
+    WHERE ua2.IsCompany = 0 AND ua2.EmpID IS NOT NULL
+    GROUP BY ua2.EmpID
+  )
+  AND del.EmpID IN (
+    SELECT EmpID FROM UserAccount WHERE IsCompany = 0 GROUP BY EmpID HAVING COUNT(*) > 1
+  );
+
+-- Uncomment to delete duplicates (keeps latest UserAccount per Employee):
+-- DELETE FROM UserAccount
+-- WHERE IsCompany = 0
+--   AND ID NOT IN (
+--     SELECT MAX(ua2.ID)
+--     FROM UserAccount ua2
+--     WHERE ua2.IsCompany = 0 AND ua2.EmpID IS NOT NULL
+--     GROUP BY ua2.EmpID
+--   )
+--   AND EmpID IN (
+--     SELECT EmpID FROM UserAccount WHERE IsCompany = 0 GROUP BY EmpID HAVING COUNT(*) > 1
+--   );
