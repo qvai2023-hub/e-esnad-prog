@@ -51,8 +51,14 @@ SELECT
     ua.EmpID,
     e.Name AS EmployeeName,
     COUNT(*) AS AccountCount,
-    STRING_AGG(CAST(ua.ID AS VARCHAR), ', ') AS UserAccountIDs,
-    STRING_AGG(ua.UserName, ', ') AS UserNames
+    STUFF((SELECT ', ' + CAST(ua2.ID AS VARCHAR(20))
+           FROM UserAccount ua2
+           WHERE ua2.EmpID = ua.EmpID AND ua2.IsCompany = 0
+           FOR XML PATH('')), 1, 2, '') AS UserAccountIDs,
+    STUFF((SELECT ', ' + ua2.UserName
+           FROM UserAccount ua2
+           WHERE ua2.EmpID = ua.EmpID AND ua2.IsCompany = 0
+           FOR XML PATH('')), 1, 2, '') AS UserNames
 FROM UserAccount ua
 INNER JOIN Employee e ON ua.EmpID = e.EmpID
 WHERE ua.IsCompany = 0
