@@ -368,22 +368,23 @@
     }
 
     /**
-     * Show checkout notification
+     * Show checkout notification and redirect to logout
      */
     function showCheckoutNotification(checkoutTime) {
         var notification = document.createElement('div');
         notification.className = 'alert alert-info alert-dismissible fade show';
         notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
         notification.innerHTML =
-            '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
             '<strong><i class="fa fa-info-circle"></i> تم تسجيل الخروج</strong><br>' +
-            'تم تسجيل خروجك في الساعة ' + checkoutTime + ' بسبب عدم النشاط.';
+            'تم تسجيل خروجك في الساعة ' + checkoutTime + ' بسبب عدم النشاط.<br>' +
+            '<small>سيتم تحويلك لصفحة تسجيل الدخول خلال 3 ثواني...</small>';
 
         document.body.appendChild(notification);
 
+        // Redirect to logout page after 3 seconds
         setTimeout(function () {
-            notification.remove();
-        }, 10000);
+            window.location.href = '/Security/Logout';
+        }, 3000);
     }
 
     /**
