@@ -614,7 +614,6 @@
         <TopMargin>1cm</TopMargin>
         <BottomMargin>1cm</BottomMargin>
         <ColumnSpacing>1.27cm</ColumnSpacing>
-        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
 

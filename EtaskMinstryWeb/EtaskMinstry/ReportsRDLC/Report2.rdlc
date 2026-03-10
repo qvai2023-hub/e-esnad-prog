@@ -89,7 +89,6 @@
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>
         <BottomMargin>1in</BottomMargin>
-        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
 

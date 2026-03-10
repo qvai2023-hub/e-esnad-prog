@@ -1001,7 +1001,6 @@
         <LeftMargin>0.3in</LeftMargin>
         <RightMargin>0.3in</RightMargin>
         <TopMargin>0.5in</TopMargin>
-        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
 

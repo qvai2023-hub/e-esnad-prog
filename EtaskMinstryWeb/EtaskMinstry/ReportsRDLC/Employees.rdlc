@@ -481,7 +481,6 @@
         <TopMargin>2.54cm</TopMargin>
         <BottomMargin>2.54cm</BottomMargin>
         <ColumnSpacing>1.27cm</ColumnSpacing>
-        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
 
