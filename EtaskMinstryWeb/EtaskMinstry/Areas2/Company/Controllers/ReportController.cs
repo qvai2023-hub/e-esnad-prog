@@ -195,6 +195,27 @@ namespace EtaskMinstry.Areas.Company.Controllers
                 }
             }
             var tasks = _unitOfWork.SP_CompanyTasksResults.CallStoredProcedure("sp_CompanyTasks", parameters.ToArray());
+
+            // convert dates based on calendarType selection
+            string calType = string.IsNullOrEmpty(model.calendarType) ? "gregorian" : model.calendarType;
+            if (calType == "hijri" || calType == "both")
+            {
+                foreach (var t in tasks)
+                {
+                    DateTime dtStart, dtEnd;
+                    if (!string.IsNullOrEmpty(t.StartDate) && DateTime.TryParse(t.StartDate, out dtStart))
+                    {
+                        string hijri = QvLib.QVUtil.Date.GregToHijri(dtStart);
+                        t.StartDate = calType == "both" ? t.StartDate + " | " + hijri : hijri;
+                    }
+                    if (!string.IsNullOrEmpty(t.EndDate) && DateTime.TryParse(t.EndDate, out dtEnd))
+                    {
+                        string hijri = QvLib.QVUtil.Date.GregToHijri(dtEnd);
+                        t.EndDate = calType == "both" ? t.EndDate + " | " + hijri : hijri;
+                    }
+                }
+            }
+
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.ReportParameters.Clear();
             //use serialize session

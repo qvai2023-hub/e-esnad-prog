@@ -38,6 +38,7 @@ namespace EtaskMinstry.Areas.Company.Models
         public string toDate { get; set; }
         public string fromendDate { get; set; }
         public string toendDate { get; set; }
+        public string calendarType { get; set; }
         public List<StatusDisplay> chkStatus { get; set; }
         public List<PriorityDisplay> chkPriorities { get; set; }
 
