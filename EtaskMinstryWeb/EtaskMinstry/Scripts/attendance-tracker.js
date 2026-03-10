@@ -49,7 +49,10 @@
         // Check if user has active attendance
         checkCurrentAttendance(function (hasAttendance) {
             if (!hasAttendance) {
-                console.log('[AttendanceTracker] No active attendance, tracker disabled');
+                console.log('[AttendanceTracker] No active attendance, redirecting to logout');
+                // User is logged in but has no active attendance (e.g., closed tab after checkout)
+                // Redirect to logout to ensure clean session
+                window.location.href = '/Security/Logout';
                 return;
             }
 
