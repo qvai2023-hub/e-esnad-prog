@@ -1,70 +1,60 @@
 -- Fix T-01: Date Filter Bug in sp_CompanyTasks
 -- Issue: ToDate and ToEndDate comparisons use <= with midnight timestamps,
 --        excluding tasks from the selected end date that have a time component.
--- Fix: Use CAST(... AS DATE) on both sides of the comparison to ignore time components.
+--
+-- IMPORTANT: This script patches ONLY the 4 date comparison lines in the existing SP.
+-- It preserves all other SP logic by reading the current definition and applying targeted replacements.
+--
+-- Compatible with SQL Server 2008 R2+
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[sp_CompanyTasks]
-@CompanyId int =0,
-@ProjectIds nvarchar(MAX)='',
-@EmpId nvarchar(MAX)='',
-@notInEmpList int=0,
-@notInProjectList int=0,
-@StatusId nvarchar(32)='',
-@PriorityId nvarchar(5)='',
-@FromDate datetime=null,
-@ToDate datetime=null,
-@taskName nvarchar(20)='',
-@FromEndDate datetime=null,
-@ToEndDate datetime=null
-AS
+-- Step 1: Get the current SP definition
+DECLARE @spText NVARCHAR(MAX) = ''
+
+SELECT @spText = @spText + [text]
+FROM sys.syscomments
+WHERE id = OBJECT_ID('sp_CompanyTasks')
+ORDER BY colid
+
+IF @spText = ''
 BEGIN
-select t.TaskID, t.Title task, p.Name project,emps.[employee Id] as Employee_ID, emps.[Employee Name]  as Employee_Name, pr.Name priority, s.Name [status],
-SUBSTRING( cast([dbo].[GetHijriDate](t.StartDate) as nvarchar(50)),1,10) as StartDate,
- SUBSTRING( cast([dbo].[GetHijriDate](t.EndDate) as nvarchar(50)),1,10) as EndDate,
- case when t.ActualTime > 0 then t.ActualTime else SUM(isnull(tl.TimeCount,0)) end ActualTime, tu.Name timeUnit
-
-from Task t   left join Project p on t.ProjectID = p.ProjectID
-            left join [Status] s on t.StatusID = s.StatusID
-            left join Priority pr on t.PriorityID = pr.PriorityID
-            left join TimeUnit tu on t.TimeUnitID=tu.TimeUnitID
-            left join TaskTLog tl on tl.TaskID = t.TaskID
-            left join EmployeesNames emps on t.EmpID = emps.[employee Id] and t.companyid=emps.[company id]
-
-
-where t.IsDeleted=0 and ((@CompanyId=0) or (t.CompanyID = @CompanyId))  and
-   ((@ProjectIds = '')
-   or (@notInProjectList = 0 and @ProjectIds='-2' and t.ProjectID is null)
-   or (@notInProjectList = 1 and t.ProjectID not in(select * from dbo.fnSplitStringAsTable(@ProjectIds,','))  OR t.ProjectID IS NULL)
-   or (@notInProjectList = 0 and t.ProjectID in (select * from dbo.fnSplitStringAsTable(@ProjectIds,','))))and
-
-      ((@EmpId = '')
-      or (@notInEmpList = 0 and @EmpId = '-2' and t.EmpID is null)
-      or (@notInEmpList = 1 and t.EmpID not in(select * from dbo.fnSplitStringAsTable(@EmpId,',')))
-      or (@notInEmpList = 0 and t.EmpID in (select * from dbo.fnSplitStringAsTable(@EmpId,','))))and
-
-      ((@StatusId = '')
-      or (@StatusId='-1' and (t.EndDate <  case when t.DeliverDate is not null then t.DeliverDate else CONVERT(date, getdate()) end)and t.StatusID != 1 )
-      or (t.StatusID in (select * from dbo.fnSplitStringAsTable(@StatusId,',')))
-
-      )and
-
-      ((@PriorityId = '') or (t.PriorityID in (select * from dbo.fnSplitStringAsTable(@PriorityId,','))))and
-
-      ((@FromDate IS NULL) or (CAST(t.StartDate AS DATE) >= CAST(@FromDate AS DATE))) and
-
-      ((@ToDate IS NULL) or (CAST(t.StartDate AS DATE) <= CAST(@ToDate AS DATE)))
-    and
-   ((@FromEndDate IS NULL) or (CAST(t.EndDate AS DATE) >= CAST(@FromEndDate AS DATE))) and
-
-      ((@ToEndDate IS NULL) or (CAST(t.EndDate AS DATE) <= CAST(@ToEndDate AS DATE)))
-   and
-
-      ((@taskName = '')or(t.Title like '%'+@taskName+'%'))
-
-group by  t.TaskID,t.Title,t.CreatedDate, p.Name, pr.Name,emps.[employee Id], emps.[Employee Name], s.Name, t.StartDate,t.EndDate, t.ActualTime, tu.Name, t.DeliverDate
-order by t.CreatedDate desc
+    PRINT 'ERROR: sp_CompanyTasks not found!'
+    RETURN
 END
+
+-- Step 2: Replace the 4 date comparison lines to use CAST(... AS DATE)
+-- This fixes the bug where tasks on the selected end date are excluded
+-- because their time component (e.g., 14:30) is greater than midnight (00:00).
+
+-- Fix FromDate: >= comparison (add CAST for consistency)
+SET @spText = REPLACE(@spText,
+    'or (t.StartDate >= @FromDate)',
+    'or (CAST(t.StartDate AS DATE) >= CAST(@FromDate AS DATE))')
+
+-- Fix ToDate: <= comparison (this is the main bug)
+SET @spText = REPLACE(@spText,
+    'or (t.StartDate <= @ToDate)',
+    'or (CAST(t.StartDate AS DATE) <= CAST(@ToDate AS DATE))')
+
+-- Fix FromEndDate: >= comparison
+SET @spText = REPLACE(@spText,
+    'or (t.EndDate >= @FromEndDate)',
+    'or (CAST(t.EndDate AS DATE) >= CAST(@FromEndDate AS DATE))')
+
+-- Fix ToEndDate: <= comparison (this is the main bug)
+SET @spText = REPLACE(@spText,
+    'or (t.EndDate <= @ToEndDate)',
+    'or (CAST(t.EndDate AS DATE) <= CAST(@ToEndDate AS DATE))')
+
+-- Step 3: Convert CREATE to ALTER if needed
+IF @spText LIKE '%CREATE PROCEDURE%' OR @spText LIKE '%CREATE  PROCEDURE%'
+BEGIN
+    SET @spText = REPLACE(@spText, 'CREATE PROCEDURE', 'ALTER PROCEDURE')
+    SET @spText = REPLACE(@spText, 'CREATE  PROCEDURE', 'ALTER PROCEDURE')
+END
+
+-- Step 4: Show the modified SP for review before executing
+PRINT '-- Review the modified SP below. If it looks correct, uncomment the EXEC line at the bottom.'
+PRINT @spText
+
+-- Step 5: Uncomment the line below to apply the fix:
+-- EXEC sp_executesql @spText
