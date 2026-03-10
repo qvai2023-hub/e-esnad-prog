@@ -131,6 +131,7 @@
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>
         <BottomMargin>1in</BottomMargin>
+        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
     </ReportSection>
@@ -155,7 +156,7 @@
       </CellDefinitions>
     </GridLayoutDefinition>
   </ReportParametersLayout>
-  <Language>en-US</Language>
+  <Language>ar-SA</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>1d828b12-c54b-41e5-8461-f659d227bf3a</rd:ReportID>

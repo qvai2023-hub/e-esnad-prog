@@ -54,12 +54,26 @@ namespace EtaskMinstry.Areas.Employee.Controllers
 
             SqlParameter param5 = new SqlParameter("@StatusId", SqlDbType.NVarChar) { Value = model.Status == null ? "" : model.Status.Contains(-1) ? "-1" : string.Join(",", model.Status) };
             SqlParameter param6 = new SqlParameter("@PriorityId", SqlDbType.NVarChar) { Value = model.priorities == null ? "" : string.Join(",", model.priorities) };
-            SqlParameter param7 = new SqlParameter("@FromDate", SqlDbType.DateTime) { Value = model.fromDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromDate).Date };
-            SqlParameter param8 = new SqlParameter("@ToDate", SqlDbType.DateTime) { Value = model.toDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toDate).Date };
+            SqlParameter param7;
+            SqlParameter param8;
+            SqlParameter param10;
+            SqlParameter param11;
+            if (EtaskMinstry.MvcApplication.IsGregDate)
+            {
+                 param7 = new SqlParameter("@FromDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.fromDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.ConvertDate(model.fromDate) };
+                 param8 = new SqlParameter("@ToDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.toDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.ConvertDate(model.toDate) };
+                 param10 = new SqlParameter("@FromEndDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.fromendDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.ConvertDate(model.fromendDate) };
+                 param11 = new SqlParameter("@ToEndDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.toendDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.ConvertDate(model.toendDate) };
+            }
+            else
+            {
+                 param7 = new SqlParameter("@FromDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.fromDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromDate).Date };
+                 param8 = new SqlParameter("@ToDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.toDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toDate).Date };
+                 param10 = new SqlParameter("@FromEndDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.fromendDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromendDate).Date };
+                 param11 = new SqlParameter("@ToEndDate", SqlDbType.DateTime) { Value = string.IsNullOrEmpty(model.toendDate) ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toendDate).Date };
+            }
 
             SqlParameter param9 = new SqlParameter("@taskName", SqlDbType.NVarChar) { Value = model.taskName == null ? "" : model.taskName };
-            SqlParameter param10 = new SqlParameter("@FromEndDate", SqlDbType.DateTime) { Value = model.fromendDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromendDate).Date };
-            SqlParameter param11 = new SqlParameter("@ToEndDate", SqlDbType.DateTime) { Value = model.toendDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toendDate).Date };
 
             parameters.Add(param);
             parameters.Add(param1);

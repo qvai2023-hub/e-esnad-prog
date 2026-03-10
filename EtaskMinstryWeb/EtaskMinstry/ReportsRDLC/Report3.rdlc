@@ -335,6 +335,7 @@
               <Border>
                 <Style>None</Style>
               </Border>
+              <Direction>RTL</Direction>
             </Style>
           </Tablix>
         </ReportItems>
@@ -456,6 +457,7 @@
         <TopMargin>1cm</TopMargin>
         <BottomMargin>1cm</BottomMargin>
         <ColumnSpacing>1.27cm</ColumnSpacing>
+        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
 
@@ -507,7 +509,7 @@ IX5ZQqLPPRLyu9KdENfnWvd8NLuZpUsrb72rbM9K+Xv3mhWFGAsI5TXGwm4ZE8zWful+THuN1E03pa0Y
 /wGLMGrsKWtvhgAAAABJRU5ErkJggg==</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>en-US</Language>
+  <Language>ar-SA</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
   <rd:ReportID>1d591823-8a9d-42ad-8476-c9ce6e4bd88a</rd:ReportID>

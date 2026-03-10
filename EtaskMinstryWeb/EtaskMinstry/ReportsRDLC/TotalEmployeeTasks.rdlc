@@ -1099,7 +1099,9 @@
             <Height>0.58625in</Height>
             <Width>8.16209in</Width>
             <ZIndex>1</ZIndex>
-            <Style />
+            <Style>
+              <Direction>RTL</Direction>
+            </Style>
           </Tablix>
         </ReportItems>
         <Height>1.44789in</Height>
@@ -1233,6 +1235,7 @@
         <RightMargin>0.3in</RightMargin>
         <TopMargin>1in</TopMargin>
         <BottomMargin>1in</BottomMargin>
+        <LayoutDirection>RTL</LayoutDirection>
         <Style />
       </Page>
 
@@ -1348,7 +1351,7 @@ IX5ZQqLPPRLyu9KdENfnWvd8NLuZpUsrb72rbM9K+Xv3mhWFGAsI5TXGwm4ZE8zWful+THuN1E03pa0Y
 /wGLMGrsKWtvhgAAAABJRU5ErkJggg==</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>en-US</Language>
+  <Language>ar-SA</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>185b66d3-a281-4182-aec4-f03a6bac1b67</rd:ReportID>
