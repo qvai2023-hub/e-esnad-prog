@@ -290,17 +290,31 @@ namespace EtaskMinstry.Areas.Admin.Models
             {
                 //update isDeleted=false
                 objEmp.IsDeleted = false;
-                //Add user account record to enable rehired employee to  login
-                TaskManagementModel.UserAccount user = new TaskManagementModel.UserAccount()
+                _unitOfWork.Employee.Update(objEmp);
+                //Add user account record to enable rehired employee to login (only if not exists)
+                var existingUser = _unitOfWork.UserAccount.Get(x => x.EmpID == objEmp.EmpID).FirstOrDefault();
+                TaskManagementModel.UserAccount user;
+                if (existingUser != null)
                 {
-                    UserName = objEmp.Email,
-                    CompanyID = objEmp.CompanyID,
-                    EmpID = objEmp.EmpID,
-                    IsCompany = false,
-                    Password = QvLib.Security.DataProtection.Encrypt(objEmp.Email.Split('@')[0] + objEmp.EmpID + "d"),
-                    UserTypeID = (int)LoggedUserType.Employee
-                };
-                _unitOfWork.UserAccount.Insert(user);
+                    existingUser.CompanyID = objEmp.CompanyID;
+                    existingUser.UserName = objEmp.Email;
+                    existingUser.Password = QvLib.Security.DataProtection.Encrypt(objEmp.Email.Split('@')[0] + objEmp.EmpID + "d");
+                    _unitOfWork.UserAccount.Update(existingUser);
+                    user = existingUser;
+                }
+                else
+                {
+                    user = new TaskManagementModel.UserAccount()
+                    {
+                        UserName = objEmp.Email,
+                        CompanyID = objEmp.CompanyID,
+                        EmpID = objEmp.EmpID,
+                        IsCompany = false,
+                        Password = QvLib.Security.DataProtection.Encrypt(objEmp.Email.Split('@')[0] + objEmp.EmpID + "d"),
+                        UserTypeID = (int)LoggedUserType.Employee
+                    };
+                    _unitOfWork.UserAccount.Insert(user);
+                }
                 _unitOfWork.Save();
                 //send mail for rehire
                 string DycPass = QvLib.Security.DataProtection.Decrypt(user.Password);
@@ -550,6 +564,17 @@ namespace EtaskMinstry.Areas.Admin.Models
                         obj.NationaIDImage = NationaIDImage;
                         obj.Email = Email;
                         _unitOfWork.Employee.Update(obj);
+
+                        // Sync UserAccount.CompanyID with Employee.CompanyID
+                        var empUser = _unitOfWork.UserAccount.Get(x => x.EmpID == obj.EmpID).FirstOrDefault();
+                        if (empUser != null && empUser.CompanyID != obj.CompanyID)
+                        {
+                            empUser.CompanyID = obj.CompanyID;
+                            var newCompanyAccount = _unitOfWork.UserAccount.Get(x => x.CompanyID == obj.CompanyID && x.IsCompany == true).FirstOrDefault();
+                            if (newCompanyAccount != null)
+                                empUser.IsTelesak = newCompanyAccount.IsTelesak;
+                            _unitOfWork.UserAccount.Update(empUser);
+                        }
 
                         _unitOfWork.Save();
                         //  NotificationHub.Send(Users.Employee(obj.EmpID), NotificationType.NewTask, "لقد تم تعديل في بياناتك من قبل الشركة ", @"/Employee/employee/" );
