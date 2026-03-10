@@ -561,7 +561,6 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <LayoutDirection>RTL</LayoutDirection>
             <RepeatColumnHeaders>true</RepeatColumnHeaders>
             <KeepTogether>true</KeepTogether>
             <DataSetName>DataSet1</DataSetName>

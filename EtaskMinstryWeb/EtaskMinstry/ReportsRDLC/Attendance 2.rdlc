@@ -565,7 +565,6 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <LayoutDirection>RTL</LayoutDirection>
             <DataSetName>DS_attendance</DataSetName>
             <Top>3.67453cm</Top>
             <Left>1.50372cm</Left>
