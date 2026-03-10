@@ -49,7 +49,10 @@
         // Check if user has active attendance
         checkCurrentAttendance(function (hasAttendance) {
             if (!hasAttendance) {
-                console.log('[AttendanceTracker] No active attendance, tracker disabled');
+                console.log('[AttendanceTracker] No active attendance, redirecting to logout');
+                // User is logged in but has no active attendance (e.g., closed tab after checkout)
+                // Redirect to logout to ensure clean session
+                window.location.href = '/Security/Logout';
                 return;
             }
 
@@ -350,11 +353,15 @@
                     cleanup();
                 } else {
                     console.error('[AttendanceTracker] Checkout failed:', response.message || 'Unknown error');
-                    // If already checked out, stop the tracker and hide modal
+                    // If already checked out, stop the tracker and redirect to logout
                     if (response.message && response.message.indexOf('تم تسجيل الخروج مسبقاً') >= 0) {
                         hideInactivityModal();
                         cleanup();
                         alert('ملاحظة: ' + response.message);
+                        // Still redirect to logout since user has no active attendance
+                        setTimeout(function () {
+                            window.location.href = '/Security/Logout';
+                        }, 1000);
                     } else {
                         alert('فشل تسجيل الخروج: ' + (response.message || 'خطأ غير معروف'));
                     }
@@ -368,22 +375,25 @@
     }
 
     /**
-     * Show checkout notification
+     * Show checkout notification and redirect to logout
      */
     function showCheckoutNotification(checkoutTime) {
+        console.log('[AttendanceTracker] showCheckoutNotification called, will redirect in 3 seconds');
         var notification = document.createElement('div');
         notification.className = 'alert alert-info alert-dismissible fade show';
         notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
         notification.innerHTML =
-            '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
             '<strong><i class="fa fa-info-circle"></i> تم تسجيل الخروج</strong><br>' +
-            'تم تسجيل خروجك في الساعة ' + checkoutTime + ' بسبب عدم النشاط.';
+            'تم تسجيل خروجك في الساعة ' + checkoutTime + ' بسبب عدم النشاط.<br>' +
+            '<small>سيتم تحويلك لصفحة تسجيل الدخول خلال 3 ثواني...</small>';
 
         document.body.appendChild(notification);
 
+        // Redirect to logout page after 3 seconds
         setTimeout(function () {
-            notification.remove();
-        }, 10000);
+            console.log('[AttendanceTracker] Redirecting to logout page now...');
+            window.location.href = '/Security/Logout';
+        }, 3000);
     }
 
     /**
