@@ -14,8 +14,8 @@
     // Configuration
     var CONFIG = {
         HEARTBEAT_INTERVAL: 60000,        // 1 minute - send heartbeat
-        INACTIVITY_WARNING: 10000,        // 10 seconds - show warning (TESTING)
-        INACTIVITY_TIMEOUT: 5000,         // 5 seconds after warning - auto checkout (TESTING)
+        INACTIVITY_WARNING: 30 * 60000,   // 30 minutes - show warning
+        INACTIVITY_TIMEOUT: 15 * 60000,   // 15 minutes after warning - auto checkout
         ACTIVITY_EVENTS: ['click', 'keypress', 'mousemove', 'scroll', 'touchstart']
     };
 
