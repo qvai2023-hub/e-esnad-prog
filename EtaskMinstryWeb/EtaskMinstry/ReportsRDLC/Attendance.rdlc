@@ -627,6 +627,21 @@
       <DataType>String</DataType>
       <Prompt>LogoUrl</Prompt>
     </ReportParameter>
+    <ReportParameter Name="StartDate">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>StartDate</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndDate">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>EndDate</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ReportPeriod">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>ReportPeriod</Prompt>
+    </ReportParameter>
   </ReportParameters>
 
   <EmbeddedImages>

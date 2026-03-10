@@ -99,9 +99,10 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             }
             var tasks = _unitOfWork.SP_CompanyTasksResults.CallStoredProcedure("sp_CompanyTasks", parameters.ToArray());
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_CompanyTasks", tasks));
-           
+
             return Redirect("/Reports/CompanyTasks");
         }
 
@@ -150,6 +151,7 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             parameters.Add(param3);
             var tasks = _unitOfWork.SP_ProjecetTasksResults.CallStoredProcedure("sp_ProjectTasks", parameters.ToArray());
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_ProjectTasks", tasks));
             return Redirect("/Reports/ProjectTasks");

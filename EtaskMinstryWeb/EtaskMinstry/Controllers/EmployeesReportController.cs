@@ -33,6 +33,7 @@ namespace EtaskMinstry.Controllers
             var data = employeesReportService.GetData(CompanyId);
 
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_EmpReport", data));
             return Redirect("/Reports/Report3");
         }
