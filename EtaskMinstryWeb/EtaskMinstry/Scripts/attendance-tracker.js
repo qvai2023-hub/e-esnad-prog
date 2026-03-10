@@ -350,11 +350,15 @@
                     cleanup();
                 } else {
                     console.error('[AttendanceTracker] Checkout failed:', response.message || 'Unknown error');
-                    // If already checked out, stop the tracker and hide modal
+                    // If already checked out, stop the tracker and redirect to logout
                     if (response.message && response.message.indexOf('تم تسجيل الخروج مسبقاً') >= 0) {
                         hideInactivityModal();
                         cleanup();
                         alert('ملاحظة: ' + response.message);
+                        // Still redirect to logout since user has no active attendance
+                        setTimeout(function () {
+                            window.location.href = '/Security/Logout';
+                        }, 1000);
                     } else {
                         alert('فشل تسجيل الخروج: ' + (response.message || 'خطأ غير معروف'));
                     }
