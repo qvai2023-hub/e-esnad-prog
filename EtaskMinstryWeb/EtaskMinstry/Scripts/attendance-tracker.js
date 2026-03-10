@@ -371,6 +371,7 @@
      * Show checkout notification and redirect to logout
      */
     function showCheckoutNotification(checkoutTime) {
+        console.log('[AttendanceTracker] showCheckoutNotification called, will redirect in 3 seconds');
         var notification = document.createElement('div');
         notification.className = 'alert alert-info alert-dismissible fade show';
         notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
@@ -383,6 +384,7 @@
 
         // Redirect to logout page after 3 seconds
         setTimeout(function () {
+            console.log('[AttendanceTracker] Redirecting to logout page now...');
             window.location.href = '/Security/Logout';
         }, 3000);
     }
