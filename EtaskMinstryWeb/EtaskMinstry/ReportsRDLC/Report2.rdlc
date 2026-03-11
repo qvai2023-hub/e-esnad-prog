@@ -92,7 +92,6 @@
         <Style />
       </Page>
 
-  <Language>ar-SA</Language>
   <ReportParameters>
     <ReportParameter Name="ReportDateTime">
       <DataType>String</DataType>

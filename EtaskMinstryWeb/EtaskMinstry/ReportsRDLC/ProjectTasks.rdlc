@@ -676,7 +676,7 @@
             <Height>0.58625in</Height>
             <Width>6.65624in</Width>
             <ZIndex>1</ZIndex>
-            <Style><Direction>RTL</Direction></Style>
+            <Style />
           </Tablix>
           <Textbox Name="Textbox10">
             <CanGrow>true</CanGrow>
@@ -947,7 +947,7 @@ IX5ZQqLPPRLyu9KdENfnWvd8NLuZpUsrb72rbM9K+Xv3mhWFGAsI5TXGwm4ZE8zWful+THuN1E03pa0Y
 /wGLMGrsKWtvhgAAAABJRU5ErkJggg==</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>ar-SA</Language>
+  <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>185b66d3-a281-4182-aec4-f03a6bac1b67</rd:ReportID>

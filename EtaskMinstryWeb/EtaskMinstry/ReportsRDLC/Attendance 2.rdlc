@@ -565,6 +565,7 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
+            <LayoutDirection>RTL</LayoutDirection>
             <DataSetName>DS_attendance</DataSetName>
             <Top>3.67453cm</Top>
             <Left>1.50372cm</Left>
@@ -575,7 +576,6 @@
               <Border>
                 <Style>None</Style>
               </Border>
-              <Direction>RTL</Direction>
             </Style>
           </Tablix>
           <Textbox Name="Textbox11">
@@ -923,7 +923,7 @@ IX5ZQqLPPRLyu9KdENfnWvd8NLuZpUsrb72rbM9K+Xv3mhWFGAsI5TXGwm4ZE8zWful+THuN1E03pa0Y
 /wGLMGrsKWtvhgAAAABJRU5ErkJggg==</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>ar-SA</Language>
+  <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
   <rd:ReportID>1d591823-8a9d-42ad-8476-c9ce6e4bd88a</rd:ReportID>

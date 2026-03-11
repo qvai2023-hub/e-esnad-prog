@@ -561,6 +561,7 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
+            <LayoutDirection>RTL</LayoutDirection>
             <RepeatColumnHeaders>true</RepeatColumnHeaders>
             <KeepTogether>true</KeepTogether>
             <DataSetName>DataSet1</DataSetName>
@@ -576,7 +577,6 @@
               <Border>
                 <Style>None</Style>
               </Border>
-              <Direction>RTL</Direction>
             </Style>
           </Tablix>
           <Textbox Name="Textbox35">
@@ -807,7 +807,7 @@ IX5ZQqLPPRLyu9KdENfnWvd8NLuZpUsrb72rbM9K+Xv3mhWFGAsI5TXGwm4ZE8zWful+THuN1E03pa0Y
 /wGLMGrsKWtvhgAAAABJRU5ErkJggg==</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>ar-SA</Language>
+  <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
   <rd:ReportID>c894e511-db70-4101-9140-9fe868f0d446</rd:ReportID>

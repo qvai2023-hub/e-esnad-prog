@@ -1130,9 +1130,7 @@
             <Height>0.58625in</Height>
             <Width>8.16213in</Width>
             <ZIndex>1</ZIndex>
-            <Style>
-              <Direction>RTL</Direction>
-            </Style>
+            <Style />
           </Tablix>
         </ReportItems>
         <Height>1.43747in</Height>
@@ -1397,7 +1395,7 @@ g57hDrd/tW89YSN7PpKZoGkWBr6+nY7GPoN81QxyNiJcR/uttHyX/zIHUqadn6rrG2ln5N5t76n7s2yB
 341gmwq9gcZtChDl4B59wtMGOCeSYGPOqayLc5/DLGiPZ80FiJPQUJKOZiQTiMQOFKV3wyRZBgmbA4mtp+J1gnQTSTwfnakcwLsWTDADZuJaF6S2LER2Eja0eXWSsSjjAtTFGKq6+FmZJuA6QVtch3caSZEX4XgDCmcSSdwCdNs0VbXNohLiaQy1Y0QaXwawcrDfChJ0JSrvUgDSANJuUmPhBdozD6DxxfYcpR3Phgq9HoC7EtdJoLsrOoIx2bqudl8eAlzTYSsbJKC5A6p7BCTzCbzzTyjzSki5ifCYZXpBBwCnDMd34Fn90daGNBPQ/wbvyqWqiTEboGGe1kyb9aZrmmjmzURop/6w7Y0o799QZy0o+JI/gUVzXAXqV95AtPHtWCyKbYfaAbDmnMrzIV0+gXMlIJY/QVgKhyhcugx26nyEhTrDQw40WS8Z8ckWAFosl5u+FvXSGKC8XLN9g9E82PLjKcw0xviSoHXq1eRfR1vFLwdYAHQD4nvPIRpQSmrl5akRvkca+AJSydSGrfdzSHcrqqToTA+JhEQy/wSdZJRNcHaHBN5CgXJPzxkJmqAEmei/AgwAHp25uYi8iUAAAAAASUVORK5CYII=</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>ar-SA</Language>
+  <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>185b66d3-a281-4182-aec4-f03a6bac1b67</rd:ReportID>

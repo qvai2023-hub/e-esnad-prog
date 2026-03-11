@@ -155,7 +155,7 @@
       </CellDefinitions>
     </GridLayoutDefinition>
   </ReportParametersLayout>
-  <Language>ar-SA</Language>
+  <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>1d828b12-c54b-41e5-8461-f659d227bf3a</rd:ReportID>

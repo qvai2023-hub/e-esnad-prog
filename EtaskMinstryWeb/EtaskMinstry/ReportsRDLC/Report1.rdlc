@@ -948,7 +948,7 @@
             <Height>0.43in</Height>
             <Width>10in</Width>
             <ZIndex>1</ZIndex>
-            <Style><Direction>RTL</Direction></Style>
+            <Style />
           </Tablix>
         </ReportItems>
         <Height>0.86in</Height>
@@ -970,7 +970,7 @@
       <NumberOfRows>2</NumberOfRows>
     </GridLayoutDefinition>
   </ReportParametersLayout>
-  <Language>ar-SA</Language>
+  <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>a75bae40-db10-4579-aaa2-16067d9f61d1</rd:ReportID>
