@@ -55,17 +55,21 @@ namespace EtaskMinstry
                 {
                     if (!user.isCompany)
                     {
-                        //if emoloyee or his Company not active or stoped return user to inActive page
-                        //if (user  .status == (int)userStatus.stoped || user.status == (int)userStatus.notActive ||
-                        //    user.companyStatus == (int)userStatus.stoped || user.companyStatus == (int)userStatus.notActive)
-                        //{
+                        //if employee or his Company not active or stoped return user to inActive page
+                        if (user.status == (int)userStatus.stoped || user.status == (int)userStatus.notActive ||
+                            user.companyStatus == (int)userStatus.stoped || user.companyStatus == (int)userStatus.notActive)
+                        {
                             filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
                             {
                                 action = "StopedUser",
                                 controller = "Security",
                                 area = ""
                             }));
-                        //}
+                        }
+                        else
+                        {
+                            base.HandleUnauthorizedRequest(filterContext);
+                        }
                     }
                     else
                     {
