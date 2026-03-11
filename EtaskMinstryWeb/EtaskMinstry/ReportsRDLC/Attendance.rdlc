@@ -61,7 +61,7 @@
   </DataSets>
   <Body>
     <ReportItems>
-      <!-- Report Title -->
+      <!-- Report Title - Above Table -->
       <Textbox Name="ReportTitle">
         <CanGrow>true</CanGrow>
         <KeepTogether>true</KeepTogether>
@@ -84,9 +84,9 @@
           </Paragraph>
         </Paragraphs>
         <Top>0cm</Top>
-        <Left>0cm</Left>
+        <Left>2.25cm</Left>
         <Height>0.8cm</Height>
-        <Width>19cm</Width>
+        <Width>14.5cm</Width>
         <Style>
           <Border>
             <Style>None</Style>
@@ -95,129 +95,6 @@
           <VerticalAlign>Middle</VerticalAlign>
           <PaddingLeft>2pt</PaddingLeft>
           <PaddingRight>2pt</PaddingRight>
-        </Style>
-      </Textbox>
-
-      <!-- Company Name Label -->
-      <Textbox Name="CompanyLabel">
-        <CanGrow>true</CanGrow>
-        <Paragraphs>
-          <Paragraph>
-            <TextRuns>
-              <TextRun>
-                <Value>اسم الشركة :</Value>
-                <Style>
-                  <FontFamily>Arial</FontFamily>
-                  <FontSize>11pt</FontSize>
-                  <FontWeight>Bold</FontWeight>
-                </Style>
-              </TextRun>
-            </TextRuns>
-            <Style>
-              <TextAlign>Right</TextAlign>
-            </Style>
-          </Paragraph>
-        </Paragraphs>
-        <Top>1cm</Top>
-        <Left>16cm</Left>
-        <Height>0.6cm</Height>
-        <Width>3cm</Width>
-        <Style>
-          <Border>
-            <Style>None</Style>
-          </Border>
-        </Style>
-      </Textbox>
-
-      <!-- Company Name Value -->
-      <Textbox Name="CompanyValue">
-        <CanGrow>true</CanGrow>
-        <Paragraphs>
-          <Paragraph>
-            <TextRuns>
-              <TextRun>
-                <Value>=First(Fields!companyName.Value, "DS_attendance")</Value>
-                <Style>
-                  <FontFamily>Arial</FontFamily>
-                  <FontSize>11pt</FontSize>
-                </Style>
-              </TextRun>
-            </TextRuns>
-            <Style>
-              <TextAlign>Right</TextAlign>
-            </Style>
-          </Paragraph>
-        </Paragraphs>
-        <Top>1cm</Top>
-        <Left>10cm</Left>
-        <Height>0.6cm</Height>
-        <Width>6cm</Width>
-        <Style>
-          <Border>
-            <Style>None</Style>
-          </Border>
-        </Style>
-      </Textbox>
-
-      <!-- Report Period -->
-      <Textbox Name="ReportPeriodValue">
-        <CanGrow>true</CanGrow>
-        <Paragraphs>
-          <Paragraph>
-            <TextRuns>
-              <TextRun>
-                <Value>=Parameters!ReportPeriod.Value</Value>
-                <Style>
-                  <FontFamily>Arial</FontFamily>
-                  <FontSize>11pt</FontSize>
-                  <FontWeight>Bold</FontWeight>
-                </Style>
-              </TextRun>
-            </TextRuns>
-            <Style>
-              <TextAlign>Right</TextAlign>
-            </Style>
-          </Paragraph>
-        </Paragraphs>
-        <Top>1.7cm</Top>
-        <Left>10cm</Left>
-        <Height>0.6cm</Height>
-        <Width>9cm</Width>
-        <Style>
-          <Border>
-            <Style>None</Style>
-          </Border>
-        </Style>
-      </Textbox>
-
-      <!-- Date Range -->
-      <Textbox Name="DateRange">
-        <CanGrow>true</CanGrow>
-        <Paragraphs>
-          <Paragraph>
-            <TextRuns>
-              <TextRun>
-                <Value>="من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value</Value>
-                <Style>
-                  <FontFamily>Arial</FontFamily>
-                  <FontSize>10pt</FontSize>
-                  <Color>#3d85c6</Color>
-                </Style>
-              </TextRun>
-            </TextRuns>
-            <Style>
-              <TextAlign>Center</TextAlign>
-            </Style>
-          </Paragraph>
-        </Paragraphs>
-        <Top>2.4cm</Top>
-        <Left>0cm</Left>
-        <Height>0.6cm</Height>
-        <Width>19cm</Width>
-        <Style>
-          <Border>
-            <Style>None</Style>
-          </Border>
         </Style>
       </Textbox>
 
@@ -788,7 +665,7 @@
           </TablixMembers>
         </TablixRowHierarchy>
         <DataSetName>DS_attendance</DataSetName>
-        <Top>3.5cm</Top>
+        <Top>1cm</Top>
         <Left>2.25cm</Left>
         <Height>2.5cm</Height>
         <Width>14.5cm</Width>
@@ -820,7 +697,7 @@
             </Style>
           </Paragraph>
         </Paragraphs>
-        <Top>6.5cm</Top>
+        <Top>4cm</Top>
         <Left>0cm</Left>
         <Height>0.7cm</Height>
         <Width>19cm</Width>
@@ -854,7 +731,7 @@
             </Style>
           </Paragraph>
         </Paragraphs>
-        <Top>7.3cm</Top>
+        <Top>4.8cm</Top>
         <Left>0cm</Left>
         <Height>0.5cm</Height>
         <Width>19cm</Width>
@@ -865,13 +742,13 @@
         </Style>
       </Textbox>
     </ReportItems>
-    <Height>8cm</Height>
+    <Height>5.5cm</Height>
     <Style />
   </Body>
   <Width>19cm</Width>
   <Page>
     <PageHeader>
-      <Height>2cm</Height>
+      <Height>3.8cm</Height>
       <PrintOnFirstPage>true</PrintOnFirstPage>
       <PrintOnLastPage>true</PrintOnLastPage>
       <ReportItems>
@@ -880,7 +757,7 @@
           <Value>=Parameters!LogoUrl.Value</Value>
           <Sizing>FitProportional</Sizing>
           <Top>0.2cm</Top>
-          <Left>16cm</Left>
+          <Left>8cm</Left>
           <Height>1.5cm</Height>
           <Width>3cm</Width>
           <Style>
@@ -889,6 +766,66 @@
             </Border>
           </Style>
         </Image>
+        <!-- Company Name in Header -->
+        <Textbox Name="HeaderCompanyName">
+          <CanGrow>true</CanGrow>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>=First(Fields!companyName.Value, "DS_attendance")</Value>
+                  <Style>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>14pt</FontSize>
+                    <FontWeight>Bold</FontWeight>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style>
+                <TextAlign>Center</TextAlign>
+              </Style>
+            </Paragraph>
+          </Paragraphs>
+          <Top>1.8cm</Top>
+          <Left>0cm</Left>
+          <Height>0.7cm</Height>
+          <Width>19cm</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </Textbox>
+        <!-- Date Range in Header -->
+        <Textbox Name="HeaderDateRange">
+          <CanGrow>true</CanGrow>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>="من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value</Value>
+                  <Style>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>11pt</FontSize>
+                    <Color>#555555</Color>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style>
+                <TextAlign>Center</TextAlign>
+              </Style>
+            </Paragraph>
+          </Paragraphs>
+          <Top>2.6cm</Top>
+          <Left>0cm</Left>
+          <Height>0.6cm</Height>
+          <Width>19cm</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </Textbox>
       </ReportItems>
       <Style>
         <Border>
