@@ -309,6 +309,7 @@
     <Compile Include="Resources\Shared\ValidationResource.cs" />
     <Compile Include="Resources\Task\Task.Designer.cs" />
     <Compile Include="Services\AttendanceReportService.cs" />
+    <Compile Include="Services\AutoCheckoutJob.cs" />
     <Compile Include="Services\EmployeePerformanceReportService.cs" />
     <Compile Include="Services\EmployeesReportService.cs" />
     <Compile Include="Services\SharedService.cs" />

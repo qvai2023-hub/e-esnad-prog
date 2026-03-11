@@ -67,6 +67,7 @@
     <Compile Include="Attendance.cs">
       <DependentUpon>ETaskModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Attendance.Partial.cs" />
     <Compile Include="CommentStatu.cs">
       <DependentUpon>ETaskModel.tt</DependentUpon>
     </Compile>
