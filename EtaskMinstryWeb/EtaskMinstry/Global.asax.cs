@@ -1,5 +1,6 @@
 ﻿using EtaskMinstry.AppCode;
 using EtaskMinstry.Models;
+using EtaskMinstry.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,6 +107,15 @@ namespace EtaskMinstry
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
 
+            // Start the auto-checkout background job
+            // This job runs every 15 minutes to close orphaned attendance sessions
+            AutoCheckoutJob.Start();
+        }
+
+        protected void Application_End()
+        {
+            // Stop the auto-checkout background job
+            AutoCheckoutJob.Stop();
         }
 
         /// <summary>

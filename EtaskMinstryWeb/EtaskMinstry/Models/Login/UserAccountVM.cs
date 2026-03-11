@@ -219,13 +219,36 @@ namespace EtaskMinstry.Models.Login
         }
 
         public void Checkin(int userId)
-         {
+        {
             TaskManagementModel.Attendance obj = new TaskManagementModel.Attendance();
             obj.EmpId = userId;
-           string date= DateTime.Now.ToString("dd/MM/yyyy HH:mm:s");
-            obj.CheckIn= DateTime.ParseExact(date, "dd/MM/yyyy HH:mm:s", CultureInfo.InvariantCulture);
+            string date = DateTime.Now.ToString("dd/MM/yyyy HH:mm:s");
+            obj.CheckIn = DateTime.ParseExact(date, "dd/MM/yyyy HH:mm:s", CultureInfo.InvariantCulture);
             _unitOfWork.AttendanceRepository.Insert(obj);
             _unitOfWork.Save();
+
+            // Set LastHeartbeat using direct SQL (column may not be mapped in EF yet)
+            try
+            {
+                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+                string connStr = entityBuilder.ProviderConnectionString;
+                using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                {
+                    conn.Open();
+                    string sql = "UPDATE Attendance SET LastHeartbeat = @LastHeartbeat WHERE Id = @Id";
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@LastHeartbeat", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@Id", obj.Id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch
+            {
+                // Column may not exist yet - ignore until DB migration
+            }
 
             // Set session flag for attendance tracker conditional loading
             if (HttpContext.Current?.Session != null)

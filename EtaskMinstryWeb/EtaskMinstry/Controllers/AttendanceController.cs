@@ -221,22 +221,34 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "No active attendance" });
                 }
 
-                // Log activity using direct SQL (ActivityLog not in EDMX)
+                // Log activity and update LastHeartbeat using direct SQL
                 // Extract SQL connection string from EF connection string
                 var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
                 var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
                 string connStr = entityBuilder.ProviderConnectionString;
+                var now = DateTime.Now;
                 using (var conn = new SqlConnection(connStr))
                 {
                     conn.Open();
-                    string sql = @"INSERT INTO ActivityLog (EmpId, AttendanceId, LastActivityTime, ActivityType)
+
+                    // Insert activity log
+                    string sqlInsert = @"INSERT INTO ActivityLog (EmpId, AttendanceId, LastActivityTime, ActivityType)
                                    VALUES (@EmpId, @AttendanceId, @LastActivityTime, @ActivityType)";
-                    using (var cmd = new SqlCommand(sql, conn))
+                    using (var cmd = new SqlCommand(sqlInsert, conn))
                     {
                         cmd.Parameters.AddWithValue("@EmpId", empId);
                         cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
-                        cmd.Parameters.AddWithValue("@LastActivityTime", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@LastActivityTime", now);
                         cmd.Parameters.AddWithValue("@ActivityType", activityType ?? "heartbeat");
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // Update LastHeartbeat on Attendance record
+                    string sqlUpdate = "UPDATE Attendance SET LastHeartbeat = @LastHeartbeat WHERE Id = @Id";
+                    using (var cmd = new SqlCommand(sqlUpdate, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@LastHeartbeat", now);
+                        cmd.Parameters.AddWithValue("@Id", attendance.Id);
                         cmd.ExecuteNonQuery();
                     }
                 }
