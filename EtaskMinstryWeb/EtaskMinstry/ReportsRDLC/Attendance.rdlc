@@ -803,7 +803,7 @@
             <Paragraph>
               <TextRuns>
                 <TextRun>
-                  <Value>="من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value</Value>
+                  <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "", "من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
                   <Style>
                     <FontFamily>Arial</FontFamily>
                     <FontSize>11pt</FontSize>
