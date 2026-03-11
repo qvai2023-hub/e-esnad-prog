@@ -544,6 +544,11 @@
     <script type="text/javascript" src="~/HTML_NewDesign_Responsive/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="~/HTML_NewDesign_Responsive/js/application.js"></script>
 
-
+    @if (EtaskMinstry.MvcApplication.userData != null &&
+         EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Employee &&
+         HttpContext.Current.Session["HasActiveAttendance"] != null && (bool)HttpContext.Current.Session["HasActiveAttendance"] == true)
+    {
+        <script src="~/Scripts/attendance-tracker.js"></script>
+    }
 </body>
 </html>

@@ -263,6 +263,11 @@ namespace EtaskMinstry.Models.Login
                        && item.CheckIn.Value.Month == currentDate.Month
                        && item.CheckIn.Value.Day == currentDate.Day).ToList();
             var obj = lst.LastOrDefault();
+
+            // Skip if no attendance record or already checked out
+            if (obj == null || obj.CheckOut != null)
+                return;
+
             string date = DateTime.Now.ToString("dd/MM/yyyy HH:mm:s");
             obj.CheckOut = DateTime.ParseExact(date, "dd/MM/yyyy HH:mm:s", CultureInfo.InvariantCulture);
             _unitOfWork.AttendanceRepository.Update(obj);
