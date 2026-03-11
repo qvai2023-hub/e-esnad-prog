@@ -133,7 +133,9 @@ namespace EtaskMinstry
                     string sessionUserData = Convert.ToString(sessionValues[0]);
                     string sessionIpAddress = Convert.ToString(sessionValues[1]);
                     string sessionUserAgent = Convert.ToString(sessionValues[2]);
-                    if (sessionUserData == null || sessionUserAgent != UserAgent)//hijacking attack attempt!
+                    // UserAgent check disabled - was causing logout issues with Chrome
+                    // Original check: sessionUserAgent != UserAgent
+                    if (sessionUserData == null)
                     {
                         Session.RemoveAll();
                         Session.Clear();
