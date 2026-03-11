@@ -221,8 +221,7 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "No active attendance" });
                 }
 
-                // Log activity and update LastHeartbeat using direct SQL
-                // Extract SQL connection string from EF connection string
+                // Update LastHeartbeat on Attendance record using direct SQL
                 var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
                 var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
                 string connStr = entityBuilder.ProviderConnectionString;
@@ -230,20 +229,6 @@ namespace EtaskMinstry.Controllers
                 using (var conn = new SqlConnection(connStr))
                 {
                     conn.Open();
-
-                    // Insert activity log
-                    string sqlInsert = @"INSERT INTO ActivityLog (EmpId, AttendanceId, LastActivityTime, ActivityType)
-                                   VALUES (@EmpId, @AttendanceId, @LastActivityTime, @ActivityType)";
-                    using (var cmd = new SqlCommand(sqlInsert, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@EmpId", empId);
-                        cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
-                        cmd.Parameters.AddWithValue("@LastActivityTime", now);
-                        cmd.Parameters.AddWithValue("@ActivityType", activityType ?? "heartbeat");
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // Update LastHeartbeat on Attendance record
                     string sqlUpdate = "UPDATE Attendance SET LastHeartbeat = @LastHeartbeat WHERE Id = @Id";
                     using (var cmd = new SqlCommand(sqlUpdate, conn))
                     {
@@ -356,28 +341,8 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "تم تسجيل الخروج مسبقاً في: " + attendance.CheckOut.Value.ToString("HH:mm:ss") });
                 }
 
-                // Get last activity time using direct SQL (ActivityLog not in EDMX)
-                // Extract SQL connection string from EF connection string
-                DateTime? lastActivityTime = null;
-                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
-                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
-                string connStr = entityBuilder.ProviderConnectionString;
-                using (var conn = new SqlConnection(connStr))
-                {
-                    conn.Open();
-                    string sql = "SELECT TOP 1 LastActivityTime FROM ActivityLog WHERE AttendanceId = @AttendanceId ORDER BY LastActivityTime DESC";
-                    using (var cmd = new SqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@AttendanceId", attendance.Id);
-                        var result = cmd.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
-                        {
-                            lastActivityTime = (DateTime)result;
-                        }
-                    }
-                }
-
-                DateTime checkoutTime = lastActivityTime ?? DateTime.Now;
+                // Use LastHeartbeat from Attendance record
+                DateTime checkoutTime = attendance.LastHeartbeat ?? DateTime.Now;
                 attendance.CheckOut = checkoutTime;
                 _unitOfWork.AttendanceRepository.Update(attendance);
                 _unitOfWork.Save();
