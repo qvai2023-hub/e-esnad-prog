@@ -858,7 +858,9 @@ else
     </script>
 
     @* Attendance Tracker - Auto checkout on browser close/inactivity *@
-    @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany)
+    @* Only load if user has active attendance (set on check-in, cleared on checkout) *@
+    @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany &&
+         HttpContext.Current?.Session?["HasActiveAttendance"] != null && (bool)HttpContext.Current.Session["HasActiveAttendance"] == true)
     {
         <script src="~/Scripts/attendance-tracker.js"></script>
     }

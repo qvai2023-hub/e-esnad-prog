@@ -294,6 +294,12 @@ namespace EtaskMinstry.Controllers
                 _unitOfWork.AttendanceRepository.Update(attendance);
                 _unitOfWork.Save();
 
+                // Clear session flag so tracker won't load on next page
+                if (Session != null)
+                {
+                    Session["HasActiveAttendance"] = false;
+                }
+
                 return Json(new { success = true });
             }
             catch
@@ -363,6 +369,12 @@ namespace EtaskMinstry.Controllers
                 attendance.CheckOut = checkoutTime;
                 _unitOfWork.AttendanceRepository.Update(attendance);
                 _unitOfWork.Save();
+
+                // Clear session flag so tracker won't load on next page
+                if (Session != null)
+                {
+                    Session["HasActiveAttendance"] = false;
+                }
 
                 return Json(new { success = true, checkoutTime = checkoutTime.ToString("HH:mm:ss") });
             }

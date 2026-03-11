@@ -226,6 +226,12 @@ namespace EtaskMinstry.Models.Login
             obj.CheckIn= DateTime.ParseExact(date, "dd/MM/yyyy HH:mm:s", CultureInfo.InvariantCulture);
             _unitOfWork.AttendanceRepository.Insert(obj);
             _unitOfWork.Save();
+
+            // Set session flag for attendance tracker conditional loading
+            if (HttpContext.Current?.Session != null)
+            {
+                HttpContext.Current.Session["HasActiveAttendance"] = true;
+            }
         }
         public void Checkout(int userId)
         {
