@@ -29,7 +29,8 @@
         countdownInterval: null,
         isModalShown: false,
         isInitialized: false,
-        isCheckingOut: false
+        isCheckingOut: false,
+        isInternalNavigation: false  // Track if user is navigating within the site
     };
 
     // URLs
@@ -117,14 +118,45 @@
      * This is the most reliable method for catching closes
      */
     function setupBeaconCheckout() {
+        // Track internal navigation - intercept all link clicks and form submits
+        document.addEventListener('click', function (e) {
+            var target = e.target.closest('a');
+            if (target && target.href) {
+                var linkUrl = new URL(target.href, window.location.origin);
+                // Check if it's an internal link (same origin)
+                if (linkUrl.origin === window.location.origin) {
+                    state.isInternalNavigation = true;
+                    console.log('[AttendanceTracker] Internal navigation detected');
+                }
+            }
+        }, true);
+
+        // Track form submissions as internal navigation
+        document.addEventListener('submit', function () {
+            state.isInternalNavigation = true;
+            console.log('[AttendanceTracker] Form submit - internal navigation');
+        }, true);
+
         // beforeunload - fires when page is about to unload
+        // Only checkout if NOT internal navigation
         window.addEventListener('beforeunload', function () {
-            sendBeaconCheckout();
+            if (!state.isInternalNavigation) {
+                console.log('[AttendanceTracker] Browser close/external navigation detected');
+                sendBeaconCheckout();
+            } else {
+                console.log('[AttendanceTracker] Skipping checkout - internal navigation');
+            }
         });
 
         // pagehide - more reliable on mobile
-        window.addEventListener('pagehide', function () {
-            sendBeaconCheckout();
+        // Only checkout if NOT internal navigation
+        window.addEventListener('pagehide', function (e) {
+            // persisted = true means page is being cached (back-forward cache)
+            // In this case, don't checkout
+            if (!state.isInternalNavigation && !e.persisted) {
+                console.log('[AttendanceTracker] Page hide - external navigation detected');
+                sendBeaconCheckout();
+            }
         });
     }
 
