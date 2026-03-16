@@ -150,6 +150,113 @@ Implement structured report with:
 
 ---
 
+---
+
+## Sprint 1 Decisions
+
+### DEC-007: Client-Side Attendance Tracking with Heartbeat
+
+**Date:** 2026-03-09
+**Session:** earlier
+**Status:** Implemented
+
+### Context
+Employees could check in and forget to check out, leaving orphaned attendance sessions.
+
+### Decision
+Implement a heartbeat-based attendance tracking system:
+- Client sends periodic heartbeats via `attendance-tracker.js`
+- `LastHeartbeat` column added to Attendance table
+- Server-side `AutoCheckoutJob` checks for stale heartbeats and auto-checks out
+
+### Rationale
+- Ensures attendance records are always closed
+- Non-intrusive to user experience
+- Server-side fallback for closed browsers
+
+### Implementation
+- JS: `attendance-tracker.js` with periodic heartbeat API calls
+- C#: `AutoCheckoutJob.cs` runs on app startup
+- SQL: `AddLastHeartbeat.sql` migration
+
+---
+
+### DEC-008: Inactivity Checkout with Modal Notification
+
+**Date:** 2026-03-09
+**Session:** earlier
+**Status:** Implemented
+
+### Context
+Users leaving browser open but inactive needed a checkout mechanism.
+
+### Decision
+Show a modal popup after 30 seconds of inactivity with countdown timer, then auto-checkout and redirect to logout.
+
+### Rationale
+- Gives user a chance to stay active
+- Clear visual feedback before checkout
+- Prevents false inactive checkouts
+
+---
+
+### DEC-009: Remove UserAgent from Session Validation
+
+**Date:** 2026-03-09
+**Session:** earlier
+**Status:** Implemented
+
+### Context
+`UserAccountVM.cs` was checking UserAgent string for session validation, causing false session invalidation when browser updates changed the agent string.
+
+### Decision
+Remove UserAgent check from session validation.
+
+### Rationale
+- UserAgent strings change frequently with browser updates
+- Was causing legitimate users to be logged out
+- Session token alone is sufficient for validation
+
+---
+
+### DEC-010: Hijri/Gregorian Calendar Toggle for Reports
+
+**Date:** 2026-03-16
+**Session:** haj1c
+**Status:** Implemented
+
+### Context
+Task report needed to support both Hijri and Gregorian calendar date display.
+
+### Decision
+Add a calendar type toggle in `TaskReportPreperation.cshtml` and use `ConvertDate()` helper in the controller.
+
+### Rationale
+- Saudi business requirement for Hijri dates
+- User flexibility to switch between calendars
+- `CultureInfo("ar-SA")` for Arabic formatting
+
+---
+
+### DEC-011: Add Interaction Column to Task Report
+
+**Date:** 2026-03-16
+**Session:** haj1c
+**Status:** Implemented
+
+### Context
+Task report lacked visibility into employee task interaction status.
+
+### Decision
+Add التفاعل (Interaction) column to CompanyTasks report, sourced from updated `sp_CompanyTasks` stored procedure.
+
+### Rationale
+- Management needs to see task engagement at a glance
+- Color-coded: متفاعل (active) vs غير متفاعل (inactive)
+- Integrated into existing report structure
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports
