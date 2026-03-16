@@ -1,5 +1,40 @@
 # CLAUDE.md - Project Instructions for Claude Code
 
+## Development Workflow Rules (MANDATORY)
+
+Every code change MUST follow this workflow — no exceptions:
+
+### 1. Plan First — Never Code Without Approval
+- Before making ANY code change, present a clear plan to the user that includes:
+  - What will be changed and why
+  - Which files will be affected
+  - The approach and any trade-offs
+- **Wait for the user's approval** before writing or modifying any code
+- If the plan needs discussion, iterate on it until both sides agree
+
+### 2. After Every Modification — Report Changed Files
+- Immediately after completing a modification, provide a clear list of all changed files with:
+  - Full file path
+  - Brief description of what changed in each file
+- This list is for the user to know exactly which files to upload/deploy
+
+### 3. Provide Testing Instructions
+- After every modification, include clear step-by-step instructions on how to test the change:
+  - What to do (steps to reproduce/verify)
+  - What the expected result should be
+  - Any edge cases to check
+
+### 4. Document Only After User Confirms Testing
+- Do NOT update documentation (CHANGELOG, SPRINT-TRACKER, DECISIONS) until the user confirms the change has been tested and works
+- Once the user confirms, update the relevant docs in `docs/`
+
+### Workflow Summary
+```
+Plan → Discuss → Approve → Code → Report Files → Test Instructions → User Tests → Document
+```
+
+---
+
 ## Project Overview
 
 **E-Esnad / Telesak** — A task management web application (E-Task Ministry) built with ASP.NET MVC 4 on .NET Framework 4.8. The application supports Arabic localization and both Hijri and Gregorian date systems.
