@@ -1075,26 +1075,31 @@
     <ReportParameter Name="CompanyName">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
       <Prompt>CompanyName</Prompt>
     </ReportParameter>
     <ReportParameter Name="StartDate">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
       <Prompt>StartDate</Prompt>
     </ReportParameter>
     <ReportParameter Name="EndDate">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
       <Prompt>EndDate</Prompt>
     </ReportParameter>
     <ReportParameter Name="ReportPeriod">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
       <Prompt>ReportPeriod</Prompt>
     </ReportParameter>
     <ReportParameter Name="CalendarType">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
       <Prompt>CalendarType</Prompt>
     </ReportParameter>
   </ReportParameters>
