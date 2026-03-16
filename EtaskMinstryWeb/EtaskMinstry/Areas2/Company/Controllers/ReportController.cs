@@ -260,6 +260,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             }
             var tasks = _unitOfWork.SP_TotalEmployeeTasks_Result.CallStoredProcedure("sp_TotalEmployeeTasks", parameters.ToArray());
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_TotalEmployeeTasks", tasks));
           
