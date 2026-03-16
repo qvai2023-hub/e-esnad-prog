@@ -150,7 +150,7 @@ namespace TaskManagementModel
                 ObjectResult<TEntity> result = currContext.ExecuteStoreQuery<TEntity>(SPSignature, listParams);
                 return result.ToList<TEntity>();
             }
-            catch (Exception e) { return new List<TEntity>(); }
+            catch (Exception e) { System.Diagnostics.Debug.WriteLine("SP_ERROR: " + e.Message + " | " + e.InnerException?.Message); throw; }
         }
 
         public virtual ObjectResult<TEntity> CallStored(string SPname, object[] listParams)
