@@ -178,6 +178,16 @@
                     <span class="col-md-4"></span>
                     @Html.ValidationMessageFor(model => model.toendDate)
                 </div>
+                <div class="row form-group">
+                    <div class="col-md-12">
+                        <label>نوع التقويم :</label>
+                        @Html.DropDownListFor(item => item.calendarType,
+                            new List<SelectListItem> {
+                                new SelectListItem { Text = "ميلادي", Value = "1", Selected = true },
+                                new SelectListItem { Text = "هجري", Value = "0" }
+                            }, new { @class = "form-control", @style = "width:200px; display:inline-block;" })
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-12 text-center mb-30 mt-30">
                         <input type="submit" class="btn btn-primary submit" value="استخراج التقرير" />

@@ -1,0 +1,46 @@
+-- =====================================================================
+-- Sprint 1: Task Report Improvements (T-02 + T-04 + T-05)
+-- SQL Server 2008 R2 Compatible
+-- =====================================================================
+--
+-- IMPORTANT: This script adds the @CalendarType parameter to sp_CompanyTasks
+--
+-- @CalendarType = 0 → Hijri dates (existing behavior, default)
+-- @CalendarType = 1 → Gregorian dates (yyyy/MM/dd format)
+--
+-- INSTRUCTIONS:
+-- 1. Open the existing sp_CompanyTasks stored procedure in SSMS
+-- 2. Add the new parameter: @CalendarType INT = 0
+-- 3. Replace the date columns with the CASE WHEN logic below
+-- 4. Test with both @CalendarType = 0 and @CalendarType = 1
+--
+-- =====================================================================
+
+-- Add this parameter to the stored procedure signature:
+-- @CalendarType INT = 0
+
+-- Replace the StartDate column:
+-- FROM:
+--   SUBSTRING(CAST([dbo].[GetHijriDate](t.StartDate) AS NVARCHAR(50)), 1, 10) AS StartDate
+-- TO:
+--   CASE WHEN @CalendarType = 1
+--       THEN CONVERT(NVARCHAR(10), t.StartDate, 111)
+--       ELSE SUBSTRING(CAST([dbo].[GetHijriDate](t.StartDate) AS NVARCHAR(50)), 1, 10)
+--   END AS StartDate
+
+-- Replace the EndDate column:
+-- FROM:
+--   SUBSTRING(CAST([dbo].[GetHijriDate](t.EndDate) AS NVARCHAR(50)), 1, 10) AS EndDate
+-- TO:
+--   CASE WHEN @CalendarType = 1
+--       THEN CONVERT(NVARCHAR(10), t.EndDate, 111)
+--       ELSE SUBSTRING(CAST([dbo].[GetHijriDate](t.EndDate) AS NVARCHAR(50)), 1, 10)
+--   END AS EndDate
+
+-- =====================================================================
+-- NOTES:
+-- - CONVERT style 111 = yyyy/MM/dd (Japanese format, matches requirement)
+-- - CASE WHEN is used instead of IIF (IIF not available in SQL 2008 R2)
+-- - Default is 0 (Hijri) to maintain backward compatibility
+-- - The [dbo].[GetHijriDate] function is preserved for Hijri output
+-- =====================================================================

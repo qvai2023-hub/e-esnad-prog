@@ -77,6 +77,24 @@ Sprint 0: ████████████████████ 100% Comp
 
 ---
 
-## Next Sprint (Sprint 1)
+## Sprint 1: Task Report Improvements
+
+### Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| T-02 | Calendar Type Toggle (Hijri/Gregorian) | 🔵 In Progress | haj1c | Claude |
+| T-04 | Add Interaction Column (التفاعل) | 🔵 In Progress | haj1c | Claude |
+| T-05 | Report Header Modification | 🔵 In Progress | haj1c | Claude |
+
+### Progress
+
+- [ ] T-02: Calendar Type Toggle
+- [ ] T-04: Interaction Column
+- [ ] T-05: Report Header
+
+---
+
+## Next Sprint (Sprint 2)
 
 *To be planned*
