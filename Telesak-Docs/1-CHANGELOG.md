@@ -4,6 +4,70 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## Sprint 1 - Task Report & Attendance Tracking
+
+### T-05/T-04: Task Report Redesign (CompanyTasks)
+**Status:** Completed
+**Date Completed:** 2026-03-16
+
+#### Files Modified:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/ReportsRDLC/CompanyTasks.rdlc` | Modified | Redesigned layout, added interaction column, fixed XML |
+| `EtaskMinstry/Views/Report/TaskReportPreperation.cshtml` | Modified | Added calendar type toggle UI |
+| `EtaskMinstry/Controllers/AttendanceController.cs` | Modified | Hijri/Gregorian support, nullable DateTime fix |
+
+#### Database Changes:
+| Object | Type | Description |
+|--------|------|-------------|
+| `sp_CompanyTasks` | Stored Procedure | Updated with interaction column |
+
+#### Changes:
+- Added التفاعل (Interaction) column to task report (T-04)
+- Modified report header layout (T-05)
+- Added Hijri/Gregorian calendar toggle (T-02)
+- Fixed missing `</Report>` closing tag causing ReportProcessingException
+- Fixed CS0266 nullable DateTime error
+- Restored truncated embedded images
+- Added AllowBlank to report parameters
+
+---
+
+### ATT: Attendance Tracking System
+**Status:** Completed
+**Date Completed:** 2026-03-16
+
+#### Files Created:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/Scripts/attendance-tracker.js` | New | Client-side attendance tracker |
+| `EtaskMinstry/Services/AutoCheckoutJob.cs` | New | Server-side auto-checkout job |
+| `TaskManagementModel/Attendance.Partial.cs` | New | Partial class for heartbeat |
+| `TaskManagementModel/Migrations/AddLastHeartbeat.sql` | New | DB migration script |
+| `scripts/check_isTelesak_consistency.sql` | New | Maintenance script |
+| `scripts/fix_useraccount_companyid_mismatch.sql` | New | Maintenance script |
+
+#### Files Modified:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/CustomAttrbutes/EmployeeAuthorize.cs` | Modified | Fixed StopedUser redirect bug |
+| `EtaskMinstry/Models/Login/UserAccountVM.cs` | Modified | Removed UserAgent session check |
+| `EtaskMinstry/Global.asax.cs` | Modified | Auto-checkout job registration |
+| `EtaskMinstry/Views/Shared/_Layout.cshtml` | Modified | Tracker integration |
+| `EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml` | Modified | Tracker integration |
+| `EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml` | Modified | Tracker integration |
+| `EtaskMinstry/Views/Shared/Modal.cshtml` | Modified | Fixed backdrop + z-index |
+| `EtaskMinstry/ReportsRDLC/Attendance.rdlc` | Modified | Header layout update |
+
+#### Bug Fixes:
+- EmployeeAuthorize always redirecting to StopedUser
+- UserAgent check causing session validation issues
+- Duplicate checkout calls
+- Inactivity checkout countdown errors
+- Custom modal display issues
+
+---
+
 ## Sprint 0 - Attendance Report Improvements
 
 ### A-03: Professional Report Format
@@ -89,6 +153,20 @@ Identified 4 issues in the attendance report:
 
 ### SQL Jobs
 *None*
+
+---
+
+## Sprint 1 Summary
+
+| Task | Status | Files | DB Changes |
+|------|--------|-------|------------|
+| T-02 | Completed | 2 modified | None |
+| T-04 | Completed | 1 modified | sp_CompanyTasks updated |
+| T-05 | Completed | 1 modified | None |
+| ATT | Completed | 4 new + 8 modified | AddLastHeartbeat migration |
+| FIX | Completed | 1 modified | None (CompanyTasks.rdlc XML fix) |
+
+**Total Files:** 14 (6 new + 11 modified)
 
 ---
 

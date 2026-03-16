@@ -173,6 +173,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
             
             SqlParameter param9 = new SqlParameter("@taskName", SqlDbType.NVarChar) { Value = model.taskName == null ? "" : model.taskName };
+            SqlParameter param12 = new SqlParameter("@CalendarType", SqlDbType.Int) { Value = model.calendarType };
 
             parameters.Add(param);
             parameters.Add(param1);
@@ -186,6 +187,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             parameters.Add(param9);
             parameters.Add(param10);
             parameters.Add(param11);
+            parameters.Add(param12);
 
             foreach (var item in parameters)
             {
@@ -196,7 +198,56 @@ namespace EtaskMinstry.Areas.Company.Controllers
                 }
             }
             var tasks = _unitOfWork.SP_CompanyTasksResults.CallStoredProcedure("sp_CompanyTasks", parameters.ToArray());
+
+            // Report header parameters
+            string companyName = MvcApplication.userData.companyName ?? "";
+            string startDateDisplay = "";
+            string endDateDisplay = "";
+            string reportPeriod = "";
+
+            if (!string.IsNullOrEmpty(model.fromDate) && !string.IsNullOrEmpty(model.toDate))
+            {
+                startDateDisplay = model.fromDate;
+                endDateDisplay = model.toDate;
+
+                DateTime fromDt;
+                DateTime toDt;
+                if (EtaskMinstry.MvcApplication.IsGregDate)
+                {
+                    fromDt = QvLib.QVUtil.Date.ConvertDate(model.fromDate).Value;
+                    toDt = QvLib.QVUtil.Date.ConvertDate(model.toDate).Value;
+                }
+                else
+                {
+                    fromDt = QvLib.QVUtil.Date.hijritodate(model.fromDate).Date;
+                    toDt = QvLib.QVUtil.Date.hijritodate(model.toDate).Date;
+                }
+
+                if (model.calendarType == 1)
+                {
+                    CultureInfo arCulture = new CultureInfo("ar-SA");
+                    arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+                    startDateDisplay = fromDt.ToString("yyyy/MM/dd");
+                    endDateDisplay = toDt.ToString("yyyy/MM/dd");
+                    reportPeriod = fromDt.ToString("MMMM yyyy", arCulture);
+                }
+                else
+                {
+                    CultureInfo hijriCulture = new CultureInfo("ar-SA");
+                    hijriCulture.DateTimeFormat.Calendar = new System.Globalization.UmAlQuraCalendar();
+                    startDateDisplay = fromDt.ToString("yyyy/MM/dd", hijriCulture);
+                    endDateDisplay = toDt.ToString("yyyy/MM/dd", hijriCulture);
+                    reportPeriod = fromDt.ToString("MMMM yyyy", hijriCulture);
+                }
+            }
+
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
+            ReportAgent.ReportParameters.Add(new ReportParameter("CompanyName", companyName));
+            ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", startDateDisplay));
+            ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", endDateDisplay));
+            ReportAgent.ReportParameters.Add(new ReportParameter("ReportPeriod", reportPeriod));
+            ReportAgent.ReportParameters.Add(new ReportParameter("CalendarType", model.calendarType.ToString()));
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_CompanyTasks", tasks));
             return Redirect("/Reports/CompanyTasks");
@@ -242,6 +293,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             }
             var tasks = _unitOfWork.SP_TotalEmployeeTasks_Result.CallStoredProcedure("sp_TotalEmployeeTasks", parameters.ToArray());
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_TotalEmployeeTasks", tasks));
           
