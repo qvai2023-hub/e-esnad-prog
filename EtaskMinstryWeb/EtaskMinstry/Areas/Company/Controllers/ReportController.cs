@@ -214,8 +214,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                 DateTime toDt;
                 if (EtaskMinstry.MvcApplication.IsGregDate)
                 {
-                    fromDt = QvLib.QVUtil.Date.ConvertDate(model.fromDate);
-                    toDt = QvLib.QVUtil.Date.ConvertDate(model.toDate);
+                    fromDt = QvLib.QVUtil.Date.ConvertDate(model.fromDate).Value;
+                    toDt = QvLib.QVUtil.Date.ConvertDate(model.toDate).Value;
                 }
                 else
                 {
