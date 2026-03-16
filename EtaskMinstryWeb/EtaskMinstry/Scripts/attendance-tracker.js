@@ -15,7 +15,7 @@
     var CONFIG = {
         HEARTBEAT_INTERVAL: 60000,        // 1 minute - send heartbeat
         INACTIVITY_WARNING: 30 * 60000,   // 30 minutes - show warning
-        INACTIVITY_TIMEOUT: 15 * 60000,   // 15 minutes after warning - auto checkout
+        INACTIVITY_TIMEOUT: 30 * 1000,    // 30 seconds after warning - auto checkout (countdown in modal)
         ACTIVITY_EVENTS: ['click', 'keypress', 'mousemove', 'scroll', 'touchstart']
     };
 
@@ -284,7 +284,7 @@
                     '<div class="modal-body text-center">' +
                         '<p class="lead">هل أنهيت عملك لليوم؟</p>' +
                         '<p>لم يتم اكتشاف أي نشاط منذ فترة.</p>' +
-                        '<p>سيتم تسجيل خروجك تلقائياً خلال: <strong id="inactivityCountdown">15:00</strong></p>' +
+                        '<p>سيتم تسجيل خروجك تلقائياً خلال: <strong id="inactivityCountdown">00:30</strong></p>' +
                     '</div>' +
                     '<div class="modal-footer justify-content-center">' +
                         '<button type="button" class="btn btn-success btn-lg" id="btnContinueWork">' +
