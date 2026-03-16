@@ -61,43 +61,6 @@
   </DataSets>
   <Body>
     <ReportItems>
-      <!-- Report Title - Above Table -->
-      <Textbox Name="ReportTitle">
-        <CanGrow>true</CanGrow>
-        <KeepTogether>true</KeepTogether>
-        <Paragraphs>
-          <Paragraph>
-            <TextRuns>
-              <TextRun>
-                <Value>تقرير الحضور والانصراف</Value>
-                <Style>
-                  <FontFamily>Arial</FontFamily>
-                  <FontSize>16pt</FontSize>
-                  <FontWeight>Bold</FontWeight>
-                  <Color>White</Color>
-                </Style>
-              </TextRun>
-            </TextRuns>
-            <Style>
-              <TextAlign>Center</TextAlign>
-            </Style>
-          </Paragraph>
-        </Paragraphs>
-        <Top>0cm</Top>
-        <Left>2.25cm</Left>
-        <Height>0.8cm</Height>
-        <Width>14.5cm</Width>
-        <Style>
-          <Border>
-            <Style>None</Style>
-          </Border>
-          <BackgroundColor>#3d85c6</BackgroundColor>
-          <VerticalAlign>Middle</VerticalAlign>
-          <PaddingLeft>2pt</PaddingLeft>
-          <PaddingRight>2pt</PaddingRight>
-        </Style>
-      </Textbox>
-
       <!-- Main Data Table with Employee Grouping -->
       <Tablix Name="AttendanceTablix">
         <TablixBody>
@@ -665,7 +628,7 @@
           </TablixMembers>
         </TablixRowHierarchy>
         <DataSetName>DS_attendance</DataSetName>
-        <Top>1cm</Top>
+        <Top>0cm</Top>
         <Left>2.25cm</Left>
         <Height>2.5cm</Height>
         <Width>14.5cm</Width>
@@ -697,7 +660,7 @@
             </Style>
           </Paragraph>
         </Paragraphs>
-        <Top>4cm</Top>
+        <Top>3cm</Top>
         <Left>0cm</Left>
         <Height>0.7cm</Height>
         <Width>19cm</Width>
@@ -731,7 +694,7 @@
             </Style>
           </Paragraph>
         </Paragraphs>
-        <Top>4.8cm</Top>
+        <Top>3.8cm</Top>
         <Left>0cm</Left>
         <Height>0.5cm</Height>
         <Width>19cm</Width>
@@ -742,31 +705,49 @@
         </Style>
       </Textbox>
     </ReportItems>
-    <Height>5.5cm</Height>
+    <Height>4.5cm</Height>
     <Style />
   </Body>
   <Width>19cm</Width>
   <Page>
     <PageHeader>
-      <Height>3.8cm</Height>
+      <Height>4.5cm</Height>
       <PrintOnFirstPage>true</PrintOnFirstPage>
       <PrintOnLastPage>true</PrintOnLastPage>
       <ReportItems>
-        <Image Name="Logo">
-          <Source>External</Source>
-          <Value>=Parameters!LogoUrl.Value</Value>
-          <Sizing>FitProportional</Sizing>
+        <!-- TELE SAK - Application Name (Top Right) -->
+        <Textbox Name="HeaderAppName">
+          <CanGrow>true</CanGrow>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>TELE SAK</Value>
+                  <Style>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>14pt</FontSize>
+                    <FontWeight>Bold</FontWeight>
+                    <Color>#3d85c6</Color>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style>
+                <TextAlign>Right</TextAlign>
+              </Style>
+            </Paragraph>
+          </Paragraphs>
           <Top>0.2cm</Top>
-          <Left>8cm</Left>
-          <Height>1.5cm</Height>
-          <Width>3cm</Width>
+          <Left>12cm</Left>
+          <Height>0.6cm</Height>
+          <Width>7cm</Width>
           <Style>
             <Border>
               <Style>None</Style>
             </Border>
+            <PaddingRight>5pt</PaddingRight>
           </Style>
-        </Image>
-        <!-- Company Name in Header -->
+        </Textbox>
+        <!-- Company Name (Below App Name - Right) -->
         <Textbox Name="HeaderCompanyName">
           <CanGrow>true</CanGrow>
           <Paragraphs>
@@ -776,7 +757,69 @@
                   <Value>=First(Fields!companyName.Value, "DS_attendance")</Value>
                   <Style>
                     <FontFamily>Arial</FontFamily>
-                    <FontSize>14pt</FontSize>
+                    <FontSize>12pt</FontSize>
+                    <FontWeight>Bold</FontWeight>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style>
+                <TextAlign>Right</TextAlign>
+              </Style>
+            </Paragraph>
+          </Paragraphs>
+          <Top>0.8cm</Top>
+          <Left>12cm</Left>
+          <Height>0.6cm</Height>
+          <Width>7cm</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <PaddingRight>5pt</PaddingRight>
+          </Style>
+        </Textbox>
+        <!-- Report Period/Month (Top Left) -->
+        <Textbox Name="HeaderMonth">
+          <CanGrow>true</CanGrow>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>=IIF(IsNothing(Parameters!ReportPeriod.Value) Or Len(CStr(Parameters!ReportPeriod.Value)) = 0, "", Parameters!ReportPeriod.Value)</Value>
+                  <Style>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>12pt</FontSize>
+                    <FontWeight>Bold</FontWeight>
+                  </Style>
+                </TextRun>
+              </TextRuns>
+              <Style>
+                <TextAlign>Left</TextAlign>
+              </Style>
+            </Paragraph>
+          </Paragraphs>
+          <Top>0.5cm</Top>
+          <Left>0cm</Left>
+          <Height>0.6cm</Height>
+          <Width>7cm</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+            <PaddingLeft>5pt</PaddingLeft>
+          </Style>
+        </Textbox>
+        <!-- Report Title (Center) -->
+        <Textbox Name="HeaderReportTitle">
+          <CanGrow>true</CanGrow>
+          <Paragraphs>
+            <Paragraph>
+              <TextRuns>
+                <TextRun>
+                  <Value>تقرير الحضور والانصراف</Value>
+                  <Style>
+                    <FontFamily>Arial</FontFamily>
+                    <FontSize>16pt</FontSize>
                     <FontWeight>Bold</FontWeight>
                   </Style>
                 </TextRun>
@@ -826,6 +869,20 @@
             </Border>
           </Style>
         </Textbox>
+        <!-- Separator Line -->
+        <Line Name="HeaderSeparator">
+          <Top>3.5cm</Top>
+          <Left>0cm</Left>
+          <Height>0cm</Height>
+          <Width>19cm</Width>
+          <Style>
+            <Border>
+              <Color>#cccccc</Color>
+              <Style>Solid</Style>
+              <Width>1pt</Width>
+            </Border>
+          </Style>
+        </Line>
       </ReportItems>
       <Style>
         <Border>
