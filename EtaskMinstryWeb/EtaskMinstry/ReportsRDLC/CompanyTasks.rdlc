@@ -818,38 +818,6 @@
                 <PaddingRight>5pt</PaddingRight>
               </Style>
             </Textbox>
-            <!-- Date Range (Left, below report title area) -->
-            <Textbox Name="HeaderDateRange">
-              <CanGrow>true</CanGrow>
-              <Paragraphs>
-                <Paragraph>
-                  <TextRuns>
-                    <TextRun>
-                      <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "", "من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
-                      <Style>
-                        <FontFamily>janna LT</FontFamily>
-                        <FontSize>9pt</FontSize>
-                        <Color>#555555</Color>
-                      </Style>
-                    </TextRun>
-                  </TextRuns>
-                  <Style>
-                    <TextAlign>Left</TextAlign>
-                  </Style>
-                </Paragraph>
-              </Paragraphs>
-              <Top>0.42in</Top>
-              <Left>0in</Left>
-              <Height>0.25in</Height>
-              <Width>4in</Width>
-              <ZIndex>3</ZIndex>
-              <Style>
-                <Border>
-                  <Style>None</Style>
-                </Border>
-                <PaddingLeft>5pt</PaddingLeft>
-              </Style>
-            </Textbox>
             <!-- Separator Line -->
             <Line Name="HeaderSeparator">
               <Top>1.3in</Top>
@@ -873,7 +841,7 @@
           </Style>
         </PageHeader>
         <PageFooter>
-          <Height>0.5in</Height>
+          <Height>0.7in</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
@@ -949,6 +917,39 @@
                   <Style>None</Style>
                 </Border>
                 <PaddingRight>5pt</PaddingRight>
+              </Style>
+            </Textbox>
+            <!-- Date Range -->
+            <Textbox Name="FooterDateRange">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "", "من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
+                      <Style>
+                        <FontFamily>janna LT</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <Color>#888888</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>FooterDateRange</rd:DefaultName>
+              <Top>0.38in</Top>
+              <Left>0in</Left>
+              <Height>0.25in</Height>
+              <Width>7.76042in</Width>
+              <ZIndex>2</ZIndex>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
               </Style>
             </Textbox>
           </ReportItems>
