@@ -85,20 +85,19 @@ namespace EtaskMinstry.Models.Company
         }
 
 /// <summary>
-/// Search Tasks .
+/// Search Tasks (backward-compatible single employee filter).
 /// </summary>
-/// <param name="strTitle"></param>
-/// <param name="FromStartDate"></param>
-/// <param name="ToStartDate"></param>
-/// <param name="FromEndDate"></param>
-/// <param name="ToEndDate"></param>
-/// <param name="iStatus"></param>
-/// <param name="iEmpolyee"></param>
-/// <param name="bIsArchived"></param>
-/// <param name="bIsNotAssigned"></param>
-/// <param name="iProjectID"></param>
-/// <param name="PriorityID"></param>
-/// <returns></returns>
+        public List<CompanyTaskVM> Select(String strTitle, String FromStartDate, String ToStartDate, String FromEndDate,
+                                          String ToEndDate, int iStatus, int? iEmpolyee, Boolean? bIsArchived,
+                                          Boolean? bIsNotAssigned, int iProjectID, int PriorityID)
+        {
+            int[] empIds = (iEmpolyee.HasValue && iEmpolyee.Value > 0) ? new[] { iEmpolyee.Value } : null;
+            return Select(strTitle, FromStartDate, ToStartDate, FromEndDate, ToEndDate, iStatus, empIds, bIsArchived, bIsNotAssigned, iProjectID, PriorityID);
+        }
+
+/// <summary>
+/// Search Tasks (multi-employee filter).
+/// </summary>
         public List<CompanyTaskVM> Select(String strTitle, String FromStartDate, String ToStartDate, String FromEndDate,
                                           String ToEndDate, int iStatus, int[] empIds, Boolean? bIsArchived,
                                           Boolean? bIsNotAssigned, int iProjectID, int PriorityID)
