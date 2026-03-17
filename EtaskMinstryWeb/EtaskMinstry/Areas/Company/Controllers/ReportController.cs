@@ -229,7 +229,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
                     arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
                     startDateDisplay = fromDt.ToString("yyyy/MM/dd");
                     endDateDisplay = toDt.ToString("yyyy/MM/dd");
-                    reportPeriod = fromDt.ToString("MMMM yyyy", arCulture);
+                    reportPeriod = "شهر " + fromDt.ToString("MMMM yyyy", arCulture);
                 }
                 else
                 {
@@ -237,7 +237,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
                     hijriCulture.DateTimeFormat.Calendar = new System.Globalization.UmAlQuraCalendar();
                     startDateDisplay = fromDt.ToString("yyyy/MM/dd", hijriCulture);
                     endDateDisplay = toDt.ToString("yyyy/MM/dd", hijriCulture);
-                    reportPeriod = fromDt.ToString("MMMM yyyy", hijriCulture);
+                    reportPeriod = "شهر " + fromDt.ToString("MMMM yyyy", hijriCulture);
                 }
             }
 

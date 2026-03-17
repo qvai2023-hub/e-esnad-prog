@@ -70,6 +70,31 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ## Sprint 0 - Attendance Report Improvements
 
+### A-05: Report Header Redesign & Inactivity Timeout
+**Status:** Completed
+**Date Completed:** 2026-03-16
+
+#### Files Modified:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/ReportsRDLC/Attendance.rdlc` | Modified | Redesigned page header layout |
+| `EtaskMinstry/Scripts/attendance-tracker.js` | Modified | Increased inactivity popup timeout |
+
+#### Report Changes:
+- Added "TELE SAK" app name (top right, blue #3d85c6)
+- Company name below app name (right aligned)
+- Report period/month (top left) - e.g., "يناير 2026"
+- Report title centered
+- Date range "من X إلى Y" below title
+- Added separator line before table
+- Removed duplicate title from body
+
+#### Attendance Tracker Changes:
+- Changed `INACTIVITY_TIMEOUT` to 2 minutes
+- Employees now have 2 minutes to respond to inactivity warning before auto-checkout
+
+---
+
 ### A-03: Professional Report Format
 **Status:** Completed
 **Date Completed:** 2026-03-08

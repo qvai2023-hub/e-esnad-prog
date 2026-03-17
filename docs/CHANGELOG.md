@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed - Attendance Report Header Redesign (Session a05)
+
+#### Reports
+- **Attendance.rdlc**: Redesigned page header layout
+  - Added "TELE SAK" app name (top right, blue color)
+  - Company name moved below app name (right aligned)
+  - Report period/month added (top left) - e.g., "يناير 2026"
+  - Report title centered
+  - Date range below title - "من X إلى Y"
+  - Added separator line before table
+  - Removed duplicate title from body section
+
+#### Scripts
+- **attendance-tracker.js**: Increased inactivity popup timeout
+  - Changed `INACTIVITY_TIMEOUT` to 2 minutes (was 30 seconds)
+  - Employees now have 2 minutes to respond before auto-checkout
 ### Fixed - CompanyTasks Report XML (Session haj1c)
 
 #### Reports
