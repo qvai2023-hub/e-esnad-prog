@@ -96,7 +96,37 @@ namespace EtaskMinstry.Services
                 }
             }
             var data = _unitOfWork.Sp_AttendanceResult.CallStoredProcedure("sp_Attendance", parameters.ToArray());
+
+            // Convert times to 12-hour format with Arabic AM/PM
+            foreach (var row in data)
+            {
+                row.CheckInTime = ConvertTo12HourArabic(row.CheckInTime);
+                row.CheckOutTime = ConvertTo12HourArabic(row.CheckOutTime);
+            }
+
             return data;
+        }
+
+        private string ConvertTo12HourArabic(string time24)
+        {
+            if (string.IsNullOrEmpty(time24))
+                return time24;
+
+            DateTime dt;
+            if (!DateTime.TryParseExact(time24.Trim(), new[] { "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss" },
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                return time24;
+
+            int hour = dt.Hour;
+            int minute = dt.Minute;
+            string period = hour < 12 ? "ص" : "م";
+
+            if (hour == 0)
+                hour = 12;
+            else if (hour > 12)
+                hour = hour - 12;
+
+            return hour.ToString("D2") + ":" + minute.ToString("D2") + " " + period;
         }
 
     }

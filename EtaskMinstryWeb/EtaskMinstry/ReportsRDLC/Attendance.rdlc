@@ -193,13 +193,13 @@
                 </TablixCell>
                 <TablixCell>
                   <CellContents>
-                    <Textbox Name="HeaderCheckIn">
+                    <Textbox Name="HeaderCheckOut">
                       <CanGrow>true</CanGrow>
                       <Paragraphs>
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>الحضور</Value>
+                              <Value>الانصراف</Value>
                               <Style>
                                 <FontFamily>Arial</FontFamily>
                                 <FontSize>10pt</FontSize>
@@ -227,13 +227,13 @@
                 </TablixCell>
                 <TablixCell>
                   <CellContents>
-                    <Textbox Name="HeaderCheckOut">
+                    <Textbox Name="HeaderCheckIn">
                       <CanGrow>true</CanGrow>
                       <Paragraphs>
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>الانصراف</Value>
+                              <Value>الحضور</Value>
                               <Style>
                                 <FontFamily>Arial</FontFamily>
                                 <FontSize>10pt</FontSize>
@@ -440,13 +440,13 @@
                 </TablixCell>
                 <TablixCell>
                   <CellContents>
-                    <Textbox Name="CheckInTime">
+                    <Textbox Name="CheckOutTime">
                       <CanGrow>true</CanGrow>
                       <Paragraphs>
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Fields!CheckInTime.Value</Value>
+                              <Value>=Fields!CheckOutTime.Value</Value>
                               <Style>
                                 <FontFamily>Arial</FontFamily>
                                 <FontSize>10pt</FontSize>
@@ -471,13 +471,13 @@
                 </TablixCell>
                 <TablixCell>
                   <CellContents>
-                    <Textbox Name="CheckOutTime">
+                    <Textbox Name="CheckInTime">
                       <CanGrow>true</CanGrow>
                       <Paragraphs>
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Fields!CheckOutTime.Value</Value>
+                              <Value>=Fields!CheckInTime.Value</Value>
                               <Style>
                                 <FontFamily>Arial</FontFamily>
                                 <FontSize>10pt</FontSize>
