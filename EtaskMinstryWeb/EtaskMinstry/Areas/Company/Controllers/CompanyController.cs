@@ -30,7 +30,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
         public ActionResult Index(int s = 0, bool? isNotAssign = null, bool? isArchive = null)
         {
              EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
-             ViewData["CompanyTask"] = new CompanyTaskVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), 0, isArchive, isNotAssign, 0, 0);
+             ViewData["CompanyTask"] = new CompanyTaskVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), null, isArchive, isNotAssign, 0, 0);
 
             ViewBag.statuse = new SelectList(new StatusDisplay().Get().ToList(), "ID", "Name");
             ViewBag.Employee = new SelectList(EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployeeNotDeleted(MvcApplication.userData.userId), "id", "name");
@@ -289,12 +289,15 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult GetTasks(Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                      String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
+                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
+                                     int[] EmpIDs = null)
         {
+            // Support multi-employee filter: use EmpIDs array if provided, otherwise fall back to single EmpID
+            int[] empFilter = (EmpIDs != null && EmpIDs.Length > 0) ? EmpIDs : (EmpID > 0 ? new[] { EmpID } : null);
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
-                                                                             EmpID, bIsArchived, bIsNotAssigned,
+                                                                             empFilter, bIsArchived, bIsNotAssigned,
                                                                              (ProjectID == 0
                                                                                   ? Request.QueryString
                                                                                         ["ProjectID"].IntParse()
@@ -313,12 +316,14 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpGet]
         public ActionResult GetTasks(int? page, Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                     String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                    TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
+                                    TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
+                                    int[] EmpIDs = null)
         {
+            int[] empFilter = (EmpIDs != null && EmpIDs.Length > 0) ? EmpIDs : (EmpID > 0 ? new[] { EmpID } : null);
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
-                                                                             EmpID, bIsArchived, bIsNotAssigned,
+                                                                             empFilter, bIsArchived, bIsNotAssigned,
                                                                              (ProjectID == 0
                                                                                   ? Request.QueryString
                                                                                         ["ProjectID"].IntParse()
@@ -375,10 +380,17 @@ namespace EtaskMinstry.Areas.Company.Controllers
         {
             return new TaskManger().ChangePriority(TaskID, PriorityID);
         }
-        //[HttpPost]
-        //public Boolean Delete(int id)
-        //{
-        //    return new TaskManger().Delete(id);
-        //}
+
+        /// <summary>
+        /// Bulk Delete Tasks (New status only, max 500).
+        /// </summary>
+        /// <param name="taskIds">Array of Task IDs</param>
+        /// <returns>JSON with success/fail counts</returns>
+        [HttpPost]
+        public ActionResult BulkDelete(int[] taskIds)
+        {
+            var result = new CompanyTaskVM().BulkDelete(taskIds);
+            return Json(result);
+        }
     }
 }

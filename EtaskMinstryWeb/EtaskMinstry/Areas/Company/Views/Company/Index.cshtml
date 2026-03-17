@@ -191,12 +191,13 @@
 
                                         <label class="col-sm-4 control-label">الموظف: </label>
                                         <div class="col-sm-8">
-                                            @Html.DropDownList("EmpID", ViewBag.Employee as SelectList, "الكل",
+                                            @Html.ListBox("EmpIDs", ViewBag.Employee as SelectList,
                                                new
                                                {
-                                                   @id = "EmpID",
-                                                   Class = "form-control",
-
+                                                   @id = "EmpIDs",
+                                                   @class = "chzn-select chzn-rtl form-control",
+                                                   @multiple = "multiple",
+                                                   data_placeholder = "الكل"
                                                })
                                         </div>
                                     </div>
@@ -288,6 +289,19 @@
             @* --------------------------------------End Search Panel------------------------------------------- *@
 
       
+        @* ---------------------- Start Bulk Actions Toolbar ---------------------- *@
+        <div id="bulkActionsBar" style="display:none; padding:10px; margin-bottom:10px; background-color:#f5f5f5; border:1px solid #ddd; border-radius:4px;">
+            <span id="selectedCount" class="label label-info" style="font-size:14px; margin-left:10px;">0 مهمة محددة</span>
+            <button type="button" id="btnBulkDelete" class="btn btn-danger btn-sm">
+                <i class="fa fa-trash"></i> حذف المحدد
+            </button>
+            <button type="button" id="btnClearSelection" class="btn btn-default btn-sm">
+                <i class="fa fa-times"></i> إلغاء التحديد
+            </button>
+            <span class="text-muted" style="margin-right:15px; font-size:12px;">* يتم حذف المهام الجديدة فقط (الحد الأقصى 500)</span>
+        </div>
+        @* ---------------------- End Bulk Actions Toolbar ---------------------- *@
+
         @* --------------------  Start Partial Table Return With Result---------- *@
         <div id="divTasks" class="datatable-tasks">
             @{ Html.RenderPartial("PartialCompTask", (IEnumerable<EtaskMinstry.Models.Company.CompanyTaskVM>)ViewData["CompanyTask"]);}
@@ -382,6 +396,13 @@
                 yearRange: '1418:1450'
             });
         }
+
+        // Initialize Chosen multi-select for employees
+        $("#EmpIDs").chosen({
+            placeholder_text_multiple: "اختر الموظف",
+            no_results_text: "لا توجد نتائج",
+            width: "100%"
+        });
 
         /*$("#btnSearchToggle").click(function () {
 
@@ -519,6 +540,12 @@
             //$('.errorMsgStartDate').hide();
             //$('#ProjectID').val(0);
             window.location.href = "/Company/Company/index";
+        });
+
+        // Override form submit to include EmpIDs as hidden field
+        $('#SearchForm').on('submit', function () {
+            // Remove any previously added hidden EmpID fields
+            $(this).find('input[name="EmpIDs"]').not('#EmpIDs').remove();
         });
 
         //add validation rule to search name
@@ -694,7 +721,7 @@
         $(".tab").live('click', function(e) {
             debugger
             $('#strTitle').val('');
-            $('#EmpID').val(0);
+            $('#EmpIDs').val('').trigger('chosen:updated');
             $("#fromstartdate").val();
             $("#tostartdate").val();
             $("#fromenddate").val();
@@ -730,6 +757,105 @@
         console.log('copied text : ', copyText);
 
     });
+
+    // ==================== Bulk Delete Functions ====================
+    function updateBulkBar() {
+        var checked = $('#divTasks .chkTask:checked');
+        var count = checked.length;
+        if (count > 0) {
+            $('#bulkActionsBar').show();
+            $('#selectedCount').text(count + ' مهمة محددة');
+        } else {
+            $('#bulkActionsBar').hide();
+        }
+    }
+
+    // Select All checkbox
+    $(document).on('change', '#chkSelectAll', function () {
+        var isChecked = $(this).is(':checked');
+        $('#divTasks .chkTask').prop('checked', isChecked);
+        updateBulkBar();
+    });
+
+    // Individual checkbox
+    $(document).on('change', '.chkTask', function () {
+        var total = $('#divTasks .chkTask').length;
+        var checked = $('#divTasks .chkTask:checked').length;
+        $('#chkSelectAll').prop('checked', total === checked && total > 0);
+        updateBulkBar();
+    });
+
+    // Clear selection
+    $(document).on('click', '#btnClearSelection', function () {
+        $('#divTasks .chkTask').prop('checked', false);
+        $('#chkSelectAll').prop('checked', false);
+        updateBulkBar();
+    });
+
+    // Bulk Delete button
+    $(document).on('click', '#btnBulkDelete', function () {
+        var selectedIds = [];
+        $('#divTasks .chkTask:checked').each(function () {
+            selectedIds.push(parseInt($(this).val()));
+        });
+
+        if (selectedIds.length === 0) {
+            Notify("warning", "الرجاء تحديد مهمة واحدة على الأقل", 3000);
+            return;
+        }
+
+        if (selectedIds.length > 500) {
+            Notify("warning", "الحد الأقصى للحذف 500 مهمة", 3000);
+            return;
+        }
+
+        var bulkDeleteConfirmation = new Modal({
+            title: 'تأكيد الحذف',
+            message: 'هل أنت متأكد من حذف ' + selectedIds.length + ' مهمة؟<br><small class="text-muted">سيتم حذف المهام الجديدة فقط</small>',
+            type: 'confirm',
+            onAccept: function () {
+                $('#loadding').fadeIn();
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("BulkDelete", "Company")',
+                    data: JSON.stringify({ taskIds: selectedIds }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#loadding').fadeOut();
+                        if (data.error) {
+                            Notify("danger", data.error, 4000);
+                        } else {
+                            var msg = 'تم حذف ' + data.successCount + ' مهمة بنجاح';
+                            if (data.failCount > 0) msg += '، فشل حذف ' + data.failCount;
+                            if (data.skippedNotNew > 0) msg += '، تم تجاوز ' + data.skippedNotNew + ' (ليست جديدة)';
+                            Notify(data.successCount > 0 ? "success" : "warning", msg, 5000);
+                            $('#chkSelectAll').prop('checked', false);
+                            updateBulkBar();
+                            $("#btnSearch").click();
+                        }
+                    },
+                    error: function () {
+                        $('#loadding').fadeOut();
+                        Notify("danger", "حدث خطأ أثناء الحذف", 3000);
+                    }
+                });
+                bulkDeleteConfirmation.hide();
+            },
+            onCancel: function () {
+                bulkDeleteConfirmation.hide();
+            }
+        });
+        bulkDeleteConfirmation.show();
+    });
+
+    // Reset checkboxes when grid reloads (AJAX update)
+    $(document).ajaxComplete(function (event, xhr, settings) {
+        if (settings.url && settings.url.indexOf('GetTasks') > -1) {
+            updateBulkBar();
+        }
+    });
+    // ==================== End Bulk Delete Functions ====================
 
     function Archive(iTaskid) {
         debugger;

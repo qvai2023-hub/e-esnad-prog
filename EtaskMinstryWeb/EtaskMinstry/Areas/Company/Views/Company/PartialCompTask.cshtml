@@ -8,6 +8,9 @@
             var grid = new WebGrid(Model);
             var gridColumns = new List<WebGridColumn>();
 
+            gridColumns.Add(grid.Column("Select", header: "<input type='checkbox' id='chkSelectAll' title='تحديد الكل' />",
+                format: @<text><input type="checkbox" class="chkTask" value="@item.TaskID" data-statusid="@item.StatusID" /></text>, style: "text-center", canSort: false));
+
             gridColumns.Add(grid.Column("Task", "المهمة",
     @<text>  <strong>
             @Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)

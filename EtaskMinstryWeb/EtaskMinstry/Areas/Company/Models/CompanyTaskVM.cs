@@ -100,37 +100,40 @@ namespace EtaskMinstry.Models.Company
 /// <param name="PriorityID"></param>
 /// <returns></returns>
         public List<CompanyTaskVM> Select(String strTitle, String FromStartDate, String ToStartDate, String FromEndDate,
-                                          String ToEndDate, int iStatus, int? iEmpolyee, Boolean? bIsArchived,
+                                          String ToEndDate, int iStatus, int[] empIds, Boolean? bIsArchived,
                                           Boolean? bIsNotAssigned, int iProjectID, int PriorityID)
         {
             // Get Company Employees .
             List<EmployeeProfile> CompanyEmployee =EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployee (MvcApplication.userData.userId);
-           
+
     DateTime dtFromStartDate = new DateTime();
             DateTime dtToStartDate = new DateTime();
 
             if (!String.IsNullOrEmpty(FromStartDate))
                 dtFromStartDate =(MvcApplication.IsGregDate ?  FromStartDate.ToGregExactformate() : FromStartDate.ToGregExact()) ;
-               
+
 
             if (!String.IsNullOrEmpty(ToStartDate))
                 dtToStartDate =(MvcApplication.IsGregDate ?  ToStartDate.ToGregExactformate() : ToStartDate.ToGregExact());
-             
+
 
             DateTime dtFromEndDate = new DateTime();
             DateTime dtToEndDate = new DateTime();
 
             if (!String.IsNullOrEmpty(FromEndDate))
                 dtFromEndDate =(MvcApplication.IsGregDate ? FromEndDate.ToGregExactformate(): FromEndDate.ToGregExact());
-             
+
             if (!String.IsNullOrEmpty(ToEndDate))
-              dtToEndDate =(MvcApplication.IsGregDate ?  ToEndDate.ToGregExactformate() : ToEndDate.ToGregExact());              
-             
+              dtToEndDate =(MvcApplication.IsGregDate ?  ToEndDate.ToGregExactformate() : ToEndDate.ToGregExact());
+
 
             strTitle = strTitle.Trim().ToLower();
 
+            // Support multi-employee filter
+            bool hasEmpFilter = empIds != null && empIds.Length > 0;
+
             List<CompanyTaskVM> objTasks =
-                _unitOfWork.TaskRepository.Get(t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
+                _unitOfWork.TaskRepository.Get(t => (!hasEmpFilter || empIds.Contains(t.EmpID.HasValue ? t.EmpID.Value : 0))
                                                     &&
                                                     (!bIsNotAssigned.HasValue || t.EmpID == null)
                                                     &&
@@ -416,6 +419,85 @@ namespace EtaskMinstry.Models.Company
             return false;
         }
 
+
+        /// <summary>
+        /// Bulk Delete Tasks (New status only, max 500).
+        /// </summary>
+        /// <param name="taskIds">Array of Task IDs to delete</param>
+        /// <returns>Object with success count and fail count</returns>
+        public object BulkDelete(int[] taskIds)
+        {
+            int successCount = 0;
+            int failCount = 0;
+            int skippedNotNew = 0;
+
+            if (taskIds == null || taskIds.Length == 0)
+                return new { successCount = 0, failCount = 0, skippedNotNew = 0 };
+
+            // Enforce max batch size of 500
+            if (taskIds.Length > 500)
+                return new { successCount = 0, failCount = 0, skippedNotNew = 0, error = "الحد الأقصى للحذف 500 مهمة" };
+
+            foreach (var taskId in taskIds)
+            {
+                try
+                {
+                    var objTask = _unitOfWork.TaskRepository.GetByID(taskId);
+
+                    if (objTask == null || objTask.IsDeleted)
+                    {
+                        failCount++;
+                        continue;
+                    }
+
+                    // Only New tasks can be deleted
+                    if (objTask.StatusID != (int)TaskStatus.New)
+                    {
+                        skippedNotNew++;
+                        continue;
+                    }
+
+                    // Verify task belongs to current company
+                    if (objTask.CompanyID != MvcApplication.userData.CompanyId)
+                    {
+                        failCount++;
+                        continue;
+                    }
+
+                    if (objTask.EmpID.HasValue)
+                    {
+                        // Delete all attachments
+                        var objAttachments = objTask.Attachments.ToList();
+                        foreach (var objAttachment in objAttachments)
+                        {
+                            _unitOfWork.AttachmentRepository.Delete(objAttachment.AttachmentID);
+                            if (System.IO.File.Exists(
+                                HttpContext.Current.Server.MapPath("/Upload/Task/" + objAttachment.FileName)))
+                                System.IO.File.Delete(
+                                    HttpContext.Current.Server.MapPath("/Upload/Task/" + objAttachment.FileName));
+                        }
+
+                        // Delete all comments
+                        var objComments = objTask.TaskComments.ToList();
+                        foreach (var objComment in objComments)
+                            _unitOfWork.TaskCommentRepository.Delete(objComment.TaskCommentID);
+                    }
+
+                    AppCode.LogTask.Log(objTask, null, true);
+                    objTask.IsDeleted = true;
+                    _unitOfWork.TaskRepository.Update(objTask);
+                    _unitOfWork.Save();
+
+                    successCount++;
+                }
+                catch
+                {
+                    failCount++;
+                }
+            }
+
+            return new { successCount, failCount, skippedNotNew };
+        }
 
         #endregion
     }
