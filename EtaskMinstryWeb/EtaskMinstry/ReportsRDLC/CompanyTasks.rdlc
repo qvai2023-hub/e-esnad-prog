@@ -448,7 +448,7 @@
                         </Textbox>
                       </CellContents>
                     </TablixCell>
-                    <!-- Col 3: Interaction (color-coded based on ActualTime) -->
+                    <!-- Col 3: Interaction (color-coded based on Status) -->
                     <TablixCell>
                       <CellContents>
                         <Textbox Name="Interaction">
@@ -458,12 +458,12 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=IIF(IsNothing(Fields!ActualTime.Value) Or Fields!ActualTime.Value = 0, "غير متفاعل", "متفاعل")</Value>
+                                  <Value>=IIF(Fields!status.Value = "انتهت" Or Fields!status.Value = "معتمدة" Or Fields!status.Value = "مقبولة", "متفاعل", IIF(Fields!status.Value = "جارى العمل" Or Fields!status.Value = "معلقة" Or Fields!status.Value = "غير معتمدة" Or Fields!status.Value = "إعادة فتح", "تفاعل متوسط", "غير متفاعل"))</Value>
                                   <Style>
                                     <FontFamily>janna LT</FontFamily>
                                     <FontSize>9pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
-                                    <Color>=IIF(IsNothing(Fields!ActualTime.Value) Or Fields!ActualTime.Value = 0, "#c0392b", "#27ae60")</Color>
+                                    <Color>=IIF(Fields!status.Value = "انتهت" Or Fields!status.Value = "معتمدة" Or Fields!status.Value = "مقبولة", "#27ae60", IIF(Fields!status.Value = "جارى العمل" Or Fields!status.Value = "معلقة" Or Fields!status.Value = "غير معتمدة" Or Fields!status.Value = "إعادة فتح", "#e67e22", "#c0392b"))</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -478,7 +478,7 @@
                               <Color>LightGrey</Color>
                               <Style>Solid</Style>
                             </Border>
-                            <BackgroundColor>=IIF(IsNothing(Fields!ActualTime.Value) Or Fields!ActualTime.Value = 0, "#fdecea", "#eafaf1")</BackgroundColor>
+                            <BackgroundColor>=IIF(Fields!status.Value = "انتهت" Or Fields!status.Value = "معتمدة" Or Fields!status.Value = "مقبولة", "#eafaf1", IIF(Fields!status.Value = "جارى العمل" Or Fields!status.Value = "معلقة" Or Fields!status.Value = "غير معتمدة" Or Fields!status.Value = "إعادة فتح", "#fef5e7", "#fdecea"))</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -786,7 +786,7 @@
                 <PaddingRight>5pt</PaddingRight>
               </Style>
             </Textbox>
-            <!-- Report Period (Left) -->
+            <!-- Report Period (Right, under company name) -->
             <Textbox Name="HeaderMonth">
               <CanGrow>true</CanGrow>
               <Paragraphs>
@@ -802,23 +802,23 @@
                     </TextRun>
                   </TextRuns>
                   <Style>
-                    <TextAlign>Left</TextAlign>
+                    <TextAlign>Right</TextAlign>
                   </Style>
                 </Paragraph>
               </Paragraphs>
-              <Top>0.15in</Top>
-              <Left>0in</Left>
+              <Top>0.88in</Top>
+              <Left>4.5in</Left>
               <Height>0.25in</Height>
-              <Width>3in</Width>
+              <Width>3.26in</Width>
               <ZIndex>2</ZIndex>
               <Style>
                 <Border>
                   <Style>None</Style>
                 </Border>
-                <PaddingLeft>5pt</PaddingLeft>
+                <PaddingRight>5pt</PaddingRight>
               </Style>
             </Textbox>
-            <!-- Date Range (Center, below title area) -->
+            <!-- Date Range (Left, below report title area) -->
             <Textbox Name="HeaderDateRange">
               <CanGrow>true</CanGrow>
               <Paragraphs>
@@ -834,19 +834,20 @@
                     </TextRun>
                   </TextRuns>
                   <Style>
-                    <TextAlign>Center</TextAlign>
+                    <TextAlign>Left</TextAlign>
                   </Style>
                 </Paragraph>
               </Paragraphs>
-              <Top>0.95in</Top>
+              <Top>0.42in</Top>
               <Left>0in</Left>
               <Height>0.25in</Height>
-              <Width>7.76042in</Width>
+              <Width>4in</Width>
               <ZIndex>3</ZIndex>
               <Style>
                 <Border>
                   <Style>None</Style>
                 </Border>
+                <PaddingLeft>5pt</PaddingLeft>
               </Style>
             </Textbox>
             <!-- Separator Line -->
