@@ -30,7 +30,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
         public ActionResult Index(int s = 0, bool? isNotAssign = null, bool? isArchive = null)
         {
              EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
-             ViewData["CompanyTask"] = new CompanyTaskVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), null, isArchive, isNotAssign, 0, 0);
+             ViewData["CompanyTask"] = new CompanyTaskVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), 0, isArchive, isNotAssign, 0, 0);
 
             ViewBag.statuse = new SelectList(new StatusDisplay().Get().ToList(), "ID", "Name");
             ViewBag.Employee = new SelectList(EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployeeNotDeleted(MvcApplication.userData.userId), "id", "name");
@@ -292,16 +292,22 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                      TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
                                      int[] EmpIDs = null)
         {
-            // Support multi-employee filter: use EmpIDs array if provided, otherwise fall back to single EmpID
-            int[] empFilter = (EmpIDs != null && EmpIDs.Length > 0) ? EmpIDs : (EmpID > 0 ? new[] { EmpID } : null);
+            int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
+
+            // Multi-employee filter: get all tasks then filter by selected employees
+            if (EmpIDs != null && EmpIDs.Length > 0)
+            {
+                var allTasks = new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
+                                                          FromEndDate, ToEndDate, (int)iStatus,
+                                                          0, bIsArchived, bIsNotAssigned, projID, PriorityID);
+                var filtered = allTasks.Where(t => t.EmpID.HasValue && EmpIDs.Contains(t.EmpID.Value)).ToList();
+                return PartialView("PartialCompTask", filtered);
+            }
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
-                                                                             empFilter, bIsArchived, bIsNotAssigned,
-                                                                             (ProjectID == 0
-                                                                                  ? Request.QueryString
-                                                                                        ["ProjectID"].IntParse()
-                                                                                  : ProjectID), PriorityID));
+                                                                             EmpID, bIsArchived, bIsNotAssigned,
+                                                                             projID, PriorityID));
         }
 
 
@@ -319,15 +325,21 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
                                     int[] EmpIDs = null)
         {
-            int[] empFilter = (EmpIDs != null && EmpIDs.Length > 0) ? EmpIDs : (EmpID > 0 ? new[] { EmpID } : null);
+            int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
+
+            if (EmpIDs != null && EmpIDs.Length > 0)
+            {
+                var allTasks = new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
+                                                          FromEndDate, ToEndDate, (int)iStatus,
+                                                          0, bIsArchived, bIsNotAssigned, projID, PriorityID);
+                var filtered = allTasks.Where(t => t.EmpID.HasValue && EmpIDs.Contains(t.EmpID.Value)).ToList();
+                return PartialView("PartialCompTask", filtered);
+            }
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
-                                                                             empFilter, bIsArchived, bIsNotAssigned,
-                                                                             (ProjectID == 0
-                                                                                  ? Request.QueryString
-                                                                                        ["ProjectID"].IntParse()
-                                                                                  : ProjectID), PriorityID));
+                                                                             EmpID, bIsArchived, bIsNotAssigned,
+                                                                             projID, PriorityID));
         }
 
         //public ActionResult GetTasks(int? page, int iStatus = 0, bool? bIsNotAssigned = null, bool? bIsArchived = null)
@@ -389,8 +401,25 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public ActionResult BulkDelete(int[] taskIds)
         {
-            var result = new CompanyTaskVM().BulkDelete(taskIds);
-            return Json(result);
+            int successCount = 0;
+            int failCount = 0;
+
+            if (taskIds == null || taskIds.Length == 0)
+                return Json(new { successCount = 0, failCount = 0 });
+
+            if (taskIds.Length > 500)
+                return Json(new { successCount = 0, failCount = 0, error = "الحد الأقصى للحذف 500 مهمة" });
+
+            var vm = new CompanyTaskVM();
+            foreach (var taskId in taskIds)
+            {
+                if (vm.Delete(taskId))
+                    successCount++;
+                else
+                    failCount++;
+            }
+
+            return Json(new { successCount, failCount });
         }
     }
 }
