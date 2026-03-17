@@ -38,6 +38,7 @@ namespace EtaskMinstry.Areas.Company.Models
         public string toDate { get; set; }
         public string fromendDate { get; set; }
         public string toendDate { get; set; }
+        public int calendarType { get; set; }
         public List<StatusDisplay> chkStatus { get; set; }
         public List<PriorityDisplay> chkPriorities { get; set; }
 
@@ -46,6 +47,7 @@ namespace EtaskMinstry.Areas.Company.Models
         {
             ddlProjects = new SelectList(new ProjectDisplay().Get(),"ID","Name");
             ddlEmployees = new SelectList(new ManageEmployees().GetEmpsInCompany(MvcApplication.userData.userId), "userId", "userName");
+            calendarType = 1; // default: Gregorian (ميلادي)
             chkPriorities = new PriorityDisplay().Get();
             chkStatus = new StatusDisplay().Get();
         }
