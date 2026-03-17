@@ -18,8 +18,8 @@ All notable changes to this project will be documented in this file.
 
 #### Scripts
 - **attendance-tracker.js**: Increased inactivity popup timeout
-  - Changed `INACTIVITY_TIMEOUT` from 15 minutes to 30 seconds
-  - Gives employees more time to respond to the warning modal
+  - Changed `INACTIVITY_TIMEOUT` to 2 minutes (was 30 seconds)
+  - Employees now have 2 minutes to respond before auto-checkout
 
 ---
 

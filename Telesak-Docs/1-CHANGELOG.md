@@ -26,8 +26,8 @@ All notable changes to the TELE SAK project will be documented in this file.
 - Removed duplicate title from body
 
 #### Attendance Tracker Changes:
-- Changed `INACTIVITY_TIMEOUT` from 15 minutes to 30 seconds
-- Employees now have 30 seconds to respond to inactivity warning
+- Changed `INACTIVITY_TIMEOUT` to 2 minutes
+- Employees now have 2 minutes to respond to inactivity warning before auto-checkout
 
 ---
 
