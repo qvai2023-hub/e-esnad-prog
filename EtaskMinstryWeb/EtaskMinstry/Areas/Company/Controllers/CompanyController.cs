@@ -294,13 +294,19 @@ namespace EtaskMinstry.Areas.Company.Controllers
         {
             int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
 
-            // Multi-employee filter: get all tasks then filter by selected employees
+            // Multi-employee filter: call Select per employee, merge results
             if (EmpIDs != null && EmpIDs.Length > 0)
             {
-                var allTasks = new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
-                                                          FromEndDate, ToEndDate, (int)iStatus,
-                                                          0, bIsArchived, bIsNotAssigned, projID, PriorityID);
-                var filtered = allTasks.Where(t => t.EmpID.HasValue && EmpIDs.Contains(t.EmpID.Value)).ToList();
+                var vm = new CompanyTaskVM();
+                var allTasks = new List<CompanyTaskVM>();
+                foreach (var empId in EmpIDs)
+                {
+                    var tasks = vm.Select(strTitle, FromStartDate, ToStartDate,
+                                          FromEndDate, ToEndDate, (int)iStatus,
+                                          empId, bIsArchived, bIsNotAssigned, projID, PriorityID);
+                    allTasks.AddRange(tasks);
+                }
+                var filtered = allTasks.GroupBy(t => t.TaskID).Select(g => g.First()).OrderByDescending(t => t.TaskID).ToList();
                 return PartialView("PartialCompTask", filtered);
             }
 
@@ -329,10 +335,16 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
             if (EmpIDs != null && EmpIDs.Length > 0)
             {
-                var allTasks = new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
-                                                          FromEndDate, ToEndDate, (int)iStatus,
-                                                          0, bIsArchived, bIsNotAssigned, projID, PriorityID);
-                var filtered = allTasks.Where(t => t.EmpID.HasValue && EmpIDs.Contains(t.EmpID.Value)).ToList();
+                var vm = new CompanyTaskVM();
+                var allTasks = new List<CompanyTaskVM>();
+                foreach (var empId in EmpIDs)
+                {
+                    var tasks = vm.Select(strTitle, FromStartDate, ToStartDate,
+                                          FromEndDate, ToEndDate, (int)iStatus,
+                                          empId, bIsArchived, bIsNotAssigned, projID, PriorityID);
+                    allTasks.AddRange(tasks);
+                }
+                var filtered = allTasks.GroupBy(t => t.TaskID).Select(g => g.First()).OrderByDescending(t => t.TaskID).ToList();
                 return PartialView("PartialCompTask", filtered);
             }
 

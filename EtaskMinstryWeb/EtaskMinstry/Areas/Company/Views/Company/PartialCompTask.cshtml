@@ -8,8 +8,12 @@
             var grid = new WebGrid(Model);
             var gridColumns = new List<WebGridColumn>();
 
-            gridColumns.Add(grid.Column("Select", header: "<input type='checkbox' id='chkSelectAll' title='تحديد الكل' />",
+// Show checkbox column only for New tasks tab
+if (Model.All(i => i.StatusID == (int)TaskStatus.New))
+{
+            gridColumns.Add(grid.Column("Select", "تحديد",
                 format: @<text><input type="checkbox" class="chkTask" value="@item.TaskID" data-statusid="@item.StatusID" /></text>, style: "text-center", canSort: false));
+}
 
             gridColumns.Add(grid.Column("Task", "المهمة",
     @<text>  <strong>
@@ -469,6 +473,13 @@ else
 
     loadColor();
     applyClassesToWebGrid();
+
+    // Replace "تحديد" header text with select-all checkbox
+    $('#list table thead th').each(function () {
+        if ($.trim($(this).text()) === 'تحديد') {
+            $(this).html('<input type="checkbox" id="chkSelectAll" title="تحديد الكل" />');
+        }
+    });
 
       @*$("a[id^=delete_]").on('click', (function () {
             debugger;
