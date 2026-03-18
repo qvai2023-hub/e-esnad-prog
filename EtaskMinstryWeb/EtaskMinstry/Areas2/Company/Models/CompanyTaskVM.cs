@@ -130,7 +130,7 @@ namespace EtaskMinstry.Models.Company
             strTitle = strTitle.Trim().ToLower();
 
             List<CompanyTaskVM> objTasks =
-                _unitOfWork.TaskRepository.Get(t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
+                _unitOfWork.TaskRepository.Get(filter: t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
                                                     &&
                                                     (!bIsNotAssigned.HasValue || t.EmpID == null)
                                                     &&
@@ -163,7 +163,8 @@ namespace EtaskMinstry.Models.Company
                                                     && (iProjectID == 0 || t.ProjectID == iProjectID)
 
                                                     && (PriorityID == 0 ||
-                                                        t.PriorityID == PriorityID)   ).Select(t => new CompanyTaskVM()
+                                                        t.PriorityID == PriorityID),
+                                                    includeProperties: "Project,Status,Priority,TaskTLogs").Select(t => new CompanyTaskVM()
                                                             {
                                                                 TaskID = t.TaskID,
                                                                 Task =  t.Title,
@@ -258,17 +259,23 @@ namespace EtaskMinstry.Models.Company
             // To Get Only Delayed Task .
             else{
 
+                // Performance fix: batch-load task delay data instead of querying per task
+                var taskIds = objTasks.Select(t => t.TaskID).ToList();
+                var taskDelayData = _unitOfWork.TaskRepository
+                    .Get(filter: t => taskIds.Contains(t.TaskID))
+                    .ToDictionary(t => t.TaskID, t => new { t.isDelayed, t.delayTime, t.DelayPercentage });
+
                 objTasks.ForEach(t =>
                 {
                     t.ArabicFinishDate = (t.FinishDate.HasValue) ? (MvcApplication.IsGregDate) ? t.FinishDate.Value.ToGregArabicDate() : t.FinishDate.Value.ToHijriArabicDate() : String.Empty;
                     t.HijriStartDate = (t.StartDate.HasValue) ? (MvcApplication.IsGregDate) ? t.StartDate.Value.ToGregArabicDate() : t.StartDate.Value.ToHijriArabicDate() : String.Empty;
                     t.HijriEndDate = (t.EndDate.HasValue) ? (MvcApplication.IsGregDate) ? t.EndDate.Value.ToGregArabicDate() : t.EndDate.Value.ToHijriArabicDate() : String.Empty;
-                    t.IsDelayed = isTaskDelayed(t);
+                    t.IsDelayed = taskDelayData.ContainsKey(t.TaskID) && taskDelayData[t.TaskID].isDelayed;
                     t.EmpName = t.EmpID == null
                                     ? "غير مسنده" : (CompanyEmployee.Count(i => i.id == t.EmpID) > 0 ? CompanyEmployee.FirstOrDefault(i => i.id == t.EmpID).name : "-");
                    // t.Progressbar = ProgressbarPercentage(t);
                     t.SpendtimebyDay = TaskManger.SpendTimeByDay(t.WorkedHours);
-                    t.Delay = Delaytime(t);
+                    t.Delay = taskDelayData.ContainsKey(t.TaskID) ? taskDelayData[t.TaskID].delayTime : null;
 
                 });
 

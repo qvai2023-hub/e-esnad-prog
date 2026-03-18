@@ -74,7 +74,7 @@ namespace EtaskMinstry.AppCode
             UnitOfWork   _unitOfWork =
                 new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
 
-            List<Emps> lstallEmployees = _unitOfWork.Employees.Get().Where(e=>e.company_Id == companyId).Select(a => new Emps
+            List<Emps> lstallEmployees = _unitOfWork.Employees.Get(filter: e => e.company_Id == companyId).Select(a => new Emps
                 {
                     employee_Id = a.employee_Id,
                     emp_Name = a.Employee_Name,
