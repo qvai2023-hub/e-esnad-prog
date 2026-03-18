@@ -332,7 +332,8 @@ namespace EtaskMinstry.AppCode
                         {
                             TaskID = newTask.TaskID,
                             FileName = uploadedFiles[j].FileName,
-                            Description = uploadedFiles[j].Description
+                            Description = uploadedFiles[j].Description,
+                            OriginalFileName = uploadedFiles[j].OriginalFileName
                         };
 
                         new AttachmentDisplay().Insert(objAttachment);
