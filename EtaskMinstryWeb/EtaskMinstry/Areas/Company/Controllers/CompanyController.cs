@@ -292,26 +292,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult GetTasks(Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                      String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
-                                     int[] EmpIDs = null)
+                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
         {
             int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
-
-            // Multi-employee filter: call Select per employee, merge results
-            if (EmpIDs != null && EmpIDs.Length > 0)
-            {
-                var vm = new CompanyTaskVM();
-                var allTasks = new List<CompanyTaskVM>();
-                foreach (var empId in EmpIDs)
-                {
-                    var tasks = vm.Select(strTitle, FromStartDate, ToStartDate,
-                                          FromEndDate, ToEndDate, (int)iStatus,
-                                          empId, bIsArchived, bIsNotAssigned, projID, PriorityID);
-                    allTasks.AddRange(tasks);
-                }
-                var filtered = allTasks.GroupBy(t => t.TaskID).Select(g => g.First()).OrderByDescending(t => t.TaskID).ToList();
-                return PartialView("PartialCompTask", filtered);
-            }
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
@@ -331,25 +314,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpGet]
         public ActionResult GetTasks(int? page, Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                     String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                    TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
-                                    int[] EmpIDs = null)
+                                    TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
         {
             int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
-
-            if (EmpIDs != null && EmpIDs.Length > 0)
-            {
-                var vm = new CompanyTaskVM();
-                var allTasks = new List<CompanyTaskVM>();
-                foreach (var empId in EmpIDs)
-                {
-                    var tasks = vm.Select(strTitle, FromStartDate, ToStartDate,
-                                          FromEndDate, ToEndDate, (int)iStatus,
-                                          empId, bIsArchived, bIsNotAssigned, projID, PriorityID);
-                    allTasks.AddRange(tasks);
-                }
-                var filtered = allTasks.GroupBy(t => t.TaskID).Select(g => g.First()).OrderByDescending(t => t.TaskID).ToList();
-                return PartialView("PartialCompTask", filtered);
-            }
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
