@@ -13,6 +13,7 @@ namespace EtaskMinstry.Models.Attachment
         public int ID { get; set; }
         public String FileName { get; set; }
         public String Description { get; set; }
+        public String OriginalFileName { get; set; }
 
         public int? TaskID { get; set; }
         public int? CommentID { get; set; }
@@ -40,7 +41,8 @@ namespace EtaskMinstry.Models.Attachment
                                   {
                                       ID = i.AttachmentID,
                                       FileName = i.FileName,
-                                      Description = i.Description
+                                      Description = i.Description,
+                                      OriginalFileName = i.OriginalFileName
                                   })
                               .ToList();
         }
@@ -57,6 +59,7 @@ namespace EtaskMinstry.Models.Attachment
                                   ID = i.AttachmentID,
                                   FileName = i.FileName,
                                   Description = i.Description,
+                                  OriginalFileName = i.OriginalFileName,
                                   TaskID = i.TaskID,
                               }).FirstOrDefault(
                                       i => i.FileName == strFileName);
@@ -72,6 +75,7 @@ namespace EtaskMinstry.Models.Attachment
                 {
                     Description = obj.Description,
                     FileName = obj.FileName,
+                    OriginalFileName = obj.OriginalFileName,
                     TaskID = obj.TaskID
                 });
             _unitOfWork.Save();
@@ -101,6 +105,7 @@ namespace EtaskMinstry.Models.Attachment
                                   ID = i.AttachmentID,
                                   FileName = i.FileName,
                                   Description = i.Description,
+                                  OriginalFileName = i.OriginalFileName,
                                   TaskID = i.TaskID,
                               }).FirstOrDefault(
                                       i => i.ID == id);

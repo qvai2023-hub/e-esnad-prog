@@ -578,7 +578,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                     {
                                         TaskID = iTaskID,
                                         FileName = fileName,
-                                        Description = objDescription[i]
+                                        Description = objDescription[i],
+                                        OriginalFileName = Extentions.SanitizeFileName(Request.Files[i].FileName)
                                     };
 
                                     new AttachmentDisplay().Insert(objAttachment);
@@ -604,6 +605,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             else
             {
                 List<string> uploadedFiles = new List<string>();
+                List<string> originalFileNames = new List<string>();
                 for (int i = 0; i < Request.Files.Count - 1; i++)
                 {
                     if (Request.Files[i].ContentLength > 0)
@@ -624,6 +626,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                                   Path.GetExtension(Request.Files[i].FileName);
                                 Request.Files[i].SaveAs(Server.MapPath("/Upload/Task/" + strFileName));
                                 uploadedFiles.Add(strFileName);
+                                originalFileNames.Add(Extentions.SanitizeFileName(Request.Files[i].FileName));
                             }
                         }
                     }
@@ -666,7 +669,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                             {
                                 TaskID = iTaskID,
                                 FileName = uploadedFiles[j],
-                                Description = objDescription[j]
+                                Description = objDescription[j],
+                                OriginalFileName = j < originalFileNames.Count ? originalFileNames[j] : null
                             };
 
                             new AttachmentDisplay().Insert(objAttachment);

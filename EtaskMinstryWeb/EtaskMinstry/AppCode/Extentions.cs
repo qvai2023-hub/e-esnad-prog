@@ -18,6 +18,21 @@ namespace EtaskMinstry
 {
     public static class Extentions
     {
+        public static string SanitizeFileName(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return null;
+            // Get just the file name (remove any path)
+            fileName = System.IO.Path.GetFileName(fileName);
+            // Remove dangerous path characters
+            char[] invalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
+            foreach (var c in invalidChars)
+                fileName = fileName.Replace(c.ToString(), "");
+            // Truncate to 200 chars
+            if (fileName.Length > 200)
+                fileName = fileName.Substring(0, 200);
+            return string.IsNullOrWhiteSpace(fileName) ? null : fileName;
+        }
+
         public static string ToHijriArabicDate(this DateTime dt)
         {
             CultureInfo higri_format = new CultureInfo("ar-SA");

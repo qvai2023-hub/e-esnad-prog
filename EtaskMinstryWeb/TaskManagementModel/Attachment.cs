@@ -17,6 +17,7 @@ namespace TaskManagementModel
         public int AttachmentID { get; set; }
         public string FileName { get; set; }
         public string Description { get; set; }
+        public string OriginalFileName { get; set; }
         public Nullable<int> TaskID { get; set; }
     
         public virtual Task Task { get; set; }

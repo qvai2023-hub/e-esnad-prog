@@ -132,7 +132,7 @@
                 {
                 <tr>
                     <td width="15%" class="srch-lbl">الملف :</td>
-                    <td width="85%">@Html.ActionLink(attach.FileName, "DownloadAttachment", new { fileName = attach.FileName })    </td>
+                    <td width="85%">@Html.ActionLink(attach.OriginalFileName ?? attach.FileName, "DownloadAttachment", new { fileName = attach.FileName })    </td>
                 </tr>
                 <tr class="desc-row">
                     <td class="srch-lbl">الوصف :</td>

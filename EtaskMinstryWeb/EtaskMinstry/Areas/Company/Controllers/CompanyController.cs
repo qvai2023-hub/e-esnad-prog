@@ -242,11 +242,12 @@ namespace EtaskMinstry.Areas.Company.Controllers
             int Taskid = int.Parse(Request.Form["taskID"]);
             //if (Extentions.ValidateReCaptcha())
             //{
+                string originalFileName = Request.Files.Count > 0 ? Extentions.SanitizeFileName(Request.Files[0].FileName) : null;
                 string filename = new EtaskMinstry.AppCode.UploadFile().Uploadfile(Request,"/Upload/Task/");
                 if (filename != "FAILED")
                 {
                     var description = Request.Form["txtFileDescription"];
-                    EtaskMinstry.AppCode.TaskManger.AttachTaskFile(Taskid, filename, description);
+                    EtaskMinstry.AppCode.TaskManger.AttachTaskFile(Taskid, filename, description, originalFileName);
                     return RedirectToAction("TaskDetails", new { id = Taskid, isAttach = 1 });
                 }
                 else
@@ -265,7 +266,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
         {
             try
             {
-                return File(Server.MapPath("/Upload/Task/" + fileName), "application/octet-stream", fileName);
+                var attachDisplay = new EtaskMinstry.Models.Attachment.AttachmentDisplay().GetAttachment(fileName);
+                string downloadName = (attachDisplay != null && !string.IsNullOrEmpty(attachDisplay.OriginalFileName)) ? attachDisplay.OriginalFileName : fileName;
+                return File(Server.MapPath("/Upload/Task/" + fileName), "application/octet-stream", downloadName);
             }
             catch
             {
