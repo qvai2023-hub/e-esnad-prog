@@ -264,7 +264,7 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label text-right">الملف:</label>
                                         <div class="col-sm-6">
-                                            <a href="~/Upload/Task/@attachment.FileName" style="font-size:15px;" target="_blank">@attachment.FileName</a>
+                                            <a href="~/Upload/Task/@attachment.FileName" style="font-size:15px;" target="_blank">@(attachment.OriginalFileName ?? attachment.FileName)</a>
                                         </div>
                                         <div class="col-sm-2">
                                             <a href="javascript:void(0);" class="Delete-icon deleteFile NewFile" title="حذف" style="float:left;" id="@attachment.AttachmentID"></a>

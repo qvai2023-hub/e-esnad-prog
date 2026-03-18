@@ -203,7 +203,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                             {
                                                 TaskID = iTaskID,
                                                 FileName = fileName,
-                                                Description = objDescription[i]
+                                                Description = objDescription[i],
+                                                OriginalFileName = Extentions.SanitizeFileName(Request.Files[i].FileName)
                                             };
 
                                         new AttachmentDisplay().Insert(objAttachment);

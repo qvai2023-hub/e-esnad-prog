@@ -272,7 +272,7 @@
                                     <tr>
                                         <td width="15%" class="srch-lbl">الملف :</td>
                                         <td width="85%">
-                                            <a href="javascript:void(0);" style="font-size: 15px;">@attachment.FileName</a>
+                                            <a href="javascript:void(0);" style="font-size: 15px;">@(attachment.OriginalFileName ?? attachment.FileName)</a>
                                             <a href="javascript:void(0);" class="Delete-icon deleteFile NewFile" title="حذف" style="float: left;"></a>
                                             </td>
                                     </tr>
