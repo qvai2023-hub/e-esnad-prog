@@ -1118,15 +1118,16 @@ namespace EtaskMinstry.AppCode
         /// <param name="strfileName"></param>
         /// <param name="strDescription"></param>
         /// <returns></returns>
-        public static bool AttachTaskFile(int iTaskId, string strfileName, string strDescription)
+        public static bool AttachTaskFile(int iTaskId, string strfileName, string strDescription, string strOriginalFileName = null)
         {
-            //Define Unit ofWork 
+            //Define Unit ofWork
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskId);
             Attachment objAttachment = new TaskManagementModel.Attachment()
             {
                 Description = strDescription,
                 FileName = strfileName,
+                OriginalFileName = strOriginalFileName,
                 TaskID = iTaskId
             };
             _unitOfWork.AttachmentRepository.Insert(objAttachment);

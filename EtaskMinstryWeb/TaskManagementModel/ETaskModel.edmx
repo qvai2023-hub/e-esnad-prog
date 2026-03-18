@@ -12,6 +12,7 @@
           <Property Name="AttachmentID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="FileName" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="350" />
+          <Property Name="OriginalFileName" Type="nvarchar" MaxLength="255" />
           <Property Name="TaskID" Type="int" />
         </EntityType>
         <EntityType Name="Attendance">
@@ -1183,6 +1184,7 @@ FROM [dbo].[TotalLog] AS [TotalLog]</DefiningQuery>
           <Property Type="String" Name="FileName" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Description" MaxLength="350" FixedLength="false" Unicode="true" />
           <Property Type="Int32" Name="TaskID" />
+          <Property Type="String" Name="OriginalFileName" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Task" Relationship="EtaskMinstryModel.FK_Attachment_Task" FromRole="Attachment" ToRole="Task" />
         </EntityType>
         <EntityType Name="CommentStatu">
@@ -2116,6 +2118,7 @@ FROM [dbo].[TotalLog] AS [TotalLog]</DefiningQuery>
             <EntityTypeMapping TypeName="EtaskMinstryModel.Attachment">
               <MappingFragment StoreEntitySet="Attachment">
                 <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+                <ScalarProperty Name="OriginalFileName" ColumnName="OriginalFileName" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="FileName" ColumnName="FileName" />
                 <ScalarProperty Name="AttachmentID" ColumnName="AttachmentID" />
