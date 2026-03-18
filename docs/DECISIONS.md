@@ -257,6 +257,82 @@ Add التفاعل (Interaction) column to CompanyTasks report, sourced from upd
 
 ---
 
+---
+
+## Sprint 4 Decisions
+
+### DEC-012: Eager Loading via includeProperties for Task Lists
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+Task list pages (`CompanyTaskVM.Select()`, `EmployeeTaskListVM.FillTasks()`) were triggering N+1 lazy-loading queries for navigation properties like Project, Status, Priority, and TaskTLogs. Each task rendered caused additional DB roundtrips.
+
+### Decision
+Add `includeProperties` parameter to `Get()` calls to eager-load required navigation properties in a single query.
+
+### Rationale
+- Eliminates hundreds of lazy-load queries per page load
+- `includeProperties` is already supported by the repository's `Get()` method
+- No schema or model changes required
+- Minimal code change with large performance gain
+
+### Implementation
+- `CompanyTaskVM`: `includeProperties: "Project,Status,Priority,TaskTLogs"`
+- `EmployeeTaskListVM`: `includeProperties: "Project,Priority,Status,TaskTLogs,TaskTLogs.Status"`
+
+---
+
+### DEC-013: Batch Dictionary Lookup for Task Delay Data
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+In `CompanyTaskVM.Select()`, the `else` branch (delayed tasks) called `isTaskDelayed(t)` and `Delaytime(t)` per task inside `ForEach`. Each method called `GetByID()`, causing N extra queries.
+
+### Decision
+Fetch all needed task delay data (isDelayed, delayTime, DelayPercentage) in a single batch query using a `Dictionary<int, ...>` keyed by TaskID, then perform O(1) lookups inside the loop.
+
+### Rationale
+- Replaces N queries with 1 query
+- Dictionary lookups are O(1)
+- No changes to DB schema or stored procedures
+- Same data, dramatically fewer roundtrips
+
+### Implementation
+```csharp
+var taskIds = objTasks.Select(t => t.TaskID).ToList();
+var taskDelayData = _unitOfWork.TaskRepository
+    .Get(filter: t => taskIds.Contains(t.TaskID))
+    .ToDictionary(t => t.TaskID, t => new { t.isDelayed, t.delayTime, t.DelayPercentage });
+// Then: taskDelayData[t.TaskID].isDelayed instead of isTaskDelayed(t)
+```
+
+---
+
+### DEC-014: Server-Side Filtering for GetAllEmployees
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+`ServiceManger.GetAllEmployees()` called `_unitOfWork.Employees.Get()` (no filter), loading ALL employees into memory, then filtered with `.Where(e => e.company_Id == companyId)` client-side.
+
+### Decision
+Pass the filter directly into `Get(filter:)` so EF translates it to a SQL WHERE clause.
+
+### Rationale
+- Avoids loading entire employee table into memory
+- Significantly reduces data transfer and memory usage
+- Single-line fix with no behavioral change
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports

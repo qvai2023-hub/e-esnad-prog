@@ -3,9 +3,60 @@
 ## Current Status
 
 ```
+Sprint 4: ████████████████████ 100% Complete
+Sprint 3: ████████████████████ 100% Complete
 Sprint 1: ████████████████████ 100% Complete
 Sprint 0: ████████████████████ 100% Complete
 ```
+
+---
+
+## Sprint 4: Performance & Attachment Fixes
+
+### Performance Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| PERF-01 | Fix N+1 queries in CompanyTaskVM (delay data) | ✅ Completed | pw8mP | Claude |
+| PERF-02 | Add eager loading to CompanyTaskVM Select() | ✅ Completed | pw8mP | Claude |
+| PERF-03 | Add eager loading to EmployeeTaskListVM FillTasks() | ✅ Completed | pw8mP | Claude |
+| PERF-04 | Fix redundant GetByID in ComapnyTaskDetailVM | ✅ Completed | pw8mP | Claude |
+| PERF-05 | Fix client-side filtering in ServiceManger | ✅ Completed | pw8mP | Claude |
+
+### Attachment Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| T-09b | Preserve original file names for attachments | ✅ Completed | pw8mP | Claude |
+
+### Progress
+
+- [x] PERF-01: Batch delay data lookup
+- [x] PERF-02: CompanyTaskVM eager loading
+- [x] PERF-03: EmployeeTaskListVM eager loading
+- [x] PERF-04: Remove redundant GetByID
+- [x] PERF-05: Server-side filtering
+- [x] T-09b: Original file names
+
+---
+
+## Sprint 3: Bulk Operations & Filtering
+
+### Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| T-07 | Bulk Delete Tasks (New status only, max 500) | ✅ Completed | haj1c | Claude |
+| T-08 | Multi-Employee Filter (Chosen.js) | ✅ Completed | haj1c | Claude |
+| T-09 | Attachment Table SQL Script | ✅ Completed | haj1c | Claude |
+| T-10 | Performance Index on Task table | ✅ Completed | haj1c | Claude |
+
+### Progress
+
+- [x] T-07: Bulk Delete
+- [x] T-08: Multi-Employee Filter
+- [x] T-09: Attachment SQL Script
+- [x] T-10: Performance Indexes
 
 ---
 
@@ -28,6 +79,37 @@ Sprint 0: ████████████████████ 100% Comp
 ---
 
 ## Files to Upload
+
+### Sprint 4 Files
+
+#### Application Files (To Deploy)
+
+| # | File Path | Action | Priority |
+|---|-----------|--------|----------|
+| 1 | `EtaskMinstry/Areas2/Company/Models/CompanyTaskVM.cs` | Upload | High |
+| 2 | `EtaskMinstry/Areas2/Company/Models/ComapnyTaskDetailVM.cs` | Upload | High |
+| 3 | `EtaskMinstry/Areas2/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` | Upload | High |
+| 4 | `EtaskMinstry/AppCode/ServiceManger.cs` | Upload | High |
+| 5 | `EtaskMinstry/Areas2/Company/Controllers/TaskController.cs` | Upload | High |
+| 6 | `EtaskMinstry/Areas2/Company/Controllers/CompanyController.cs` | Upload | High |
+| 7 | `EtaskMinstry/Areas2/Company/Views/Company/EditTask.cshtml` | Upload | Medium |
+| 8 | `EtaskMinstry/Areas2/Company/Views/Company/SaveData.cshtml` | Upload | Medium |
+
+### Sprint 3 Files
+
+#### Application Files (To Deploy)
+
+| # | File Path | Action | Priority |
+|---|-----------|--------|----------|
+| 1 | `EtaskMinstry/Areas/Company/Controllers/CompanyController.cs` | Upload | High |
+| 2 | `EtaskMinstry/Areas/Company/Views/Company/PartialCompTask.cshtml` | Upload | High |
+| 3 | `EtaskMinstry/Areas/Company/Views/Company/Index.cshtml` | Upload | High |
+
+#### Database Scripts (To Execute)
+
+| # | Script | Action | Priority |
+|---|--------|--------|----------|
+| 1 | `docs/Sprint3_SQL_Scripts.sql` | Execute in SSMS | High |
 
 ### Sprint 1 Files
 
@@ -98,6 +180,8 @@ Sprint 0: ████████████████████ 100% Comp
 
 | Sprint | Start | End | Status |
 |--------|-------|-----|--------|
+| Sprint 4 | 2026-03-18 | 2026-03-18 | Completed |
+| Sprint 3 | 2026-03-17 | 2026-03-17 | Completed |
 | Sprint 1 | 2026-03-09 | 2026-03-16 | Completed |
 | Sprint 0 | 2026-03-08 | 2026-03-08 | Completed |
 
@@ -137,6 +221,6 @@ Sprint 0: ████████████████████ 100% Comp
 
 ---
 
-## Next Sprint (Sprint 2)
+## Next Sprint (Sprint 5)
 
 *To be planned*

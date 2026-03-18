@@ -276,6 +276,83 @@ Add التفاعل column to CompanyTasks report from updated `sp_CompanyTasks`.
 
 ---
 
+---
+
+## Sprint 4 Decisions
+
+### DEC-012: Eager Loading via includeProperties for Task Lists
+
+**Date:** 2026-03-18 | **Task:** PERF-01/02/03 | **Status:** Implemented
+
+#### Context
+Task list pages triggered N+1 lazy-loading queries for navigation properties (Project, Status, Priority, TaskTLogs). Each task caused additional DB roundtrips.
+
+#### Decision
+Add `includeProperties` parameter to `Get()` calls to eager-load all required navigation properties in a single query.
+
+#### Rationale
+- Eliminates hundreds of lazy-load queries per page load
+- Already supported by the repository pattern
+- Minimal code change, large performance gain
+
+#### Implementation
+```csharp
+// CompanyTaskVM.Select()
+_unitOfWork.TaskRepository.Get(filter: ..., includeProperties: "Project,Status,Priority,TaskTLogs")
+
+// EmployeeTaskListVM.FillTasks()
+_unitOfWork.TaskRepository.Get(filter: ..., includeProperties: "Project,Priority,Status,TaskTLogs,TaskTLogs.Status")
+```
+
+---
+
+### DEC-013: Batch Dictionary Lookup for Task Delay Data
+
+**Date:** 2026-03-18 | **Task:** PERF-01 | **Status:** Implemented
+
+#### Context
+`CompanyTaskVM.Select()` called `isTaskDelayed(t)` and `Delaytime(t)` per task inside a `ForEach`. Each method called `GetByID()`, causing N extra DB queries.
+
+#### Decision
+Batch-load all task delay data into a `Dictionary<int, {isDelayed, delayTime, DelayPercentage}>` and perform O(1) lookups.
+
+#### Rationale
+- Replaces N queries with 1 query
+- Dictionary lookups are O(1)
+- No schema changes needed
+
+#### Implementation
+```csharp
+var taskDelayData = _unitOfWork.TaskRepository
+    .Get(filter: t => taskIds.Contains(t.TaskID))
+    .ToDictionary(t => t.TaskID, t => new { t.isDelayed, t.delayTime, t.DelayPercentage });
+```
+
+---
+
+### DEC-014: Server-Side Filtering for GetAllEmployees
+
+**Date:** 2026-03-18 | **Task:** PERF-05 | **Status:** Implemented
+
+#### Context
+`ServiceManger.GetAllEmployees()` loaded ALL employees then filtered client-side with `.Where()`.
+
+#### Decision
+Pass filter into `Get(filter:)` so EF translates it to SQL WHERE clause.
+
+#### Rationale
+- Avoids loading entire employee table into memory
+- Reduces data transfer and memory usage
+- Single-line fix
+
+#### Implementation
+```csharp
+// Before: Get().Where(e => e.company_Id == companyId)
+// After:  Get(filter: e => e.company_Id == companyId)
+```
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports

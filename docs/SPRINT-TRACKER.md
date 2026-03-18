@@ -1,6 +1,40 @@
 # Sprint Tracker
 
-## Current Sprint: Sprint 3 - Bulk Operations & Filtering
+## Current Sprint: Sprint 4 - Performance & Attachment Fixes
+
+### Sprint Goal
+Fix N+1 query performance issues, add eager loading, and preserve original file names for task attachments.
+
+---
+
+## Sprint 4 Task Status
+
+| # | Task | Status | Session | Notes |
+|---|------|--------|---------|-------|
+| T-09b | Preserve original file names for attachments | Done | pw8mP | OriginalFileName in TaskController, CompanyController, views |
+| PERF-01 | Fix N+1 queries in CompanyTaskVM (delay data) | Done | pw8mP | Batch dictionary lookup replaces per-task GetByID |
+| PERF-02 | Add eager loading to CompanyTaskVM Select() | Done | pw8mP | includeProperties: Project,Status,Priority,TaskTLogs |
+| PERF-03 | Add eager loading to EmployeeTaskListVM FillTasks() | Done | pw8mP | includeProperties: Project,Priority,Status,TaskTLogs,TaskTLogs.Status |
+| PERF-04 | Fix redundant GetByID in ComapnyTaskDetailVM | Done | pw8mP | Use already-loaded task object |
+| PERF-05 | Fix client-side filtering in ServiceManger | Done | pw8mP | Move filter into Get() call |
+
+---
+
+## Sprint 4 Files Modified
+
+### Session pw8mP
+- `Areas2/Company/Models/CompanyTaskVM.cs` - Eager loading + batch delay data lookup
+- `Areas2/Company/Models/ComapnyTaskDetailVM.cs` - Removed redundant GetByID
+- `Areas2/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` - Eager loading
+- `AppCode/ServiceManger.cs` - Server-side filtering for GetAllEmployees
+- `Areas2/Company/Controllers/TaskController.cs` - OriginalFileName on upload
+- `Areas2/Company/Controllers/CompanyController.cs` - OriginalFileName on re-assignment copy
+- `Areas2/Company/Views/Company/EditTask.cshtml` - Display original file name
+- `Areas2/Company/Views/Company/SaveData.cshtml` - Display original file name
+
+---
+
+## Previous Sprint: Sprint 3 - Bulk Operations & Filtering
 
 ### Sprint Goal
 Add bulk task deletion, multi-employee filtering, and database performance improvements.
@@ -140,7 +174,10 @@ Improve the attendance report to be more readable and support data aggregation.
 ---
 
 ## Next Steps
-- [ ] Plan Sprint 4
+- [ ] Plan Sprint 5
 - [x] Run Sprint 3 SQL scripts on database
 - [x] Test bulk delete on جديدة tab
 - [x] Test multi-employee filter with Chosen.js
+- [ ] Verify eager loading doesn't change query results (compare task list pages)
+- [ ] Verify original file names display correctly in EditTask and SaveData views
+- [ ] Load test task list pages to confirm performance improvement
