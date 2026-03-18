@@ -135,7 +135,7 @@ namespace EtaskMinstry.Areas.Company.Models
         public bool CheckForUniqueName(int? companyID, int? empID, string Name)
         {
 
-            var result = _unitOfWork.Employee.Get().Count(e => e.CompanyID == companyID && e.EmpID != empID && e.Name.Contains(Name)) > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get(filter: e => e.CompanyID == companyID && e.EmpID != empID && e.Name.Contains(Name)).Count() > 0 ? false : true;
             return result;
         }
 
@@ -149,10 +149,10 @@ namespace EtaskMinstry.Areas.Company.Models
         {
             //email cannot be repeated in the same comany
             //email cannot repeated if it's existed in other comany and this record is not deleted
-            var Empresult = _unitOfWork.Employee.Get().Count(e => (companyID == 0 && e.Email.Contains(Email) && e.IsDeleted == true) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) > 0 ? false : true;
+            var Empresult = _unitOfWork.Employee.Get(filter: e => (companyID == 0 && e.Email.Contains(Email) && e.IsDeleted == true) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))).Count() > 0 ? false : true;
 
-            //email cannot repeated in  any company 
-            var CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false) > 0 ? false : true;
+            //email cannot repeated in  any company
+            var CompResult = _unitOfWork.Company.Get(filter: e => (e.Email.Contains(Email)) && e.IsDeleted == false).Count() > 0 ? false : true;
 
             return Empresult && CompResult;
         }
@@ -166,15 +166,15 @@ namespace EtaskMinstry.Areas.Company.Models
         public bool CheckForUniqueMobile(int? companyID, int? EmpID, string Mobile)
         {
 
-            var result = _unitOfWork.Employee.Get().Count(e => e.CompanyID == companyID && e.EmpID != EmpID && e.Mobile.Contains(Mobile) || (e.CompanyID != companyID && e.Mobile.Contains(Mobile) && e.IsDeleted == false)) > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get(filter: e => e.CompanyID == companyID && e.EmpID != EmpID && e.Mobile.Contains(Mobile) || (e.CompanyID != companyID && e.Mobile.Contains(Mobile) && e.IsDeleted == false)).Count() > 0 ? false : true;
             return result;
         }
         public bool CheckForUniqueNationalID(int? companyID, int EmpID, string NationalID)
         {
-            var result = _unitOfWork.Employee.Get().Count(e => 
-                e.CompanyID == companyID && e.EmpID != EmpID 
-                && e.NationalID.Contains(NationalID) 
-                || (e.CompanyID != companyID && e.NationalID.Contains(NationalID) && e.IsDeleted == false)) > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get(filter: e =>
+                e.CompanyID == companyID && e.EmpID != EmpID
+                && e.NationalID.Contains(NationalID)
+                || (e.CompanyID != companyID && e.NationalID.Contains(NationalID) && e.IsDeleted == false)).Count() > 0 ? false : true;
             return result;
         }
         /// <summary>
@@ -189,12 +189,12 @@ namespace EtaskMinstry.Areas.Company.Models
         {
             int deletedEmpId = 0;
             //employee that has been deleted from this company before and he is not working now in another company now
-            var deletedEmpResult = _unitOfWork.Employee.Get().Where(e => e.CompanyID == companyID && e.NationalID.Contains(NationalID) && e.IsDeleted == true).FirstOrDefault();
+            var deletedEmpResult = _unitOfWork.Employee.Get(filter: e => e.CompanyID == companyID && e.NationalID.Contains(NationalID) && e.IsDeleted == true).FirstOrDefault();
             if (deletedEmpResult != null)
             {
                 deletedEmpId = deletedEmpResult.EmpID;
                 //check if the employee national id to rehire is working currently in another company
-                var currentWorking = _unitOfWork.Employee.Get().Where(e => e.CompanyID != companyID && e.NationalID == NationalID && e.IsDeleted == false).FirstOrDefault();
+                var currentWorking = _unitOfWork.Employee.Get(filter: e => e.CompanyID != companyID && e.NationalID == NationalID && e.IsDeleted == false).FirstOrDefault();
                 if (currentWorking != null)
                     deletedEmpId = 0;
             }
@@ -212,7 +212,7 @@ namespace EtaskMinstry.Areas.Company.Models
         public bool CheckForUniquSequenceNumberLaborOfficeID(int? empID, int SequenceNumber, int LaborOfficeID)
         {
    
-            var Empresult = _unitOfWork.Employee.Get().Count(e => (e.EmpID != empID && SequenceNumber > 0 && LaborOfficeID > 0 && e.SequenceNumber == SequenceNumber && e.LaborOfficeID == LaborOfficeID)) > 0 ? false : true;
+            var Empresult = _unitOfWork.Employee.Get(filter: e => (e.EmpID != empID && SequenceNumber > 0 && LaborOfficeID > 0 && e.SequenceNumber == SequenceNumber && e.LaborOfficeID == LaborOfficeID)).Count() > 0 ? false : true;
 
             return Empresult;
         }
@@ -236,7 +236,7 @@ namespace EtaskMinstry.Areas.Company.Models
 
         public int GetEmpIDUserAccount(int Id)
         {
-            var objEmp = _unitOfWork.UserAccount.Get().FirstOrDefault(e => e.EmpID == Id);
+            var objEmp = _unitOfWork.UserAccount.Get(filter: e => e.EmpID == Id).FirstOrDefault();
             int empID = 0;
             if (objEmp != null)
             {
@@ -247,7 +247,7 @@ namespace EtaskMinstry.Areas.Company.Models
         }
         public bool UpdateEmp(int Id)
         {
-            var objEmp = _unitOfWork.Employee.Get().FirstOrDefault(e => e.EmpID == Id);
+            var objEmp = _unitOfWork.Employee.Get(filter: e => e.EmpID == Id).FirstOrDefault();
             bool bReturn = false;
             if (objEmp != null)
             {
@@ -261,7 +261,7 @@ namespace EtaskMinstry.Areas.Company.Models
         public bool UpdateRehireDeletedEmployee(int empId)
         {
             settingObj = GetSettings();
-            var objEmp = _unitOfWork.Employee.Get().FirstOrDefault(e => e.EmpID == empId);
+            var objEmp = _unitOfWork.Employee.Get(filter: e => e.EmpID == empId).FirstOrDefault();
             bool bReturn = false;
             if (objEmp != null)
             {
@@ -388,7 +388,7 @@ namespace EtaskMinstry.Areas.Company.Models
 
         public Boolean Save()
         {
-            settingObj = _unitOfWork.Settings.Get().FirstOrDefault();//.GetByID(int.Parse(ConfigurationManager.AppSettings["ContactUsToEmail"].ToString()));
+            settingObj = _unitOfWork.Settings.GetByID(int.Parse(ConfigurationManager.AppSettings["ContactUsToEmail"].ToString()));
             Boolean bReuslt = false;
             string LoadTemp = string.Empty;
             using (TransactionScope tsTransScope = new TransactionScope())//(TransactionScopeOption.Suppress))

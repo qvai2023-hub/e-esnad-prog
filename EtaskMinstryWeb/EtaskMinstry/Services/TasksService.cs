@@ -46,8 +46,9 @@ namespace EtaskMinstry.Services
             List<BriefTasksReportModel> data = new List<BriefTasksReportModel>();
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
-            data = _unitOfWork.TaskRepository.Get(a => a.IsDeleted == false && a.CompanyID == CompanyId && a.EmpID!=null&&
-           a.StartDate.Value.Month == currentMonth && a.StartDate.Value.Year == currentYear).Select(a => new BriefTasksReportModel()
+            data = _unitOfWork.TaskRepository.Get(filter: a => a.IsDeleted == false && a.CompanyID == CompanyId && a.EmpID!=null&&
+           a.StartDate.Value.Month == currentMonth && a.StartDate.Value.Year == currentYear,
+           includeProperties: "Employee,Status").Select(a => new BriefTasksReportModel()
            {
                Id=a.Employee.EmpID,
                BriefTaskName = a.BriefTaskName,

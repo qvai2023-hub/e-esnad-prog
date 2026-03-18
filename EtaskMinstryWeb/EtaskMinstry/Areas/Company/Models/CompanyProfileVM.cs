@@ -48,7 +48,7 @@ namespace EtaskMinstry.Areas.Company.Models
 
          public CompanyProfileVM CompanyDetails(int CompanyID)
          {
-             var objComp = _unitOfWork.Company.Get().Where(a => a.CompanyID == CompanyID).FirstOrDefault();
+             var objComp = _unitOfWork.Company.GetByID(CompanyID);
 
              return new CompanyProfileVM()
              {
@@ -69,8 +69,8 @@ namespace EtaskMinstry.Areas.Company.Models
          {
              bool bReturn = false;
 
-             var objComp = _unitOfWork.Company.Get().Where(a => a.CompanyID == CompanyID).FirstOrDefault();
-             var objUser = _unitOfWork.UserAccount.Get().Where(a => a.CompanyID == CompanyID && a.IsCompany==true).FirstOrDefault();
+             var objComp = _unitOfWork.Company.GetByID(CompanyID);
+             var objUser = _unitOfWork.UserAccount.Get(filter: a => a.CompanyID == CompanyID && a.IsCompany==true).FirstOrDefault();
 
              if (objComp != null && objUser != null)
              {
@@ -91,7 +91,7 @@ namespace EtaskMinstry.Areas.Company.Models
          {
              bool bReturn = false;
 
-             var objComp = _unitOfWork.Company.Get().Where(a => a.CompanyID == CompanyID).FirstOrDefault();
+             var objComp = _unitOfWork.Company.GetByID(CompanyID);
 
 
              if (objComp != null)
