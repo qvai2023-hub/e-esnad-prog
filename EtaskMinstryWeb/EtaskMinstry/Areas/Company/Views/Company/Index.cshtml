@@ -828,10 +828,11 @@
                         if (data.error) {
                             Notify("danger", data.error, 4000);
                         } else {
-                            var msg = 'تم حذف ' + data.successCount + ' مهمة بنجاح';
-                            if (data.failCount > 0) msg += '، فشل حذف ' + data.failCount;
-                            if (data.skippedNotNew > 0) msg += '، تم تجاوز ' + data.skippedNotNew + ' (ليست جديدة)';
-                            Notify(data.successCount > 0 ? "success" : "warning", msg, 5000);
+                            if (data.successCount > 0) {
+                                Notify("success", "تم الحذف بنجاح", 3000);
+                            } else {
+                                Notify("warning", "لم يتم حذف أي مهمة", 3000);
+                            }
                             $('#chkSelectAll').prop('checked', false);
                             updateBulkBar();
                             $("#btnSearch").click();
