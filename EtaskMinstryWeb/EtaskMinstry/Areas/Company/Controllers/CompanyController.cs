@@ -289,16 +289,31 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult GetTasks(Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                      String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
+                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
+                                     int[] EmpIDs = null)
         {
+            int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
+
+            // Multi-employee filter: call Select per employee, merge results
+            if (EmpIDs != null && EmpIDs.Length > 0)
+            {
+                var vm = new CompanyTaskVM();
+                var allTasks = new List<CompanyTaskVM>();
+                foreach (var empId in EmpIDs)
+                {
+                    var tasks = vm.Select(strTitle, FromStartDate, ToStartDate,
+                                          FromEndDate, ToEndDate, (int)iStatus,
+                                          empId, bIsArchived, bIsNotAssigned, projID, PriorityID);
+                    allTasks.AddRange(tasks);
+                }
+                var filtered = allTasks.GroupBy(t => t.TaskID).Select(g => g.First()).OrderByDescending(t => t.TaskID).ToList();
+                return PartialView("PartialCompTask", filtered);
+            }
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
                                                                              EmpID, bIsArchived, bIsNotAssigned,
-                                                                             (ProjectID == 0
-                                                                                  ? Request.QueryString
-                                                                                        ["ProjectID"].IntParse()
-                                                                                  : ProjectID), PriorityID));
+                                                                             projID, PriorityID));
         }
 
 
@@ -313,16 +328,30 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpGet]
         public ActionResult GetTasks(int? page, Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                     String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                    TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
+                                    TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
+                                    int[] EmpIDs = null)
         {
+            int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
+
+            if (EmpIDs != null && EmpIDs.Length > 0)
+            {
+                var vm = new CompanyTaskVM();
+                var allTasks = new List<CompanyTaskVM>();
+                foreach (var empId in EmpIDs)
+                {
+                    var tasks = vm.Select(strTitle, FromStartDate, ToStartDate,
+                                          FromEndDate, ToEndDate, (int)iStatus,
+                                          empId, bIsArchived, bIsNotAssigned, projID, PriorityID);
+                    allTasks.AddRange(tasks);
+                }
+                var filtered = allTasks.GroupBy(t => t.TaskID).Select(g => g.First()).OrderByDescending(t => t.TaskID).ToList();
+                return PartialView("PartialCompTask", filtered);
+            }
 
             return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
                                                                              EmpID, bIsArchived, bIsNotAssigned,
-                                                                             (ProjectID == 0
-                                                                                  ? Request.QueryString
-                                                                                        ["ProjectID"].IntParse()
-                                                                                  : ProjectID), PriorityID));
+                                                                             projID, PriorityID));
         }
 
         //public ActionResult GetTasks(int? page, int iStatus = 0, bool? bIsNotAssigned = null, bool? bIsArchived = null)
@@ -375,10 +404,34 @@ namespace EtaskMinstry.Areas.Company.Controllers
         {
             return new TaskManger().ChangePriority(TaskID, PriorityID);
         }
-        //[HttpPost]
-        //public Boolean Delete(int id)
-        //{
-        //    return new TaskManger().Delete(id);
-        //}
+
+        /// <summary>
+        /// Bulk Delete Tasks (New status only, max 500).
+        /// </summary>
+        /// <param name="taskIds">Array of Task IDs</param>
+        /// <returns>JSON with success/fail counts</returns>
+        [HttpPost]
+        public ActionResult BulkDelete(int[] taskIds)
+        {
+            int successCount = 0;
+            int failCount = 0;
+
+            if (taskIds == null || taskIds.Length == 0)
+                return Json(new { successCount = 0, failCount = 0 });
+
+            if (taskIds.Length > 500)
+                return Json(new { successCount = 0, failCount = 0, error = "الحد الأقصى للحذف 500 مهمة" });
+
+            var vm = new CompanyTaskVM();
+            foreach (var taskId in taskIds)
+            {
+                if (vm.Delete(taskId))
+                    successCount++;
+                else
+                    failCount++;
+            }
+
+            return Json(new { successCount, failCount });
+        }
     }
 }

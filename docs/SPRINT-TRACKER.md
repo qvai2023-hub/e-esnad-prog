@@ -1,6 +1,37 @@
 # Sprint Tracker
 
-## Current Sprint: Sprint 1 - Task Report & Attendance Tracking
+## Current Sprint: Sprint 3 - Bulk Operations & Filtering
+
+### Sprint Goal
+Add bulk task deletion, multi-employee filtering, and database performance improvements.
+
+---
+
+## Sprint 3 Task Status
+
+| # | Task | Status | Session | Notes |
+|---|------|--------|---------|-------|
+| T-07 | Bulk Delete Tasks (New status only, max 500) | Done | haj1c | Checkbox column on جديدة tab + confirmation modal + "تم الحذف بنجاح" |
+| T-08 | Multi-Employee Filter (Chosen.js) | Done | haj1c | Multi-select dropdown + per-employee DB query + merge results |
+| T-09 | Attachment Table SQL Script | Done | haj1c | SQL script provided, no binary column, files stay on disk |
+| T-10 | Performance Index on Task table | Done | haj1c | IX_Task_StatusID_CompanyID + IX_Task_EmpID_CompanyID |
+
+---
+
+## Sprint 3 Files Modified
+
+### Session haj1c
+- `Areas/Company/Controllers/CompanyController.cs` - BulkDelete action + multi-employee GetTasks
+- `Areas/Company/Views/Company/PartialCompTask.cshtml` - Checkbox column (New tab only) + select-all JS
+- `Areas/Company/Views/Company/Index.cshtml` - Bulk delete toolbar + Chosen.js multi-select + JS handlers
+- `docs/Sprint3_SQL_Scripts.sql` - New: SQL scripts for indexes (T-10) and Attachment verification (T-09)
+
+### Database (User to Run)
+- `docs/Sprint3_SQL_Scripts.sql` - Performance indexes
+
+---
+
+## Previous Sprint: Sprint 1 - Task Report & Attendance Tracking
 
 ### Sprint Goal
 Improve task report (CompanyTasks) with interaction column and calendar toggle, plus build attendance tracking system.
@@ -109,7 +140,7 @@ Improve the attendance report to be more readable and support data aggregation.
 ---
 
 ## Next Steps
-- [ ] Plan Sprint 2
-- [x] Test CompanyTasks report (Verified - working)
-- [x] Verify attendance tracking system
-- [x] Test Hijri/Gregorian calendar toggle
+- [ ] Plan Sprint 4
+- [x] Run Sprint 3 SQL scripts on database
+- [x] Test bulk delete on جديدة tab
+- [x] Test multi-employee filter with Chosen.js

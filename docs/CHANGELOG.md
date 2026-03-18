@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added - Sprint 3: Bulk Operations & Filtering (Session haj1c)
+
+#### T-07: Bulk Delete Tasks
+- **CompanyController.cs**: Added `BulkDelete` action (POST, max 500 tasks)
+  - Reuses existing `CompanyTaskVM.Delete()` per task (New status only, soft-delete)
+- **PartialCompTask.cshtml**: Added checkbox column (only on جديدة tab)
+  - Select-all checkbox in header via JS injection
+- **Index.cshtml**: Bulk delete toolbar with confirmation modal
+  - Shows selected count, delete button, clear selection
+  - Success message: "تم الحذف بنجاح"
+
+#### T-08: Multi-Employee Filter
+- **Index.cshtml**: Changed employee dropdown to multi-select with Chosen.js
+  - `chzn-select chzn-rtl` classes, placeholder "اختر الموظف"
+- **CompanyController.cs**: Updated `GetTasks` (POST/GET) to accept `int[] EmpIDs`
+  - Calls `Select()` per employee at DB level, merges and deduplicates results
+
+#### T-09: Attachment Table
+- **Sprint3_SQL_Scripts.sql**: New file with table verification script
+  - No binary column added (files stay on disk at `/Upload/Task/`)
+
+#### T-10: Performance Indexes
+- **Sprint3_SQL_Scripts.sql**: Two new indexes
+  - `IX_Task_StatusID_CompanyID` with INCLUDE columns
+  - `IX_Task_EmpID_CompanyID` with INCLUDE columns
+
+---
+
 ### Changed - Attendance Report Header Redesign (Session a05)
 
 #### Reports
