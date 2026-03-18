@@ -353,6 +353,71 @@ Pass filter into `Get(filter:)` so EF translates it to SQL WHERE clause.
 
 ---
 
+### DEC-015: Server-Side Filtering for CompanyEmployeeVM Validation Queries
+
+**Date:** 2026-03-18 | **Task:** PERF-06 | **Status:** Implemented
+
+#### Context
+All 11 validation/lookup methods in `CompanyEmployeeVM` called `.Get()` with no filter, loading ALL employees into memory before filtering client-side.
+
+#### Decision
+Pass filter expressions directly into `Get(filter:)` for all 11 methods.
+
+#### Rationale
+- Every employee form submit triggered full table scans
+- Single-line fixes with no behavioral change
+- Query execution moves from C# to SQL WHERE clause
+
+---
+
+### DEC-016: Replace Unbounded Session Load in NotificationHub
+
+**Date:** 2026-03-18 | **Task:** PERF-10 | **Status:** Implemented
+
+#### Context
+`NotificationHub.Send()` loaded ALL SignalR sessions into memory, then filtered client-side.
+
+#### Decision
+Filter at DB level using `InstanceID` and `UserTypeID` values from the notification collection with `.Contains()` (translates to SQL IN).
+
+#### Rationale
+- Scales better as connected users grow
+- Avoids loading entire session table per notification
+
+---
+
+### DEC-017: Company-Scoped Queries in RecurrenceTaskVM
+
+**Date:** 2026-03-18 | **Task:** PERF-13 | **Status:** Implemented
+
+#### Context
+`GetAllProjects()` and `GetAllEmployees()` loaded ALL records without company filter — cross-tenant data exposure in a multi-tenant system.
+
+#### Decision
+Add `CompanyID == MvcApplication.userData.userId` filter, plus `IsDeleted == false` for employees.
+
+#### Rationale
+- Security: prevents cross-tenant data exposure
+- Performance: only loads relevant records
+
+---
+
+### DEC-018: Remove AsEnumerable() Client-Side GroupBy in SharedService
+
+**Date:** 2026-03-18 | **Task:** PERF-11 | **Status:** Implemented
+
+#### Context
+`GetCompaniesByproviderId()` loaded all UserAccounts, forced client-side execution with `.AsEnumerable()`, then did GroupBy.
+
+#### Decision
+Replace with `Company.Get(filter:)` using `.Any()` subquery to check matching UserAccounts.
+
+#### Rationale
+- GroupBy was only used to get distinct companies — a Company query does this directly
+- `.Any()` translates to efficient SQL EXISTS
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports

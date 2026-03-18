@@ -17,6 +17,14 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 | PERF-03 | Add eager loading to EmployeeTaskListVM FillTasks() | Done | pw8mP | includeProperties: Project,Priority,Status,TaskTLogs,TaskTLogs.Status |
 | PERF-04 | Fix redundant GetByID in ComapnyTaskDetailVM | Done | pw8mP | Use already-loaded task object |
 | PERF-05 | Fix client-side filtering in ServiceManger | Done | pw8mP | Move filter into Get() call |
+| PERF-06 | Fix 11 client-side filtering queries in CompanyEmployeeVM | Done | pw8mP | All uniqueness checks now use Get(filter:) |
+| PERF-07 | Fix 3 client-side queries in CompanyProfileVM | Done | pw8mP | Replaced Get().Where() with GetByID / Get(filter:) |
+| PERF-08 | Add eager loading to TasksService (BriefTasks report) | Done | pw8mP | includeProperties: Employee,Status |
+| PERF-09 | Add eager loading to EmployeesReportService | Done | pw8mP | includeProperties: Attendances |
+| PERF-10 | Fix unbounded SIGNAL_R_SESSIONs load in Notification.cs | Done | pw8mP | Filter by collection instance/type IDs at DB level |
+| PERF-11 | Fix client-side GroupBy in SharedService | Done | pw8mP | Replace AsEnumerable() with Company.Get(filter:) |
+| PERF-12 | Fix double materialization in AttendanceReportService | Done | pw8mP | Remove intermediate .ToList() before .Select() |
+| PERF-13 | Add company scoping to RecurrenceTaskVM queries | Done | pw8mP | GetAllProjects and GetAllEmployees now filter by company |
 
 ---
 
@@ -31,6 +39,14 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 - `Areas2/Company/Controllers/CompanyController.cs` - OriginalFileName on re-assignment copy
 - `Areas2/Company/Views/Company/EditTask.cshtml` - Display original file name
 - `Areas2/Company/Views/Company/SaveData.cshtml` - Display original file name
+- `Areas/Company/Models/CompanyEmployeeVM.cs` - 11 queries moved to server-side filtering
+- `Areas/Company/Models/CompanyProfileVM.cs` - 3 queries moved to GetByID / Get(filter:)
+- `Areas/Company/Models/RecurrenceTaskVM.cs` - Company-scoped project + employee queries
+- `Services/TasksService.cs` - Eager loading for BriefTasks report
+- `Services/EmployeesReportService.cs` - Eager loading for Attendances
+- `Services/SharedService.cs` - DB-level company query replaces client-side GroupBy
+- `Services/AttendanceReportService.cs` - Removed double materialization
+- `AppCode/Notification.cs` - Filtered SignalR session query
 
 ---
 
@@ -181,3 +197,10 @@ Improve the attendance report to be more readable and support data aggregation.
 - [ ] Verify eager loading doesn't change query results (compare task list pages)
 - [ ] Verify original file names display correctly in EditTask and SaveData views
 - [ ] Load test task list pages to confirm performance improvement
+- [ ] Test employee CRUD validations (duplicate name/email/mobile/NationalID checks)
+- [ ] Test company profile view/edit/change email/change address
+- [ ] Test BriefTasks report and EmployeesReport with attendance counts
+- [ ] Test notifications via SignalR (assign task, verify delivery)
+- [ ] Test admin company dropdown (SharedService provider filter)
+- [ ] Test attendance report employee dropdown
+- [ ] Test recurrence task creation (verify projects/employees show only current company)

@@ -6,7 +6,7 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ## Sprint 4 - Performance & Attachment Fixes
 
-### PERF: N+1 Query Fixes & Eager Loading
+### PERF: N+1 Query Fixes, Eager Loading & Client-Side Filtering Fixes
 **Status:** Completed
 **Date Completed:** 2026-03-18
 
@@ -17,6 +17,14 @@ All notable changes to the TELE SAK project will be documented in this file.
 | `EtaskMinstry/Areas2/Company/Models/ComapnyTaskDetailVM.cs` | Modified | Removed redundant GetByID in ProgressbarPercentage() |
 | `EtaskMinstry/Areas2/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` | Modified | Added includeProperties to FillTasks() |
 | `EtaskMinstry/AppCode/ServiceManger.cs` | Modified | Server-side filtering for GetAllEmployees() |
+| `EtaskMinstry/Areas/Company/Models/CompanyEmployeeVM.cs` | Modified | 11 queries moved from client-side to DB-level filtering |
+| `EtaskMinstry/Areas/Company/Models/CompanyProfileVM.cs` | Modified | 3 queries replaced with GetByID / Get(filter:) |
+| `EtaskMinstry/Areas/Company/Models/RecurrenceTaskVM.cs` | Modified | Company-scoped GetAllProjects + GetAllEmployees |
+| `EtaskMinstry/Services/TasksService.cs` | Modified | Added includeProperties: Employee,Status |
+| `EtaskMinstry/Services/EmployeesReportService.cs` | Modified | Added includeProperties: Attendances |
+| `EtaskMinstry/Services/SharedService.cs` | Modified | Replaced AsEnumerable() GroupBy with Company.Get(filter:) |
+| `EtaskMinstry/Services/AttendanceReportService.cs` | Modified | Removed double materialization (.ToList() before .Select()) |
+| `EtaskMinstry/AppCode/Notification.cs` | Modified | Filtered SignalR session query at DB level |
 
 #### Changes:
 - CompanyTaskVM: Eager load Project, Status, Priority, TaskTLogs in task list query
@@ -24,6 +32,14 @@ All notable changes to the TELE SAK project will be documented in this file.
 - EmployeeTaskListVM: Eager load Project, Priority, Status, TaskTLogs, TaskTLogs.Status
 - ComapnyTaskDetailVM: Use already-loaded task object instead of re-querying
 - ServiceManger: Move company filter into Get() call (DB-level instead of client-side)
+- CompanyEmployeeVM: All 11 uniqueness/lookup queries now filter at DB level via Get(filter:)
+- CompanyProfileVM: CompanyDetails, ChangeEmail, ChangeAddress use GetByID / Get(filter:)
+- RecurrenceTaskVM: GetAllProjects and GetAllEmployees now scoped to current company
+- TasksService: BriefTasks report eager-loads Employee and Status navigation properties
+- EmployeesReportService: Employee report eager-loads Attendances for count
+- SharedService: Eliminated AsEnumerable() that forced client-side GroupBy of all UserAccounts
+- AttendanceReportService: Employee dropdown projects at DB level (no intermediate ToList)
+- Notification.cs: SignalR session lookup filtered by collection instance/type IDs at DB level
 
 ---
 
@@ -255,8 +271,16 @@ Identified 4 issues in the attendance report:
 | PERF-03 | Completed | 1 modified (EmployeeTaskListVM) | None |
 | PERF-04 | Completed | 1 modified (ComapnyTaskDetailVM) | None |
 | PERF-05 | Completed | 1 modified (ServiceManger) | None |
+| PERF-06 | Completed | 1 modified (CompanyEmployeeVM) | None |
+| PERF-07 | Completed | 1 modified (CompanyProfileVM) | None |
+| PERF-08 | Completed | 1 modified (TasksService) | None |
+| PERF-09 | Completed | 1 modified (EmployeesReportService) | None |
+| PERF-10 | Completed | 1 modified (Notification.cs) | None |
+| PERF-11 | Completed | 1 modified (SharedService) | None |
+| PERF-12 | Completed | 1 modified (AttendanceReportService) | None |
+| PERF-13 | Completed | 1 modified (RecurrenceTaskVM) | None |
 
-**Total Files:** 8 modified (4 unique for perf + 4 for T-09b attachments)
+**Total Files:** 16 modified (12 unique for perf + 4 for T-09b attachments)
 
 ---
 

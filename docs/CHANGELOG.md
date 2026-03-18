@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Performance: Client-Side Filtering, N+1 Queries & Unbounded Loads (Session pw8mP)
+
+#### Areas/Company/Models
+- **CompanyEmployeeVM.cs**: Moved 11 `.Get()` validation queries to `Get(filter:)` — all uniqueness checks (name, email, mobile, NationalID, SequenceNumber+LaborOfficeID) now filter at DB level; restored `GetByID` for Settings lookup
+- **CompanyProfileVM.cs**: Replaced 3x `.Get().Where().FirstOrDefault()` with `GetByID()` or `Get(filter:)` for Company and UserAccount lookups
+- **RecurrenceTaskVM.cs**: Added company filter to `GetAllProjects()` and `GetAllEmployees()` — was loading entire tables unfiltered
+
+#### Services
+- **TasksService.cs**: Added `includeProperties: "Employee,Status"` to eliminate N+1 lazy-load queries in BriefTasks report
+- **EmployeesReportService.cs**: Added `includeProperties: "Attendances"` to eliminate N+1 queries when counting attendance records
+- **SharedService.cs**: Replaced `.AsEnumerable()` GroupBy (loaded all UserAccounts into memory) with direct `Company.Get(filter:)` query
+- **AttendanceReportService.cs**: Removed intermediate `.ToList()` before `.Select()` to let EF project at DB level
+
+#### AppCode
+- **Notification.cs**: Replaced unbounded `SIGNAL_R_SESSIONs.Get().ToList()` with filtered query using collection instance/type IDs
+
+---
+
 ### Fixed - Performance: N+1 Queries & Eager Loading (Session pw8mP)
 
 #### Areas2/Company
@@ -198,6 +216,12 @@ All notable changes to this project will be documented in this file.
 - Added eager loading (includeProperties) to task list queries
 - Moved server-side filtering for GetAllEmployees in ServiceManger
 - Preserved original file names for task attachments (T-09 continuation)
+- Fixed client-side filtering in CompanyEmployeeVM (11 queries), CompanyProfileVM (3 queries)
+- Added eager loading to TasksService (Employee,Status) and EmployeesReportService (Attendances)
+- Fixed unbounded SIGNAL_R_SESSIONs load in Notification.cs
+- Replaced client-side GroupBy in SharedService with DB-level Company query
+- Removed double materialization in AttendanceReportService
+- Added company scoping to RecurrenceTaskVM (GetAllProjects, GetAllEmployees)
 
 ### Session a02 (2026-03-08)
 - Refactored attendance report structure

@@ -22,6 +22,14 @@ Sprint 0: ████████████████████ 100% Comp
 | PERF-03 | Add eager loading to EmployeeTaskListVM FillTasks() | ✅ Completed | pw8mP | Claude |
 | PERF-04 | Fix redundant GetByID in ComapnyTaskDetailVM | ✅ Completed | pw8mP | Claude |
 | PERF-05 | Fix client-side filtering in ServiceManger | ✅ Completed | pw8mP | Claude |
+| PERF-06 | Fix 11 client-side filtering queries in CompanyEmployeeVM | ✅ Completed | pw8mP | Claude |
+| PERF-07 | Fix 3 client-side queries in CompanyProfileVM | ✅ Completed | pw8mP | Claude |
+| PERF-08 | Add eager loading to TasksService (BriefTasks report) | ✅ Completed | pw8mP | Claude |
+| PERF-09 | Add eager loading to EmployeesReportService | ✅ Completed | pw8mP | Claude |
+| PERF-10 | Fix unbounded SIGNAL_R_SESSIONs load in Notification.cs | ✅ Completed | pw8mP | Claude |
+| PERF-11 | Fix client-side GroupBy in SharedService | ✅ Completed | pw8mP | Claude |
+| PERF-12 | Fix double materialization in AttendanceReportService | ✅ Completed | pw8mP | Claude |
+| PERF-13 | Add company scoping to RecurrenceTaskVM queries | ✅ Completed | pw8mP | Claude |
 
 ### Attachment Tasks
 
@@ -36,6 +44,14 @@ Sprint 0: ████████████████████ 100% Comp
 - [x] PERF-03: EmployeeTaskListVM eager loading
 - [x] PERF-04: Remove redundant GetByID
 - [x] PERF-05: Server-side filtering
+- [x] PERF-06: CompanyEmployeeVM client-side filtering (11 queries)
+- [x] PERF-07: CompanyProfileVM client-side queries (3 queries)
+- [x] PERF-08: TasksService eager loading (Employee,Status)
+- [x] PERF-09: EmployeesReportService eager loading (Attendances)
+- [x] PERF-10: Notification.cs unbounded session load
+- [x] PERF-11: SharedService AsEnumerable GroupBy
+- [x] PERF-12: AttendanceReportService double materialization
+- [x] PERF-13: RecurrenceTaskVM company scoping
 - [x] T-09b: Original file names
 
 ---
@@ -94,6 +110,14 @@ Sprint 0: ████████████████████ 100% Comp
 | 6 | `EtaskMinstry/Areas2/Company/Controllers/CompanyController.cs` | Upload | High |
 | 7 | `EtaskMinstry/Areas2/Company/Views/Company/EditTask.cshtml` | Upload | Medium |
 | 8 | `EtaskMinstry/Areas2/Company/Views/Company/SaveData.cshtml` | Upload | Medium |
+| 9 | `EtaskMinstry/Areas/Company/Models/CompanyEmployeeVM.cs` | Upload | High |
+| 10 | `EtaskMinstry/Areas/Company/Models/CompanyProfileVM.cs` | Upload | High |
+| 11 | `EtaskMinstry/Areas/Company/Models/RecurrenceTaskVM.cs` | Upload | High |
+| 12 | `EtaskMinstry/Services/TasksService.cs` | Upload | High |
+| 13 | `EtaskMinstry/Services/EmployeesReportService.cs` | Upload | High |
+| 14 | `EtaskMinstry/Services/SharedService.cs` | Upload | High |
+| 15 | `EtaskMinstry/Services/AttendanceReportService.cs` | Upload | High |
+| 16 | `EtaskMinstry/AppCode/Notification.cs` | Upload | High |
 
 ### Sprint 3 Files
 

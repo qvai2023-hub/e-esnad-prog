@@ -333,6 +333,82 @@ Pass the filter directly into `Get(filter:)` so EF translates it to a SQL WHERE 
 
 ---
 
+### DEC-015: Server-Side Filtering for All Uniqueness Checks in CompanyEmployeeVM
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+All uniqueness validation methods in `CompanyEmployeeVM` (CheckForUniqueName, CheckForUniqueEmail, CheckForUniqueMobile, CheckForUniqueNationalID, CheckForUniquSequenceNumberLaborOfficeID, CheckForDeletedEmpNationlID) called `.Get()` with no filter, loading ALL employees into memory and filtering client-side with `.Count()` or `.Where().FirstOrDefault()`. Same pattern in `GetEmpIDUserAccount`, `UpdateEmp`, `UpdateRehireDeletedEmployee`.
+
+### Decision
+Pass filter expressions directly into `Get(filter:)` so EF translates them to SQL WHERE clauses. For simple PK lookups, use `GetByID()`.
+
+### Rationale
+- Every employee form submit was loading the entire Employee table
+- 11 separate methods affected — each one a full table scan
+- No behavioral change; only query execution location changes from client to DB
+
+---
+
+### DEC-016: Replace Unbounded Session Load in NotificationHub
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+`NotificationHub.Send()` loaded ALL SignalR sessions (`SIGNAL_R_SESSIONs.Get().ToList()`) into memory, then filtered client-side to find matching recipients. As connected users grow, this becomes a significant bottleneck.
+
+### Decision
+Filter at DB level using the known `InstanceID` and `UserTypeID` values from the notification collection.
+
+### Rationale
+- Avoids loading entire session table on every notification
+- Scales better as active user count grows
+- Uses `.Contains()` which EF translates to SQL IN clause
+
+---
+
+### DEC-017: Company-Scoped Queries in RecurrenceTaskVM
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+`GetAllProjects()` and `GetAllEmployees()` in `RecurrenceTaskVM` loaded ALL records from the Projects and Employee tables without any company filter. In a multi-tenant system, this means every company sees every other company's projects and employees.
+
+### Decision
+Add `CompanyID == MvcApplication.userData.userId` filter to both queries, and `IsDeleted == false` filter to employee query.
+
+### Rationale
+- Security: prevents cross-tenant data exposure
+- Performance: only loads relevant records
+- Correctness: dropdowns should only show current company's data
+
+---
+
+### DEC-018: Remove AsEnumerable() Client-Side GroupBy in SharedService
+
+**Date:** 2026-03-18
+**Session:** pw8mP
+**Status:** Implemented
+
+### Context
+`GetCompaniesByproviderId()` loaded all UserAccount records, called `.AsEnumerable()` (forcing client-side execution), then did a `.GroupBy()` on CompanyID + Company.Name. This loaded the entire UserAccounts table into memory.
+
+### Decision
+Replace with a direct `Company.Get(filter:)` query that uses `.Any()` subquery to check if matching UserAccounts exist, eliminating the GroupBy entirely.
+
+### Rationale
+- GroupBy was only used to get distinct companies — a Company query does this directly
+- Avoids loading entire UserAccounts table
+- `.Any()` subquery translates to efficient SQL EXISTS
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports
