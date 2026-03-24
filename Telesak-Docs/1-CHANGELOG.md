@@ -4,6 +4,61 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## Sprint 5 - UX Fixes & Performance (T-10, T-11, T-12, T-13)
+
+**Status:** Completed
+**Date Completed:** 2026-03-24
+
+### T-10: Remove Duplicate Date Filters (إزالة تكرار فلاتر التاريخ)
+
+Removed "تاريخ النهاية" (End Date) filter row from report preparation pages. Only "تاريخ البداية" (Start Date) From/To remains.
+
+| File | Description |
+|------|-------------|
+| `Areas/Company/Views/Report/TaskReportPreperation.cshtml` | Removed تاريخ النهاية HTML + JS |
+| `Areas/Employee/Views/Report/TaskReportPreperation.cshtml` | Removed تاريخ النهاية HTML + JS |
+| `Areas/Company/Views/Report/EmployeeReport.cshtml` | Removed تاريخ النهاية HTML + JS |
+
+### T-11: Add Month Filter in Statistics (فلتر الشهر في الإحصائيات)
+
+Added Hijri month dropdown filter next to the year filter on the TasksByMonthsChart page.
+
+| File | Description |
+|------|-------------|
+| `Areas/Company/Views/Report/TasksByMonthsChart.cshtml` | Added month `<select>` dropdown (محرم - ذو الحجة) |
+| `Areas/Company/Controllers/ReportController.cs` | Added `Month` parameter to `TasksByMonthsChart()` action |
+| `Areas/Company/Models/YearlyTasksChart.cs` | Added `iMonth` param to `GetTasks()` — filters by specific Hijri month |
+
+### T-12: Fix BiDi (Arabic/English Mixed Text)
+
+Added `unicode-bidi: plaintext` CSS class to fix mixed Arabic/English task name display order.
+
+| File | Description |
+|------|-------------|
+| `Content/Main/Developers.css` | Added `.bidi-text` CSS class |
+| `Areas/Company/Views/Company/PartialCompTask.cshtml` | Wrapped task name in `<span class="bidi-text">` |
+| `Areas/Company/Views/DashBoard/PartialDBCompTask.cshtml` | Wrapped task name in `<span class="bidi-text">` |
+| `Areas/Employee/Views/Tasks/PartialEmpTask.cshtml` | Wrapped task name in `<span class="bidi-text">` |
+| `Areas/Common/Views/Common/PartialTaskCommon.cshtml` | Wrapped task name in `<span class="bidi-text">` |
+
+### T-13: Performance Improvements (تحسين الأداء)
+
+Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
+
+| File | Description |
+|------|-------------|
+| `Areas/Company/Models/DaskBoardCompanyTaskVM.cs` | Replaced 4x per-task GetByID + GetEmplyeeName with batch `FillTaskMetadata()` |
+| `Views/Shared/_Layout.cshtml` | Removed duplicate `jquery-1.7.1.min.js` (jquery.js already loaded) |
+| `Views/Shared/_LayoutNewDesign.cshtml` | Removed duplicate `jquery-1.7.1.min.js` |
+
+### Database Scripts (Optional)
+
+| Script | Description |
+|--------|-------------|
+| `Telesak-Docs/Sprint5_SQL_Indexes.sql` | Suggested indexes: `IX_Task_CompanyID_IsDelayed`, `IX_Task_CompanyID_IsDeleted` |
+
+---
+
 ## Sprint 4 - Performance & Attachment Fixes
 
 ### PERF: N+1 Query Fixes, Eager Loading & Client-Side Filtering Fixes

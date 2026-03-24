@@ -3,7 +3,7 @@
 ## Current Status
 
 ```
-Sprint 5: ░░░░░░░░░░░░░░░░░░░░   0% In Progress
+Sprint 5: ████████████████████ 100% Complete
 Sprint 4: ████████████████████ 100% Complete
 Sprint 3: ████████████████████ 100% Complete
 Sprint 1: ████████████████████ 100% Complete
@@ -101,6 +101,33 @@ Sprint 0: ████████████████████ 100% Comp
 ---
 
 ## Files to Upload
+
+### Sprint 5 Files
+
+#### Application Files (To Deploy)
+
+| # | File Path | Task | Priority |
+|---|-----------|------|----------|
+| 1 | `EtaskMinstry/Areas/Company/Views/Report/TaskReportPreperation.cshtml` | T-10 | High |
+| 2 | `EtaskMinstry/Areas/Employee/Views/Report/TaskReportPreperation.cshtml` | T-10 | High |
+| 3 | `EtaskMinstry/Areas/Company/Views/Report/EmployeeReport.cshtml` | T-10 | High |
+| 4 | `EtaskMinstry/Areas/Company/Views/Report/TasksByMonthsChart.cshtml` | T-11 | High |
+| 5 | `EtaskMinstry/Areas/Company/Controllers/ReportController.cs` | T-11 | High |
+| 6 | `EtaskMinstry/Areas/Company/Models/YearlyTasksChart.cs` | T-11 | High |
+| 7 | `EtaskMinstry/Content/Main/Developers.css` | T-12 | High |
+| 8 | `EtaskMinstry/Areas/Company/Views/Company/PartialCompTask.cshtml` | T-12 | High |
+| 9 | `EtaskMinstry/Areas/Company/Views/DashBoard/PartialDBCompTask.cshtml` | T-12 | High |
+| 10 | `EtaskMinstry/Areas/Employee/Views/Tasks/PartialEmpTask.cshtml` | T-12 | High |
+| 11 | `EtaskMinstry/Areas/Common/Views/Common/PartialTaskCommon.cshtml` | T-12 | High |
+| 12 | `EtaskMinstry/Areas/Company/Models/DaskBoardCompanyTaskVM.cs` | T-13 | High |
+| 13 | `EtaskMinstry/Views/Shared/_Layout.cshtml` | T-13 | Medium |
+| 14 | `EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml` | T-13 | Medium |
+
+#### Database Scripts (Optional)
+
+| # | Script | Action | Priority |
+|---|--------|--------|----------|
+| 1 | `Telesak-Docs/Sprint5_SQL_Indexes.sql` | Execute in SSMS (optional) | Low |
 
 ### Sprint 4 Files
 
@@ -211,6 +238,7 @@ Sprint 0: ████████████████████ 100% Comp
 
 | Sprint | Start | End | Status |
 |--------|-------|-----|--------|
+| Sprint 5 | 2026-03-24 | 2026-03-24 | Completed |
 | Sprint 4 | 2026-03-18 | 2026-03-18 | Completed |
 | Sprint 3 | 2026-03-17 | 2026-03-17 | Completed |
 | Sprint 1 | 2026-03-09 | 2026-03-16 | Completed |
@@ -258,14 +286,14 @@ Sprint 0: ████████████████████ 100% Comp
 
 | ID | Task | Status | Session | Assignee |
 |----|------|--------|---------|----------|
-| T-10 | Remove Duplicate Date Filters (إزالة تكرار فلاتر التاريخ) | 🔵 In Progress | eFE3C | Claude |
-| T-11 | Add Month Filter in Statistics (فلتر الشهر في الإحصائيات) | 🔵 In Progress | eFE3C | Claude |
-| T-12 | Fix BiDi (Arabic/English Mixed Text) | 🔵 In Progress | eFE3C | Claude |
-| T-13 | Performance Improvements (تحسين الأداء) | 🔵 In Progress | eFE3C | Claude |
+| T-10 | Remove Duplicate Date Filters (إزالة تكرار فلاتر التاريخ) | ✅ Completed | eFE3C | Claude |
+| T-11 | Add Month Filter in Statistics (فلتر الشهر في الإحصائيات) | ✅ Completed | eFE3C | Claude |
+| T-12 | Fix BiDi (Arabic/English Mixed Text) | ✅ Completed | eFE3C | Claude |
+| T-13 | Performance Improvements (تحسين الأداء) | ✅ Completed | eFE3C | Claude |
 
 ### Progress
 
-- [ ] T-10: Remove duplicate date filters
-- [ ] T-11: Add month filter in statistics
-- [ ] T-12: Fix BiDi mixed text
-- [ ] T-13: Performance improvements
+- [x] T-10: Remove duplicate date filters
+- [x] T-11: Add month filter in statistics
+- [x] T-12: Fix BiDi mixed text
+- [x] T-13: Performance improvements

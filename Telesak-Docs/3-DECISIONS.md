@@ -418,6 +418,93 @@ Replace with `Company.Get(filter:)` using `.Any()` subquery to check matching Us
 
 ---
 
+## Sprint 5 Decisions
+
+### DEC-019: Remove End Date Filter from Report Pages
+
+**Date:** 2026-03-24 | **Task:** T-10 | **Status:** Implemented
+
+#### Context
+Report preparation pages had 4 date fields (Start Date From/To + End Date From/To) which appeared as duplicates to users.
+
+#### Decision
+Remove the "تاريخ النهاية" (End Date) row entirely. Keep only "تاريخ البداية" (Start Date) From/To.
+
+#### Rationale
+- User reported as confusing/duplicate
+- Start Date range is sufficient for most report use cases
+- Backend SP still accepts the parameters (they'll be null)
+
+---
+
+### DEC-020: Hijri Month Names for Statistics Filter
+
+**Date:** 2026-03-24 | **Task:** T-11 | **Status:** Implemented
+
+#### Context
+TasksByMonthsChart uses Hijri months on the X-axis. Month filter dropdown needed matching names.
+
+#### Decision
+Use Hijri month names (محرم through ذو الحجة) instead of Gregorian months, matching the chart axis labels.
+
+#### Rationale
+- Consistency with chart display
+- The data is already grouped by Hijri months
+
+---
+
+### DEC-021: BiDi Fix via CSS Class Instead of Inline Styles
+
+**Date:** 2026-03-24 | **Task:** T-12 | **Status:** Implemented
+
+#### Context
+Mixed Arabic/English task names displayed in wrong reading order.
+
+#### Decision
+Add `.bidi-text { unicode-bidi: plaintext; }` CSS class and wrap task name elements with `<span class="bidi-text">`. Deferred RDLC report BiDi to future task.
+
+#### Rationale
+- CSS class is reusable across all views
+- `unicode-bidi: plaintext` lets the browser determine text direction automatically
+- RDLC requires different approach (XML-level changes)
+
+---
+
+### DEC-022: Batch FillTaskMetadata Instead of Per-Task GetByID
+
+**Date:** 2026-03-24 | **Task:** T-13 | **Status:** Implemented
+
+#### Context
+Dashboard `SelectCompanyTasks()` called `isTaskDelayed()`, `TaskDelayTime()`, `DelayPercentage()`, and `GetEmplyeeName()` per task — each creating a new UnitOfWork and calling GetByID.
+
+#### Decision
+Replace with single `FillTaskMetadata()` method that batch-loads all task entities and employee names into dictionaries, then performs O(1) lookups.
+
+#### Rationale
+- Reduces N*4 DB queries to 2 queries (tasks + employees)
+- `isDelayed` is a computed property — cannot be used in LINQ-to-Entities WHERE clause
+- Same pattern as Sprint 4 DEC-013 for CompanyTaskVM
+
+---
+
+### DEC-023: Only Modify Areas/ Folder, Not Areas2/
+
+**Date:** 2026-03-24 | **Task:** All | **Status:** Documented
+
+#### Context
+Project has both Areas/ and Areas2/ folders with similar views. Areas2 is excluded from the VS project.
+
+#### Decision
+Only apply code changes to Areas/ folder. Areas2 is not part of the active application.
+
+#### Rationale
+- Areas2 is excluded from .csproj
+- Confirmed by user via Visual Studio Solution Explorer screenshot
+
+---
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports
