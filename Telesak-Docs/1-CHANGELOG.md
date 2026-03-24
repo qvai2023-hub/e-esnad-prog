@@ -41,6 +41,24 @@ Added `unicode-bidi: plaintext` CSS class to fix mixed Arabic/English task name 
 | `Areas/Employee/Views/Tasks/PartialEmpTask.cshtml` | Wrapped task name in `<span class="bidi-text">` |
 | `Areas/Common/Views/Common/PartialTaskCommon.cshtml` | Wrapped task name in `<span class="bidi-text">` |
 
+### T-12b: Fix BiDi in CompanyTasks RDLC Report
+
+Fixed mixed Arabic/English text order in the CompanyTasks RDLC report and widened the task column.
+
+| File | Description |
+|------|-------------|
+| `ReportsRDLC/CompanyTasks.rdlc` | Changed report `Language` from `en-US` to `ar-SA` for correct RTL base direction |
+| `ReportsRDLC/CompanyTasks.rdlc` | Added `<Direction>RTL</Direction>` to task column header and data paragraphs |
+| `ReportsRDLC/CompanyTasks.rdlc` | Widened task column from 1.5in to 2.3in; reduced other columns to fit |
+
+### T-14: Fix Inactivity Modal Closing on Mouse Move
+
+Fixed bug where the inactivity warning popup closed immediately when the employee moved the mouse to click a button.
+
+| File | Description |
+|------|-------------|
+| `Scripts/attendance-tracker.js` | `updateLastActivity()` now ignores activity events while modal is shown — only modal buttons can dismiss it |
+
 ### T-13: Performance Improvements (تحسين الأداء)
 
 Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
