@@ -48,7 +48,7 @@ namespace EtaskMinstry.Services
             var currentYear = DateTime.Now.Year;
             data = _unitOfWork.TaskRepository.Get(filter: a => a.IsDeleted == false && a.CompanyID == CompanyId && a.EmpID!=null&&
            a.StartDate.Value.Month == currentMonth && a.StartDate.Value.Year == currentYear,
-           includeProperties: "Employee,Status").Select(a => new BriefTasksReportModel()
+           includeProperties: "Employee,Employee.Tasks,Status").Select(a => new BriefTasksReportModel()
            {
                Id=a.Employee.EmpID,
                BriefTaskName = a.BriefTaskName,
