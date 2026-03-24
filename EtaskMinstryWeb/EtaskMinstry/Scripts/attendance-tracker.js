@@ -102,15 +102,13 @@
      * Update last activity time
      */
     function updateLastActivity() {
+        // Ignore activity events while modal is shown — only modal buttons should dismiss it
+        if (state.isModalShown) return;
+
         state.lastActivityTime = new Date();
 
         // Reset inactivity timer
         resetInactivityTimer();
-
-        // Hide modal if shown
-        if (state.isModalShown) {
-            hideInactivityModal();
-        }
     }
 
     /**
