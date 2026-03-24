@@ -3,6 +3,7 @@
 ## Current Status
 
 ```
+Sprint 5: ░░░░░░░░░░░░░░░░░░░░   0% In Progress
 Sprint 4: ████████████████████ 100% Complete
 Sprint 3: ████████████████████ 100% Complete
 Sprint 1: ████████████████████ 100% Complete
@@ -251,6 +252,20 @@ Sprint 0: ████████████████████ 100% Comp
 
 ---
 
-## Next Sprint (Sprint 5)
+## Sprint 5: UX & Performance (T-10 + T-11 + T-12 + T-13)
 
-*To be planned*
+### Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| T-10 | Remove Duplicate Date Filters (إزالة تكرار فلاتر التاريخ) | 🔵 In Progress | eFE3C | Claude |
+| T-11 | Add Month Filter in Statistics (فلتر الشهر في الإحصائيات) | 🔵 In Progress | eFE3C | Claude |
+| T-12 | Fix BiDi (Arabic/English Mixed Text) | 🔵 In Progress | eFE3C | Claude |
+| T-13 | Performance Improvements (تحسين الأداء) | 🔵 In Progress | eFE3C | Claude |
+
+### Progress
+
+- [ ] T-10: Remove duplicate date filters
+- [ ] T-11: Add month filter in statistics
+- [ ] T-12: Fix BiDi mixed text
+- [ ] T-13: Performance improvements
