@@ -9,7 +9,7 @@
             var gridColumns = new List<WebGridColumn>();
 
 
-            gridColumns.Add(grid.Column("Task", "المهمة", @<text>@Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)
+            gridColumns.Add(grid.Column("Task", "المهمة", @<text><span class="bidi-text">@Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)</span>
 
 
             </text>, "FirstColumn"));

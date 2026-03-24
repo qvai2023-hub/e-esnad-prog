@@ -260,12 +260,50 @@ namespace EtaskMinstry.Models.Company
 
 
             }
-            objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
-            objTasks.ForEach(i => i.delayTime = TaskDelayTime(i));
-            objTasks.ForEach(i => i.DBStatus = taskType);
-            objTasks.ForEach(i => i.EmpName = i.EmpID.HasValue ? EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName(i.EmpID.Value) : "_");
-            objTasks.ForEach(i => i.delayPercentage = DelayPercentage(i));
+            // Batch load delay data and employee names to avoid N+1 queries
+            FillTaskMetadata(objTasks, taskType, _unitOfWork);
                     return objTasks;
+        }
+
+        /// <summary>
+        /// Batch loads delay data and employee names for all tasks in a single query
+        /// instead of N+1 individual GetByID calls per task.
+        /// </summary>
+        private void FillTaskMetadata(List<DaskBoardCompanyTaskVM> objTasks, DashBoaedTaskType taskType, UnitOfWork unitOfWork)
+        {
+            if (!objTasks.Any()) return;
+
+            // Batch load task entities for delay info
+            var taskIds = objTasks.Select(t => t.TaskID).ToList();
+            var taskEntities = unitOfWork.TaskRepository.Get(t => taskIds.Contains(t.TaskID)).ToList();
+            var taskDict = taskEntities.ToDictionary(t => t.TaskID);
+
+            // Batch load employee names
+            var empIds = objTasks.Where(t => t.EmpID.HasValue).Select(t => t.EmpID.Value).Distinct().ToList();
+            var empDict = new Dictionary<int, string>();
+            if (empIds.Any())
+            {
+                var employees = unitOfWork.Employee.Get(e => empIds.Contains(e.EmpID) && e.IsActive.HasValue && e.IsActive.Value).ToList();
+                foreach (var emp in employees)
+                {
+                    if (!empDict.ContainsKey(emp.EmpID))
+                        empDict[emp.EmpID] = emp.Name;
+                }
+            }
+
+            foreach (var task in objTasks)
+            {
+                task.DBStatus = taskType;
+                task.EmpName = task.EmpID.HasValue && empDict.ContainsKey(task.EmpID.Value) ? empDict[task.EmpID.Value] : "_";
+
+                if (taskDict.ContainsKey(task.TaskID))
+                {
+                    var entity = taskDict[task.TaskID];
+                    task.IsDelayed = entity.isDelayed;
+                    task.delayTime = entity.delayTime != null ? entity.delayTime.Replace('-', ' ') : "";
+                    task.delayPercentage = entity.DelayPercentage;
+                }
+            }
         }
 
         public List<DaskBoardCompanyTaskVM> SelectCompanyTasks(DashBoaedTaskType taskType, out int count, int page = 1, int pageSize = 10)
@@ -558,11 +596,8 @@ namespace EtaskMinstry.Models.Company
                     break;
 
             }
-            objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
-            objTasks.ForEach(i => i.delayTime = TaskDelayTime(i));
-            objTasks.ForEach(i => i.DBStatus = taskType);
-            objTasks.ForEach(i => i.EmpName = i.EmpID.HasValue ? EtaskMinstry.AppCode.ServiceManger.GetEmplyeeName(i.EmpID.Value) : "_");
-            objTasks.ForEach(i => i.delayPercentage = DelayPercentage(i));
+            // Batch load delay data and employee names to avoid N+1 queries
+            FillTaskMetadata(objTasks, taskType, _unitOfWork);
             return objTasks;
         }
 

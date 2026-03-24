@@ -43,7 +43,9 @@ namespace EtaskMinstry.Areas.Company.Models
         /// To Get Count each Task type By Year .
         /// </summary>
         /// <param name="iYear"></param>
-        public void GetTasks(int iYear,int iEmpID)
+        /// <param name="iEmpID"></param>
+        /// <param name="iMonth">Hijri month (1-12), 0 = all months</param>
+        public void GetTasks(int iYear, int iEmpID, int iMonth = 0)
         {
             if (iYear == 0)
                 iYear = DateTime.Now.GetHijriYear();
@@ -75,6 +77,16 @@ namespace EtaskMinstry.Areas.Company.Models
             for (int i = 1; i <= 12; i++)
             {
                 DateTime dtStartMonth = ("1/" + i + "/" + iYear).ToGregExact();
+
+                // If a specific month is selected, only count for that month; others get 0
+                if (iMonth > 0 && i != iMonth)
+                {
+                    CreatedTasks += "0,";
+                    ApprovedTasks += "0,";
+                    RefusedTasks += "0,";
+                    DoneTasks += "0,";
+                    continue;
+                }
 
                 CreatedTasks += lstTasks.Count(
                     t => t.CreatedDate >= dtStartMonth && t.CreatedDate <= dtStartMonth.AddMonths(1)) + ",";
