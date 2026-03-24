@@ -44,6 +44,7 @@ namespace EtaskMinstry.Services
             //.ToList();
             var selectList = _unitOfWork.Company
 .Get(filter: c => c.IsDeleted == false && c.UserAccounts.Any(u => u.IsTelesak == isTelesak && u.CompanyID != null))
+.ToList()
 .Select(c => new SelectListItem
 {
     Value = c.CompanyID.ToString(),

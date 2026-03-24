@@ -15,10 +15,13 @@ All notable changes to this project will be documented in this file.
 - **TasksService.cs**: Added `includeProperties: "Employee,Status"` to eliminate N+1 lazy-load queries in BriefTasks report
 - **EmployeesReportService.cs**: Added `includeProperties: "Attendances"` to eliminate N+1 queries when counting attendance records
 - **SharedService.cs**: Replaced `.AsEnumerable()` GroupBy (loaded all UserAccounts into memory) with direct `Company.Get(filter:)` query
-- **AttendanceReportService.cs**: Removed intermediate `.ToList()` before `.Select()` to let EF project at DB level
+- **AttendanceReportService.cs**: Added `Get(filter:)` for employee dropdown (`.ToList()` kept for `.ToString()` projection)
 
 #### AppCode
-- **Notification.cs**: Replaced unbounded `SIGNAL_R_SESSIONs.Get().ToList()` with filtered query using collection instance/type IDs
+- **Notification.cs**: Replaced unbounded `SIGNAL_R_SESSIONs.Get().ToList()` with filtered query using collection instance/type IDs; added empty collection guard
+
+#### Services (continued)
+- **TasksService.cs**: Added `Employee.Tasks` to includeProperties to prevent N+1 on `a.Employee.Tasks.Any(...)` check
 
 ---
 
