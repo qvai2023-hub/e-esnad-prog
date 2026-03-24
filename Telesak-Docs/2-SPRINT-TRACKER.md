@@ -122,6 +122,8 @@ Sprint 0: ████████████████████ 100% Comp
 | 12 | `EtaskMinstry/Areas/Company/Models/DaskBoardCompanyTaskVM.cs` | T-13 | High |
 | 13 | `EtaskMinstry/Views/Shared/_Layout.cshtml` | T-13 | Medium |
 | 14 | `EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml` | T-13 | Medium |
+| 15 | `EtaskMinstry/ReportsRDLC/CompanyTasks.rdlc` | T-12b | High |
+| 16 | `EtaskMinstry/Scripts/attendance-tracker.js` | T-14 | High |
 
 #### Database Scripts (Optional)
 
@@ -289,11 +291,15 @@ Sprint 0: ████████████████████ 100% Comp
 | T-10 | Remove Duplicate Date Filters (إزالة تكرار فلاتر التاريخ) | ✅ Completed | eFE3C | Claude |
 | T-11 | Add Month Filter in Statistics (فلتر الشهر في الإحصائيات) | ✅ Completed | eFE3C | Claude |
 | T-12 | Fix BiDi (Arabic/English Mixed Text) | ✅ Completed | eFE3C | Claude |
+| T-12b | Fix BiDi in CompanyTasks RDLC Report | ✅ Completed | eFE3C | Claude |
 | T-13 | Performance Improvements (تحسين الأداء) | ✅ Completed | eFE3C | Claude |
+| T-14 | Fix Inactivity Modal Closing on Mouse Move | ✅ Completed | eFE3C | Claude |
 
 ### Progress
 
 - [x] T-10: Remove duplicate date filters
 - [x] T-11: Add month filter in statistics
 - [x] T-12: Fix BiDi mixed text
+- [x] T-12b: Fix BiDi in CompanyTasks RDLC report (Language ar-SA + RTL direction)
 - [x] T-13: Performance improvements
+- [x] T-14: Fix inactivity modal closing on mouse move
