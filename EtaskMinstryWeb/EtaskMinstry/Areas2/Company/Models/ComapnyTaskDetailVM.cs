@@ -211,7 +211,8 @@ namespace EtaskMinstry.Models.Company
         /// <returns></returns>
         public double ProgressbarPercentage(TaskManagementModel.Task task)
         {
-            return _unitOfWork.TaskRepository.GetByID(task.TaskID).DelayPercentage;
+            // Performance fix: use the already-loaded task object instead of re-querying DB
+            return task.DelayPercentage;
         }
 
 

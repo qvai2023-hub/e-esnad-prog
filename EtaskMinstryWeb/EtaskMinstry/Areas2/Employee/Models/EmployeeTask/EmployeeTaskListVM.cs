@@ -91,15 +91,16 @@ namespace EtaskMinstry.Models.EmployeeTask
                   && !t.IsDeleted
                   // && t.IsArchived != true // check that all tasks are not in archive.
                   && t.StatusID != (int)TaskStatus.Rejected
-                  && (statuse == (int)TaskStatus.All ? statuse == (int)TaskStatus.All //if need all tasks 
-                  : statuse == (int)TaskStatus.Delay ? true //get delay and not done tasks 
+                  && (statuse == (int)TaskStatus.All ? statuse == (int)TaskStatus.All //if need all tasks
+                  : statuse == (int)TaskStatus.Delay ? true //get delay and not done tasks
                                                             //get new or accepted task in the new tab
                   : statuse == (int)TaskStatus.New ? ((t.StatusID == (int)TaskStatus.New && t.EmpID == currentUser) || (t.StatusID == (int)TaskStatus.Accepted && t.StartDate > DateTime.Now && t.EmpID == currentUser))
                   //get tasks if it pending or reassigned to another employee
                   : statuse == (int)TaskStatus.Pending ? (t.StatusID == (int)TaskStatus.Pending || (t.TaskTLogs.FirstOrDefault(o => o.EmpID == currentUser) != null && t.TaskTLogs.FirstOrDefault(o => o.EmpID == currentUser).EmpID != t.TaskTLogs.OrderByDescending(o => o.TaskTLogID).FirstOrDefault().EmpID))
                   : t.StatusID == statuse)
                   && (priorityId == 0 || t.PriorityID == priorityId)
-                  && (title == "" || t.Title.ToLower().Contains(title.Trim().ToLower())))
+                  && (title == "" || t.Title.ToLower().Contains(title.Trim().ToLower())),
+                  includeProperties: "Project,Priority,Status,TaskTLogs,TaskTLogs.Status")
                   .Where(o => (fromDate == null || o.StartDate >= fromDate) && (toDate == null || o.StartDate <= toDate)
                    && (String.IsNullOrEmpty(FromEndDate) ||
                                                         o.EndDate.Value >= dtFromEndDate)

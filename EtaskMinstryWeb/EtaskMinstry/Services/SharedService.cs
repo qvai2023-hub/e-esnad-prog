@@ -42,14 +42,12 @@ namespace EtaskMinstry.Services
             //    Text = g.Key.CompanyName
             //})
             //.ToList();
-            var selectList = _unitOfWork.UserAccount
-.Get(x => x.IsTelesak == isTelesak && x.CompanyID != null)
-.GroupBy(n => new { n.CompanyID, CompanyName = n.Company.Name })
-.AsEnumerable()
-.Select(g => new SelectListItem
+            var selectList = _unitOfWork.Company
+.Get(filter: c => c.IsDeleted == false && c.UserAccounts.Any(u => u.IsTelesak == isTelesak && u.CompanyID != null))
+.Select(c => new SelectListItem
 {
-    Value = g.Key.CompanyID?.ToString(),
-    Text = g.Key.CompanyName
+    Value = c.CompanyID.ToString(),
+    Text = c.Name
 })
 .ToList();
             return selectList;

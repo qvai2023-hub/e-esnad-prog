@@ -30,7 +30,7 @@ namespace EtaskMinstry.Services
             List<EmployeesReportModel> data = new List<EmployeesReportModel>();
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
-            data = _unitOfWork.Employee.Get(a => a.IsDeleted == false && a.CompanyID == CompanyId).Select(a => new EmployeesReportModel()
+            data = _unitOfWork.Employee.Get(filter: a => a.IsDeleted == false && a.CompanyID == CompanyId, includeProperties: "Attendances").Select(a => new EmployeesReportModel()
             {
                 EmpId=a.EmpID,
                 employeeName = a.Name,

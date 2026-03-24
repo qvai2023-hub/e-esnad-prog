@@ -276,6 +276,148 @@ Add التفاعل column to CompanyTasks report from updated `sp_CompanyTasks`.
 
 ---
 
+---
+
+## Sprint 4 Decisions
+
+### DEC-012: Eager Loading via includeProperties for Task Lists
+
+**Date:** 2026-03-18 | **Task:** PERF-01/02/03 | **Status:** Implemented
+
+#### Context
+Task list pages triggered N+1 lazy-loading queries for navigation properties (Project, Status, Priority, TaskTLogs). Each task caused additional DB roundtrips.
+
+#### Decision
+Add `includeProperties` parameter to `Get()` calls to eager-load all required navigation properties in a single query.
+
+#### Rationale
+- Eliminates hundreds of lazy-load queries per page load
+- Already supported by the repository pattern
+- Minimal code change, large performance gain
+
+#### Implementation
+```csharp
+// CompanyTaskVM.Select()
+_unitOfWork.TaskRepository.Get(filter: ..., includeProperties: "Project,Status,Priority,TaskTLogs")
+
+// EmployeeTaskListVM.FillTasks()
+_unitOfWork.TaskRepository.Get(filter: ..., includeProperties: "Project,Priority,Status,TaskTLogs,TaskTLogs.Status")
+```
+
+---
+
+### DEC-013: Batch Dictionary Lookup for Task Delay Data
+
+**Date:** 2026-03-18 | **Task:** PERF-01 | **Status:** Implemented
+
+#### Context
+`CompanyTaskVM.Select()` called `isTaskDelayed(t)` and `Delaytime(t)` per task inside a `ForEach`. Each method called `GetByID()`, causing N extra DB queries.
+
+#### Decision
+Batch-load all task delay data into a `Dictionary<int, {isDelayed, delayTime, DelayPercentage}>` and perform O(1) lookups.
+
+#### Rationale
+- Replaces N queries with 1 query
+- Dictionary lookups are O(1)
+- No schema changes needed
+
+#### Implementation
+```csharp
+var taskDelayData = _unitOfWork.TaskRepository
+    .Get(filter: t => taskIds.Contains(t.TaskID))
+    .ToDictionary(t => t.TaskID, t => new { t.isDelayed, t.delayTime, t.DelayPercentage });
+```
+
+---
+
+### DEC-014: Server-Side Filtering for GetAllEmployees
+
+**Date:** 2026-03-18 | **Task:** PERF-05 | **Status:** Implemented
+
+#### Context
+`ServiceManger.GetAllEmployees()` loaded ALL employees then filtered client-side with `.Where()`.
+
+#### Decision
+Pass filter into `Get(filter:)` so EF translates it to SQL WHERE clause.
+
+#### Rationale
+- Avoids loading entire employee table into memory
+- Reduces data transfer and memory usage
+- Single-line fix
+
+#### Implementation
+```csharp
+// Before: Get().Where(e => e.company_Id == companyId)
+// After:  Get(filter: e => e.company_Id == companyId)
+```
+
+---
+
+### DEC-015: Server-Side Filtering for CompanyEmployeeVM Validation Queries
+
+**Date:** 2026-03-18 | **Task:** PERF-06 | **Status:** Implemented
+
+#### Context
+All 11 validation/lookup methods in `CompanyEmployeeVM` called `.Get()` with no filter, loading ALL employees into memory before filtering client-side.
+
+#### Decision
+Pass filter expressions directly into `Get(filter:)` for all 11 methods.
+
+#### Rationale
+- Every employee form submit triggered full table scans
+- Single-line fixes with no behavioral change
+- Query execution moves from C# to SQL WHERE clause
+
+---
+
+### DEC-016: Replace Unbounded Session Load in NotificationHub
+
+**Date:** 2026-03-18 | **Task:** PERF-10 | **Status:** Implemented
+
+#### Context
+`NotificationHub.Send()` loaded ALL SignalR sessions into memory, then filtered client-side.
+
+#### Decision
+Filter at DB level using `InstanceID` and `UserTypeID` values from the notification collection with `.Contains()` (translates to SQL IN).
+
+#### Rationale
+- Scales better as connected users grow
+- Avoids loading entire session table per notification
+
+---
+
+### DEC-017: Company-Scoped Queries in RecurrenceTaskVM
+
+**Date:** 2026-03-18 | **Task:** PERF-13 | **Status:** Implemented
+
+#### Context
+`GetAllProjects()` and `GetAllEmployees()` loaded ALL records without company filter — cross-tenant data exposure in a multi-tenant system.
+
+#### Decision
+Add `CompanyID == MvcApplication.userData.userId` filter, plus `IsDeleted == false` for employees.
+
+#### Rationale
+- Security: prevents cross-tenant data exposure
+- Performance: only loads relevant records
+
+---
+
+### DEC-018: Remove AsEnumerable() Client-Side GroupBy in SharedService
+
+**Date:** 2026-03-18 | **Task:** PERF-11 | **Status:** Implemented
+
+#### Context
+`GetCompaniesByproviderId()` loaded all UserAccounts, forced client-side execution with `.AsEnumerable()`, then did GroupBy.
+
+#### Decision
+Replace with `Company.Get(filter:)` using `.Any()` subquery to check matching UserAccounts.
+
+#### Rationale
+- GroupBy was only used to get distinct companies — a Company query does this directly
+- `.Any()` translates to efficient SQL EXISTS
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports

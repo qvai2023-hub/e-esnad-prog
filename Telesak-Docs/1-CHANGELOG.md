@@ -4,6 +4,86 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## Sprint 4 - Performance & Attachment Fixes
+
+### PERF: N+1 Query Fixes, Eager Loading & Client-Side Filtering Fixes
+**Status:** Completed
+**Date Completed:** 2026-03-18
+
+#### Files Modified:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/Areas2/Company/Models/CompanyTaskVM.cs` | Modified | Added includeProperties to Select() + batch delay data lookup |
+| `EtaskMinstry/Areas2/Company/Models/ComapnyTaskDetailVM.cs` | Modified | Removed redundant GetByID in ProgressbarPercentage() |
+| `EtaskMinstry/Areas2/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` | Modified | Added includeProperties to FillTasks() |
+| `EtaskMinstry/AppCode/ServiceManger.cs` | Modified | Server-side filtering for GetAllEmployees() |
+| `EtaskMinstry/Areas/Company/Models/CompanyEmployeeVM.cs` | Modified | 11 queries moved from client-side to DB-level filtering |
+| `EtaskMinstry/Areas/Company/Models/CompanyProfileVM.cs` | Modified | 3 queries replaced with GetByID / Get(filter:) |
+| `EtaskMinstry/Areas/Company/Models/RecurrenceTaskVM.cs` | Modified | Company-scoped GetAllProjects + GetAllEmployees |
+| `EtaskMinstry/Services/TasksService.cs` | Modified | Added includeProperties: Employee,Status |
+| `EtaskMinstry/Services/EmployeesReportService.cs` | Modified | Added includeProperties: Attendances |
+| `EtaskMinstry/Services/SharedService.cs` | Modified | Replaced AsEnumerable() GroupBy with Company.Get(filter:) |
+| `EtaskMinstry/Services/AttendanceReportService.cs` | Modified | Removed double materialization (.ToList() before .Select()) |
+| `EtaskMinstry/AppCode/Notification.cs` | Modified | Filtered SignalR session query at DB level |
+
+#### Changes:
+- CompanyTaskVM: Eager load Project, Status, Priority, TaskTLogs in task list query
+- CompanyTaskVM: Batch dictionary lookup for isDelayed, delayTime, DelayPercentage (replaces per-task GetByID)
+- EmployeeTaskListVM: Eager load Project, Priority, Status, TaskTLogs, TaskTLogs.Status
+- ComapnyTaskDetailVM: Use already-loaded task object instead of re-querying
+- ServiceManger: Move company filter into Get() call (DB-level instead of client-side)
+- CompanyEmployeeVM: All 11 uniqueness/lookup queries now filter at DB level via Get(filter:)
+- CompanyProfileVM: CompanyDetails, ChangeEmail, ChangeAddress use GetByID / Get(filter:)
+- RecurrenceTaskVM: GetAllProjects and GetAllEmployees now scoped to current company
+- TasksService: BriefTasks report eager-loads Employee and Status navigation properties
+- EmployeesReportService: Employee report eager-loads Attendances for count
+- SharedService: Eliminated AsEnumerable() that forced client-side GroupBy of all UserAccounts
+- AttendanceReportService: Employee dropdown projects at DB level (no intermediate ToList)
+- Notification.cs: SignalR session lookup filtered by collection instance/type IDs at DB level
+
+---
+
+### T-09b: Preserve Original File Names for Attachments
+**Status:** Completed
+**Date Completed:** 2026-03-18
+
+#### Files Modified:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/Areas2/Company/Controllers/TaskController.cs` | Modified | Store OriginalFileName on upload |
+| `EtaskMinstry/Areas2/Company/Controllers/CompanyController.cs` | Modified | Preserve OriginalFileName on task re-assignment copy |
+| `EtaskMinstry/Areas2/Company/Views/Company/EditTask.cshtml` | Modified | Display original file name |
+| `EtaskMinstry/Areas2/Company/Views/Company/SaveData.cshtml` | Modified | Display original file name |
+
+#### Changes:
+- Task attachments now preserve and display the user's original file name
+- GUID-based disk name still used for storage (no collision risk)
+- Original name carried forward when tasks are re-assigned and attachments are copied
+
+---
+
+## Sprint 3 - Bulk Operations & Filtering
+
+### T-07/T-08/T-09/T-10: Bulk Delete, Multi-Employee Filter, SQL Scripts
+**Status:** Completed
+**Date Completed:** 2026-03-17
+
+#### Files Modified:
+| File | Type | Description |
+|------|------|-------------|
+| `EtaskMinstry/Areas/Company/Controllers/CompanyController.cs` | Modified | BulkDelete action + multi-employee GetTasks |
+| `EtaskMinstry/Areas/Company/Views/Company/PartialCompTask.cshtml` | Modified | Checkbox column (New tab only) + select-all JS |
+| `EtaskMinstry/Areas/Company/Views/Company/Index.cshtml` | Modified | Bulk delete toolbar + Chosen.js multi-select |
+| `docs/Sprint3_SQL_Scripts.sql` | New | Performance indexes + Attachment table verification |
+
+#### Changes:
+- T-07: Bulk delete for tasks with New status only (max 500), with confirmation modal
+- T-08: Multi-employee filter using Chosen.js multi-select dropdown
+- T-09: SQL verification script for attachment table (files stay on disk)
+- T-10: Performance indexes IX_Task_StatusID_CompanyID and IX_Task_EmpID_CompanyID
+
+---
+
 ## Sprint 1 - Task Report & Attendance Tracking
 
 ### T-05/T-04: Task Report Redesign (CompanyTasks)
@@ -178,6 +258,42 @@ Identified 4 issues in the attendance report:
 
 ### SQL Jobs
 *None*
+
+---
+
+## Sprint 4 Summary
+
+| Task | Status | Files | DB Changes |
+|------|--------|-------|------------|
+| T-09b | Completed | 4 modified | None |
+| PERF-01 | Completed | 1 modified (CompanyTaskVM) | None |
+| PERF-02 | Completed | 1 modified (CompanyTaskVM) | None |
+| PERF-03 | Completed | 1 modified (EmployeeTaskListVM) | None |
+| PERF-04 | Completed | 1 modified (ComapnyTaskDetailVM) | None |
+| PERF-05 | Completed | 1 modified (ServiceManger) | None |
+| PERF-06 | Completed | 1 modified (CompanyEmployeeVM) | None |
+| PERF-07 | Completed | 1 modified (CompanyProfileVM) | None |
+| PERF-08 | Completed | 1 modified (TasksService) | None |
+| PERF-09 | Completed | 1 modified (EmployeesReportService) | None |
+| PERF-10 | Completed | 1 modified (Notification.cs) | None |
+| PERF-11 | Completed | 1 modified (SharedService) | None |
+| PERF-12 | Completed | 1 modified (AttendanceReportService) | None |
+| PERF-13 | Completed | 1 modified (RecurrenceTaskVM) | None |
+
+**Total Files:** 16 modified (12 unique for perf + 4 for T-09b attachments)
+
+---
+
+## Sprint 3 Summary
+
+| Task | Status | Files | DB Changes |
+|------|--------|-------|------------|
+| T-07 | Completed | 3 modified | None |
+| T-08 | Completed | 2 modified | None |
+| T-09 | Completed | 1 new (SQL) | Verification only |
+| T-10 | Completed | 1 new (SQL) | 2 indexes to create |
+
+**Total Files:** 4 (1 new SQL + 3 modified)
 
 ---
 

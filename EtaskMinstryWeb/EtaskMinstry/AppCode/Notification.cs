@@ -244,9 +244,10 @@ public class NotificationHub : Hub
         unitOfWork.Save();
 
         //get current session keys
-        var currentSession = unitOfWork.SIGNAL_R_SESSIONs.Get().ToList();
-        //get the list specific to send now
-        var lstToSend = currentSession.Where(i => collection.Any(s => s.InstanceID  == i.UserID  && s.UserTypeID == i.UserTypeID)).Select(i => i.ConnectionID).ToList();
+        //get the list specific to send now — filter at DB level using the collection IDs
+        var instanceIds = collection.Select(s => s.InstanceID).ToList();
+        var userTypeIds = collection.Select(s => s.UserTypeID).Distinct().ToList();
+        var lstToSend = unitOfWork.SIGNAL_R_SESSIONs.Get(filter: i => instanceIds.Contains(i.UserID) && userTypeIds.Contains(i.UserTypeID)).Select(i => i.ConnectionID).ToList();
         //create object to be serialized and send it to client
         var objToSend = new NotificationClientObject() 
         {

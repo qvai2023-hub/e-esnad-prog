@@ -57,7 +57,7 @@ namespace EtaskMinstry.Areas.Company.Models
 
           public List<Project> GetAllProjects()
           {
-              return _unitOfWork.ProjectRepository.Get().ToList();
+              return _unitOfWork.ProjectRepository.Get(filter: p => p.CompanyID == MvcApplication.userData.userId).ToList();
           }
 
           public List<TaskManagementModel.RecurrenceType> GetAllRecurrenceType()
@@ -68,7 +68,7 @@ namespace EtaskMinstry.Areas.Company.Models
           public List<Emps> GetAllEmployees()
           {
 
-              List<Emps> eTaskList = _unitOfWork.Employee.Get().Select(a => new
+              List<Emps> eTaskList = _unitOfWork.Employee.Get(filter: a => a.CompanyID == MvcApplication.userData.userId && a.IsDeleted == false).Select(a => new
             {
                employee_Id= a.EmpID,
                Employee_Name= a.Name,

@@ -4,6 +4,57 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Performance: Client-Side Filtering, N+1 Queries & Unbounded Loads (Session pw8mP)
+
+#### Areas/Company/Models
+- **CompanyEmployeeVM.cs**: Moved 11 `.Get()` validation queries to `Get(filter:)` — all uniqueness checks (name, email, mobile, NationalID, SequenceNumber+LaborOfficeID) now filter at DB level; restored `GetByID` for Settings lookup
+- **CompanyProfileVM.cs**: Replaced 3x `.Get().Where().FirstOrDefault()` with `GetByID()` or `Get(filter:)` for Company and UserAccount lookups
+- **RecurrenceTaskVM.cs**: Added company filter to `GetAllProjects()` and `GetAllEmployees()` — was loading entire tables unfiltered
+
+#### Services
+- **TasksService.cs**: Added `includeProperties: "Employee,Status"` to eliminate N+1 lazy-load queries in BriefTasks report
+- **EmployeesReportService.cs**: Added `includeProperties: "Attendances"` to eliminate N+1 queries when counting attendance records
+- **SharedService.cs**: Replaced `.AsEnumerable()` GroupBy (loaded all UserAccounts into memory) with direct `Company.Get(filter:)` query
+- **AttendanceReportService.cs**: Removed intermediate `.ToList()` before `.Select()` to let EF project at DB level
+
+#### AppCode
+- **Notification.cs**: Replaced unbounded `SIGNAL_R_SESSIONs.Get().ToList()` with filtered query using collection instance/type IDs
+
+---
+
+### Fixed - Performance: N+1 Queries & Eager Loading (Session pw8mP)
+
+#### Areas2/Company
+- **CompanyTaskVM.cs**: Added `includeProperties: "Project,Status,Priority,TaskTLogs"` to `Select()` Get() call
+  - Eliminates lazy-loading N+1 queries when projecting task list
+- **CompanyTaskVM.cs**: Replaced per-task `isTaskDelayed()`, `Delaytime()` calls with batch dictionary lookup
+  - Single query loads all task delay data (isDelayed, delayTime, DelayPercentage) at once
+  - Eliminates ~N extra `GetByID()` calls for delayed task list
+- **ComapnyTaskDetailVM.cs**: `ProgressbarPercentage()` now uses the already-loaded `task` parameter
+  - Removed redundant `GetByID(task.TaskID)` call
+
+#### Areas2/Employee
+- **EmployeeTaskListVM.cs**: Added `includeProperties: "Project,Priority,Status,TaskTLogs,TaskTLogs.Status"` to `FillTasks()` Get() call
+  - Eliminates lazy-loading N+1 queries when building employee task list
+
+#### AppCode
+- **ServiceManger.cs**: Moved `GetAllEmployees()` filter into `Get(filter:)` parameter
+  - Was: `Get().Where(e => e.company_Id == companyId)` — loads ALL employees then filters client-side
+  - Now: `Get(filter: e => e.company_Id == companyId)` — filters at DB level
+
+---
+
+### Fixed - Task Attachments: Original File Names (Session pw8mP)
+
+#### T-09: Preserve Original File Names
+- **TaskController.cs** (Areas2): Added `OriginalFileName` property when saving attachments
+  - Stores user-facing file name alongside the GUID-based disk name
+- **CompanyController.cs** (Areas2): Preserved `OriginalFileName` when copying attachments during task re-assignment
+- **EditTask.cshtml**: Display original file name in attachment list
+- **SaveData.cshtml**: Display original file name in save confirmation view
+
+---
+
 ### Added - Sprint 3: Bulk Operations & Filtering (Session haj1c)
 
 #### T-07: Bulk Delete Tasks
@@ -159,6 +210,18 @@ All notable changes to this project will be documented in this file.
 ---
 
 ## Session History
+
+### Session pw8mP (2026-03-18)
+- Fixed N+1 query performance issues in CompanyTaskVM, EmployeeTaskListVM, ComapnyTaskDetailVM
+- Added eager loading (includeProperties) to task list queries
+- Moved server-side filtering for GetAllEmployees in ServiceManger
+- Preserved original file names for task attachments (T-09 continuation)
+- Fixed client-side filtering in CompanyEmployeeVM (11 queries), CompanyProfileVM (3 queries)
+- Added eager loading to TasksService (Employee,Status) and EmployeesReportService (Attendances)
+- Fixed unbounded SIGNAL_R_SESSIONs load in Notification.cs
+- Replaced client-side GroupBy in SharedService with DB-level Company query
+- Removed double materialization in AttendanceReportService
+- Added company scoping to RecurrenceTaskVM (GetAllProjects, GetAllEmployees)
 
 ### Session a02 (2026-03-08)
 - Refactored attendance report structure

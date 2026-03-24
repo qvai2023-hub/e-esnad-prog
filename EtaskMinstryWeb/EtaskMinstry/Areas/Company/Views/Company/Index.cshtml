@@ -191,13 +191,11 @@
 
                                         <label class="col-sm-4 control-label">الموظف: </label>
                                         <div class="col-sm-8">
-                                            @Html.ListBox("EmpIDs", ViewBag.Employee as SelectList,
+                                            @Html.DropDownList("EmpID", ViewBag.Employee as SelectList, "الكل",
                                                new
                                                {
-                                                   @id = "EmpIDs",
-                                                   @class = "chzn-select chzn-rtl form-control",
-                                                   @multiple = "multiple",
-                                                   data_placeholder = "الكل"
+                                                   @id = "EmpID",
+                                                   @class = "form-control",
                                                })
                                         </div>
                                     </div>
@@ -397,12 +395,7 @@
             });
         }
 
-        // Initialize Chosen multi-select for employees
-        $("#EmpIDs").chosen({
-            placeholder_text_multiple: "اختر الموظف",
-            no_results_text: "لا توجد نتائج",
-            width: "100%"
-        });
+        // Employee dropdown (single select)
 
         /*$("#btnSearchToggle").click(function () {
 
@@ -542,10 +535,8 @@
             window.location.href = "/Company/Company/index";
         });
 
-        // Override form submit to include EmpIDs as hidden field
+        // Form submit handler
         $('#SearchForm').on('submit', function () {
-            // Remove any previously added hidden EmpID fields
-            $(this).find('input[name="EmpIDs"]').not('#EmpIDs').remove();
         });
 
         //add validation rule to search name
@@ -721,7 +712,7 @@
         $(".tab").live('click', function(e) {
             debugger
             $('#strTitle').val('');
-            $('#EmpIDs').val('').trigger('chosen:updated');
+            $('#EmpID').val(0);
             $("#fromstartdate").val();
             $("#tostartdate").val();
             $("#fromenddate").val();
