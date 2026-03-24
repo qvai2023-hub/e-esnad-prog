@@ -146,39 +146,6 @@
                    
                 </div>
                 <div class="row form-group">
-                    <div class="col-md-2">
-                        <label>تاريخ النهاية : </label>
-                    </div>
-                    <div class="col-md-5">
-                        <label>من : </label>
-                        <div class='input-group date'>
-
-                            @Html.TextBoxFor(item => item.fromendDate, new { @placeholder = "اختر تاريخ البداية", @Readonly = "readonly", @class = "form-control" })
-                       
-                            <span class="input-group-addon">
-                                <span id="fromendDateIcon" class="fa fa-calendar"></span>
-                            </span>
-
-</div>
-                        </div>
-                    <div class="col-md-5">
-                        <label>إلى : </label>
-                        <div class='input-group date'>
-
-                            @Html.TextBoxFor(item => item.toendDate, new { @placeholder = "اختر تاريخ النهاية", @Readonly = "readonly", @class = "form-control" })
-                          
-                            <span class="input-group-addon">
-                                <span id="toendDateIcon" class="fa fa-calendar"></span>
-                            </span>
-
-                        
-                          </div>
-                        </div>
-
-                    <span class="col-md-4"></span>
-                    @Html.ValidationMessageFor(model => model.toendDate)
-                </div>
-                <div class="row form-group">
                     <div class="col-md-12">
                         <label>نوع التقويم :</label>
                         @Html.DropDownListFor(item => item.calendarType,
@@ -224,8 +191,6 @@
                 //datepicker Grerg
                 $("#fromDate").datepicker({ dateFormat: "yy-mm-dd" });
                 $("#toDate").datepicker({ dateFormat: "yy-mm-dd" });
-                $("#fromendDate").datepicker({ dateFormat: "yy-mm-dd" });
-                $("#toendDate").datepicker({ dateFormat: "yy-mm-dd" });
 
                 //   
             }
@@ -237,14 +202,6 @@
                     showTrigger: '#calImg',
                     calendar: $.calendars.instance('ummalqura'),
                     dateFormat: 'dd/mm/yyyy',
-                    yearRange: '1418:1450'
-                });
-                $('#fromendDate,#toendDate').calendarsPicker({
-                    changeMonth: true,
-                    changeYear: true,
-                    showTrigger: '#calImg',
-                    calendar: $.calendars.instance('ummalqura'),
-                    dateFormat: 'dd/mm/yyyy' ,
                     yearRange: '1418:1450'
                 });
             }
@@ -334,21 +291,7 @@
 
             //////////////////////////////////
 
-            //click in icon of from end  date
-            //fire calender
-            $('#fromendDateIcon').click(function () {
-                $('#fromendDate').focus();
-            });
-            //////////////////////////////////////
-
-            //click in icon of to end  date
-            //fire calender
-            $('#toendDateIcon').click(function () {
-                $('#toendDate').focus();
-            })
-            ////////////////////////////////////
-
-            //choose the delay tasks check box 
+            //choose the delay tasks check box
             //disable all other status
             $('.delayTasks').click(function () {
                 if ($(this).is(':checked')) {
@@ -377,24 +320,10 @@
                     isValid = true;
                 return isValid;
             });
-            $.validator.addMethod("MinMaxEndDateValidation", function (value, element, options) {
-                var isValid = false;
-                debugger;
-                var FromValue = $('#fromendDate').val();
-                var ToValue = $('#toendDate').val();
-                if ($('#toendDate').val() != "" && $('#fromendDate').val() != "" && HijridateCompare(ToValue, FromValue) < 0)
-                    isValid = false;
-                else
-                    isValid = true;
-                return isValid;
-            });
             $('.submit').live("click", function () {
                 debugger;
                 $('#toDate').rules("add", { MinMaxValidation: true, messages: { MinMaxValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
                 $('#fromDate').rules("add", { MinMaxValidation: true, messages: { MinMaxValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
-
-                $('#toendDate').rules("add", { MinMaxEndDateValidation: true, messages: { MinMaxEndDateValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
-                $('#fromendDate').rules("add", { MinMaxEndDateValidation: true, messages: { MinMaxEndDateValidation: "لا يمكن اختيار تاريخ البداية اكبر من تاريخ النهاية" } });
             })
             //////////////////////////////////////////////////////
         });
