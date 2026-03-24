@@ -617,9 +617,9 @@ namespace EtaskMinstry.Models.Company
                         && !t.EmpID.HasValue && !t.IsDeleted).Count();
 
                     break;
-                case DashBoaedTaskType.Delayed: // Delayed Tasks - filter on DB side
+                case DashBoaedTaskType.Delayed: // Delayed Tasks
                     iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                      && t.isDelayed).Count();
+                      ).ToList().Count(t => t.isDelayed);
                     break;
                 case DashBoaedTaskType.FinishToday: //EndDate =today
                     iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
