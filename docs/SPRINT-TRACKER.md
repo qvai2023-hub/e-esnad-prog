@@ -11,7 +11,7 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 
 | # | Task | Status | Session | Notes |
 |---|------|--------|---------|-------|
-| T-09b | Preserve original file names for attachments | Done | pw8mP | OriginalFileName in TaskController, CompanyController, views |
+| T-09b | Preserve original file names for attachments | Done | pw8mP | OriginalFileName in Areas2 TaskController, CompanyController, views (Areas v1 reverted) |
 | PERF-01 | Fix N+1 queries in CompanyTaskVM (delay data) | Done | pw8mP | Batch dictionary lookup replaces per-task GetByID |
 | PERF-02 | Add eager loading to CompanyTaskVM Select() | Done | pw8mP | includeProperties: Project,Status,Priority,TaskTLogs |
 | PERF-03 | Add eager loading to EmployeeTaskListVM FillTasks() | Done | pw8mP | includeProperties: Project,Priority,Status,TaskTLogs,TaskTLogs.Status |
@@ -19,11 +19,11 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 | PERF-05 | Fix client-side filtering in ServiceManger | Done | pw8mP | Move filter into Get() call |
 | PERF-06 | Fix 11 client-side filtering queries in CompanyEmployeeVM | Done | pw8mP | All uniqueness checks now use Get(filter:) |
 | PERF-07 | Fix 3 client-side queries in CompanyProfileVM | Done | pw8mP | Replaced Get().Where() with GetByID / Get(filter:) |
-| PERF-08 | Add eager loading to TasksService (BriefTasks report) | Done | pw8mP | includeProperties: Employee,Status |
+| PERF-08 | Add eager loading to TasksService (BriefTasks report) | Done | pw8mP | includeProperties: Employee,Employee.Tasks,Status |
 | PERF-09 | Add eager loading to EmployeesReportService | Done | pw8mP | includeProperties: Attendances |
 | PERF-10 | Fix unbounded SIGNAL_R_SESSIONs load in Notification.cs | Done | pw8mP | Filter by collection instance/type IDs at DB level |
 | PERF-11 | Fix client-side GroupBy in SharedService | Done | pw8mP | Replace AsEnumerable() with Company.Get(filter:) |
-| PERF-12 | Fix double materialization in AttendanceReportService | Done | pw8mP | Remove intermediate .ToList() before .Select() |
+| PERF-12 | Add Get(filter:) to AttendanceReportService | Done | pw8mP | Server-side filter; .ToList() kept for .ToString() projection |
 | PERF-13 | Add company scoping to RecurrenceTaskVM queries | Done | pw8mP | GetAllProjects and GetAllEmployees now filter by company |
 
 ---

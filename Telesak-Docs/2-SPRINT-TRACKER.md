@@ -25,17 +25,20 @@ Sprint 0: ████████████████████ 100% Comp
 | PERF-06 | Fix 11 client-side filtering queries in CompanyEmployeeVM | ✅ Completed | pw8mP | Claude |
 | PERF-07 | Fix 3 client-side queries in CompanyProfileVM | ✅ Completed | pw8mP | Claude |
 | PERF-08 | Add eager loading to TasksService (BriefTasks report) | ✅ Completed | pw8mP | Claude |
+| PERF-08b | Add Employee.Tasks to TasksService includeProperties | ✅ Completed | pw8mP | Claude |
 | PERF-09 | Add eager loading to EmployeesReportService | ✅ Completed | pw8mP | Claude |
 | PERF-10 | Fix unbounded SIGNAL_R_SESSIONs load in Notification.cs | ✅ Completed | pw8mP | Claude |
 | PERF-11 | Fix client-side GroupBy in SharedService | ✅ Completed | pw8mP | Claude |
-| PERF-12 | Fix double materialization in AttendanceReportService | ✅ Completed | pw8mP | Claude |
+| PERF-12 | Add Get(filter:) to AttendanceReportService | ✅ Completed | pw8mP | Claude |
 | PERF-13 | Add company scoping to RecurrenceTaskVM queries | ✅ Completed | pw8mP | Claude |
 
 ### Attachment Tasks
 
 | ID | Task | Status | Session | Assignee |
 |----|------|--------|---------|----------|
-| T-09b | Preserve original file names for attachments | ✅ Completed | pw8mP | Claude |
+| T-09b | Preserve original file names for attachments (Areas2 only) | ✅ Completed | pw8mP | Claude |
+| FIX-01 | Revert T-09b code from Areas v1 CompanyController | ✅ Completed | pw8mP | Claude |
+| FIX-02 | Restore .ToList() for .ToString() in AttendanceReport/SharedService | ✅ Completed | pw8mP | Claude |
 
 ### Progress
 
@@ -46,11 +49,13 @@ Sprint 0: ████████████████████ 100% Comp
 - [x] PERF-05: Server-side filtering
 - [x] PERF-06: CompanyEmployeeVM client-side filtering (11 queries)
 - [x] PERF-07: CompanyProfileVM client-side queries (3 queries)
-- [x] PERF-08: TasksService eager loading (Employee,Status)
+- [x] PERF-08: TasksService eager loading (Employee,Employee.Tasks,Status)
 - [x] PERF-09: EmployeesReportService eager loading (Attendances)
 - [x] PERF-10: Notification.cs unbounded session load
 - [x] PERF-11: SharedService AsEnumerable GroupBy
-- [x] PERF-12: AttendanceReportService double materialization
+- [x] PERF-12: AttendanceReportService Get(filter:) + .ToList() for .ToString()
+- [x] FIX-01: Reverted T-09b from Areas v1 CompanyController
+- [x] FIX-02: Restored .ToList() for .ToString() in AttendanceReport + SharedService
 - [x] PERF-13: RecurrenceTaskVM company scoping
 - [x] T-09b: Original file names
 
@@ -118,6 +123,7 @@ Sprint 0: ████████████████████ 100% Comp
 | 14 | `EtaskMinstry/Services/SharedService.cs` | Upload | High |
 | 15 | `EtaskMinstry/Services/AttendanceReportService.cs` | Upload | High |
 | 16 | `EtaskMinstry/AppCode/Notification.cs` | Upload | High |
+| 17 | `EtaskMinstry/Areas/Company/Controllers/CompanyController.cs` | Upload | High |
 
 ### Sprint 3 Files
 

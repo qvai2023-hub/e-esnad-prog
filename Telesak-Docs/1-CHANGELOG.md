@@ -20,11 +20,12 @@ All notable changes to the TELE SAK project will be documented in this file.
 | `EtaskMinstry/Areas/Company/Models/CompanyEmployeeVM.cs` | Modified | 11 queries moved from client-side to DB-level filtering |
 | `EtaskMinstry/Areas/Company/Models/CompanyProfileVM.cs` | Modified | 3 queries replaced with GetByID / Get(filter:) |
 | `EtaskMinstry/Areas/Company/Models/RecurrenceTaskVM.cs` | Modified | Company-scoped GetAllProjects + GetAllEmployees |
-| `EtaskMinstry/Services/TasksService.cs` | Modified | Added includeProperties: Employee,Status |
+| `EtaskMinstry/Services/TasksService.cs` | Modified | Added includeProperties: Employee,Employee.Tasks,Status |
 | `EtaskMinstry/Services/EmployeesReportService.cs` | Modified | Added includeProperties: Attendances |
 | `EtaskMinstry/Services/SharedService.cs` | Modified | Replaced AsEnumerable() GroupBy with Company.Get(filter:) |
-| `EtaskMinstry/Services/AttendanceReportService.cs` | Modified | Removed double materialization (.ToList() before .Select()) |
-| `EtaskMinstry/AppCode/Notification.cs` | Modified | Filtered SignalR session query at DB level |
+| `EtaskMinstry/Services/AttendanceReportService.cs` | Modified | Added Get(filter:) for employee dropdown; .ToList() kept for .ToString() |
+| `EtaskMinstry/AppCode/Notification.cs` | Modified | Filtered SignalR session query at DB level + empty collection guard |
+| `EtaskMinstry/Areas/Company/Controllers/CompanyController.cs` | Modified | Reverted T-09b code (APIs only exist in Areas2) |
 
 #### Changes:
 - CompanyTaskVM: Eager load Project, Status, Priority, TaskTLogs in task list query
@@ -35,10 +36,11 @@ All notable changes to the TELE SAK project will be documented in this file.
 - CompanyEmployeeVM: All 11 uniqueness/lookup queries now filter at DB level via Get(filter:)
 - CompanyProfileVM: CompanyDetails, ChangeEmail, ChangeAddress use GetByID / Get(filter:)
 - RecurrenceTaskVM: GetAllProjects and GetAllEmployees now scoped to current company
-- TasksService: BriefTasks report eager-loads Employee and Status navigation properties
+- TasksService: BriefTasks report eager-loads Employee, Employee.Tasks, and Status navigation properties
 - EmployeesReportService: Employee report eager-loads Attendances for count
 - SharedService: Eliminated AsEnumerable() that forced client-side GroupBy of all UserAccounts
-- AttendanceReportService: Employee dropdown projects at DB level (no intermediate ToList)
+- AttendanceReportService: Employee dropdown uses Get(filter:) at DB level (.ToList() kept for .ToString())
+- CompanyController (Areas v1): Reverted T-09b original filename code (SanitizeFileName, AttachmentDisplay.OriginalFileName only exist in Areas2)
 - Notification.cs: SignalR session lookup filtered by collection instance/type IDs at DB level
 
 ---
