@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 - **RecurrenceTaskVM.cs**: Added company filter to `GetAllProjects()` and `GetAllEmployees()` — was loading entire tables unfiltered
 
 #### Services
-- **TasksService.cs**: Added `includeProperties: "Employee,Status"` to eliminate N+1 lazy-load queries in BriefTasks report
+- **TasksService.cs**: Added `includeProperties: "Employee,Employee.Tasks,Status"` to eliminate N+1 lazy-load queries in BriefTasks report (including `Employee.Tasks` for the `Any()` check)
 - **EmployeesReportService.cs**: Added `includeProperties: "Attendances"` to eliminate N+1 queries when counting attendance records
 - **SharedService.cs**: Replaced `.AsEnumerable()` GroupBy (loaded all UserAccounts into memory) with direct `Company.Get(filter:)` query
 - **AttendanceReportService.cs**: Added `Get(filter:)` for employee dropdown (`.ToList()` kept for `.ToString()` projection)
@@ -20,8 +20,10 @@ All notable changes to this project will be documented in this file.
 #### AppCode
 - **Notification.cs**: Replaced unbounded `SIGNAL_R_SESSIONs.Get().ToList()` with filtered query using collection instance/type IDs; added empty collection guard
 
-#### Services (continued)
-- **TasksService.cs**: Added `Employee.Tasks` to includeProperties to prevent N+1 on `a.Employee.Tasks.Any(...)` check
+#### Bug Fixes During Audit
+- **CompanyController.cs (Areas v1)**: Reverted T-09b original filename code — `SanitizeFileName`, 4-arg `AttachTaskFile`, and `AttachmentDisplay.OriginalFileName` only exist in Areas2
+- **AttendanceReportService.cs**: Restored `.ToList()` before `.Select()` — `EmpID.ToString()` can't be translated by LINQ to Entities
+- **SharedService.cs**: Restored `.ToList()` before `.Select()` — same `.ToString()` issue
 
 ---
 
