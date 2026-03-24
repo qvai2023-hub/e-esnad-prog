@@ -113,22 +113,22 @@
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>1.2in</Width>
+                  <Width>1.05in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.2in</Width>
+                  <Width>1.05in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.1in</Width>
+                  <Width>0.95in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1in</Width>
+                  <Width>0.85in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.5in</Width>
+                  <Width>2.3in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.76042in</Width>
+                  <Width>1.56042in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -312,6 +312,7 @@
                               </TextRuns>
                               <Style>
                                 <TextAlign>Center</TextAlign>
+                                <Direction>RTL</Direction>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
@@ -542,6 +543,7 @@
                               </TextRuns>
                               <Style>
                                 <TextAlign>Right</TextAlign>
+                                <Direction>RTL</Direction>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
@@ -1129,7 +1131,7 @@ IX5ZQqLPPRLyu9KdENfnWvd8NLuZpUsrb72rbM9K+Xv3mhWFGAsI5TXGwm4ZE8zWful+THuN1E03pa0Y
 /wGLMGrsKWtvhgAAAABJRU5ErkJggg==</ImageData>
     </EmbeddedImage>
   </EmbeddedImages>
-  <Language>en-US</Language>
+  <Language>ar-SA</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
   <rd:ReportID>62f746ff-d25d-40bf-9e56-dd56c59b212b</rd:ReportID>
