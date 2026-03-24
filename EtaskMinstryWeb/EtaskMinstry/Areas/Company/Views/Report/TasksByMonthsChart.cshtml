@@ -174,15 +174,31 @@
                                 <div class="row">
                                     <div class="form-group">
                                         <label class=" col-sm-2">السنة: </label>
-                                        <div class="col-sm-4">
+                                        <div class="col-sm-3">
                                             @Html.DropDownList("ddlHijriDateYear", Model.Years, null,
                                                new
                                                    {
                                                        @id = "ddlHijriDateYear",
                                                        Class = "form-control",
                                                    })
-
-
+                                        </div>
+                                        <label class=" col-sm-2">الشهر: </label>
+                                        <div class="col-sm-3">
+                                            <select name="Month" id="Month" class="form-control">
+                                                <option value="">الكل</option>
+                                                <option value="1">محرم</option>
+                                                <option value="2">صفر</option>
+                                                <option value="3">ربيع أول</option>
+                                                <option value="4">ربيع آخر</option>
+                                                <option value="5">جماد أول</option>
+                                                <option value="6">جماد آخر</option>
+                                                <option value="7">رجب</option>
+                                                <option value="8">شعبان</option>
+                                                <option value="9">رمضان</option>
+                                                <option value="10">شوال</option>
+                                                <option value="11">ذو القعدة</option>
+                                                <option value="12">ذو الحجة</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

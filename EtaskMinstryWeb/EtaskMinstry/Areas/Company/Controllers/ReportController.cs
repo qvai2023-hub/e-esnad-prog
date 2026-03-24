@@ -101,14 +101,15 @@ namespace EtaskMinstry.Areas.Company.Controllers
         }
 
 
-        public ActionResult TasksByMonthsChart(String ddlHijriDateYear,String EmpID)
+        public ActionResult TasksByMonthsChart(String ddlHijriDateYear,String EmpID, String Month)
         {
             ViewBag.Employees = new SelectList(EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployeeNotDeleted(MvcApplication.userData.userId), "ID", "Name");
             int empID = EmpID.IntParse();
-           
+            int iMonth = Month.IntParse();
+
             var obj = new YearlyTasksChart();
 
-            obj.GetTasks(ddlHijriDateYear.IntParse(),empID);
+            obj.GetTasks(ddlHijriDateYear.IntParse(), empID, iMonth);
 
             return View("TasksByMonthsChart", obj);
         }

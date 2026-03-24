@@ -9,7 +9,7 @@
             @{
                 var grid = new WebGrid(Model.TaskList, null, null, 10, true, true);
                 var gridColumns = new List<WebGridColumn>();
-                gridColumns.Add(grid.Column("taskName", "المهمة",@<text> @Html.EncodedActionLink((string)item.taskName, "TaskDetails", "Tasks", "Employee", new { id = item.taskID, IsRoute = true }, null)</text>));
+                gridColumns.Add(grid.Column("taskName", "المهمة",@<text> <span class="bidi-text">@Html.EncodedActionLink((string)item.taskName, "TaskDetails", "Tasks", "Employee", new { id = item.taskID, IsRoute = true }, null)</span></text>));
 
 gridColumns.Add(grid.Column("projectName", "المشروع"));
 

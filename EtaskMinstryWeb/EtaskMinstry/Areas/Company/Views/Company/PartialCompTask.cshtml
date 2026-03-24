@@ -17,7 +17,7 @@ if (Model.All(i => i.StatusID == (int)TaskStatus.New))
 
             gridColumns.Add(grid.Column("Task", "المهمة",
     @<text>  <strong>
-            @Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)
+            <span class="bidi-text">@Html.EncodedActionLink((string)@item.Task, "TaskDetails", "Company", "Company", new { id = @item.TaskID, IsRoute = true }, null)</span>
             <input class="" type="hidden" value="@item.RowColor" />
         </strong> </text>, "FirstColumn wordBreak"));
 

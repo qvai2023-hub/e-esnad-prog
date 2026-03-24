@@ -465,3 +465,8 @@ span.active {
     margin-top: 10px;
 }
 
+/* BiDi fix for mixed Arabic/English task names */
+.bidi-text {
+    unicode-bidi: plaintext;
+}
+
