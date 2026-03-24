@@ -32,7 +32,7 @@ namespace EtaskMinstry.Services
 
         public List<SelectListItem> GetEmployeesByCompanyId(int companyId)
         {
-            return _unitOfWork.Employee.Get(filter: x => x.CompanyID == companyId).Select(n =>
+            return _unitOfWork.Employee.Get(filter: x => x.CompanyID == companyId).ToList().Select(n =>
                            new SelectListItem
                            {
                                Value = n.EmpID.ToString(),
