@@ -123,6 +123,21 @@
     styleEl.textContent = css;
     document.head.appendChild(styleEl);
 
+    // ─── Mode Detection ───
+    var MODE = window.tlskChatMode || 'login'; // 'login' = limited, 'full' = all features
+    var isLoginMode = MODE === 'login';
+
+    // ─── Login mode: hardcoded Q&A ───
+    var loginQA = {
+        'خطأ في الدخول': 'تأكد من عدم وجود مسافات عند النسخ، وجرّب الكتابة يدوياً.',
+        'نسيت كلمة المرور': 'اسم المستخدم أو كلمة المرور غير صحيحة.\nتواصل معنا على الواتساب لإعادة إرسال بيانات الدخول.'
+    };
+
+    var loginButtons = [
+        { text: 'خطأ في الدخول', icon: '🔑' },
+        { text: 'نسيت كلمة المرور', icon: '🔐' }
+    ];
+
     // ─── Icons ───
     var chatIconSvg = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
     var closeIconSvg = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
@@ -229,15 +244,16 @@
     function showWelcome() {
         $messages.empty();
         var time = getTimeStr();
+        var welcomeText = isLoginMode
+            ? 'مرحباً! 👋<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
+            : 'مرحباً! أنا مساعدك الذكي لبرنامج تلي ساك 👋<br><br>اختر من الأسئلة الشائعة أدناه أو اكتب سؤالك مباشرةً وسأجيبك فوراً.';
+        var supportBtn = isLoginMode ? '' : '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
         var html =
             '<div class="tlsk-msg-row tlsk-msg-row-assistant">' +
                 '<div class="tlsk-bot-avatar">ت</div>' +
                 '<div class="tlsk-msg-wrap">' +
-                    '<div class="tlsk-welcome-card">' +
-                        'مرحباً! أنا مساعدك الذكي لبرنامج تلي ساك 👋<br><br>' +
-                        'اختر من الأسئلة الشائعة أدناه أو اكتب سؤالك مباشرةً وسأجيبك فوراً.' +
-                    '</div>' +
-                    '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>' +
+                    '<div class="tlsk-welcome-card">' + welcomeText + '</div>' +
+                    supportBtn +
                     '<div class="tlsk-time">' + time + '</div>' +
                 '</div>' +
             '</div>';
@@ -258,9 +274,10 @@
     // ─── Render: Quick buttons ───
     function renderChips() {
         var html = '';
-        for (var i = 0; i < quickButtons.length; i++) {
-            var b = quickButtons[i];
-            if (activeCategory !== 'all' && b.cat !== activeCategory) continue;
+        var buttons = isLoginMode ? loginButtons : quickButtons;
+        for (var i = 0; i < buttons.length; i++) {
+            var b = buttons[i];
+            if (!isLoginMode && activeCategory !== 'all' && b.cat !== activeCategory) continue;
             html += '<span class="tlsk-chip" data-text="' + b.text + '">' +
                         '<span class="tlsk-chip-icon">' + b.icon + '</span> ' + b.text +
                     '</span>';
@@ -303,16 +320,20 @@
         history = [];
         activeCategory = 'all';
         showWelcome();
-        renderTabs();
+        if (!isLoginMode) { renderTabs(); $tabs.show(); }
         renderChips();
-        $tabs.show();
         $chips.show();
         scrollToBottom();
     }
 
     // ─── Init ───
     showWelcome();
-    renderTabs();
+    if (isLoginMode) {
+        $tabs.hide();
+        $('#tlsk-chat-input-area').hide();
+    } else {
+        renderTabs();
+    }
     renderChips();
 
     // ─── Events: Toggle panel ───
@@ -380,6 +401,31 @@
 
         appendMessage('user', text);
         $input.val('').trigger('input');
+
+        // ─── Login mode: local answers only ───
+        if (isLoginMode) {
+            var answer = loginQA[text];
+            if (!answer) {
+                // Try substring match
+                for (var key in loginQA) {
+                    if (text.indexOf(key) !== -1 || key.indexOf(text) !== -1) {
+                        answer = loginQA[key];
+                        break;
+                    }
+                }
+            }
+            if (answer) {
+                appendMessage('assistant', answer);
+            } else {
+                appendMessage('assistant', 'للمساعدة في تسجيل الدخول، اختر أحد الأسئلة أعلاه أو تواصل مع الدعم.');
+            }
+            // Show chips again for login mode
+            renderChips();
+            $chips.show();
+            return;
+        }
+
+        // ─── Full mode: server call ───
         $sendBtn.prop('disabled', true);
 
         history.push({ role: 'user', content: text });
