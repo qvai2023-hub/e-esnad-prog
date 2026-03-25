@@ -4,6 +4,58 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## Sprint 6 - AI Chat Assistant (T-15)
+
+**Status:** Completed
+**Date Completed:** 2026-03-25
+
+### T-15: AI Chat Assistant (المساعد الذكي)
+
+Added a floating chat widget with Q&A keyword matching and Claude AI fallback.
+
+#### Backend — ChatController
+
+| File | Type | Description |
+|------|------|-------------|
+| `Controllers/ChatController.cs` | New | Inherits BaseController, [HttpPost] Send() action |
+
+- Reads user info from `MvcApplication.userData` (userName, userId, isCompany)
+- Tries keyword match against `App_Data/telesak-qa.json` triggers array
+- Falls back to Claude Haiku API (`claude-haiku-4-5-20251001`) with Arabic system prompt
+- API key from `Web.config` appSettings `ClaudeApiKey`
+- Returns `{ success, answer, source: "qa"|"ai" }`
+- Async with graceful Arabic error messages
+
+#### Frontend — Chat Widget
+
+| File | Type | Description |
+|------|------|-------------|
+| `Scripts/telesak-chat.js` | New | Self-contained floating chat widget (JS + injected CSS) |
+| `Views/Shared/_Layout.cshtml` | Modified | Added script tag before `</body>` |
+| `Views/Shared/_LayoutNewDesign.cshtml` | Modified | Added script tag before `</body>` |
+| `Views/Shared/_LayoutNoSearch.cshtml` | Modified | Added script tag before `</body>` |
+
+Widget features:
+- Blue theme (#3D85C6) floating button (bottom-left), toggles to X when open
+- RTL Arabic UI with header avatar "ت", status "متاح الآن · يرد فوراً"
+- Welcome card with greeting and "تواصل مع الدعم" WhatsApp button
+- 6 category tabs: الكل, تسجيل الدخول, المهام, الملفات, الحضور, التقارير
+- 17 categorized quick buttons with emoji icons
+- Bot messages with "ت" avatar circle and HH:MM timestamp
+- Typing indicator (3 animated dots) while waiting for response
+- Reset chat button (refresh icon) clears conversation
+- Keeps last 6 conversation turns in memory as history
+- Sends AntiForgeryToken header if available on page
+
+#### Configuration
+
+| File | Type | Description |
+|------|------|-------------|
+| `Web.config` | Modified | Added `ClaudeApiKey` appSetting |
+| `App_Data/telesak-qa.json` | New (pending) | Q&A keyword matching file |
+
+---
+
 ## Sprint 5 - UX Fixes & Performance (T-10, T-11, T-12, T-13)
 
 **Status:** Completed
