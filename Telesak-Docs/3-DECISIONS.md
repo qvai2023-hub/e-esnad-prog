@@ -487,6 +487,41 @@ Replace with single `FillTaskMetadata()` method that batch-loads all task entiti
 
 ---
 
+### DEC-024: RDLC Report Language for BiDi Text
+
+**Date:** 2026-03-24 | **Task:** T-12b | **Status:** Implemented
+
+#### Context
+CompanyTasks RDLC report displayed mixed Arabic/English task names in wrong reading order (e.g. "ChatGPT" appeared at the wrong position). The web pages rendered correctly using CSS `unicode-bidi: plaintext`, but RDLC requires XML-level configuration.
+
+#### Decision
+Change the report `<Language>` from `en-US` to `ar-SA` and add `<Direction>RTL</Direction>` to task column paragraphs.
+
+#### Rationale
+- RDLC uses the report Language to determine base paragraph direction for BiDi text
+- `en-US` forces LTR base direction, causing incorrect mixed text ordering
+- `ar-SA` sets RTL as default, matching the web page behavior
+- `<Direction>RTL</Direction>` on individual paragraphs provides explicit control
+
+---
+
+### DEC-025: Ignore Activity Events While Inactivity Modal Is Shown
+
+**Date:** 2026-03-24 | **Task:** T-14 | **Status:** Implemented
+
+#### Context
+The inactivity warning modal closed immediately when the employee moved the mouse to click a button, because `mousemove` was one of the tracked activity events that triggered `updateLastActivity()`, which called `hideInactivityModal()`.
+
+#### Decision
+Return early from `updateLastActivity()` when `state.isModalShown` is true. Only the modal's own buttons ("Continue Work" / "End Work") can dismiss it.
+
+#### Rationale
+- Mouse movement to interact with the modal is not a "resume work" signal
+- Users need to make an explicit choice (continue or end work)
+- The countdown timer still runs while the modal is shown
+
+---
+
 ### DEC-023: Only Modify Areas/ Folder, Not Areas2/
 
 **Date:** 2026-03-24 | **Task:** All | **Status:** Documented
