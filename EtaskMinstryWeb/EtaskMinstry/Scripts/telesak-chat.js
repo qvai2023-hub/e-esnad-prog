@@ -154,7 +154,7 @@
         { text: 'إنهاء المهمة', icon: '📋', cat: 'tasks' },
         { text: 'ما المطلوب مني؟', icon: '❓', cat: 'tasks' },
         { text: 'الوقت المستغرق', icon: '⏱', cat: 'tasks' },
-        { text: 'مهمة متأخرة', icon: '⚠', cat: 'tasks' },
+        { text: 'لماذا تظهر المهمة متأخرة؟', icon: '⚠', cat: 'tasks' },
         { text: 'مهمة لا تظهر', icon: '👁', cat: 'tasks' },
         { text: 'الاستبيان', icon: '📝', cat: 'tasks' },
         { text: 'رفع ملف', icon: '📎', cat: 'files' },
@@ -478,7 +478,7 @@
 
     // ─── Support button → WhatsApp (optional) ───
     $messages.on('click', '.tlsk-support-btn', function () {
-        window.open('https://wa.me/', '_blank');
+        window.open('https://wa.me/966568786846', '_blank');
     });
 
 })();
