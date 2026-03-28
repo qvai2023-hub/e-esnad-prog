@@ -26,6 +26,27 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 | PERF-12 | Add Get(filter:) to AttendanceReportService | Done | pw8mP | Server-side filter; .ToList() kept for .ToString() projection |
 | PERF-13 | Add company scoping to RecurrenceTaskVM queries | Done | pw8mP | GetAllProjects and GetAllEmployees now filter by company |
 
+| FIX-03 | Fix session timeout countdown display (00 : 2 → 00:02) | Done | eFE3C | Added dir="ltr" to `<strong id="inactivityCountdown">` in attendance-tracker.js line 285 |
+
+---
+
+## Sprint 5 — CHATBOT (شات بوت) ✅
+
+| # | Task | Status | Session | Notes |
+|---|------|--------|---------|-------|
+| 1 | Updated welcome message text | Done | eFE3C | New 4-line Arabic text |
+| 2 | Removed emoji icons from all quick button labels | Done | eFE3C | Text only, no emojis |
+| 3 | Login tab now shows single button only (تغيير الإيميل) | Done | eFE3C | Removed خطأ في الدخول + نسيت كلمة المرور |
+| 4 | Removed ▶ icon from video link answer | Done | eFE3C | URL only in telesak-qa.json |
+| 5 | Merged login Q&A into one entry "مشكلة في تسجيل الدخول" | Done | eFE3C | Combined triggers from both entries |
+| 6 | Updated WhatsApp number to 966568786846 | Done | eFE3C | wa.me/966568786846 |
+
+### Sprint 5 Files Modified
+- `EtaskMinstry/Scripts/telesak-chat.js` — welcome text, emojis, buttons, merged Q&A
+- `EtaskMinstry/App_Data/telesak-qa.json` — merged login entries, removed video emoji, WhatsApp number
+
+All changes tested and confirmed working ✅
+
 ---
 
 ## Sprint 4 Files Modified
