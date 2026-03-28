@@ -129,13 +129,11 @@
 
     // ─── Login mode: hardcoded Q&A ───
     var loginQA = {
-        'خطأ في الدخول': 'تأكد من عدم وجود مسافات عند النسخ، وجرّب الكتابة يدوياً.',
-        'نسيت كلمة المرور': 'اسم المستخدم أو كلمة المرور غير صحيحة.\nتواصل معنا على الواتساب لإعادة إرسال بيانات الدخول.'
+        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات عند النسخ، وجرّب الكتابة يدوياً.'
     };
 
     var loginButtons = [
-        { text: 'خطأ في الدخول', icon: '🔑' },
-        { text: 'نسيت كلمة المرور', icon: '🔐' }
+        { text: 'مشكلة في تسجيل الدخول' }
     ];
 
     // ─── Icons ───
@@ -147,23 +145,22 @@
 
     // ─── Quick buttons data ───
     var quickButtons = [
-        { text: 'خطأ في الدخول', icon: '🔑', cat: 'login' },
-        { text: 'نسيت كلمة المرور', icon: '🔐', cat: 'login' },
-        { text: 'تغيير الإيميل', icon: '📧', cat: 'login' },
-        { text: 'قبول المهمة', icon: '✅', cat: 'tasks' },
-        { text: 'إنهاء المهمة', icon: '📋', cat: 'tasks' },
-        { text: 'ما المطلوب مني؟', icon: '❓', cat: 'tasks' },
-        { text: 'الوقت المستغرق', icon: '⏱', cat: 'tasks' },
-        { text: 'لماذا تظهر المهمة متأخرة؟', icon: '⚠', cat: 'tasks' },
-        { text: 'مهمة لا تظهر', icon: '👁', cat: 'tasks' },
-        { text: 'الاستبيان', icon: '📝', cat: 'tasks' },
-        { text: 'رفع ملف', icon: '📎', cat: 'files' },
-        { text: 'ملف داخل المهمة', icon: '📂', cat: 'files' },
-        { text: 'إنشاء ملف Word', icon: '📄', cat: 'files' },
-        { text: 'تسجيل الحضور', icon: '🟢', cat: 'attendance' },
-        { text: 'تسجيل الانصراف', icon: '🔴', cat: 'attendance' },
-        { text: 'تقرير المهام', icon: '📊', cat: 'reports' },
-        { text: 'فيديو الشرح', icon: '🎬', cat: 'reports' }
+        { text: 'مشكلة في تسجيل الدخول', cat: 'login' },
+        { text: 'تغيير الإيميل', cat: 'login' },
+        { text: 'قبول المهمة', cat: 'tasks' },
+        { text: 'إنهاء المهمة', cat: 'tasks' },
+        { text: 'ما المطلوب مني؟', cat: 'tasks' },
+        { text: 'الوقت المستغرق', cat: 'tasks' },
+        { text: 'لماذا تظهر المهمة متأخرة؟', cat: 'tasks' },
+        { text: 'مهمة لا تظهر', cat: 'tasks' },
+        { text: 'الاستبيان', cat: 'tasks' },
+        { text: 'رفع ملف', cat: 'files' },
+        { text: 'ملف داخل المهمة', cat: 'files' },
+        { text: 'إنشاء ملف Word', cat: 'files' },
+        { text: 'تسجيل الحضور', cat: 'attendance' },
+        { text: 'تسجيل الانصراف', cat: 'attendance' },
+        { text: 'تقرير المهام', cat: 'reports' },
+        { text: 'فيديو الشرح', cat: 'reports' }
     ];
 
     var categories = [
@@ -246,7 +243,7 @@
         var time = getTimeStr();
         var welcomeText = isLoginMode
             ? 'مرحباً! 👋<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
-            : 'مرحباً! أنا مساعدك الذكي لبرنامج تلي ساك 👋<br><br>اختر من الأسئلة الشائعة أدناه أو اكتب سؤالك مباشرةً وسأجيبك فوراً.';
+            : 'مرحباً! أنا مساعدك الذكي في تلي ساك<br><br>يمكنني مساعدتك في متابعة مهامك، تسجيل حضورك،<br>والاطلاع على تقاريرك وغير ذلك.<br>اختر من الأسئلة الشائعة أدناه أو تواصل مع الدعم.';
         var supportBtn = isLoginMode ? '' : '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
         var html =
             '<div class="tlsk-msg-row tlsk-msg-row-assistant">' +
@@ -278,9 +275,7 @@
         for (var i = 0; i < buttons.length; i++) {
             var b = buttons[i];
             if (!isLoginMode && activeCategory !== 'all' && b.cat !== activeCategory) continue;
-            html += '<span class="tlsk-chip" data-text="' + b.text + '">' +
-                        '<span class="tlsk-chip-icon">' + b.icon + '</span> ' + b.text +
-                    '</span>';
+            html += '<span class="tlsk-chip" data-text="' + b.text + '">' + b.text + '</span>';
         }
         $chips.html(html);
     }
