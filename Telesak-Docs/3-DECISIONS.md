@@ -418,6 +418,63 @@ Replace with `Company.Get(filter:)` using `.Any()` subquery to check matching Us
 
 ---
 
+## Sprint 6 Decisions
+
+### DEC-026: Q&A Keyword Match Before AI Fallback
+
+**Date:** 2026-03-25 | **Task:** T-15 | **Status:** Implemented
+
+#### Context
+A chat assistant was needed to help employees with common questions about Telesak.
+
+#### Decision
+Two-tier response strategy:
+1. First try keyword matching against `App_Data/telesak-qa.json` (triggers array, case-insensitive substring)
+2. If no match, fall back to Claude Haiku API with user context in system prompt
+
+#### Rationale
+- Q&A file gives instant, deterministic answers for known questions — no API cost
+- AI fallback handles open-ended questions naturally
+- Q&A file is editable by admin without code changes
+- Response includes `source: "qa"|"ai"` so the frontend can distinguish
+
+---
+
+### DEC-027: Self-Contained Chat Widget (JS + Injected CSS)
+
+**Date:** 2026-03-25 | **Task:** T-15 | **Status:** Implemented
+
+#### Context
+The chat widget needed to work across all 3 layout files without external CSS dependencies.
+
+#### Decision
+All styles are injected via a `<style>` tag from within `telesak-chat.js`. No separate CSS file.
+
+#### Rationale
+- Single file to deploy — just add one `<script>` tag to each layout
+- No CSS bundle changes or build step needed
+- Styles are scoped by `#tlsk-` prefixed IDs/classes to avoid conflicts
+- Easier to maintain — widget is fully self-contained
+
+---
+
+### DEC-028: Category Tabs for Quick Buttons
+
+**Date:** 2026-03-25 | **Task:** T-15 | **Status:** Implemented
+
+#### Context
+17 quick buttons across 5 topics would clutter the UI if shown all at once.
+
+#### Decision
+Add 6 category tabs (الكل + 5 categories) that filter the quick buttons. Each button has a `cat` property. "الكل" shows all.
+
+#### Rationale
+- Users can quickly find relevant questions by category
+- Reduces visual clutter
+- Familiar tab/filter UX pattern
+
+---
+
 ## Sprint 5 Decisions
 
 ### DEC-019: Remove End Date Filter from Report Pages

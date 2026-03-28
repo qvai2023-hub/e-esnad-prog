@@ -3,12 +3,51 @@
 ## Current Status
 
 ```
+Sprint 6: ████████████████████ 100% Complete
 Sprint 5: ████████████████████ 100% Complete
 Sprint 4: ████████████████████ 100% Complete
 Sprint 3: ████████████████████ 100% Complete
 Sprint 1: ████████████████████ 100% Complete
 Sprint 0: ████████████████████ 100% Complete
 ```
+
+---
+
+## Sprint 6: AI Chat Assistant
+
+### Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| T-15 | AI Chat Assistant (المساعد الذكي) | ✅ Completed | eFE3C | Claude |
+
+### Progress
+
+- [x] T-15: ChatController (backend Q&A + Claude API)
+- [x] T-15: telesak-chat.js (frontend floating widget)
+- [x] T-15: Include script in all 3 layouts
+- [x] T-15: Web.config ClaudeApiKey appSetting
+
+### Sprint 6 Files
+
+#### Application Files (To Deploy)
+
+| # | File Path | Task | Priority |
+|---|-----------|------|----------|
+| 1 | `EtaskMinstry/Controllers/ChatController.cs` | T-15 | High |
+| 2 | `EtaskMinstry/Scripts/telesak-chat.js` | T-15 | High |
+| 3 | `EtaskMinstry/Views/Shared/_Layout.cshtml` | T-15 | High |
+| 4 | `EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml` | T-15 | High |
+| 5 | `EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml` | T-15 | High |
+| 6 | `EtaskMinstry/Web.config` | T-15 | High |
+
+#### Configuration (Manual)
+
+| # | Action | Priority |
+|---|--------|----------|
+| 1 | Create `App_Data/` folder on server | High |
+| 2 | Upload `telesak-qa.json` to `App_Data/` | High |
+| 3 | Replace `REPLACE_WITH_YOUR_KEY` in Web.config with real Claude API key | High |
 
 ---
 
@@ -240,6 +279,7 @@ Sprint 0: ████████████████████ 100% Comp
 
 | Sprint | Start | End | Status |
 |--------|-------|-----|--------|
+| Sprint 6 | 2026-03-25 | 2026-03-25 | Completed |
 | Sprint 5 | 2026-03-24 | 2026-03-24 | Completed |
 | Sprint 4 | 2026-03-18 | 2026-03-18 | Completed |
 | Sprint 3 | 2026-03-17 | 2026-03-17 | Completed |
