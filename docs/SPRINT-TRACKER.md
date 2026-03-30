@@ -40,12 +40,14 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 | 4 | Removed ▶ icon from video link answer | Done | eFE3C | URL only in telesak-qa.json |
 | 5 | Merged login Q&A into one entry "مشكلة في تسجيل الدخول" | Done | eFE3C | Combined triggers from both entries |
 | 6 | Updated WhatsApp number to 966568786846 | Done | eFE3C | wa.me/966568786846 |
+| 7 | Login flow: intermediate [نعم] step for "مشكلة في تسجيل الدخول" | Done | eFE3C | Bot asks question first, then shows answer after [نعم] click |
+| 8 | Removed 👋 emoji from login mode welcome message | Done | eFE3C | Clean text only |
 
 ### Sprint 5 Files Modified
-- `EtaskMinstry/Scripts/telesak-chat.js` — welcome text, emojis, buttons, merged Q&A
+- `EtaskMinstry/Scripts/telesak-chat.js` — welcome text, emojis, buttons, merged Q&A, login [نعم] flow
 - `EtaskMinstry/App_Data/telesak-qa.json` — merged login entries, removed video emoji, WhatsApp number
 
-All changes tested and confirmed working ✅
+All Sprint 5 chatbot changes tested and confirmed ✅
 
 ---
 
