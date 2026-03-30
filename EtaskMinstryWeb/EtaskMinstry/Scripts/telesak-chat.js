@@ -242,7 +242,7 @@
         $messages.empty();
         var time = getTimeStr();
         var welcomeText = isLoginMode
-            ? 'مرحباً! 👋<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
+            ? 'مرحباً!<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
             : 'مرحباً! أنا مساعدك الذكي في تلي ساك<br><br>يمكنني مساعدتك في متابعة مهامك، تسجيل حضورك،<br>والاطلاع على تقاريرك وغير ذلك.<br>اختر من الأسئلة الشائعة أدناه أو تواصل مع الدعم.';
         var supportBtn = isLoginMode ? '' : '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
         var html =
@@ -399,9 +399,17 @@
 
         // ─── Login mode: local answers only ───
         if (isLoginMode) {
+            if (text === 'مشكلة في تسجيل الدخول') {
+                // Step 1: show intermediate question + [نعم] button
+                appendMessage('assistant', 'مرحبا!\nهل تواجه مشكلة في تسجيل الدخول؟');
+                var $yesBtn = $('<div style="margin-top:6px;"><span class="tlsk-chip tlsk-yes-btn" data-answer="تأكد من عدم وجود مسافات عند النسخ، أو أدخل بياناتك يدوياً">نعم</span></div>');
+                $messages.append($yesBtn);
+                scrollToBottom();
+                return;
+            }
+            // Other login Q&A
             var answer = loginQA[text];
             if (!answer) {
-                // Try substring match
                 for (var key in loginQA) {
                     if (text.indexOf(key) !== -1 || key.indexOf(text) !== -1) {
                         answer = loginQA[key];
@@ -414,7 +422,6 @@
             } else {
                 appendMessage('assistant', 'للمساعدة في تسجيل الدخول، اختر أحد الأسئلة أعلاه أو تواصل مع الدعم.');
             }
-            // Show chips again for login mode
             renderChips();
             $chips.show();
             return;
@@ -474,6 +481,15 @@
     // ─── Support button → WhatsApp (optional) ───
     $messages.on('click', '.tlsk-support-btn', function () {
         window.open('https://wa.me/966568786846', '_blank');
+    });
+
+    // ─── Login mode: [نعم] button handler ───
+    $messages.on('click', '.tlsk-yes-btn', function () {
+        var answer = $(this).data('answer');
+        $(this).parent().remove();
+        appendMessage('assistant', answer);
+        renderChips();
+        $chips.show();
     });
 
 })();
