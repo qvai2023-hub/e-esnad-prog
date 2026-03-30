@@ -116,6 +116,7 @@ Improve task report (CompanyTasks) with interaction column and calendar toggle, 
 | 1 | Calendar Type Toggle (Hijri/Gregorian) T-02 | Done | haj1c | ConvertDate + UI toggle |
 | 2 | Add Interaction Column (التفاعل) T-04 | Done | haj1c | SP + RDLC updated |
 | 3 | Report Header Modification T-05 | Done | haj1c | Redesigned layout |
+| 3b | T-05: Add date range to CompanyTasks title header | Done | eFE3C | Title now shows "تقرير المهام — من X إلى Y", FooterDateRange hidden |
 | 4 | Update sp_CompanyTasks stored procedure | Done | haj1c | User updated in SSMS |
 | 5 | Fix CompanyTasks.rdlc XML (missing closing tag) | Done | haj1c | Was causing ReportProcessingException |
 | 6 | Fix CS0266 nullable DateTime returns | Done | haj1c | Added .Value to ConvertDate() |
@@ -154,6 +155,9 @@ Improve the attendance report to be more readable and support data aggregation.
 | 9 | Add employee grouping with subtotals | Done | a03 | Days + Hours per employee |
 | 10 | Add report totals footer | Done | a03 | Total employees + days |
 | 11 | Test and verify changes | Done | - | Verified by user |
+| 12 | Remove Arabic AM/PM (ص/م) from attendance times | Done | eFE3C | Removed ConvertTo12HourArabic() calls in AttendanceReportService.cs |
+| 13 | Add ميلادي/هجري calendar toggle to AttendanceReport | Done | eFE3C | Dropdown + initCalendar() JS + Hijri date conversion in controller |
+| 14 | Fix Attendance report layout to match CompanyTasks | Done | eFE3C | Logo added, blue title header, date range in title, removed duplicate date elements in Attendance.rdlc |
 
 ---
 
