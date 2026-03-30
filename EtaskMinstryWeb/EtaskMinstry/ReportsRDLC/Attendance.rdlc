@@ -36,6 +36,10 @@
           <DataField>AttendanceDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="DisplayDate">
+          <DataField>DisplayDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="DayName">
           <DataField>DayName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -384,7 +388,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Format(Fields!AttendanceDate.Value, "yyyy/MM/dd")</Value>
+                              <Value>=Fields!DisplayDate.Value</Value>
                               <Style>
                                 <FontFamily>Arial</FontFamily>
                                 <FontSize>10pt</FontSize>

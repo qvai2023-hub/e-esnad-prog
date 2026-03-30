@@ -126,6 +126,20 @@ namespace EtaskMinstry.Controllers
 
             var data = attendanceReportService.GetAttendence(CompanyId, EmployeeId, fromDateForSP, toDateForSP);
 
+            // Convert AttendanceDate for display (Hijri or Gregorian)
+            CultureInfo hijriDisplayCulture = new CultureInfo("ar-SA");
+            hijriDisplayCulture.DateTimeFormat.Calendar = new System.Globalization.UmAlQuraCalendar();
+            foreach (var row in data)
+            {
+                if (row.AttendanceDate.HasValue)
+                {
+                    if (calendarType.HasValue && calendarType.Value == 0)
+                        row.DisplayDate = row.AttendanceDate.Value.ToString("yyyy/MM/dd", hijriDisplayCulture);
+                    else
+                        row.DisplayDate = row.AttendanceDate.Value.ToString("yyyy/MM/dd");
+                }
+            }
+
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.ReportParameters.Clear();
 
