@@ -930,6 +930,12 @@
       <AllowBlank>true</AllowBlank>
       <Prompt>ReportPeriod</Prompt>
     </ReportParameter>
+    <ReportParameter Name="CalendarType">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>CalendarType</Prompt>
+    </ReportParameter>
   </ReportParameters>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>
   <rd:ReportID>a1b2c3d4-e5f6-7890-abcd-ef1234567890</rd:ReportID>

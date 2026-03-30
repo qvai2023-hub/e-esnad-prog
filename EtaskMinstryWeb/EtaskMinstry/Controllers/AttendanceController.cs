@@ -136,23 +136,24 @@ namespace EtaskMinstry.Controllers
 
             if (!string.IsNullOrEmpty(fromDateForSP) && !string.IsNullOrEmpty(toDateForSP))
             {
-                CultureInfo arCulture = new CultureInfo("ar-SA");
-                arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
-
                 DateTime fromDt = DateTime.ParseExact(fromDateForSP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
                 DateTime toDt = DateTime.ParseExact(toDateForSP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-                startDateDisplay = fromDt.ToString("yyyy/MM/dd");
-                endDateDisplay = toDt.ToString("yyyy/MM/dd");
-
-                // Check if same month
-                if (fromDt.Month == toDt.Month && fromDt.Year == toDt.Year)
+                if (calendarType.HasValue && calendarType.Value == 0)
                 {
-                    reportPeriod = fromDt.ToString("MMMM yyyy", arCulture);
+                    CultureInfo hijriCulture = new CultureInfo("ar-SA");
+                    hijriCulture.DateTimeFormat.Calendar = new System.Globalization.UmAlQuraCalendar();
+                    startDateDisplay = fromDt.ToString("yyyy/MM/dd", hijriCulture);
+                    endDateDisplay = toDt.ToString("yyyy/MM/dd", hijriCulture);
+                    reportPeriod = "شهر " + fromDt.ToString("MMMM yyyy", hijriCulture);
                 }
                 else
                 {
-                    reportPeriod = "من " + fromDt.ToString("MMMM yyyy", arCulture) + " إلى " + toDt.ToString("MMMM yyyy", arCulture);
+                    CultureInfo arCulture = new CultureInfo("ar-SA");
+                    arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+                    startDateDisplay = fromDt.ToString("yyyy/MM/dd");
+                    endDateDisplay = toDt.ToString("yyyy/MM/dd");
+                    reportPeriod = "شهر " + fromDt.ToString("MMMM yyyy", arCulture);
                 }
             }
 
@@ -160,6 +161,7 @@ namespace EtaskMinstry.Controllers
             ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", startDateDisplay));
             ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", endDateDisplay));
             ReportAgent.ReportParameters.Add(new ReportParameter("ReportPeriod", reportPeriod));
+            ReportAgent.ReportParameters.Add(new ReportParameter("CalendarType", (calendarType ?? 1).ToString()));
 
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_attendance", data));
             return Redirect("/Reports/Attendance");
