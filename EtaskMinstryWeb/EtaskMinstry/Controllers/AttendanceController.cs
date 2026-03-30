@@ -109,9 +109,22 @@ namespace EtaskMinstry.Controllers
         //    return Redirect("/Reports/Attendance");
         //}
 
-        public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate)
+        public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate, int? calendarType)
         {
-            var data = attendanceReportService.GetAttendence(CompanyId, EmployeeId, FromDate, ToDate);
+            // Convert Hijri dates to Gregorian before passing to service
+            string fromDateForSP = FromDate;
+            string toDateForSP = ToDate;
+
+            if (calendarType.HasValue && calendarType.Value == 0 && !string.IsNullOrEmpty(FromDate) && !string.IsNullOrEmpty(ToDate))
+            {
+                // Hijri → Gregorian using same pattern as CompanyTasks ReportController
+                DateTime gregFrom = QvLib.QVUtil.Date.hijritodate(FromDate).Date;
+                DateTime gregTo = QvLib.QVUtil.Date.hijritodate(ToDate).Date;
+                fromDateForSP = gregFrom.ToString("dd/MM/yyyy");
+                toDateForSP = gregTo.ToString("dd/MM/yyyy");
+            }
+
+            var data = attendanceReportService.GetAttendence(CompanyId, EmployeeId, fromDateForSP, toDateForSP);
 
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.ReportParameters.Clear();
@@ -121,13 +134,13 @@ namespace EtaskMinstry.Controllers
             string endDateDisplay = "";
             string reportPeriod = "";
 
-            if (!string.IsNullOrEmpty(FromDate) && !string.IsNullOrEmpty(ToDate))
+            if (!string.IsNullOrEmpty(fromDateForSP) && !string.IsNullOrEmpty(toDateForSP))
             {
                 CultureInfo arCulture = new CultureInfo("ar-SA");
                 arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
 
-                DateTime fromDt = DateTime.ParseExact(FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                DateTime toDt = DateTime.ParseExact(ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateTime fromDt = DateTime.ParseExact(fromDateForSP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateTime toDt = DateTime.ParseExact(toDateForSP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
 
                 startDateDisplay = fromDt.ToString("yyyy/MM/dd");
                 endDateDisplay = toDt.ToString("yyyy/MM/dd");
