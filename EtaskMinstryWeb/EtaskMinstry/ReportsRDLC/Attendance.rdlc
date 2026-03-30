@@ -715,38 +715,6 @@
       <PrintOnFirstPage>true</PrintOnFirstPage>
       <PrintOnLastPage>true</PrintOnLastPage>
       <ReportItems>
-        <!-- TELE SAK - Application Name (Top Right) -->
-        <Textbox Name="HeaderAppName">
-          <CanGrow>true</CanGrow>
-          <Paragraphs>
-            <Paragraph>
-              <TextRuns>
-                <TextRun>
-                  <Value>TELE SAK</Value>
-                  <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>14pt</FontSize>
-                    <FontWeight>Bold</FontWeight>
-                    <Color>#3d85c6</Color>
-                  </Style>
-                </TextRun>
-              </TextRuns>
-              <Style>
-                <TextAlign>Right</TextAlign>
-              </Style>
-            </Paragraph>
-          </Paragraphs>
-          <Top>0.2cm</Top>
-          <Left>12cm</Left>
-          <Height>0.6cm</Height>
-          <Width>7cm</Width>
-          <Style>
-            <Border>
-              <Style>None</Style>
-            </Border>
-            <PaddingRight>5pt</PaddingRight>
-          </Style>
-        </Textbox>
         <!-- Company Name (Below App Name - Right) -->
         <Textbox Name="HeaderCompanyName">
           <CanGrow>true</CanGrow>
@@ -818,9 +786,10 @@
                 <TextRun>
                   <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "تقرير الحضور والانصراف", "تقرير الحضور والانصراف — من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
                   <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>16pt</FontSize>
+                    <FontFamily>janna LT</FontFamily>
+                    <FontSize>14pt</FontSize>
                     <FontWeight>Bold</FontWeight>
+                    <Color>White</Color>
                   </Style>
                 </TextRun>
               </TextRuns>
@@ -837,39 +806,11 @@
             <Border>
               <Style>None</Style>
             </Border>
-          </Style>
-        </Textbox>
-        <!-- Date Range in Header -->
-        <Textbox Name="HeaderDateRange">
-          <CanGrow>true</CanGrow>
-          <Paragraphs>
-            <Paragraph>
-              <TextRuns>
-                <TextRun>
-                  <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "", "من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
-                  <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>11pt</FontSize>
-                    <Color>#555555</Color>
-                  </Style>
-                </TextRun>
-              </TextRuns>
-              <Style>
-                <TextAlign>Center</TextAlign>
-              </Style>
-            </Paragraph>
-          </Paragraphs>
-          <Top>2.6cm</Top>
-          <Left>0cm</Left>
-          <Height>0.6cm</Height>
-          <Width>19cm</Width>
-          <Visibility>
-            <Hidden>true</Hidden>
-          </Visibility>
-          <Style>
-            <Border>
-              <Style>None</Style>
-            </Border>
+            <BackgroundColor>#3d85c6</BackgroundColor>
+            <PaddingLeft>2pt</PaddingLeft>
+            <PaddingRight>2pt</PaddingRight>
+            <PaddingTop>2pt</PaddingTop>
+            <PaddingBottom>2pt</PaddingBottom>
           </Style>
         </Textbox>
         <!-- Logo (Right) -->
