@@ -711,7 +711,7 @@
   <Width>19cm</Width>
   <Page>
     <PageHeader>
-      <Height>4.5cm</Height>
+      <Height>3.0cm</Height>
       <PrintOnFirstPage>true</PrintOnFirstPage>
       <PrintOnLastPage>true</PrintOnLastPage>
       <ReportItems>
@@ -746,37 +746,6 @@
             <PaddingRight>5pt</PaddingRight>
           </Style>
         </Textbox>
-        <!-- Report Period/Month (Top Left) -->
-        <Textbox Name="HeaderMonth">
-          <CanGrow>true</CanGrow>
-          <Paragraphs>
-            <Paragraph>
-              <TextRuns>
-                <TextRun>
-                  <Value>=IIF(IsNothing(Parameters!ReportPeriod.Value) Or Len(CStr(Parameters!ReportPeriod.Value)) = 0, "", Parameters!ReportPeriod.Value)</Value>
-                  <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>12pt</FontSize>
-                    <FontWeight>Bold</FontWeight>
-                  </Style>
-                </TextRun>
-              </TextRuns>
-              <Style>
-                <TextAlign>Left</TextAlign>
-              </Style>
-            </Paragraph>
-          </Paragraphs>
-          <Top>0.5cm</Top>
-          <Left>0cm</Left>
-          <Height>0.6cm</Height>
-          <Width>7cm</Width>
-          <Style>
-            <Border>
-              <Style>None</Style>
-            </Border>
-            <PaddingLeft>5pt</PaddingLeft>
-          </Style>
-        </Textbox>
         <!-- Report Title (Center) -->
         <Textbox Name="HeaderReportTitle">
           <CanGrow>true</CanGrow>
@@ -798,7 +767,7 @@
               </Style>
             </Paragraph>
           </Paragraphs>
-          <Top>1.8cm</Top>
+          <Top>1.4cm</Top>
           <Left>0cm</Left>
           <Height>0.7cm</Height>
           <Width>19cm</Width>
@@ -830,7 +799,7 @@
         </Image>
         <!-- Separator Line -->
         <Line Name="HeaderSeparator">
-          <Top>3.5cm</Top>
+          <Top>2.4cm</Top>
           <Left>0cm</Left>
           <Height>0cm</Height>
           <Width>19cm</Width>
