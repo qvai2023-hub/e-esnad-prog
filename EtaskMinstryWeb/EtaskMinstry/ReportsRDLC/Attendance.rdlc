@@ -816,7 +816,7 @@
             <Paragraph>
               <TextRuns>
                 <TextRun>
-                  <Value>تقرير الحضور والانصراف</Value>
+                  <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "تقرير الحضور والانصراف", "تقرير الحضور والانصراف — من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
                   <Style>
                     <FontFamily>Arial</FontFamily>
                     <FontSize>16pt</FontSize>
@@ -863,12 +863,30 @@
           <Left>0cm</Left>
           <Height>0.6cm</Height>
           <Width>19cm</Width>
+          <Visibility>
+            <Hidden>true</Hidden>
+          </Visibility>
           <Style>
             <Border>
               <Style>None</Style>
             </Border>
           </Style>
         </Textbox>
+        <!-- Logo (Right) -->
+        <Image Name="Image1">
+          <Source>External</Source>
+          <Value>=Parameters!LogoUrl.Value</Value>
+          <Sizing>FitProportional</Sizing>
+          <Top>0.13cm</Top>
+          <Left>15.39cm</Left>
+          <Height>1.40cm</Height>
+          <Width>4.32cm</Width>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </Image>
         <!-- Separator Line -->
         <Line Name="HeaderSeparator">
           <Top>3.5cm</Top>
