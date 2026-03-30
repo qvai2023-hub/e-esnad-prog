@@ -3,6 +3,7 @@
 ## Current Status
 
 ```
+Sprint 7: ████████████████████ 100% Complete
 Sprint 6: ████████████████████ 100% Complete
 Sprint 5: ████████████████████ 100% Complete
 Sprint 4: ████████████████████ 100% Complete
@@ -10,6 +11,51 @@ Sprint 3: ████████████████████ 100% Comp
 Sprint 1: ████████████████████ 100% Complete
 Sprint 0: ████████████████████ 100% Complete
 ```
+
+---
+
+## Sprint 7: Reports & Attendance Improvements
+
+### Tasks
+
+| ID | Task | Status | Session | Assignee |
+|----|------|--------|---------|----------|
+| ATT-01 | Remove Arabic AM/PM (ص/م) from attendance times | ✅ Completed | eFE3C | Claude |
+| ATT-02 | Add ميلادي/هجري calendar toggle to Attendance Report | ✅ Completed | eFE3C | Claude |
+| ATT-03 | Fix Attendance report layout to match CompanyTasks | ✅ Completed | eFE3C | Claude |
+| ATT-04 | Add Hijri date display to Attendance report data rows | ✅ Completed | eFE3C | Claude |
+| T-05b | Add date range to CompanyTasks report title header | ✅ Completed | eFE3C | Claude |
+| FIX-03 | Fix countdown display (00 : 2 → 00:02) | ✅ Completed | eFE3C | Claude |
+| FIX-04 | Fix chat Q&A missing triggers | ✅ Completed | eFE3C | Claude |
+| CHAT | Chat widget updates (welcome, emojis, login flow, WhatsApp) | ✅ Completed | eFE3C | Claude |
+
+### Progress
+
+- [x] ATT-01: Removed ConvertTo12HourArabic() — 24-hour format
+- [x] ATT-02: Calendar dropdown + initCalendar() + Hijri conversion
+- [x] ATT-03: Logo, blue title, removed duplicate elements
+- [x] ATT-04: DisplayDate partial class + UmAlQuraCalendar in controller
+- [x] T-05b: Title expression with date range, FooterDateRange hidden
+- [x] FIX-03: dir="ltr" on countdown element
+- [x] FIX-04: Added missing Q&A triggers for button texts
+- [x] CHAT: Welcome text, emojis removed, login [نعم] flow, 👋 removed
+
+### Sprint 7 Files
+
+#### Application Files (To Deploy)
+
+| # | File Path | Task | Priority |
+|---|-----------|------|----------|
+| 1 | `EtaskMinstry/Services/AttendanceReportService.cs` | ATT-01 | High |
+| 2 | `EtaskMinstry/Views/Attendance/AttendanceReport.cshtml` | ATT-02 | High |
+| 3 | `EtaskMinstry/Controllers/AttendanceController.cs` | ATT-02/03/04 | High |
+| 4 | `EtaskMinstry/ReportsRDLC/Attendance.rdlc` | ATT-03/04 | High |
+| 5 | `TaskManagementModel/sp_Attendance_Result.Partial.cs` | ATT-04 | High |
+| 6 | `TaskManagementModel/TaskManagementModel.csproj` | ATT-04 | High |
+| 7 | `EtaskMinstry/ReportsRDLC/CompanyTasks.rdlc` | T-05b | High |
+| 8 | `EtaskMinstry/Scripts/attendance-tracker.js` | FIX-03 | Medium |
+| 9 | `EtaskMinstry/App_Data/telesak-qa.json` | FIX-04/CHAT | High |
+| 10 | `EtaskMinstry/Scripts/telesak-chat.js` | CHAT | High |
 
 ---
 
@@ -279,6 +325,7 @@ Sprint 0: ████████████████████ 100% Comp
 
 | Sprint | Start | End | Status |
 |--------|-------|-----|--------|
+| Sprint 7 | 2026-03-30 | 2026-03-30 | Completed |
 | Sprint 6 | 2026-03-25 | 2026-03-25 | Completed |
 | Sprint 5 | 2026-03-24 | 2026-03-24 | Completed |
 | Sprint 4 | 2026-03-18 | 2026-03-18 | Completed |

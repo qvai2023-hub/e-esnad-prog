@@ -4,6 +4,66 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## Sprint 7 - Reports & Attendance Improvements
+
+**Status:** Completed
+**Date Completed:** 2026-03-30
+
+### ATT-01: Remove Arabic AM/PM from Attendance Times
+
+| File | Type | Description |
+|------|------|-------------|
+| `Services/AttendanceReportService.cs` | Modified | Removed `ConvertTo12HourArabic()` calls on CheckInTime/CheckOutTime — times now display in 24-hour format |
+
+### ATT-02: Add ميلادي/هجري Calendar Toggle to Attendance Report
+
+| File | Type | Description |
+|------|------|-------------|
+| `Views/Attendance/AttendanceReport.cshtml` | Modified | Added calendar type dropdown + `initCalendar()` JS function |
+| `Controllers/AttendanceController.cs` | Modified | Added `calendarType` parameter, Hijri date conversion via `QvLib.QVUtil.Date.hijritodate()` |
+
+### ATT-03: Fix Attendance Report Layout to Match CompanyTasks
+
+| File | Type | Description |
+|------|------|-------------|
+| `ReportsRDLC/Attendance.rdlc` | Modified | Added logo Image, blue title header with date range, deleted HeaderAppName "TELE SAK" text, deleted HeaderDateRange, deleted HeaderMonth, reduced header gap |
+
+### ATT-04: Add Hijri Date Display to Attendance Report
+
+| File | Type | Description |
+|------|------|-------------|
+| `TaskManagementModel/sp_Attendance_Result.Partial.cs` | New | Partial class adds `DisplayDate` string property |
+| `TaskManagementModel/TaskManagementModel.csproj` | Modified | Included new partial class file |
+| `Controllers/AttendanceController.cs` | Modified | Populates `DisplayDate` using `UmAlQuraCalendar` (Hijri) or Gregorian based on calendarType; header dates also use conditional formatting |
+| `ReportsRDLC/Attendance.rdlc` | Modified | Added `DisplayDate` field, changed date column to use it; declared `CalendarType` parameter |
+
+### T-05b: Add Date Range to CompanyTasks Report Title
+
+| File | Type | Description |
+|------|------|-------------|
+| `ReportsRDLC/CompanyTasks.rdlc` | Modified | Title expression now shows "تقرير المهام — من X إلى Y"; FooterDateRange hidden |
+
+### FIX-03: Fix Session Timeout Countdown Display
+
+| File | Type | Description |
+|------|------|-------------|
+| `Scripts/attendance-tracker.js` | Modified | Added `dir="ltr"` to countdown element — fixes "00 : 2" → "00:02" in RTL |
+
+### FIX-04: Fix Chat Q&A Missing Triggers
+
+| File | Type | Description |
+|------|------|-------------|
+| `App_Data/telesak-qa.json` | Modified | Added "ملف داخل المهمة" and "مهمة لا تظهر" as triggers |
+
+### CHAT Updates
+
+| File | Type | Description |
+|------|------|-------------|
+| `Scripts/telesak-chat.js` | Modified | Updated welcome text, removed emojis from buttons, merged login Q&A, login [نعم] intermediate step, removed 👋, WhatsApp number |
+| `App_Data/telesak-qa.json` | Modified | Merged login entries, removed video emoji, updated WhatsApp, updated attachment answer |
+
+---
+
 ## Sprint 6 - AI Chat Assistant (T-15)
 
 **Status:** Completed
