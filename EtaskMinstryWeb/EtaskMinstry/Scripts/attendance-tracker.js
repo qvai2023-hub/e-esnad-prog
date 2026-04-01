@@ -276,19 +276,19 @@
                     '<div class="modal-header bg-warning">' +
                         '<h5 class="modal-title">' +
                             '<i class="fa fa-clock-o"></i> ' +
-                            'تنبيه عدم النشاط' +
+                            'انتهاء الجلسة قريباً' +
                         '</h5>' +
                     '</div>' +
                     '<div class="modal-body text-center">' +
-                        '<p>لم يتم اكتشاف أي نشاط منذ فترة.</p>' +
-                        '<p>سيتم تسجيل خروجك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">02:00</strong></p>' +
+                        '<p>ستنتهي جلستك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">02:00</strong></p>' +
+                        '<p>هل تريد الاستمرار؟</p>' +
                     '</div>' +
                     '<div class="modal-footer justify-content-center">' +
                         '<button type="button" class="btn btn-success btn-lg" id="btnContinueWork">' +
-                            'استمر في العمل ✔' +
+                            'نعم ✔' +
                         '</button>' +
                         '<button type="button" class="btn btn-danger btn-lg" id="btnEndWork">' +
-                            'أنهِ العمل 🚪' +
+                            'لا 🚪' +
                         '</button>' +
                     '</div>' +
                 '</div>' +
