@@ -145,8 +145,6 @@
 
     // ─── Quick buttons data ───
     var quickButtons = [
-        { text: 'مشكلة في تسجيل الدخول', cat: 'login' },
-        { text: 'تغيير الإيميل', cat: 'login' },
         { text: 'قبول المهمة', cat: 'tasks' },
         { text: 'إنهاء المهمة', cat: 'tasks' },
         { text: 'ما المطلوب مني؟', cat: 'tasks' },
@@ -165,7 +163,6 @@
 
     var categories = [
         { id: 'all', label: 'الكل' },
-        { id: 'login', label: 'تسجيل الدخول' },
         { id: 'tasks', label: 'المهام' },
         { id: 'files', label: 'الملفات' },
         { id: 'attendance', label: 'الحضور' },
