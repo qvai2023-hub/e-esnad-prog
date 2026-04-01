@@ -129,7 +129,7 @@
 
     // ─── Login mode: hardcoded Q&A ───
     var loginQA = {
-        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات عند النسخ، وجرّب الكتابة يدوياً.'
+        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات باسم المستخدم أو كلمة المرور، أو أدخل بياناتك يدوياً'
     };
 
     var loginButtons = [
@@ -402,7 +402,7 @@
             if (text === 'مشكلة في تسجيل الدخول') {
                 // Step 1: show intermediate question + [نعم] button
                 appendMessage('assistant', 'مرحبا!\nهل تواجه مشكلة في تسجيل الدخول؟');
-                var $yesBtn = $('<div style="margin-top:6px;"><span class="tlsk-chip tlsk-yes-btn" data-answer="تأكد من عدم وجود مسافات عند النسخ، أو أدخل بياناتك يدوياً">نعم</span></div>');
+                var $yesBtn = $('<div style="margin-top:6px;"><span class="tlsk-chip tlsk-yes-btn" data-answer="تأكد من عدم وجود مسافات باسم المستخدم أو كلمة المرور، أو أدخل بياناتك يدوياً">نعم</span></div>');
                 $messages.append($yesBtn);
                 scrollToBottom();
                 return;
