@@ -280,16 +280,15 @@
                         '</h5>' +
                     '</div>' +
                     '<div class="modal-body text-center">' +
-                        '<p class="lead">هل أنهيت عملك لليوم؟</p>' +
                         '<p>لم يتم اكتشاف أي نشاط منذ فترة.</p>' +
                         '<p>سيتم تسجيل خروجك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">02:00</strong></p>' +
                     '</div>' +
                     '<div class="modal-footer justify-content-center">' +
                         '<button type="button" class="btn btn-success btn-lg" id="btnContinueWork">' +
-                            '<i class="fa fa-check"></i> استمر في العمل' +
+                            'استمر في العمل ✔' +
                         '</button>' +
                         '<button type="button" class="btn btn-danger btn-lg" id="btnEndWork">' +
-                            '<i class="fa fa-sign-out"></i> أنهِ العمل' +
+                            'أنهِ العمل 🚪' +
                         '</button>' +
                     '</div>' +
                 '</div>' +
