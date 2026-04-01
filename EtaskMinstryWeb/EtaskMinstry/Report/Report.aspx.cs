@@ -48,7 +48,12 @@ namespace EtaskMinstry.Areas.Company.Report
                     string baseUrl = Request.Url.Scheme + "://" + Request.Url.Authority +Request.ApplicationPath.TrimEnd('/') + "/";
                     string logoPath = baseUrl+ "/Content/Site/img/reportLogo.png";
                     repv.LocalReport.SetParameters(new ReportParameter("ReportDateTime", currentDateTime));
-                    repv.LocalReport.SetParameters(new ReportParameter("LogoUrl", logoPath));
+                    // Set LogoUrl only if the report defines it
+                    var reportParams = repv.LocalReport.GetParameters();
+                    if (reportParams.Any(p => p.Name == "LogoUrl"))
+                    {
+                        repv.LocalReport.SetParameters(new ReportParameter("LogoUrl", logoPath));
+                    }
 
                     // parameters
                     if (ReportAgent.ReportParameters != null) foreach (var prm in ReportAgent.ReportParameters) repv.LocalReport.SetParameters(prm);
