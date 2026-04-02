@@ -147,20 +147,22 @@
 
     // ─── Quick buttons data ───
     var quickButtons = [
-        { text: 'قبول المهمة', cat: 'tasks' },
-        { text: 'إنهاء المهمة', cat: 'tasks' },
-        { text: 'ما المطلوب مني؟', cat: 'tasks' },
-        { text: 'الوقت المستغرق', cat: 'tasks' },
-        { text: 'لماذا تظهر المهمة متأخرة؟', cat: 'tasks' },
-        { text: 'مهمة لا تظهر', cat: 'tasks' },
-        { text: 'الاستبيان', cat: 'tasks' },
-        { text: 'رفع ملف', cat: 'files' },
-        { text: 'ملف داخل المهمة', cat: 'files' },
-        { text: 'إنشاء ملف Word', cat: 'files' },
-        { text: 'تسجيل الحضور', cat: 'attendance' },
-        { text: 'تسجيل الانصراف', cat: 'attendance' },
-        { text: 'تقرير المهام', cat: 'reports' },
-        { text: 'فيديو الشرح', cat: 'reports' }
+        { text: 'كيف أقبل المهمة؟', cat: 'tasks' },
+        { text: 'كيف أنهي المهمة؟', cat: 'tasks' },
+        { text: 'ما المطلوب مني بالضبط؟', cat: 'tasks' },
+        { text: 'ما الوقت المستغرق الذي أدخله؟', cat: 'tasks' },
+        { text: 'هل يجب إنهاء المهمة؟', cat: 'tasks' },
+        { text: 'لماذا لا تظهر المهمة لدي؟', cat: 'tasks' },
+        { text: 'لا أعرف كيف أجيب على الاستبيان؟', cat: 'tasks' },
+        { text: 'لماذا تظهر المهمة "متأخرة"؟', cat: 'tasks' },
+        { text: 'لا يوجد ملف داخل المهمة؟', cat: 'files' },
+        { text: 'أين أرفع الملف؟', cat: 'files' },
+        { text: 'كيف أفتح ملف Word وأحفظ المهمة فيه وارفقه على البرنامج؟', cat: 'files' },
+        { text: 'كيف أسجّل حضوري؟', cat: 'attendance' },
+        { text: 'كيف أسجّل انصرافي؟', cat: 'attendance' },
+        { text: 'أين أجد تقرير مهامي؟', cat: 'reports' },
+        { text: 'هل يمكن تغيير إيميل الدخول؟', cat: 'reports' },
+        { text: 'فيديو الشرح لا يعمل', cat: 'reports' }
     ];
 
     var categories = [
