@@ -15,7 +15,7 @@
     var CONFIG = {
         HEARTBEAT_INTERVAL: 60000,        // 1 minute - send heartbeat
         INACTIVITY_WARNING: 30 * 60000,   // 30 minutes - show warning
-        INACTIVITY_TIMEOUT: 2 * 60 * 1000,    // 2 minutes after warning - auto checkout (countdown in modal)
+        INACTIVITY_TIMEOUT: 5 * 60 * 1000,    // 5 minutes after warning - auto checkout (countdown in modal)
         ACTIVITY_EVENTS: ['click', 'keypress', 'mousemove', 'scroll', 'touchstart']
     };
 
@@ -280,7 +280,7 @@
                         '</h5>' +
                     '</div>' +
                     '<div class="modal-body text-center">' +
-                        '<p>ستنتهي جلستك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">02:00</strong></p>' +
+                        '<p>ستنتهي جلستك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">05:00</strong></p>' +
                         '<p>هل تريد الاستمرار؟</p>' +
                     '</div>' +
                     '<div class="modal-footer justify-content-center">' +
