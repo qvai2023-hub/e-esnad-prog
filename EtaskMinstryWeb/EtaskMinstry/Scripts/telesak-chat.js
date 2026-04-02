@@ -129,11 +129,13 @@
 
     // ─── Login mode: hardcoded Q&A ───
     var loginQA = {
-        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات باسم المستخدم أو كلمة المرور، أو أدخل بياناتك يدوياً'
+        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات باسم المستخدم أو كلمة المرور، أو أدخل بياناتك يدوياً',
+        'نسيت كلمة المرور؟': 'تواصل معنا على الواتساب لإعادة إرسال بيانات الدخول'
     };
 
     var loginButtons = [
-        { text: 'مشكلة في تسجيل الدخول' }
+        { text: 'مشكلة في تسجيل الدخول' },
+        { text: 'نسيت كلمة المرور؟' }
     ];
 
     // ─── Icons ───
@@ -241,7 +243,7 @@
         var welcomeText = isLoginMode
             ? 'مرحباً!<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
             : 'مرحباً! أنا مساعدك الذكي في تلي ساك<br><br>يمكنني مساعدتك في متابعة مهامك، تسجيل حضورك،<br>والاطلاع على تقاريرك وغير ذلك.<br>اختر من الأسئلة الشائعة أدناه أو تواصل مع الدعم.';
-        var supportBtn = isLoginMode ? '' : '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
+        var supportBtn = '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
         var html =
             '<div class="tlsk-msg-row tlsk-msg-row-assistant">' +
                 '<div class="tlsk-bot-avatar">ت</div>' +
