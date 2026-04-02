@@ -324,10 +324,10 @@
     showWelcome();
     if (isLoginMode) {
         $tabs.hide();
-        $('#tlsk-chat-input-area').hide();
     } else {
         renderTabs();
     }
+    $('#tlsk-chat-input-area').hide();
     renderChips();
 
     // ─── Events: Toggle panel ───
