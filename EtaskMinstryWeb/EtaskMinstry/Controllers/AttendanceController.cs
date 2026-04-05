@@ -109,9 +109,36 @@ namespace EtaskMinstry.Controllers
         //    return Redirect("/Reports/Attendance");
         //}
 
-        public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate)
+        public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate, int? calendarType)
         {
-            var data = attendanceReportService.GetAttendence(CompanyId, EmployeeId, FromDate, ToDate);
+            // Convert Hijri dates to Gregorian before passing to service
+            string fromDateForSP = FromDate;
+            string toDateForSP = ToDate;
+
+            if (calendarType.HasValue && calendarType.Value == 0 && !string.IsNullOrEmpty(FromDate) && !string.IsNullOrEmpty(ToDate))
+            {
+                // Hijri → Gregorian using same pattern as CompanyTasks ReportController
+                DateTime gregFrom = QvLib.QVUtil.Date.hijritodate(FromDate).Date;
+                DateTime gregTo = QvLib.QVUtil.Date.hijritodate(ToDate).Date;
+                fromDateForSP = gregFrom.ToString("dd/MM/yyyy");
+                toDateForSP = gregTo.ToString("dd/MM/yyyy");
+            }
+
+            var data = attendanceReportService.GetAttendence(CompanyId, EmployeeId, fromDateForSP, toDateForSP);
+
+            // Convert AttendanceDate for display (Hijri or Gregorian)
+            CultureInfo hijriDisplayCulture = new CultureInfo("ar-SA");
+            hijriDisplayCulture.DateTimeFormat.Calendar = new System.Globalization.UmAlQuraCalendar();
+            foreach (var row in data)
+            {
+                if (row.AttendanceDate.HasValue)
+                {
+                    if (calendarType.HasValue && calendarType.Value == 0)
+                        row.DisplayDate = row.AttendanceDate.Value.ToString("yyyy/MM/dd", hijriDisplayCulture);
+                    else
+                        row.DisplayDate = row.AttendanceDate.Value.ToString("yyyy/MM/dd");
+                }
+            }
 
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.ReportParameters.Clear();
@@ -121,25 +148,26 @@ namespace EtaskMinstry.Controllers
             string endDateDisplay = "";
             string reportPeriod = "";
 
-            if (!string.IsNullOrEmpty(FromDate) && !string.IsNullOrEmpty(ToDate))
+            if (!string.IsNullOrEmpty(fromDateForSP) && !string.IsNullOrEmpty(toDateForSP))
             {
-                CultureInfo arCulture = new CultureInfo("ar-SA");
-                arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+                DateTime fromDt = DateTime.ParseExact(fromDateForSP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateTime toDt = DateTime.ParseExact(toDateForSP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-                DateTime fromDt = DateTime.ParseExact(FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                DateTime toDt = DateTime.ParseExact(ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-
-                startDateDisplay = fromDt.ToString("yyyy/MM/dd");
-                endDateDisplay = toDt.ToString("yyyy/MM/dd");
-
-                // Check if same month
-                if (fromDt.Month == toDt.Month && fromDt.Year == toDt.Year)
+                if (calendarType.HasValue && calendarType.Value == 0)
                 {
-                    reportPeriod = fromDt.ToString("MMMM yyyy", arCulture);
+                    CultureInfo hijriCulture = new CultureInfo("ar-SA");
+                    hijriCulture.DateTimeFormat.Calendar = new System.Globalization.UmAlQuraCalendar();
+                    startDateDisplay = fromDt.ToString("yyyy/MM/dd", hijriCulture);
+                    endDateDisplay = toDt.ToString("yyyy/MM/dd", hijriCulture);
+                    reportPeriod = "شهر " + fromDt.ToString("MMMM yyyy", hijriCulture);
                 }
                 else
                 {
-                    reportPeriod = "من " + fromDt.ToString("MMMM yyyy", arCulture) + " إلى " + toDt.ToString("MMMM yyyy", arCulture);
+                    CultureInfo arCulture = new CultureInfo("ar-SA");
+                    arCulture.DateTimeFormat.Calendar = new GregorianCalendar();
+                    startDateDisplay = fromDt.ToString("yyyy/MM/dd");
+                    endDateDisplay = toDt.ToString("yyyy/MM/dd");
+                    reportPeriod = "شهر " + fromDt.ToString("MMMM yyyy", arCulture);
                 }
             }
 
@@ -147,6 +175,7 @@ namespace EtaskMinstry.Controllers
             ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", startDateDisplay));
             ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", endDateDisplay));
             ReportAgent.ReportParameters.Add(new ReportParameter("ReportPeriod", reportPeriod));
+            ReportAgent.ReportParameters.Add(new ReportParameter("CalendarType", (calendarType ?? 1).ToString()));
 
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_attendance", data));
             return Redirect("/Reports/Attendance");

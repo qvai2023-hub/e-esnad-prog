@@ -129,11 +129,13 @@
 
     // ─── Login mode: hardcoded Q&A ───
     var loginQA = {
-        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات عند النسخ، وجرّب الكتابة يدوياً.'
+        'مشكلة في تسجيل الدخول': 'تأكد من عدم وجود مسافات باسم المستخدم أو كلمة المرور، أو أدخل بياناتك يدوياً',
+        'نسيت كلمة المرور؟': 'تواصل معنا على الواتساب لإعادة إرسال بيانات الدخول'
     };
 
     var loginButtons = [
-        { text: 'مشكلة في تسجيل الدخول' }
+        { text: 'مشكلة في تسجيل الدخول' },
+        { text: 'نسيت كلمة المرور؟' }
     ];
 
     // ─── Icons ───
@@ -145,27 +147,26 @@
 
     // ─── Quick buttons data ───
     var quickButtons = [
-        { text: 'مشكلة في تسجيل الدخول', cat: 'login' },
-        { text: 'تغيير الإيميل', cat: 'login' },
-        { text: 'قبول المهمة', cat: 'tasks' },
-        { text: 'إنهاء المهمة', cat: 'tasks' },
-        { text: 'ما المطلوب مني؟', cat: 'tasks' },
-        { text: 'الوقت المستغرق', cat: 'tasks' },
+        { text: 'كيف أقبل المهمة؟', cat: 'tasks' },
+        { text: 'كيف أنهي المهمة؟', cat: 'tasks' },
+        { text: 'ما المطلوب مني بالضبط؟', cat: 'tasks' },
+        { text: 'ما الوقت المستغرق الذي أدخله؟', cat: 'tasks' },
+        { text: 'هل يجب إنهاء المهمة؟', cat: 'tasks' },
+        { text: 'لماذا لا تظهر المهمة لدي؟', cat: 'tasks' },
+        { text: 'لا أعرف كيف أجيب على الاستبيان؟', cat: 'tasks' },
         { text: 'لماذا تظهر المهمة متأخرة؟', cat: 'tasks' },
-        { text: 'مهمة لا تظهر', cat: 'tasks' },
-        { text: 'الاستبيان', cat: 'tasks' },
-        { text: 'رفع ملف', cat: 'files' },
-        { text: 'ملف داخل المهمة', cat: 'files' },
-        { text: 'إنشاء ملف Word', cat: 'files' },
-        { text: 'تسجيل الحضور', cat: 'attendance' },
-        { text: 'تسجيل الانصراف', cat: 'attendance' },
-        { text: 'تقرير المهام', cat: 'reports' },
-        { text: 'فيديو الشرح', cat: 'reports' }
+        { text: 'لا يوجد ملف داخل المهمة؟', cat: 'files' },
+        { text: 'أين أرفع الملف؟', cat: 'files' },
+        { text: 'كيف أفتح ملف Word وأحفظ المهمة فيه وارفقه على البرنامج؟', cat: 'files' },
+        { text: 'كيف أسجّل حضوري؟', cat: 'attendance' },
+        { text: 'كيف أسجّل انصرافي؟', cat: 'attendance' },
+        { text: 'أين أجد تقرير مهامي؟', cat: 'reports' },
+        { text: 'هل يمكن تغيير إيميل الدخول؟', cat: 'reports' },
+        { text: 'فيديو الشرح لا يعمل', cat: 'reports' }
     ];
 
     var categories = [
         { id: 'all', label: 'الكل' },
-        { id: 'login', label: 'تسجيل الدخول' },
         { id: 'tasks', label: 'المهام' },
         { id: 'files', label: 'الملفات' },
         { id: 'attendance', label: 'الحضور' },
@@ -242,9 +243,9 @@
         $messages.empty();
         var time = getTimeStr();
         var welcomeText = isLoginMode
-            ? 'مرحباً! 👋<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
+            ? 'مرحباً!<br><br>هل تواجه مشكلة في تسجيل الدخول؟ اختر من الأسئلة أدناه.'
             : 'مرحباً! أنا مساعدك الذكي في تلي ساك<br><br>يمكنني مساعدتك في متابعة مهامك، تسجيل حضورك،<br>والاطلاع على تقاريرك وغير ذلك.<br>اختر من الأسئلة الشائعة أدناه أو تواصل مع الدعم.';
-        var supportBtn = isLoginMode ? '' : '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
+        var supportBtn = '<button class="tlsk-support-btn">' + supportIconSvg + ' تواصل مع الدعم</button>';
         var html =
             '<div class="tlsk-msg-row tlsk-msg-row-assistant">' +
                 '<div class="tlsk-bot-avatar">ت</div>' +
@@ -325,10 +326,10 @@
     showWelcome();
     if (isLoginMode) {
         $tabs.hide();
-        $('#tlsk-chat-input-area').hide();
     } else {
         renderTabs();
     }
+    $('#tlsk-chat-input-area').hide();
     renderChips();
 
     // ─── Events: Toggle panel ───
@@ -399,9 +400,17 @@
 
         // ─── Login mode: local answers only ───
         if (isLoginMode) {
+            if (text === 'مشكلة في تسجيل الدخول') {
+                // Step 1: show intermediate question + [نعم] button
+                appendMessage('assistant', 'مرحبا!\nهل تواجه مشكلة في تسجيل الدخول؟');
+                var $yesBtn = $('<div style="margin-top:6px;"><span class="tlsk-chip tlsk-yes-btn" data-answer="تأكد من عدم وجود مسافات باسم المستخدم أو كلمة المرور، أو أدخل بياناتك يدوياً">نعم</span></div>');
+                $messages.append($yesBtn);
+                scrollToBottom();
+                return;
+            }
+            // Other login Q&A
             var answer = loginQA[text];
             if (!answer) {
-                // Try substring match
                 for (var key in loginQA) {
                     if (text.indexOf(key) !== -1 || key.indexOf(text) !== -1) {
                         answer = loginQA[key];
@@ -414,7 +423,6 @@
             } else {
                 appendMessage('assistant', 'للمساعدة في تسجيل الدخول، اختر أحد الأسئلة أعلاه أو تواصل مع الدعم.');
             }
-            // Show chips again for login mode
             renderChips();
             $chips.show();
             return;
@@ -474,6 +482,15 @@
     // ─── Support button → WhatsApp (optional) ───
     $messages.on('click', '.tlsk-support-btn', function () {
         window.open('https://wa.me/966568786846', '_blank');
+    });
+
+    // ─── Login mode: [نعم] button handler ───
+    $messages.on('click', '.tlsk-yes-btn', function () {
+        var answer = $(this).data('answer');
+        $(this).parent().remove();
+        appendMessage('assistant', answer);
+        renderChips();
+        $chips.show();
     });
 
 })();

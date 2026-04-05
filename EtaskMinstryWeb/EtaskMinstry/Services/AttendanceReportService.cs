@@ -97,13 +97,6 @@ namespace EtaskMinstry.Services
             }
             var data = _unitOfWork.Sp_AttendanceResult.CallStoredProcedure("sp_Attendance", parameters.ToArray());
 
-            // Convert times to 12-hour format with Arabic AM/PM
-            foreach (var row in data)
-            {
-                row.CheckInTime = ConvertTo12HourArabic(row.CheckInTime);
-                row.CheckOutTime = ConvertTo12HourArabic(row.CheckOutTime);
-            }
-
             return data;
         }
 

@@ -418,6 +418,59 @@ Replace with `Company.Get(filter:)` using `.Any()` subquery to check matching Us
 
 ---
 
+## Sprint 7 Decisions
+
+### DEC-029: DisplayDate Partial Class for Hijri Report Data
+
+**Date:** 2026-03-30 | **Task:** ATT-04 | **Status:** Implemented
+
+#### Context
+Attendance report data rows showed Gregorian dates even when Hijri calendar was selected. The `AttendanceDate` field is `DateTime?` from the stored procedure. RDLC cannot conditionally format dates to Hijri using simple expressions.
+
+#### Decision
+Add a `DisplayDate` string property via partial class (`sp_Attendance_Result.Partial.cs`). The controller populates it using `UmAlQuraCalendar` or Gregorian based on `calendarType`, then the RDLC displays the pre-formatted string.
+
+#### Rationale
+- Partial class doesn't touch auto-generated EF code
+- Controller-level conversion matches the project's existing pattern
+- Same `UmAlQuraCalendar` approach used in CompanyTasks ReportController
+
+---
+
+### DEC-030: Calendar Toggle via Dropdown (Not Global Setting)
+
+**Date:** 2026-03-30 | **Task:** ATT-02 | **Status:** Implemented
+
+#### Context
+AttendanceReport used the global `MvcApplication.IsGregDate` setting to decide calendar type. This meant the user couldn't choose — it was fixed system-wide.
+
+#### Decision
+Added a dropdown selector (ميلادي/هجري) to the report page, same pattern as CompanyTasks `TaskReportPreperation.cshtml`. The JS `initCalendar()` function reinitializes the datepicker when the user switches.
+
+#### Rationale
+- Matches existing CompanyTasks pattern exactly
+- Gives users per-report control over calendar type
+- Global ISGreg setting still used as default elsewhere
+
+---
+
+### DEC-031: Login Chat Intermediate [نعم] Step
+
+**Date:** 2026-03-30 | **Task:** CHAT | **Status:** Implemented
+
+#### Context
+On the login page, clicking "مشكلة في تسجيل الدخول" showed the answer directly. The desired UX was a conversational flow.
+
+#### Decision
+Added an intermediate step: bot asks "مرحبا! هل تواجه مشكلة في تسجيل الدخول؟" with a [نعم] button. Clicking [نعم] shows the answer and removes the button.
+
+#### Rationale
+- More conversational and less abrupt
+- Matches the reference design's interaction pattern
+- Button is implemented as a `.tlsk-chip` element with delegated click handler
+
+---
+
 ## Sprint 6 Decisions
 
 ### DEC-026: Q&A Keyword Match Before AI Fallback

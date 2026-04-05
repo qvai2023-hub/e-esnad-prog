@@ -36,6 +36,10 @@
           <DataField>AttendanceDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="DisplayDate">
+          <DataField>DisplayDate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="DayName">
           <DataField>DayName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -384,7 +388,7 @@
                         <Paragraph>
                           <TextRuns>
                             <TextRun>
-                              <Value>=Format(Fields!AttendanceDate.Value, "yyyy/MM/dd")</Value>
+                              <Value>=Fields!DisplayDate.Value</Value>
                               <Style>
                                 <FontFamily>Arial</FontFamily>
                                 <FontSize>10pt</FontSize>
@@ -711,42 +715,10 @@
   <Width>19cm</Width>
   <Page>
     <PageHeader>
-      <Height>4.5cm</Height>
+      <Height>3.0cm</Height>
       <PrintOnFirstPage>true</PrintOnFirstPage>
       <PrintOnLastPage>true</PrintOnLastPage>
       <ReportItems>
-        <!-- TELE SAK - Application Name (Top Right) -->
-        <Textbox Name="HeaderAppName">
-          <CanGrow>true</CanGrow>
-          <Paragraphs>
-            <Paragraph>
-              <TextRuns>
-                <TextRun>
-                  <Value>TELE SAK</Value>
-                  <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>14pt</FontSize>
-                    <FontWeight>Bold</FontWeight>
-                    <Color>#3d85c6</Color>
-                  </Style>
-                </TextRun>
-              </TextRuns>
-              <Style>
-                <TextAlign>Right</TextAlign>
-              </Style>
-            </Paragraph>
-          </Paragraphs>
-          <Top>0.2cm</Top>
-          <Left>12cm</Left>
-          <Height>0.6cm</Height>
-          <Width>7cm</Width>
-          <Style>
-            <Border>
-              <Style>None</Style>
-            </Border>
-            <PaddingRight>5pt</PaddingRight>
-          </Style>
-        </Textbox>
         <!-- Company Name (Below App Name - Right) -->
         <Textbox Name="HeaderCompanyName">
           <CanGrow>true</CanGrow>
@@ -778,37 +750,6 @@
             <PaddingRight>5pt</PaddingRight>
           </Style>
         </Textbox>
-        <!-- Report Period/Month (Top Left) -->
-        <Textbox Name="HeaderMonth">
-          <CanGrow>true</CanGrow>
-          <Paragraphs>
-            <Paragraph>
-              <TextRuns>
-                <TextRun>
-                  <Value>=IIF(IsNothing(Parameters!ReportPeriod.Value) Or Len(CStr(Parameters!ReportPeriod.Value)) = 0, "", Parameters!ReportPeriod.Value)</Value>
-                  <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>12pt</FontSize>
-                    <FontWeight>Bold</FontWeight>
-                  </Style>
-                </TextRun>
-              </TextRuns>
-              <Style>
-                <TextAlign>Left</TextAlign>
-              </Style>
-            </Paragraph>
-          </Paragraphs>
-          <Top>0.5cm</Top>
-          <Left>0cm</Left>
-          <Height>0.6cm</Height>
-          <Width>7cm</Width>
-          <Style>
-            <Border>
-              <Style>None</Style>
-            </Border>
-            <PaddingLeft>5pt</PaddingLeft>
-          </Style>
-        </Textbox>
         <!-- Report Title (Center) -->
         <Textbox Name="HeaderReportTitle">
           <CanGrow>true</CanGrow>
@@ -816,11 +757,12 @@
             <Paragraph>
               <TextRuns>
                 <TextRun>
-                  <Value>تقرير الحضور والانصراف</Value>
+                  <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "تقرير الحضور والانصراف", "تقرير الحضور والانصراف — من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
                   <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>16pt</FontSize>
+                    <FontFamily>janna LT</FontFamily>
+                    <FontSize>14pt</FontSize>
                     <FontWeight>Bold</FontWeight>
+                    <Color>White</Color>
                   </Style>
                 </TextRun>
               </TextRuns>
@@ -829,7 +771,7 @@
               </Style>
             </Paragraph>
           </Paragraphs>
-          <Top>1.8cm</Top>
+          <Top>1.4cm</Top>
           <Left>0cm</Left>
           <Height>0.7cm</Height>
           <Width>19cm</Width>
@@ -837,41 +779,31 @@
             <Border>
               <Style>None</Style>
             </Border>
+            <BackgroundColor>#3d85c6</BackgroundColor>
+            <PaddingLeft>2pt</PaddingLeft>
+            <PaddingRight>2pt</PaddingRight>
+            <PaddingTop>2pt</PaddingTop>
+            <PaddingBottom>2pt</PaddingBottom>
           </Style>
         </Textbox>
-        <!-- Date Range in Header -->
-        <Textbox Name="HeaderDateRange">
-          <CanGrow>true</CanGrow>
-          <Paragraphs>
-            <Paragraph>
-              <TextRuns>
-                <TextRun>
-                  <Value>=IIF(IsNothing(Parameters!StartDate.Value) Or IsNothing(Parameters!EndDate.Value) Or Len(CStr(Parameters!StartDate.Value)) = 0 Or Len(CStr(Parameters!EndDate.Value)) = 0, "", "من " &amp; Parameters!StartDate.Value &amp; " إلى " &amp; Parameters!EndDate.Value)</Value>
-                  <Style>
-                    <FontFamily>Arial</FontFamily>
-                    <FontSize>11pt</FontSize>
-                    <Color>#555555</Color>
-                  </Style>
-                </TextRun>
-              </TextRuns>
-              <Style>
-                <TextAlign>Center</TextAlign>
-              </Style>
-            </Paragraph>
-          </Paragraphs>
-          <Top>2.6cm</Top>
-          <Left>0cm</Left>
-          <Height>0.6cm</Height>
-          <Width>19cm</Width>
+        <!-- Logo (Right) -->
+        <Image Name="Image1">
+          <Source>External</Source>
+          <Value>=Parameters!LogoUrl.Value</Value>
+          <Sizing>FitProportional</Sizing>
+          <Top>0.13cm</Top>
+          <Left>15.39cm</Left>
+          <Height>1.40cm</Height>
+          <Width>4.32cm</Width>
           <Style>
             <Border>
               <Style>None</Style>
             </Border>
           </Style>
-        </Textbox>
+        </Image>
         <!-- Separator Line -->
         <Line Name="HeaderSeparator">
-          <Top>3.5cm</Top>
+          <Top>2.4cm</Top>
           <Left>0cm</Left>
           <Height>0cm</Height>
           <Width>19cm</Width>
@@ -1001,6 +933,12 @@
       <Nullable>true</Nullable>
       <AllowBlank>true</AllowBlank>
       <Prompt>ReportPeriod</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CalendarType">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>CalendarType</Prompt>
     </ReportParameter>
   </ReportParameters>
   <rd:ReportUnitType>Cm</rd:ReportUnitType>

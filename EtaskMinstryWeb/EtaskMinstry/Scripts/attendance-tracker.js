@@ -15,7 +15,7 @@
     var CONFIG = {
         HEARTBEAT_INTERVAL: 60000,        // 1 minute - send heartbeat
         INACTIVITY_WARNING: 30 * 60000,   // 30 minutes - show warning
-        INACTIVITY_TIMEOUT: 2 * 60 * 1000,    // 2 minutes after warning - auto checkout (countdown in modal)
+        INACTIVITY_TIMEOUT: 5 * 60 * 1000,    // 5 minutes after warning - auto checkout (countdown in modal)
         ACTIVITY_EVENTS: ['click', 'keypress', 'mousemove', 'scroll', 'touchstart']
     };
 
@@ -276,20 +276,19 @@
                     '<div class="modal-header bg-warning">' +
                         '<h5 class="modal-title">' +
                             '<i class="fa fa-clock-o"></i> ' +
-                            'تنبيه عدم النشاط' +
+                            'انتهاء الجلسة قريباً' +
                         '</h5>' +
                     '</div>' +
                     '<div class="modal-body text-center">' +
-                        '<p class="lead">هل أنهيت عملك لليوم؟</p>' +
-                        '<p>لم يتم اكتشاف أي نشاط منذ فترة.</p>' +
-                        '<p>سيتم تسجيل خروجك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">02:00</strong></p>' +
+                        '<p>ستنتهي جلستك تلقائياً خلال: <strong id="inactivityCountdown" dir="ltr">05:00</strong></p>' +
+                        '<p>هل تريد الاستمرار؟</p>' +
                     '</div>' +
                     '<div class="modal-footer justify-content-center">' +
                         '<button type="button" class="btn btn-success btn-lg" id="btnContinueWork">' +
-                            '<i class="fa fa-check"></i> استمر في العمل' +
+                            'نعم ✔' +
                         '</button>' +
                         '<button type="button" class="btn btn-danger btn-lg" id="btnEndWork">' +
-                            '<i class="fa fa-sign-out"></i> أنهِ العمل' +
+                            'لا 🚪' +
                         '</button>' +
                     '</div>' +
                 '</div>' +

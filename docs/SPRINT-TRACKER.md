@@ -40,12 +40,14 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 | 4 | Removed ▶ icon from video link answer | Done | eFE3C | URL only in telesak-qa.json |
 | 5 | Merged login Q&A into one entry "مشكلة في تسجيل الدخول" | Done | eFE3C | Combined triggers from both entries |
 | 6 | Updated WhatsApp number to 966568786846 | Done | eFE3C | wa.me/966568786846 |
+| 7 | Login flow: intermediate [نعم] step for "مشكلة في تسجيل الدخول" | Done | eFE3C | Bot asks question first, then shows answer after [نعم] click |
+| 8 | Removed 👋 emoji from login mode welcome message | Done | eFE3C | Clean text only |
 
 ### Sprint 5 Files Modified
-- `EtaskMinstry/Scripts/telesak-chat.js` — welcome text, emojis, buttons, merged Q&A
+- `EtaskMinstry/Scripts/telesak-chat.js` — welcome text, emojis, buttons, merged Q&A, login [نعم] flow
 - `EtaskMinstry/App_Data/telesak-qa.json` — merged login entries, removed video emoji, WhatsApp number
 
-All changes tested and confirmed working ✅
+All Sprint 5 chatbot changes tested and confirmed ✅
 
 ---
 
@@ -116,6 +118,7 @@ Improve task report (CompanyTasks) with interaction column and calendar toggle, 
 | 1 | Calendar Type Toggle (Hijri/Gregorian) T-02 | Done | haj1c | ConvertDate + UI toggle |
 | 2 | Add Interaction Column (التفاعل) T-04 | Done | haj1c | SP + RDLC updated |
 | 3 | Report Header Modification T-05 | Done | haj1c | Redesigned layout |
+| 3b | T-05: Add date range to CompanyTasks title header | Done | eFE3C | Title now shows "تقرير المهام — من X إلى Y", FooterDateRange hidden |
 | 4 | Update sp_CompanyTasks stored procedure | Done | haj1c | User updated in SSMS |
 | 5 | Fix CompanyTasks.rdlc XML (missing closing tag) | Done | haj1c | Was causing ReportProcessingException |
 | 6 | Fix CS0266 nullable DateTime returns | Done | haj1c | Added .Value to ConvertDate() |
@@ -154,6 +157,9 @@ Improve the attendance report to be more readable and support data aggregation.
 | 9 | Add employee grouping with subtotals | Done | a03 | Days + Hours per employee |
 | 10 | Add report totals footer | Done | a03 | Total employees + days |
 | 11 | Test and verify changes | Done | - | Verified by user |
+| 12 | Remove Arabic AM/PM (ص/م) from attendance times | Done | eFE3C | Removed ConvertTo12HourArabic() calls in AttendanceReportService.cs |
+| 13 | Add ميلادي/هجري calendar toggle to AttendanceReport | Done | eFE3C | Dropdown + initCalendar() JS + Hijri date conversion in controller |
+| 14 | Fix Attendance report layout to match CompanyTasks | Done | eFE3C | Logo added, blue title header, date range in title, removed duplicate date elements in Attendance.rdlc |
 
 ---
 

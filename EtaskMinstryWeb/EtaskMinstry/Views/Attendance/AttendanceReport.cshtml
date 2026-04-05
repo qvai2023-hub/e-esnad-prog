@@ -164,6 +164,17 @@ Class = "form-control"
 
         </div>*@
                         </div>
+                        <div class="row form-group" style="margin-top:10px;">
+                            <div class="form-group col-sm-6">
+                                <label class="col-sm-4 control-label">نوع التقويم :</label>
+                                <div class="col-sm-8">
+                                    <select id="calendarType" name="calendarType" class="form-control" style="width:200px; display:inline-block;">
+                                        <option value="1" selected>ميلادي</option>
+                                        <option value="0">هجري</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                         <div class="text-right">
                             <input type="submit" class="btn btn-primary" value="تقرير" />
 
@@ -227,26 +238,32 @@ Class = "form-control"
         });
 
      //Check Date Greg OR Hijrii
-    var Isgreg = "@(MvcApplication.IsGregDate)";
-    debugger
-    if (Isgreg == "True") {
-        //datepicker Grerg
-        $("#FromDate").datepicker($.datepicker.regional["ar"]);
-        $("#ToDate").datepicker($.datepicker.regional["ar"]);
+    function initCalendar() {
+        var calType = $("#calendarType").val();
+        // Clear existing pickers and values
+        $("#FromDate, #ToDate").val("");
+        try { $("#FromDate, #ToDate").datepicker("destroy"); } catch(e) {}
+        try { $('#FromDate, #ToDate').calendarsPicker("destroy"); } catch(e) {}
 
+        if (calType == "1") {
+            //datepicker Grerg
+            $("#FromDate").datepicker($.datepicker.regional["ar"]);
+            $("#ToDate").datepicker($.datepicker.regional["ar"]);
+        }
+        else {
+            //calendar Hijrii
+            $('#FromDate,#ToDate').calendarsPicker({
+                changeMonth: true,
+                changeYear: true,
+                showTrigger: '#calImg',
+                calendar: $.calendars.instance('ummalqura'),
+                dateFormat: 'dd/mm/yyyy',
+                yearRange: '1418:1450'
+            });
+        }
     }
-    else {
-        //calendar Hijrii
-        $('#FromDate,#ToDate').calendarsPicker({
-            changeMonth: true,
-            changeYear: true,
-            showTrigger: '#calImg',
-            calendar: $.calendars.instance('ummalqura'),
-            dateFormat: 'dd/mm/yyyy',
-            yearRange: '1418:1450'
-        });
-
-    }
+    initCalendar();
+    $("#calendarType").change(function() { initCalendar(); });
     //***************************************************************//
 
     $.validator.addMethod("MinMaxValidation", function (value, element, options) {

@@ -130,6 +130,23 @@ namespace EtaskMinstry.Controllers
                 var qaArray = JArray.Parse(json);
                 string lowerMessage = message.ToLowerInvariant();
 
+                // First pass: exact match on triggers
+                foreach (var entry in qaArray)
+                {
+                    var triggers = entry["triggers"] as JArray;
+                    if (triggers == null) continue;
+
+                    foreach (var trigger in triggers)
+                    {
+                        string keyword = ((string)trigger ?? "").ToLowerInvariant().Trim();
+                        if (!string.IsNullOrEmpty(keyword) && lowerMessage == keyword)
+                        {
+                            return (string)entry["answer"];
+                        }
+                    }
+                }
+
+                // Second pass: substring match (fallback)
                 foreach (var entry in qaArray)
                 {
                     var triggers = entry["triggers"] as JArray;
