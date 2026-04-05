@@ -238,7 +238,7 @@
 
 
             <div class="form-actions text-right">
-                <input type="submit" value="حفظ" class="btn btn-primary" onclick="Saveclick(this);" />&nbsp;
+                <input type="submit" value="حفظ" class="btn btn-primary" id="btnSave" onclick="Saveclick(this);" />&nbsp;
                 <a href="/Admin/Employee/Index" class="btn btn-primary">الرجوع للقائمة</a>
             </div>
 
@@ -429,6 +429,12 @@
         }
 
     })
+
+    $("form").on("submit", function () {
+        if ($(this).valid()) {
+            $("#btnSave").prop("disabled", true).val("جاري الحفظ...");
+        }
+    });
 
 </script>
 
