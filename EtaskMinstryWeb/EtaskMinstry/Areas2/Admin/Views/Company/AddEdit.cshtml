@@ -137,6 +137,10 @@
                    $("#btnSave").prop("disabled", true).val("جاري الحفظ...");
                }
            });
+
+           if ($('.field-validation-error:visible').length > 0) {
+               $("#btnSave").prop("disabled", false).val("حفظ");
+           }
        });
    </script>
 

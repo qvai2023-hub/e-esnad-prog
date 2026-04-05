@@ -442,6 +442,12 @@
         }
     });
 
+    $(document).ready(function () {
+        if ($('.field-validation-error:visible').length > 0) {
+            $("#btnSave").prop("disabled", false).val("حفظ");
+        }
+    });
+
 </script>
 
 <style>
