@@ -239,7 +239,7 @@
 
 
             <div class="form-actions text-right">
-                <input type="submit" value="حفظ" class="btn btn-primary" />&nbsp;
+                <input type="submit" value="حفظ" class="btn btn-primary" id="btnSave" />&nbsp;
                 <a href="/Admin/Employee/Index" class="btn btn-primary">الرجوع للقائمة</a>
             </div>
 
@@ -435,6 +435,18 @@
         }
 
     })
+
+    $("form").on("submit", function () {
+        if ($(this).valid()) {
+            $("#btnSave").prop("disabled", true).val("جاري الحفظ...");
+        }
+    });
+
+    $(document).ready(function () {
+        if ($('.field-validation-error:visible').length > 0) {
+            $("#btnSave").prop("disabled", false).val("حفظ");
+        }
+    });
 
 </script>
 
