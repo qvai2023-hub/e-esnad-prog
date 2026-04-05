@@ -178,7 +178,7 @@
 
 
                 <div class="form-actions text-right">
-                    <input type="submit" value="حفظ" class="btn btn-primary">&nbsp;
+                    <input type="submit" value="حفظ" class="btn btn-primary" id="btnSave">&nbsp;
                     <a href="/Admin/Company/Index" class="btn btn-primary">الغاء</a>
                 </div>
 
@@ -190,8 +190,14 @@
 
    <script>
        $(function () {
-        
+
            $("#Logo").QVUploader({ type: "png,jpeg,jpg",displayImage:"on" });
+
+           $("form").on("submit", function () {
+               if ($(this).valid()) {
+                   $("#btnSave").prop("disabled", true).val("جاري الحفظ...");
+               }
+           });
        });
    </script>
 
