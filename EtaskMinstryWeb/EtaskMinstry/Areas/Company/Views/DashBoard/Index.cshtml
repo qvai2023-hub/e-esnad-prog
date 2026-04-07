@@ -1,9 +1,11 @@
-﻿@using EtaskMinstry
+﻿@using System.Collections.Generic
+@using EtaskMinstry
 @using EtaskMinstry.Models.Company
 @using EtaskMinstry.AppCode
 
 @{
     ViewBag.Title = "حالة المهام";
+    var counts = (Dictionary<DashBoaedTaskType, int>)ViewBag.Counts;
 }
 
 <div class="tabbable page-tabs">
@@ -19,7 +21,7 @@
 
             @Ajax.RawActionLink("<i class='fa fa-check'></i>"
                       + System.Configuration.ConfigurationManager.AppSettings["Done"]
-                      + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Empfinish, DateTime.Now)
+                      + ".<span class='label label-success'>" + counts[DashBoaedTaskType.Empfinish]
                       + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Empfinish },
                 new AjaxOptions
                 {
@@ -45,7 +47,7 @@
             </a>*@
             @Ajax.RawActionLink("<i class='fa fa-hourglass-3'></i>"
                       + System.Configuration.ConfigurationManager.AppSettings["Delay"]
-                      + ".<span class='label label-danger' id='lblCounts'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Delayed, DateTime.Now)
+                      + ".<span class='label label-danger' id='lblCounts'>" + counts[DashBoaedTaskType.Delayed]
                       + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
                 new AjaxOptions
                 {
@@ -62,7 +64,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-ban'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["Rejected"]
-                  + ".<span class='label label-danger'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.EmpReject, DateTime.Now)
+                  + ".<span class='label label-danger'>" + counts[DashBoaedTaskType.EmpReject]
                   + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.EmpReject },
             new AjaxOptions
             {
@@ -79,7 +81,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-pause'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["Pending"]
-                  + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.Susspended, DateTime.Now)
+                  + ".<span class='label label-success'>" + counts[DashBoaedTaskType.Susspended]
                   + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
             new AjaxOptions
             {
@@ -97,7 +99,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-check'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["DoneToday"]
-                  + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.FinishToday, DateTime.Now)
+                  + ".<span class='label label-success'>" + counts[DashBoaedTaskType.FinishToday]
                   + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.FinishToday },
             new AjaxOptions
             {
@@ -115,7 +117,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-thumb-tack'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["NotAssigned"]
-                  + ".<span class='label label-success'>" + @DaskBoardCompanyTaskVM.GetCompanyTasksCount(EtaskMinstry.AppCode.DashBoaedTaskType.NeedAssign, DateTime.Now)
+                  + ".<span class='label label-success'>" + counts[DashBoaedTaskType.NeedAssign]
                   + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NeedAssign },
             new AjaxOptions
             {

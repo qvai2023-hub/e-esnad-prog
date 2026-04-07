@@ -34,6 +34,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
                 ViewBag.page = page;
                 ViewBag.taskType = (int)Type;
                 ViewBag.pagesNumber = Math.Ceiling((decimal)ViewBag.count / (decimal)ViewBag.pageSize);
+                ViewBag.Counts = DaskBoardCompanyTaskVM.GetAllCounts();
                 Generallog.LogView();
                 return View();
             }

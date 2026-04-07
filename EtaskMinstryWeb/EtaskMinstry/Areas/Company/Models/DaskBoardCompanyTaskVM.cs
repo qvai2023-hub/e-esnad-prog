@@ -619,6 +619,10 @@ namespace EtaskMinstry.Models.Company
                     break;
                 case DashBoaedTaskType.Delayed: // Delayed Tasks
                     iTasksCount = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
+                      && t.StatusID != (int)TaskStatus.New
+                      && t.StatusID != (int)TaskStatus.Rejected
+                      && t.EmpID != null
+                      && !t.IsArchived
                       ).ToList().Count(t => t.isDelayed);
                     break;
                 case DashBoaedTaskType.FinishToday: //EndDate =today
@@ -650,6 +654,52 @@ namespace EtaskMinstry.Models.Company
             return iTasksCount;
         }
 
+        /// <summary>
+        /// Returns all 6 tab counts in a single method with one UnitOfWork instance.
+        /// Each count uses the exact same filter as GetCompanyTasksCount() switch cases.
+        /// </summary>
+        public static Dictionary<DashBoaedTaskType, int> GetAllCounts()
+        {
+            UnitOfWork _unitOfWork =
+               new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+            DateTime? DateNow = DateTime.Now.Date;
+            int companyId = MvcApplication.userData.userId;
+            var counts = new Dictionary<DashBoaedTaskType, int>();
+
+            // Same filter as GetCompanyTasksCount case NeedAssign (line 616-617)
+            counts[DashBoaedTaskType.NeedAssign] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && !t.EmpID.HasValue && !t.IsDeleted).Count();
+
+            // Same filter as GetCompanyTasksCount case Delayed (line 620-622) with A1 pre-filter
+            counts[DashBoaedTaskType.Delayed] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && t.StatusID != (int)TaskStatus.New
+                && t.StatusID != (int)TaskStatus.Rejected
+                && t.EmpID != null
+                && !t.IsArchived
+                ).ToList().Count(t => t.isDelayed);
+
+            // Same filter as GetCompanyTasksCount case FinishToday (line 625-626)
+            counts[DashBoaedTaskType.FinishToday] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress).Count();
+
+            // Same filter as GetCompanyTasksCount case Susspended (line 629-630)
+            counts[DashBoaedTaskType.Susspended] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && t.StatusID == (int)TaskStatus.Pending).Count();
+
+            // Same filter as GetCompanyTasksCount case Empfinish (line 633-634)
+            counts[DashBoaedTaskType.Empfinish] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && t.StatusID == (int)TaskStatus.Done).Count();
+
+            // Same filter as GetCompanyTasksCount case EmpReject (line 637-638)
+            counts[DashBoaedTaskType.EmpReject] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && t.StatusID == (int)TaskStatus.Rejected).Count();
+
+            // Same filter as GetCompanyTasksCount case New (line 642-643)
+            counts[DashBoaedTaskType.New] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && t.StatusID == (int)TaskStatus.New).Count();
+
+            return counts;
+        }
 
         public static bool isTaskDelayed(DaskBoardCompanyTaskVM task)
         {
