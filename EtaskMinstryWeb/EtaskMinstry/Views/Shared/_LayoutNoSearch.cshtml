@@ -866,7 +866,8 @@ else
         <script src="~/Scripts/attendance-tracker.js"></script>
     }
 
-    @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany)
+    @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany &&
+         EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Employee)
     {
         <script>window.tlskChatMode='full';</script>
         <script src="~/Scripts/telesak-chat.js"></script>
