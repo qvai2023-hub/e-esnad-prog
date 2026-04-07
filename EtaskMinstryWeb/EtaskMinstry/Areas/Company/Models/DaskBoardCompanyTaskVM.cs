@@ -95,9 +95,9 @@ namespace EtaskMinstry.Models.Company
             List<DaskBoardCompanyTaskVM> objTasks = new List<DaskBoardCompanyTaskVM>();
             switch( taskType)
             {
-                    case DashBoaedTaskType.NeedAssign: // Need assign without Employees 
-                    objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                        && !t.EmpID.HasValue && !t.IsDeleted).Select(t => new DaskBoardCompanyTaskVM()
+                    case DashBoaedTaskType.NeedAssign: // Need assign without Employees
+                    objTasks= _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                        && !t.EmpID.HasValue && !t.IsDeleted, includeProperties: "Status,Priority").Select(t => new DaskBoardCompanyTaskVM()
                                                         {
                                                             TaskID = t.TaskID,
                                                             Task = t.Title,                                                         
@@ -114,8 +114,8 @@ namespace EtaskMinstry.Models.Company
 
                     break;
                     case DashBoaedTaskType.Delayed: // Delayed Tasks
-                     objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                       ).Select(t => new DaskBoardCompanyTaskVM()
+                     objTasks= _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId,
+                       includeProperties: "Status,Priority").Select(t => new DaskBoardCompanyTaskVM()
                                                         {
                                                             TaskID = t.TaskID,
                                                             Task = t.Title,
@@ -130,7 +130,11 @@ namespace EtaskMinstry.Models.Company
                                                             FinishDate = t.DeliverDate                                                          
                                                         }).OrderByDescending(i => i.TaskID).ToList();
 
-                       objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
+                       // Batch load task entities to evaluate isDelayed (avoids N+1 GetByID per task)
+                       var taskIds1 = objTasks.Select(t => t.TaskID).ToList();
+                       var taskEntities1 = _unitOfWork.TaskRepository.Get(t => taskIds1.Contains(t.TaskID)).ToList();
+                       var delayedIds1 = new HashSet<int>(taskEntities1.Where(t => t.isDelayed).Select(t => t.TaskID));
+                       objTasks.ForEach(i => i.IsDelayed = delayedIds1.Contains(i.TaskID));
                        objTasks = objTasks.Where(i => i.IsDelayed).ToList();
 
                     break;
@@ -139,8 +143,8 @@ namespace EtaskMinstry.Models.Company
                     var obj = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
                          &&   t.StatusID == (int)TaskStatus.Inprogress);
                              
-                         objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                             && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress)
+                         objTasks= _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                             && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress, includeProperties: "Status,Priority")
                              .Select(t => new DaskBoardCompanyTaskVM()
                              {
                                  TaskID = t.TaskID,
@@ -160,8 +164,8 @@ namespace EtaskMinstry.Models.Company
 
                     break;
                     case DashBoaedTaskType.Susspended: // SuspendedStatud
-                         objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                             && t.StatusID ==(int) TaskStatus.Pending)
+                         objTasks= _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                             && t.StatusID ==(int) TaskStatus.Pending, includeProperties: "Status,Priority")
                              .Select(t => new DaskBoardCompanyTaskVM()
                              {
                                  TaskID = t.TaskID,
@@ -186,8 +190,8 @@ namespace EtaskMinstry.Models.Company
                i => i.HijriFinishDate = (i.FinishDate.HasValue) ? MvcApplication.IsGregDate ? i.FinishDate.Value.ToGregArabicDate() : i.FinishDate.Value.ToHijriArabicDate() : String.Empty);
                     break;
                     case DashBoaedTaskType.Empfinish:
-                            objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                             && t.StatusID ==(int) TaskStatus.Done)
+                            objTasks= _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                             && t.StatusID ==(int) TaskStatus.Done, includeProperties: "Status,Priority")
                              .Select(t => new DaskBoardCompanyTaskVM()
                              {
                                  TaskID = t.TaskID,
@@ -209,8 +213,8 @@ namespace EtaskMinstry.Models.Company
                     break;
                    
                     case DashBoaedTaskType.EmpReject:
-                          objTasks= _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                             && t.StatusID ==(int) TaskStatus.Rejected)
+                          objTasks= _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                             && t.StatusID ==(int) TaskStatus.Rejected, includeProperties: "Status,Priority")
                              .Select(t => new DaskBoardCompanyTaskVM()
                              {
                                  TaskID = t.TaskID,
@@ -234,8 +238,8 @@ namespace EtaskMinstry.Models.Company
                                            i => i.HijriStartDate = (i.StartDate.HasValue) ? MvcApplication.IsGregDate ? i.StartDate.Value.ToGregArabicDate() : i.StartDate.Value.ToHijriArabicDate() : String.Empty);
                     break;
                     case DashBoaedTaskType.New: // Need assign without Employees 
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                        && t.StatusID==(int)TaskStatus.New).Select(t => new DaskBoardCompanyTaskVM()
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                        && t.StatusID==(int)TaskStatus.New, includeProperties: "Status,Priority").Select(t => new DaskBoardCompanyTaskVM()
                         {
                             TaskID = t.TaskID,
                             Task = t.Title,
@@ -315,8 +319,8 @@ namespace EtaskMinstry.Models.Company
             switch (taskType)
             {
                 case DashBoaedTaskType.NeedAssign: // Need assign without Employees 
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                        && !t.EmpID.HasValue && !t.IsDeleted).Select(t => new DaskBoardCompanyTaskVM()
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                        && !t.EmpID.HasValue && !t.IsDeleted, includeProperties: "Status,Priority").Select(t => new DaskBoardCompanyTaskVM()
                         {
                             TaskID = t.TaskID,
                             Task = t.Title,
@@ -348,8 +352,8 @@ namespace EtaskMinstry.Models.Company
 
                     break;
                 case DashBoaedTaskType.Delayed: // Delayed Tasks
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                      ).Select(t => new DaskBoardCompanyTaskVM()
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId,
+                      includeProperties: "Status,Priority").Select(t => new DaskBoardCompanyTaskVM()
                       {
                           TaskID = t.TaskID,
                           Task = t.Title,
@@ -379,7 +383,11 @@ namespace EtaskMinstry.Models.Company
                          // Get Finish Date .
                          FinishDate = t.DeliverDate
                      }).Count();
-                    objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
+                    // Batch load task entities to evaluate isDelayed (avoids N+1 GetByID per task)
+                    var taskIds2 = objTasks.Select(t => t.TaskID).ToList();
+                    var taskEntities2 = _unitOfWork.TaskRepository.Get(t => taskIds2.Contains(t.TaskID)).ToList();
+                    var delayedIds2 = new HashSet<int>(taskEntities2.Where(t => t.isDelayed).Select(t => t.TaskID));
+                    objTasks.ForEach(i => i.IsDelayed = delayedIds2.Contains(i.TaskID));
                     objTasks = objTasks.Where(i => i.IsDelayed).ToList();
 
                     break;
@@ -388,8 +396,8 @@ namespace EtaskMinstry.Models.Company
                     var obj = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
                          && t.StatusID == (int)TaskStatus.Inprogress);
 
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                        && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress)
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                        && t.EndDate == DateNow && t.StatusID == (int)TaskStatus.Inprogress, includeProperties: "Status,Priority")
                         .Select(t => new DaskBoardCompanyTaskVM()
                         {
                             TaskID = t.TaskID,
@@ -424,8 +432,8 @@ namespace EtaskMinstry.Models.Company
 
                     break;
                 case DashBoaedTaskType.Susspended: // SuspendedStatud
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                        && t.StatusID == (int)TaskStatus.Pending)
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                        && t.StatusID == (int)TaskStatus.Pending, includeProperties: "Status,Priority")
                         .Select(t => new DaskBoardCompanyTaskVM()
                         {
                             TaskID = t.TaskID,
@@ -468,8 +476,8 @@ namespace EtaskMinstry.Models.Company
                i => i.HijriFinishDate = (i.FinishDate.HasValue) ? MvcApplication.IsGregDate ? i.FinishDate.Value.ToGregArabicDate() : i.FinishDate.Value.ToHijriArabicDate() : String.Empty);
                     break;
                 case DashBoaedTaskType.Empfinish:
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                     && t.StatusID == (int)TaskStatus.Done)
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                     && t.StatusID == (int)TaskStatus.Done, includeProperties: "Status,Priority")
                      .Select(t => new DaskBoardCompanyTaskVM()
                      {
                          TaskID = t.TaskID,
@@ -506,8 +514,8 @@ namespace EtaskMinstry.Models.Company
                     break;
 
                 case DashBoaedTaskType.EmpReject:
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                       && t.StatusID == (int)TaskStatus.Rejected)
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                       && t.StatusID == (int)TaskStatus.Rejected, includeProperties: "Status,Priority")
                        .Select(t => new DaskBoardCompanyTaskVM()
                        {
                            TaskID = t.TaskID,
@@ -550,8 +558,8 @@ namespace EtaskMinstry.Models.Company
                                      i => i.HijriStartDate = (i.StartDate.HasValue) ? MvcApplication.IsGregDate ? i.StartDate.Value.ToGregArabicDate() : i.StartDate.Value.ToHijriArabicDate() : String.Empty);
                     break;
                 case DashBoaedTaskType.New: // Need assign without Employees 
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId
-                        && t.StatusID == (int)TaskStatus.New).Select(t => new DaskBoardCompanyTaskVM()
+                    objTasks = _unitOfWork.TaskRepository.Get(filter: t => t.CompanyID == MvcApplication.userData.userId
+                        && t.StatusID == (int)TaskStatus.New, includeProperties: "Status,Priority").Select(t => new DaskBoardCompanyTaskVM()
                         {
                             TaskID = t.TaskID,
                             Task = t.Title,

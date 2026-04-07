@@ -116,6 +116,16 @@ namespace EtaskMinstry.Areas.Admin.Models
         public List<CompanyVM> Select(string Name, string Email, string CommercialRegister, bool? IsActive)
         {
             var currentMonth = DateTime.Now.Month;
+
+            // Batch load task counts per company for current month (same month-only filter as original)
+            var taskCounts = _unitOfWork.TaskRepository.Get(t => !t.IsDeleted && t.CreatedDate.Month == currentMonth)
+                .GroupBy(t => t.CompanyID)
+                .Select(g => new {
+                    CompanyID = g.Key,
+                    Total = g.Count(),
+                    Done = g.Count(t => t.StatusID == (int)TaskStatus.Done || t.StatusID == (int)TaskStatus.Approved)
+                }).ToDictionary(x => x.CompanyID);
+
             List<CompanyVM> companies = new List<CompanyVM>();
             companies = _unitOfWork.Company.Get(a => a.IsDeleted == false && a.Name.Contains(Name) && a.Email.Contains(Email)
                 && a.CommercialRegister.Contains(CommercialRegister) && (IsActive == null || a.IsActive == IsActive)).ToList().Select(a => new CompanyVM()
@@ -131,8 +141,8 @@ namespace EtaskMinstry.Areas.Admin.Models
                     LaborOfficeID = LaborOfficeID,
                     SequenceNumber = SequenceNumber,
                     Password = QvLib.Security.DataProtection.Decrypt(a.UserAccounts.FirstOrDefault().Password),
-                    DonetasksCount =a.Tasks.Where(x => x.IsDeleted == false && x.CreatedDate.Month == currentMonth && (x.StatusID == (int)TaskStatus.Done ||x.StatusID==(int)TaskStatus.Approved)).Count(),
-                    tasksCount = a.Tasks.Where(x => x.IsDeleted == false && x.CreatedDate.Month == currentMonth).Count(),
+                    DonetasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Done : 0,
+                    tasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Total : 0,
                 }).OrderByDescending(x=>x.Id).ToList();
 
             return companies;
