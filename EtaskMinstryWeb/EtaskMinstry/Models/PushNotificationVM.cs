@@ -13,7 +13,7 @@ namespace EtaskMinstry.Models
          private List<NotificationPattren> _AllData;
          public PushNotificationVM()
          {
-            
+            _Data = new List<NotificationPattren>();
          }
 
         public PushNotificationVM(int Skip, int Take) 
