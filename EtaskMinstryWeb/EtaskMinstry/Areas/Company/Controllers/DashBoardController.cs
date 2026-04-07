@@ -48,7 +48,15 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public ActionResult GetTasks(DashBoaedTaskType taskType)
         {
-            return PartialView("~/Areas/Company/Views/DashBoard/PartialDBCompTask.cshtml", new DaskBoardCompanyTaskVM().SelectCompanyTasks(taskType));
+            int count = 0;
+            int pageSize = 10;
+            var tasks = new DaskBoardCompanyTaskVM().SelectCompanyTasks(taskType, out count, 1, pageSize);
+            ViewBag.pageSize = pageSize;
+            ViewBag.count = count;
+            ViewBag.page = 1;
+            ViewBag.taskType = (int)taskType;
+            ViewBag.pagesNumber = Math.Ceiling((decimal)count / (decimal)pageSize);
+            return PartialView("~/Areas/Company/Views/DashBoard/PartialDBCompTask.cshtml", tasks);
         }
 
      
