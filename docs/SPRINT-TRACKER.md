@@ -30,6 +30,44 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 
 ---
 
+## PERFORMANCE SPRINT ✅
+
+**Problem:** Admin and Company Dashboard slow with large data.
+
+### Group A — Critical (DaskBoardCompanyTaskVM.cs)
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| A1 | Fixed Delayed count — pre-filter at DB level before .ToList() | ✅ Done | Skip New, Rejected, null EmpID, Archived at DB level — matches isDelayed early-exit conditions |
+| A2 | Merged 6 GetCompanyTasksCount() calls into 1 GetAllCounts() | ✅ Done | 1 UnitOfWork instead of 6, controller passes via ViewBag |
+
+### Group B — Medium (DashBoardController.cs)
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| B1 | GetTasks() POST now uses pagination (pageSize=10) | ✅ Done | Tab clicks no longer load ALL tasks |
+
+### Group C — Advanced (DaskBoardCompanyTaskVM.cs + CompanyVM.cs)
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| C1 | Fixed isTaskDelayed() N+1 — batch load instead of per-row GetByID() | ✅ Done | 1 query instead of N per delayed check |
+| C2 | Added eager loading (includeProperties: Status,Priority) | ✅ Done | 14 data queries — eliminates lazy load per row |
+| C3 | Fixed Admin CompanyVM N+1 task count — single GROUP BY query | ✅ Done | 1 query instead of 2×N per company |
+
+### Files Changed
+
+| # | File | Groups |
+|---|------|--------|
+| 1 | `Areas/Company/Models/DaskBoardCompanyTaskVM.cs` | A1, A2, C1, C2 |
+| 2 | `Areas/Company/Controllers/DashBoardController.cs` | A2, B1 |
+| 3 | `Areas/Company/Views/DashBoard/Index.cshtml` | A2 |
+| 4 | `Areas/Admin/Models/CompanyVM.cs` | C3 |
+
+Tested and confirmed — noticeable speed improvement ✅
+
+---
+
 ## Sprint 5 — CHATBOT (شات بوت) ✅
 
 | # | Task | Status | Session | Notes |
