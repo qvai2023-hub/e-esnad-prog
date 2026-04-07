@@ -79,33 +79,41 @@
 
         $(function () {
 
-            var updateConnection = function (connectionID) {
-                $.ajax({
-                    type: "POST",
-                    url: "/Security/UpdateConnectionID",
-                    data: { ConnectionID: connectionID }
+            if (!window.signalRStarted) {
+                window.signalRStarted = true;
+
+                var updateConnection = function (connectionID) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Security/UpdateConnectionID",
+                        data: { ConnectionID: connectionID }
+                    });
+                };
+                var notificationHub = $.connection.notificationHub;
+
+
+                notificationHub.client.updateConnectionID = updateConnection;
+
+                notificationHub.client.sendGeneralNotification = function (value) {
+
+                    value = eval("[" + value + "]")[0];
+                    $obj = $('<li href_="' + value.Link + '" data-id="' + value.ID + '" class="hovered"><a role="menuitem" ><i class="icon icon-duration ' + value.Type + '"></i>' + value.Value + '</a><span>' + value.Time + '</span></li>');
+                    if (value.Type == 'message') {
+                        $('.msg-list').prepend($obj);
+                    }
+                    else {
+                        $('#notify-list').prepend($obj);
+                        $('#badge-notify-list').html($('#notify-list').children('.hovered').length).show();
+
+                    }
+                };
+
+
+
+                $.connection.hub.start().done(function () {
+                    updateConnection($.connection.hub.id);
                 });
-            };
-            var notificationHub = $.connection.notificationHub;
-
-
-            notificationHub.client.updateConnectionID = updateConnection;
-
-            notificationHub.client.sendGeneralNotification = function (value) {
-
-                value = eval("[" + value + "]")[0];
-                $obj = $('<li href_="' + value.Link + '" data-id="' + value.ID + '" class="hovered"><a role="menuitem" ><i class="icon icon-duration ' + value.Type + '"></i>' + value.Value + '</a><span>' + value.Time + '</span></li>');
-                if (value.Type == 'message') {
-                    $('.msg-list').prepend($obj);
-                }
-                else {
-                    $('#notify-list').prepend($obj);
-                    $('#badge-notify-list').html($('#notify-list').children('.hovered').length).show();
-
-                }
-            };
-
-
+            }
 
             $('#notify-list li').on('click', function () {
                 if ($(this).not('li a.center-read-more')) {
@@ -122,14 +130,6 @@
                         }
                     });
                 }
-            });
-
-
-
-
-
-            $.connection.hub.start().done(function () {
-                updateConnection($.connection.hub.id);
             });
         });
     </script>

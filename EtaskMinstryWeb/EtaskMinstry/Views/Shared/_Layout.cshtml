@@ -375,7 +375,9 @@
             </li>
           
             <li class="dropdown">
-                @Html.Partial("PushNotification", new EtaskMinstry.Models.PushNotificationVM(0, 8))
+                <div id="notification-shell">
+                    @Html.Partial("PushNotification", new EtaskMinstry.Models.PushNotificationVM())
+                </div>
             </li>
 
         </ul>
@@ -701,6 +703,16 @@ color: #767475 !important;
         <script>window.tlskChatMode='full';</script>
         <script src="~/Scripts/telesak-chat.js"></script>
     }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            setTimeout(function () {
+                $.get('/Notification/GetNotificationShell', function (data) {
+                    $('#notification-shell').html(data);
+                });
+            }, 1500);
+        });
+    </script>
 </body>
 
 </html>

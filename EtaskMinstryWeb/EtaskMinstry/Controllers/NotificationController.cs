@@ -26,6 +26,12 @@ namespace EtaskMinstry.Controllers
             return View("Notification", new PushNotificationVM(0, 10).Data);
         }
 
+        [HttpGet]
+        public ActionResult GetNotificationShell()
+        {
+            return PartialView("~/Views/Shared/PushNotification.cshtml", new PushNotificationVM(0, 8));
+        }
+
         public JsonResult GetNotification(int iSkip)
         {
             return Json(new PushNotificationVM(iSkip, 10).Data.Select(i => new
