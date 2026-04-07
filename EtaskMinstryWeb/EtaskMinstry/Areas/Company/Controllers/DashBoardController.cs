@@ -22,7 +22,15 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
             if (MvcApplication.userData != null)
             {
-                EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
+                // Throttle UpdateTaskStatus — run only once every 5 minutes per company
+                string sessionKey = "LastTaskUpdate_" + MvcApplication.userData.userId;
+                DateTime? lastRun = Session[sessionKey] as DateTime?;
+                if (lastRun == null || (DateTime.Now - lastRun.Value).TotalMinutes >= 5)
+                {
+                    EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
+                    Session[sessionKey] = DateTime.Now;
+                }
+
                 ViewBag.Employee = new SelectList(EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployeeNotDeleted(MvcApplication.userData.userId), "id", "name");
                 DashBoaedTaskType Type = taskType.HasValue ? taskType.Value : DashBoaedTaskType.Empfinish;
                 int count = 0;

@@ -46,10 +46,6 @@ namespace EtaskMinstry.AppCode
                         if (item.StartDate.Value.Date <= DateTime.Now.Date)
                         {
                             item.StatusID = (int)TaskStatus.Inprogress;
-                            //TODO: ADD NOTIFICATION change task to inprogress
-                            NotificationHub.Send(Users.Employee(item.EmpID.Value), NotificationType.NewTask, " تم تحويل المهمة الى جارى العمل تلقائيا اليوم : " + item.Title, @"/Employee/Tasks/TaskDetails/" + item.TaskID);
-                            NotificationHub.Send(Users.Company(item.CompanyID), NotificationType.NewTask, " تم تحويل المهمة الى جارى العمل تلقائيا اليوم  : " + item.Title, @"/company/company/TaskDetails/" + item.TaskID);
-
                         }
 
                     }
@@ -69,11 +65,6 @@ namespace EtaskMinstry.AppCode
                         if (item.StartDate.Value.Date <= DateTime.Now.Date)
                         {
                             item.StatusID = (int)TaskStatus.Inprogress;
-                            //TODO: ADD NOTIFICATION change task to inprogress
-                            if (item.EmpID.HasValue)
-                            NotificationHub.Send(Users.Employee(item.EmpID.Value), NotificationType.InprogressTask, " تم تحويل المهمة الى جارى العمل تلقائيا اليوم : " + item.Title, @"/Employee/Tasks/TaskDetails/" + item.TaskID);
-                            NotificationHub.Send(Users.Company(item.CompanyID), NotificationType.InprogressTask, " تم تحويل المهمة الى جارى العمل تلقائيا اليوم  : " + item.Title, @"/company/company/TaskDetails/" + item.TaskID);
-
                         }
 
 
