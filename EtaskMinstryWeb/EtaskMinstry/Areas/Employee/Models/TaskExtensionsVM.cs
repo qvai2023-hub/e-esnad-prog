@@ -46,7 +46,7 @@ namespace EtaskMinstry.Models.Employee
 
         public TaskExtensionsVM Select(object iID)
         {
-            var objTask = _unitOfWork.TaskRepository.Get(filter: t => t.TaskID == (int)iID, includeProperties: "TaskComments,Attachments").FirstOrDefault();
+            var objTask = _unitOfWork.TaskRepository.GetByID(iID);
             if (objTask == null)
                 return null;
             TaskExtensionsVM objDetails = new TaskExtensionsVM();
