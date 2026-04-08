@@ -358,9 +358,26 @@ namespace EtaskMinstry.Areas.Admin.Models
         public List<CompanyEmployeeVM> Search(string CompanyName, string Name, bool? bGender, string JobTitle, bool? bIsActive, string Email)
         {
             var currentMonth = DateTime.Now.Month;
-            List<CompanyEmployeeVM> objEmp = new List<CompanyEmployeeVM>();
-            objEmp = _unitOfWork.Employee.Get(e => (CompanyName == null || e.Company.Name.Contains(CompanyName)) && e.Name.Contains(Name) && e.JobTitle.Contains(JobTitle) && e.Email.Contains(Email)
-                && (bGender == null || e.Gender == bGender) && (bIsActive == null || e.IsActive == bIsActive) && (e.IsDeleted == false) && e.Company.IsDeleted == false).ToList().Select(e => new CompanyEmployeeVM()
+
+            // Eager load Company and UserAccounts to avoid N+1 lazy loading per employee
+            var employees = _unitOfWork.Employee.Get(filter: e => (CompanyName == null || e.Company.Name.Contains(CompanyName)) && e.Name.Contains(Name) && e.JobTitle.Contains(JobTitle) && e.Email.Contains(Email)
+                && (bGender == null || e.Gender == bGender) && (bIsActive == null || e.IsActive == bIsActive) && (e.IsDeleted == false) && e.Company.IsDeleted == false,
+                includeProperties: "Company,UserAccounts").ToList();
+
+            // Batch load task counts per employee for current month (same month-only filter as original lines 374-375)
+            var empIds = employees.Select(e => e.EmpID).ToList();
+            var taskCounts = _unitOfWork.TaskRepository.Get(t => !t.IsDeleted
+                && t.CreatedDate.Month == currentMonth
+                && t.EmpID.HasValue
+                && empIds.Contains(t.EmpID.Value))
+                .GroupBy(t => t.EmpID)
+                .Select(g => new {
+                    EmpID = g.Key,
+                    Total = g.Count(),
+                    Done = g.Count(t => t.StatusID == (int)TaskStatus.Done || t.StatusID == (int)TaskStatus.Approved)
+                }).ToDictionary(x => x.EmpID);
+
+            List<CompanyEmployeeVM> objEmp = employees.Select(e => new CompanyEmployeeVM()
                 {
                     Id = e.EmpID,
                     EmpID = e.EmpID,
@@ -371,8 +388,8 @@ namespace EtaskMinstry.Areas.Admin.Models
                     Email = e.Email,
                     IsActive = (bool)e.IsActive,
                     IsDeleted = (bool)e.IsDeleted,
-                    DonetasksCount= e.Tasks.Where(x => x.IsDeleted == false && x.CreatedDate.Month == currentMonth && (x.StatusID == (int)TaskStatus.Done || x.StatusID == (int)TaskStatus.Approved)).Count(),
-                    tasksCount = e.Tasks.Where(x => x.IsDeleted == false && x.CreatedDate.Month == currentMonth).Count(),
+                    DonetasksCount = taskCounts.ContainsKey(e.EmpID) ? taskCounts[e.EmpID].Done : 0,
+                    tasksCount = taskCounts.ContainsKey(e.EmpID) ? taskCounts[e.EmpID].Total : 0,
                     Password = QvLib.Security.DataProtection.Decrypt(e.UserAccounts.FirstOrDefault().Password)
                 }).OrderByDescending(x => x.Id).ToList();
 
