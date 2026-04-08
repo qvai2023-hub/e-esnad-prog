@@ -55,16 +55,117 @@ Fix N+1 query performance issues, add eager loading, and preserve original file 
 | C2 | Added eager loading (includeProperties: Status,Priority) | ✅ Done | 14 data queries — eliminates lazy load per row |
 | C3 | Fixed Admin CompanyVM N+1 task count — single GROUP BY query | ✅ Done | 1 query instead of 2×N per company |
 
+### Group D — Dashboard Load Optimization (DashBoardController + Layout)
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| D1 | Throttle UpdateTaskStatus() — 5 min per company via Session | ✅ Done | Skips if ran <5 min ago, per-company session key |
+| D2 | Remove NotificationHub.Send() from UpdateTaskStatus loop | ✅ Done | Task status still updates, notifications removed from auto-update loop |
+| D3 | PushNotification lazy load via Ajax (1.5s delay) | ✅ Done | Empty shell renders immediately, real notifications load after page |
+
+### Group E — Admin Employee Performance (CompanyEmployeeVM.cs)
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| E1 | Eager loading Company,UserAccounts in Search() | ✅ Done | includeProperties eliminates 2×N lazy loads |
+| E2 | Batch task counts via GROUP BY in Search() | ✅ Done | Same month-only filter, 1 query instead of 2×N |
+
 ### Files Changed
 
 | # | File | Groups |
 |---|------|--------|
 | 1 | `Areas/Company/Models/DaskBoardCompanyTaskVM.cs` | A1, A2, C1, C2 |
-| 2 | `Areas/Company/Controllers/DashBoardController.cs` | A2, B1 |
+| 2 | `Areas/Company/Controllers/DashBoardController.cs` | A2, B1, D1 |
 | 3 | `Areas/Company/Views/DashBoard/Index.cshtml` | A2 |
 | 4 | `Areas/Admin/Models/CompanyVM.cs` | C3 |
+| 5 | `AppCode/TaskManger.cs` | D2 |
+| 6 | `Models/PushNotificationVM.cs` | D3 |
+| 7 | `Views/Shared/_Layout.cshtml` | D3 |
+| 8 | `Controllers/NotificationController.cs` | D3 |
+| 9 | `Views/Shared/PushNotification.cshtml` | D3 |
+| 10 | `Areas/Admin/Models/CompanyEmployeeVM.cs` | E1, E2 |
 
 Tested and confirmed — noticeable speed improvement ✅
+
+---
+
+## Performance Code Standards (مبادئ الأداء)
+
+These rules apply to ALL future code changes in this project:
+
+### 1. Never use .ToList() before filtering
+```csharp
+// ❌ Bad: loads ALL then filters in C#
+var data = _unitOfWork.Repo.Get().ToList().Where(x => x.Status == 1);
+
+// ✅ Good: filter at DB level
+var data = _unitOfWork.Repo.Get(filter: x => x.Status == 1).ToList();
+```
+
+### 2. Never count/aggregate inside a loop (N+1)
+```csharp
+// ❌ Bad: 1 query per item
+foreach (var emp in employees)
+    emp.TaskCount = emp.Tasks.Where(...).Count();
+
+// ✅ Good: single GROUP BY query, then dictionary lookup
+var counts = _unitOfWork.TaskRepository.Get(filter: ...)
+    .GroupBy(t => t.EmpID)
+    .Select(g => new { EmpID = g.Key, Count = g.Count() })
+    .ToDictionary(x => x.EmpID);
+emp.TaskCount = counts.ContainsKey(emp.EmpID) ? counts[emp.EmpID].Count : 0;
+```
+
+### 3. Always use includeProperties for navigation properties
+```csharp
+// ❌ Bad: lazy loads Status.Name and Priority.Name per row
+_unitOfWork.TaskRepository.Get(filter: ...)
+
+// ✅ Good: eager loads in single query
+_unitOfWork.TaskRepository.Get(filter: ..., includeProperties: "Status,Priority")
+```
+
+### 4. Never call GetByID() inside a loop
+```csharp
+// ❌ Bad: N queries
+tasks.ForEach(t => t.IsDelayed = isTaskDelayed(t)); // GetByID inside
+
+// ✅ Good: batch load, then dictionary lookup
+var entities = _unitOfWork.TaskRepository.Get(t => ids.Contains(t.TaskID)).ToList();
+var dict = entities.ToDictionary(t => t.TaskID);
+tasks.ForEach(t => t.IsDelayed = dict.ContainsKey(t.TaskID) && dict[t.TaskID].isDelayed);
+```
+
+### 5. Never create UnitOfWork inside static methods called in loops
+```csharp
+// ❌ Bad: new DB connection per call
+public static bool IsDelayed(int taskId) {
+    var uow = new UnitOfWork(...); // new connection each time!
+    return uow.TaskRepository.GetByID(taskId).isDelayed;
+}
+
+// ✅ Good: pass UnitOfWork as parameter, or batch outside the loop
+```
+
+### 6. Throttle expensive operations
+```csharp
+// ❌ Bad: runs on every page load
+TaskManger.UpdateTaskStatus();
+
+// ✅ Good: session-based throttle
+if (lastRun == null || (DateTime.Now - lastRun.Value).TotalMinutes >= 5)
+    TaskManger.UpdateTaskStatus();
+```
+
+### 7. Lazy load UI components that block page render
+```csharp
+// ❌ Bad: blocks page render
+@Html.Partial("Notifications", new NotificationVM(0, 8))
+
+// ✅ Good: empty shell + Ajax after page loads
+@Html.Partial("Notifications", new NotificationVM())
+// + setTimeout Ajax load after 1.5s
+```
 
 ---
 
