@@ -31,7 +31,15 @@ namespace EtaskMinstry.Areas.Common.Controllers
         //[EncryptedActionParameter]
         public ActionResult Index(int s = 0, bool? isNotAssign = null, bool? isArchive = null)
         {
-            EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
+            // Throttle UpdateTaskStatus — run only once every 5 minutes per user
+            string sessionKey = "LastTaskUpdate_Common_" + MvcApplication.userData.userId;
+            DateTime? lastRun = Session[sessionKey] as DateTime?;
+            if (lastRun == null || (DateTime.Now - lastRun.Value).TotalMinutes >= 5)
+            {
+                EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
+                Session[sessionKey] = DateTime.Now;
+            }
+
             ViewData["CommonTask"] = new TaskCommonVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), 0, isArchive, isNotAssign, 0, 0);
 
             ViewBag.statuse = new SelectList(new StatusDisplay().Get().ToList(), "ID", "Name");

@@ -99,11 +99,11 @@ namespace EtaskMinstry.Models.Project
         /// <returns></returns>
         public List<ProjectDisplay> GetProjectsByCompany(int companyId)
         {
-            var objProject = _unitOfWork.ProjectRepository.Get(i =>
+            var objProject = _unitOfWork.ProjectRepository.Get(filter: i =>
                                                                i.CompanyID== companyId
-                                                               && 
-                                                               !i.IsDeleted
-                ).Select(i => new ProjectDisplay()
+                                                               &&
+                                                               !i.IsDeleted,
+                includeProperties: "Tasks").Select(i => new ProjectDisplay()
                     {
                         ID = i.ProjectID,
                         Name = i.Name,

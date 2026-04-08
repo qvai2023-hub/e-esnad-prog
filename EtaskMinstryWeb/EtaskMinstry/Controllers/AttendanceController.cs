@@ -412,16 +412,15 @@ namespace EtaskMinstry.Controllers
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
 
-                // Debug: Get all attendance records for this employee (fetch then filter)
+                // Get today's attendance records for this employee (filtered at DB level)
                 var allAttendance = _unitOfWork.AttendanceRepository.Get(
-                    a => a.EmpId == empId
+                    filter: a => a.EmpId == empId
+                               && a.CheckIn.HasValue
+                               && a.CheckIn.Value >= today
+                               && a.CheckIn.Value < tomorrow
                 ).ToList();
 
-                // Debug: Filter today's records in memory
                 var todayRecords = allAttendance
-                    .Where(a => a.CheckIn.HasValue &&
-                               a.CheckIn.Value >= today &&
-                               a.CheckIn.Value < tomorrow)
                     .ToList();
 
                 var attendance = GetTodayActiveAttendance(empId);

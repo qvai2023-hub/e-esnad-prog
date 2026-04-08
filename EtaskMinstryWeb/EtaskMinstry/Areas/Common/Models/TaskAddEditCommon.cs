@@ -306,7 +306,7 @@ namespace EtaskMinstry.Models.TaskCommon
         /// <returns></returns>
         public List<TaskAddEditCommon> GetTasksByProject(int ProjectID)
         {
-            return _unitOfWork.TaskRepository.Get(i => i.ProjectID == ProjectID && !i.IsDeleted)
+            return _unitOfWork.TaskRepository.Get(filter: i => i.ProjectID == ProjectID && !i.IsDeleted, includeProperties: "Priority,Status")
                               .Select(
                                   i => new TaskAddEditCommon()
                                       {

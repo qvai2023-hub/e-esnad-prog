@@ -56,7 +56,7 @@ namespace EtaskMinstry.Models.Employee
 
         public EmployeeTaskDetailVM Select(object iID, bool IsAttach = false)
         {
-            var objTask = _unitOfWork.TaskRepository.GetByID(iID);
+            var objTask = _unitOfWork.TaskRepository.Get(filter: t => t.TaskID == (int)iID, includeProperties: "TaskTLogs,Status,Priority,Project").FirstOrDefault();
             if (objTask == null)
                 return null;
 
