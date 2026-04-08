@@ -127,3 +127,132 @@ EtaskMinstryWeb/
 - SignalR is used for real-time notifications (configured in `Startup.cs`)
 - Report files are in `.rdlc` format under `ReportsRDLC/`
 - The solution has config variants: `webesnad.config`, `webuat.config`, `webtele.config` at the repo root
+
+---
+
+# Prompt Engineering Rules
+
+These rules help Claude Code produce the best output with the fewest
+API tokens — protecting quota and reducing cost.
+
+---
+
+## How to Write Prompts to Claude Code (For qv)
+
+### Rule 1 — Always Name the File First
+Before asking Claude to build anything, tell it which file to work on.
+
+✅ GOOD:  "Open app/projects/page.js — add a search bar at the top"
+❌ BAD:   "Add a search bar to the projects page"
+
+Why: Without a filename, Claude reads multiple files to guess context.
+That costs tokens before a single line of code is written.
+
+---
+
+### Rule 2 — Use the Phrase "Read CLAUDE.md first"
+Start complex tasks with this exact phrase. It loads the design
+system and coding standards in one shot.
+
+✅ GOOD:  "Read CLAUDE.md first. Then build the notifications page."
+❌ BAD:   "Build the notifications page" (Claude may ignore RTL rules)
+
+---
+
+### Rule 3 — Give Claude the Output Shape
+Tell Claude exactly what you want returned.
+
+✅ GOOD:  "Return only the updated function, not the full file"
+✅ GOOD:  "Return the full file — I will replace mine"
+❌ BAD:   (no instruction) — Claude guesses and may return too much
+
+---
+
+### Rule 4 — One Task Per Prompt
+Split big requests into small steps. Each step uses fewer tokens
+and is easier to review.
+
+✅ GOOD:  Step 1: "Build the ProjectCard component (card only, no data)"
+          Step 2: "Now connect it to the API call in lib/api.js"
+❌ BAD:   "Build the projects page with cards, API, filtering, and RTL"
+
+---
+
+### Rule 5 — Reference Existing Files by Name
+When a new file must match an existing pattern, name the example file.
+
+✅ GOOD:  "Follow the same structure as app/intake/_components/IntakeForm.js"
+❌ BAD:   "Follow the existing pattern" (Claude searches all files)
+
+---
+
+### Rule 6 — Use "Skip explanation" for Pure Code Tasks
+When you just need the code, add this to the end of your prompt.
+It removes the prose and saves 200–400 tokens per response.
+
+✅ GOOD:  "Add loading spinner to the submit button. Skip explanation."
+❌ BAD:   (no instruction) — Claude writes paragraphs before the code
+
+---
+
+### Rule 7 — Lock the Scope with "Do NOT touch other files"
+Prevents Claude from refactoring files you did not ask about.
+
+✅ GOOD:  "Add the filter tab to page.js only. Do NOT touch other files."
+❌ BAD:   (no instruction) — Claude may rewrite components, layout, etc.
+
+---
+
+### Rule 8 — Bilingual String Shortcut
+Instead of explaining the ar/en pattern every time, just write:
+
+  "Use the standard TEXT constant pattern from CLAUDE.md"
+
+Claude will apply the { ar: '...', en: '...' } object automatically.
+
+---
+
+### Rule 9 — For API + Page Tasks, Separate the Prompt
+API route work and UI work use different mental models.
+Split them or Claude mixes concerns.
+
+✅ GOOD:  Prompt A: "Build POST /api/projects route in app/api/projects/route.js"
+          Prompt B: "Build the UI in app/projects/page.js that calls that route"
+❌ BAD:   "Build the projects API and the page that uses it"
+
+---
+
+### Rule 10 — The Golden Prompt Template
+
+Copy this template for every new feature:
+
+```
+Read CLAUDE.md first.
+
+Task: [what you want — one sentence]
+File: [exact file path to create or edit]
+Pattern to follow: [another file as reference, if any]
+Output: [full file / updated function only / diff only]
+Constraints: Do NOT touch other files. Skip explanation.
+```
+
+Example:
+```
+Read CLAUDE.md first.
+
+Task: Add a status filter tab bar above the project cards
+File: app/projects/page.js
+Pattern to follow: app/intake/_components/IntakeForm.js (for RTL + TEXT constants)
+Output: Full updated file
+Constraints: Do NOT touch other files. Skip explanation.
+```
+
+---
+
+## Token-Saving Checklist (run before every prompt)
+
+- [ ] Did I name the exact file?
+- [ ] Is this ONE task only?
+- [ ] Did I say "Skip explanation" if I just need code?
+- [ ] Did I say "Do NOT touch other files"?
+- [ ] Did I reference an existing file as a pattern instead of re-explaining the rules?
