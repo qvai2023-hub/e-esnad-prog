@@ -680,6 +680,7 @@ namespace EtaskMinstry.Models.Company
 
             // Same filter as GetCompanyTasksCount case Delayed (line 620-622) with A1 pre-filter
             counts[DashBoaedTaskType.Delayed] = _unitOfWork.TaskRepository.Get(t => t.CompanyID == companyId
+                && !t.IsDeleted
                 && t.StatusID != (int)TaskStatus.New
                 && t.StatusID != (int)TaskStatus.Rejected
                 && t.EmpID != null

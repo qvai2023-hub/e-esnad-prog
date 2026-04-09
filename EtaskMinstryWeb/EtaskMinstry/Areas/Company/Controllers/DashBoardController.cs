@@ -42,7 +42,6 @@ namespace EtaskMinstry.Areas.Company.Controllers
                 ViewBag.page = page;
                 ViewBag.taskType = (int)Type;
                 ViewBag.pagesNumber = Math.Ceiling((decimal)ViewBag.count / (decimal)ViewBag.pageSize);
-                ViewBag.Counts = DaskBoardCompanyTaskVM.GetAllCounts();
                 Generallog.LogView();
                 return View();
             }
@@ -84,6 +83,22 @@ namespace EtaskMinstry.Areas.Company.Controllers
             ViewBag.taskType = (int)taskType;
             ViewBag.pagesNumber = Math.Ceiling((decimal)ViewBag.count / (decimal)ViewBag.pageSize);
             return PartialView("~/Areas/Company/Views/DashBoard/PartialDBCompTask.cshtml", tasks);
+        }
+
+        [HttpGet]
+        public JsonResult GetCountsJson()
+        {
+            var counts = DaskBoardCompanyTaskVM.GetAllCounts();
+            return Json(new
+            {
+                Empfinish = counts[DashBoaedTaskType.Empfinish],
+                Delayed = counts[DashBoaedTaskType.Delayed],
+                EmpReject = counts[DashBoaedTaskType.EmpReject],
+                Susspended = counts[DashBoaedTaskType.Susspended],
+                FinishToday = counts[DashBoaedTaskType.FinishToday],
+                NeedAssign = counts[DashBoaedTaskType.NeedAssign],
+                New = counts[DashBoaedTaskType.New]
+            }, JsonRequestBehavior.AllowGet);
         }
 
     }
