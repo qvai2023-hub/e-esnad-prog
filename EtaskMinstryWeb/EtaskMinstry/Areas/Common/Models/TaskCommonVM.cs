@@ -227,22 +227,26 @@ namespace EtaskMinstry.Models.Common
                 i =>
                 i.HijriEndDate = (i.EndDate.HasValue) ?(MvcApplication.IsGregDate)? i.EndDate.Value.ToGregArabicDate():i.EndDate.Value.ToHijriArabicDate() : String.Empty);
 
-            // To Set IsDelayed .
-            objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
+            // Batch load task entities for isDelayed, DelayPercentage, delayTime (avoids N+1 per task)
+            var taskIds = objTasks.Select(t => t.TaskID).ToList();
+            var taskEntities = _unitOfWork.TaskRepository.Get(t => taskIds.Contains(t.TaskID)).ToList();
+            var delayedIds = new HashSet<int>(taskEntities.Where(t => t.isDelayed).Select(t => t.TaskID));
+            var delayDict = taskEntities.ToDictionary(t => t.TaskID, t => new { t.delayTime, t.DelayPercentage });
+
+            objTasks.ForEach(t => {
+                t.IsDelayed = delayedIds.Contains(t.TaskID);
+                t.Progressbar = delayDict.ContainsKey(t.TaskID) ? delayDict[t.TaskID].DelayPercentage : 0;
+                t.Delay = delayDict.ContainsKey(t.TaskID) ? delayDict[t.TaskID].delayTime : null;
+            });
 
             // To Set Employee Name .
             objTasks.ForEach(t => t.EmpName = t.EmpID ==null
                                                    ?  "غير مسنده":(CompanyEmployee.Count(i => i.id == t.EmpID) > 0 ? CompanyEmployee.FirstOrDefault(i => i.id == t.EmpID).name: "-"));
 
-            // To Set Progressbar for (New && InProgress) 
-            objTasks.ForEach(t => t.Progressbar = ProgressbarPercentage(t));
-
-            objTasks.ForEach(t => t.Delay = Delaytime(t));
-
            // objTasks.ForEach(t => t.SpendtimebyDay = TaskManger.SpendTimeByDay(t.WorkedHours));
             objTasks.ForEach(t => t.SpendtimebyDay = TaskManger.SpendTimeByDay(t.ActualTime));
 
-            objTasks.ForEach(t => t.IsEditable = TaskManger.CanEditTask(t.TaskID));
+            objTasks.ForEach(t => t.IsEditable = TaskManger.CanEditTask(t.TaskID)); // TODO: batch candidate — CanEditTask source unknown
             // To Get Only Delayed Task .
             if (iStatus == (int)TaskStatus.Delay)
                 objTasks = objTasks.Where(i => i.IsDelayed).ToList();

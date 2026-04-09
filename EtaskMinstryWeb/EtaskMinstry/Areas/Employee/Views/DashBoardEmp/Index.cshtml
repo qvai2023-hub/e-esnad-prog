@@ -1,10 +1,12 @@
-﻿@using EtaskMinstry
+﻿@using System.Collections.Generic
+@using EtaskMinstry
 @using EtaskMinstry.Models.Employee
 @using EtaskMinstry.AppCode
 
 @{
     ViewBag.Title = "حالة المهام";
     Layout = "~/Views/Shared/_LayoutNoSearch.cshtml";
+    var empCounts = (Dictionary<DashBoaedTaskType, int>)ViewBag.EmpCounts;
 }
 @*<div class="page-header">
         <div class="page-title">
@@ -19,7 +21,7 @@
 <div class="tabbable page-tabs">
     <ul class="nav nav-tabs">
         <li class="active">
-            @Ajax.RawActionLink("<i class='fa fa-spinner'></i>" + System.Configuration.ConfigurationManager.AppSettings["Inprogress"] + "<span class='label label-success task-counter'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.Doing, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Doing },
+            @Ajax.RawActionLink("<i class='fa fa-spinner'></i>" + System.Configuration.ConfigurationManager.AppSettings["Inprogress"] + "<span class='label label-success task-counter'>" + empCounts[DashBoaedTaskType.Doing] + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Doing },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -30,7 +32,7 @@
             }, new { @class = "tab active-tab" + " DoingTab" })
         </li>
         <li>
-            @Ajax.RawActionLink("<i class='fa fa-star'></i>" + System.Configuration.ConfigurationManager.AppSettings["New"] + "<span class='label label-success task-counter'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.NewAssigned, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NewAssigned },
+            @Ajax.RawActionLink("<i class='fa fa-star'></i>" + System.Configuration.ConfigurationManager.AppSettings["New"] + "<span class='label label-success task-counter'>" + empCounts[DashBoaedTaskType.NewAssigned] + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NewAssigned },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -41,7 +43,7 @@
             }, new { @class = "tab dactive-tab" + " NewTab" })
         </li>
         <li>
-            @Ajax.RawActionLink("<i class='fa fa-hourglass-3'></i>" + System.Configuration.ConfigurationManager.AppSettings["Delay"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.Delayed, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
+            @Ajax.RawActionLink("<i class='fa fa-hourglass-3'></i>" + System.Configuration.ConfigurationManager.AppSettings["Delay"] + "<span class='label label-success'>" + empCounts[DashBoaedTaskType.Delayed] + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -53,7 +55,7 @@
         </li>
 
         <li>
-            @Ajax.RawActionLink("<i class='fa fa-pause'></i>" + System.Configuration.ConfigurationManager.AppSettings["Pending"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.Susspended, DateTime.Now) + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
+            @Ajax.RawActionLink("<i class='fa fa-pause'></i>" + System.Configuration.ConfigurationManager.AppSettings["Pending"] + "<span class='label label-success'>" + empCounts[DashBoaedTaskType.Susspended] + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -65,7 +67,7 @@
         </li>
 
         <li>
-            @Ajax.RawActionLink("<i class='fa fa-check'></i>" + System.Configuration.ConfigurationManager.AppSettings["DoneToday"] + "<span class='label label-success'>" + @DashBoardVM.GetEmployeeTasksCount(EtaskMinstry.MvcApplication.userData.userId, EtaskMinstry.AppCode.DashBoaedTaskType.FinishToday, DateTime.Now) + "</span>", "GetTasks", null
+            @Ajax.RawActionLink("<i class='fa fa-check'></i>" + System.Configuration.ConfigurationManager.AppSettings["DoneToday"] + "<span class='label label-success'>" + empCounts[DashBoaedTaskType.FinishToday] + "</span>", "GetTasks", null
            , new { taskType = DashBoaedTaskType.FinishToday },
             new AjaxOptions
             {

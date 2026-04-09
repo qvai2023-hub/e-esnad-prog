@@ -172,11 +172,13 @@ namespace EtaskMinstry.Models.Employee
                     }).OrderByDescending(i => i.taskID).ToList();
 
                     //Calculate Spending Time
+                    var finishIds = objTasks.Select(t => t.taskID).ToList();
+                    var finishDict = _unitOfWork.TaskRepository.Get(t => finishIds.Contains(t.TaskID)).ToList().ToDictionary(t => t.TaskID);
                     for (int j = 0; j < objTasks.Count(); j++)
                     {
                         objTasks[j].TimeDetails = new List<TaskTimeDetails>();
 
-                        var objTask = _unitOfWork.TaskRepository.GetByID(objTasks[j].taskID);
+                        var objTask = finishDict.ContainsKey(objTasks[j].taskID) ? finishDict[objTasks[j].taskID] : null;
                         if (objTask == null)
                             return null;
 
@@ -291,8 +293,13 @@ namespace EtaskMinstry.Models.Employee
                     //objTasks.ForEach(
                     //    i =>
                     //    i.delaytime = ((i.startDate.HasValue) && (i.endDate.HasValue))?(i.endDate - i.startDate): TimeSpan.Zero);
-                    objTasks.ForEach(i => i.delaytime = TaskDelayTime(i));
-                    objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
+                    // Batch load entities for isDelayed + delayTime evaluation (avoids N+1 per task)
+                    var delayIds = objTasks.Select(t => t.taskID).ToList();
+                    var delayEntities = _unitOfWork.TaskRepository.Get(t => delayIds.Contains(t.TaskID)).ToList();
+                    var empDelayedIds = new HashSet<int>(delayEntities.Where(t => t.isDelayed).Select(t => t.TaskID));
+                    var empDelayDict = delayEntities.ToDictionary(t => t.TaskID, t => t.delayTime);
+                    objTasks.ForEach(i => i.delaytime = empDelayDict.ContainsKey(i.taskID) ? empDelayDict[i.taskID] != null ? empDelayDict[i.taskID].Replace('-', ' ') : null : null);
+                    objTasks.ForEach(i => i.IsDelayed = empDelayedIds.Contains(i.taskID));
                     objTasks = objTasks.Where(i => i.IsDelayed).ToList();
 
                     break;
@@ -445,15 +452,9 @@ namespace EtaskMinstry.Models.Employee
                     iTasksCount = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee
                         && t.StatusID == (int)TaskStatus.New && !t.IsDeleted).Count();
                     break;
-                case DashBoaedTaskType.Delayed: // Delayed Tasks
-                    List<DashBoardVM> objTasks = new List<DashBoardVM>();
-                    objTasks = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee && !t.IsDeleted && t.StatusID != (int)TaskStatus.Rejected).Select(t => new DashBoardVM()
-                    {
-                        taskID = t.TaskID
-                    }).ToList();
-                    objTasks.ForEach(i => i.IsDelayed = isTaskDelayed(i));
-                    objTasks = objTasks.Where(i => i.IsDelayed).ToList();
-                    iTasksCount = objTasks.Count();
+                case DashBoaedTaskType.Delayed: // Delayed Tasks — batch load entities, evaluate isDelayed in memory
+                    var countEntities = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee && !t.IsDeleted && t.StatusID != (int)TaskStatus.Rejected).ToList();
+                    iTasksCount = countEntities.Count(t => t.isDelayed);
                     break;
                 case DashBoaedTaskType.FinishToday: //EndDate =today
                                                     //DateTime? PlusOneDay = DateTime.Now.AddDays(1);
@@ -480,6 +481,37 @@ namespace EtaskMinstry.Models.Employee
             }
 
             return iTasksCount;
+        }
+
+        /// <summary>
+        /// Returns all 5 tab counts in one method with one UnitOfWork.
+        /// Same filters as GetEmployeeTasksCount() switch cases.
+        /// </summary>
+        public static Dictionary<DashBoaedTaskType, int> GetAllEmployeeCounts()
+        {
+            int iEmpolyee = MvcApplication.userData.userId;
+            UnitOfWork _unitOfWork =
+               new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+            DateTime today = DateTime.Today;
+            DateTime tomorrow = today.AddDays(1);
+            var counts = new Dictionary<DashBoaedTaskType, int>();
+
+            counts[DashBoaedTaskType.Doing] = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee
+                && t.StatusID == (int)TaskStatus.Inprogress && !t.IsDeleted).Count();
+
+            counts[DashBoaedTaskType.NewAssigned] = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee
+                && t.StatusID == (int)TaskStatus.New && !t.IsDeleted).Count();
+
+            // Delayed: batch load entities, evaluate isDelayed in memory
+            var delayCountEntities = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee && !t.IsDeleted && t.StatusID != (int)TaskStatus.Rejected).ToList();
+            counts[DashBoaedTaskType.Delayed] = delayCountEntities.Count(t => t.isDelayed);
+
+            counts[DashBoaedTaskType.Susspended] = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee
+                && t.StatusID == (int)TaskStatus.Pending || (t.TaskTLogs.FirstOrDefault(o => o.EmpID == iEmpolyee) != null && t.TaskTLogs.FirstOrDefault(o => o.EmpID == iEmpolyee).EmpID != t.TaskTLogs.OrderByDescending(o => o.TaskTLogID).FirstOrDefault().EmpID) && !t.IsDeleted).Count();
+
+            counts[DashBoaedTaskType.FinishToday] = _unitOfWork.TaskRepository.Get(t => t.EmpID == iEmpolyee && t.EndDate >= today && t.EndDate < tomorrow && t.StatusID == (int)TaskStatus.Inprogress && !t.IsDeleted).Count();
+
+            return counts;
         }
 
         public static string TaskDelayTime(DashBoardVM task)

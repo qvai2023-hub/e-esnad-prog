@@ -30,11 +30,20 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             ViewBag.domain = HttpContext.Request.Url.GetLeftPart(UriPartial.Authority);
             if (MvcApplication.userData != null)
             {
-                EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
+                // Throttle UpdateTaskStatus — run only once every 5 minutes per employee
+                string sessionKey = "LastTaskUpdate_Emp_" + MvcApplication.userData.userId;
+                DateTime? lastRun = Session[sessionKey] as DateTime?;
+                if (lastRun == null || (DateTime.Now - lastRun.Value).TotalMinutes >= 5)
+                {
+                    EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
+                    Session[sessionKey] = DateTime.Now;
+                }
+
                 iEmployee = MvcApplication.userData.userId;
                 DashBoaedTaskType Type = taskType.HasValue ? taskType.Value : DashBoaedTaskType.Doing;
                 var s = new DashBoardVM().Select(iEmployee.Value, Type);
                 ViewData["EmployeeTask"] = s;
+                ViewBag.EmpCounts = DashBoardVM.GetAllEmployeeCounts();
                 return View();
             }
             else

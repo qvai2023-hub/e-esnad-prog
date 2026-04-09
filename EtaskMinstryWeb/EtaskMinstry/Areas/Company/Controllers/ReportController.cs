@@ -92,10 +92,13 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                                     
                                          ).Select(t => new CompanyTaskVM { StatusID = t.StatusID , TaskID = t.TaskID }).ToList();
 
-            // To Set IsDelayed .
-            companyTasksList.ForEach(i => i.IsDelayed = new UnitOfWork(
+            // Batch load entities for isDelayed evaluation (avoids N+1 GetByID per task)
+            var reportIds = companyTasksList.Select(t => t.TaskID).ToList();
+            var reportEntities = new UnitOfWork(
                                          System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"]
-                                             .ToString()).TaskRepository.GetByID(i.TaskID).isDelayed);
+                                             .ToString()).TaskRepository.Get(t => reportIds.Contains(t.TaskID)).ToList();
+            var reportDelayedIds = new HashSet<int>(reportEntities.Where(t => t.isDelayed).Select(t => t.TaskID));
+            companyTasksList.ForEach(i => i.IsDelayed = reportDelayedIds.Contains(i.TaskID));
 
             return View("TaskChart", companyTasksList);
         }
