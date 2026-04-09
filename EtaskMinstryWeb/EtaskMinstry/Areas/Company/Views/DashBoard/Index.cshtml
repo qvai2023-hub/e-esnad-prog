@@ -19,8 +19,7 @@
 
             @Ajax.RawActionLink("<i class='fa fa-check'></i>"
                       + System.Configuration.ConfigurationManager.AppSettings["Done"]
-                      + ".<span class='label label-success cnt-Empfinish'>...
-                      + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Empfinish },
+                      + ".<span class='label label-success cnt-Empfinish'>...</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Empfinish },
                 new AjaxOptions
                 {
                     UpdateTargetId = "divTasks",
@@ -45,8 +44,7 @@
             </a>*@
             @Ajax.RawActionLink("<i class='fa fa-hourglass-3'></i>"
                       + System.Configuration.ConfigurationManager.AppSettings["Delay"]
-                      + ".<span class='label label-danger cnt-Delayed' id='lblCounts'>...
-                      + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
+                      + ".<span class='label label-danger cnt-Delayed' id='lblCounts'>...</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Delayed },
                 new AjaxOptions
                 {
                     UpdateTargetId = "divTasks",
@@ -62,8 +60,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-ban'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["Rejected"]
-                  + ".<span class='label label-danger cnt-EmpReject'>...
-                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.EmpReject },
+                  + ".<span class='label label-danger cnt-EmpReject'>...</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.EmpReject },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -79,8 +76,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-pause'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["Pending"]
-                  + ".<span class='label label-success cnt-Susspended'>...
-                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
+                  + ".<span class='label label-success cnt-Susspended'>...</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.Susspended },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -97,8 +93,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-check'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["DoneToday"]
-                  + ".<span class='label label-success cnt-FinishToday'>...
-                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.FinishToday },
+                  + ".<span class='label label-success cnt-FinishToday'>...</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.FinishToday },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
@@ -115,8 +110,7 @@
         <li>
             @Ajax.RawActionLink("<i class='fa fa-thumb-tack'></i>"
                   + System.Configuration.ConfigurationManager.AppSettings["NotAssigned"]
-                  + ".<span class='label label-success cnt-NeedAssign'>...
-                  + "</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NeedAssign },
+                  + ".<span class='label label-success cnt-NeedAssign'>...</span>", "GetTasks", null, new { taskType = DashBoaedTaskType.NeedAssign },
             new AjaxOptions
             {
                 UpdateTargetId = "divTasks",
