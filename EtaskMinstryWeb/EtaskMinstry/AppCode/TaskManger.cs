@@ -898,10 +898,12 @@ namespace EtaskMinstry.AppCode
                 decimal totalDalyTime = 0;
 
                 // Find today's time log for the current employee and update it
-                var todayLog = _unitOfWork.TaskStatuseLog.Get(filter: t =>
+                var today = DateTime.Now.Date;
+                var tomorrow = today.AddDays(1);
+                var todayLog = _unitOfWork.TaskStatuseLog.Get(t =>
                     t.TaskID == iTaskID &&
                     t.EmpID == MvcApplication.userData.userId &&
-                    System.Data.Entity.DbFunctions.TruncateTime(t.CreatedDate) == System.Data.Entity.DbFunctions.TruncateTime(DateTime.Now)
+                    t.CreatedDate >= today && t.CreatedDate < tomorrow
                 ).OrderByDescending(t => t.CreatedDate).FirstOrDefault();
 
                 if (todayLog != null)
