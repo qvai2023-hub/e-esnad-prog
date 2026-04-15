@@ -216,10 +216,9 @@
                                 <div class="row">
                                     <div class="form-group col-sm-6">
 
-                                        <label class="col-sm-4 control-label"> تاريخ بداية من: </label>
+                                        <label class="col-sm-4 control-label"> تاريخ البداية: </label>
                                         <div class="col-sm-8">
                                             <div class='input-group date'>
-                                                @*@Html.TextBox("fromDate", null, new { @id = "fromstartdate", @class = "form-control" })*@
                                                 <input type="text" id="fromstartdate" name="FromStartDate" class="form-control" readonly />
                                                 <span class="input-group-addon">
                                                     <span class="fa fa-calendar"></span>
@@ -228,45 +227,13 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-sm-6">
-                                        <label class="col-sm-4 control-label">إلى: </label>
+                                        <label class="col-sm-4 control-label">تاريخ النهاية: </label>
                                         <div class="col-sm-8">
                                             <div class='input-group date'>
-                                                @*@Html.TextBox("toDate", null, new { @id = "endDate", @class = "form-control" })*@
                                                 <input type="text" id="tostartdate" name="ToStartDate" class="form-control" readonly />
                                                 <span class="input-group-addon">
                                                     <span class="fa fa-calendar"></span>
                                                 </span>
-                                            </div>
-                                        </div>
-                                        <span class="errorMsg" style="display: none; color: red; margin-right: 85px; margin-top: 5px">يجب ان يكون تاريخ بداية البحث اقل من تاريخ النهاية</span>
-
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-sm-6">
-
-                                        <label class="col-sm-4 control-label">تاريخ النهاية من: </label>
-                                        <div class="col-sm-8">
-                                            <div class='input-group date'>
-                                                @*@Html.TextBox("fromDate", null, new { @id = "startDate", @class = "form-control" })*@
-                                                <input type="text" id="fromenddate" name="FromEndDate" class="form-control" readonly />
-                                                <span class="input-group-addon">
-                                                    <span class="fa fa-calendar"></span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-sm-6">
-                                        <label class="col-sm-4 control-label">إلى: </label>
-                                        <div class="col-sm-8">
-                                            <div class='input-group date'>
-                                                @*@Html.TextBox("toDate", null, new { @id = "endDate", @class = "form-control" })*@
-
-                                                <input type="text" id="toendtdate" name="ToEndDate" class="form-control" readonly />
-                                                <span class="input-group-addon">
-                                                    <span class="fa fa-calendar"></span>
-                                                </span>
-
                                             </div>
                                         </div>
                                         <span class="errorMsg" style="display: none; color: red; margin-right: 85px; margin-top: 5px">يجب ان يكون تاريخ بداية البحث اقل من تاريخ النهاية</span>

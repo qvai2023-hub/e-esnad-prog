@@ -888,7 +888,7 @@ namespace EtaskMinstry.AppCode
         /// <returns></returns>
         public static string EmpUpdateDalyTaskTime(int iTaskID, decimal timeValue)
         {
-            //Define Unit ofWork 
+            //Define Unit ofWork
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);
@@ -896,10 +896,24 @@ namespace EtaskMinstry.AppCode
             {
 
                 decimal totalDalyTime = 0;
-                var emp = new List<TaskTimeDetails>();
-                Dictionary<string, TaskTimeDetails> uniqueTimeLog = new Dictionary<string, TaskTimeDetails>();
 
-                uniqueTimeLog = objTask.GetTaskTimeLog;
+                // Find today's time log for the current employee and update it
+                var todayLog = _unitOfWork.TaskStatuseLog.Get(filter: t =>
+                    t.TaskID == iTaskID &&
+                    t.EmpID == MvcApplication.userData.userId &&
+                    System.Data.Entity.DbFunctions.TruncateTime(t.CreatedDate) == System.Data.Entity.DbFunctions.TruncateTime(DateTime.Now)
+                ).OrderByDescending(t => t.CreatedDate).FirstOrDefault();
+
+                if (todayLog != null)
+                {
+                    todayLog.TimeCount = timeValue;
+                    _unitOfWork.TaskStatuseLog.Update(todayLog);
+                }
+
+                _unitOfWork.Save();
+
+                // Recalculate total ActualTime from all time logs
+                Dictionary<string, TaskTimeDetails> uniqueTimeLog = objTask.GetTaskTimeLog;
 
                 if (uniqueTimeLog.Count() < 1)
                 {
@@ -908,7 +922,17 @@ namespace EtaskMinstry.AppCode
                 else
                 {
                     objTask.ActualTime = 0;
+                    foreach (var itemTime in uniqueTimeLog.Values)
+                    {
+                        objTask.ActualTime += Decimal.Parse(itemTime.LogTime);
+                    }
                 }
+
+                _unitOfWork.TaskRepository.Update(objTask);
+                _unitOfWork.Save();
+
+                // Return today's time for the current employee
+                uniqueTimeLog = objTask.GetTaskTimeLog;
                 foreach (var itemTime in uniqueTimeLog.Values)
                 {
                     if (itemTime.isToday)

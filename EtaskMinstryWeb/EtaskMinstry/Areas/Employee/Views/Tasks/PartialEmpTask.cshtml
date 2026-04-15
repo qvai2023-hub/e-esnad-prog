@@ -53,6 +53,16 @@ gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" 
             </a></text>));
 }
 
+if (Model.CurrentStatuse == (int)TaskStatus.NotAproved)
+{
+     gridColumns.Add(grid.Column("state", "استئناف العمل", @<text>
+                <a href="#" class="accept" data-task="@item.taskID">
+                    <img src="/Content/Main/images/Check-icon.png" width="16" height="16" />
+                    <span class="usDate" style="display: none">@item.US_startDate</span>
+                    <span class="isAccepted" style="display: none">@item.isAccepted</span>
+                </a></text>));
+}
+
 if (Model.isDelay)
 {
 gridColumns.Add(grid.Column("delaytime", "مدة التأخير"));

@@ -136,6 +136,7 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             parameters.Add(param3);
             var tasks = _unitOfWork.SP_ProjecetTasksResults.CallStoredProcedure("sp_ProjectTasks", parameters.ToArray());
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_ProjectTasks", tasks));
             return Redirect("/Reports/ProjectTasks");

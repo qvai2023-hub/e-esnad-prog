@@ -667,9 +667,9 @@
             </Paragraphs>
             <rd:DefaultName>Textbox11</rd:DefaultName>
             <Top>1.06778in</Top>
-            <Left>6.25in</Left>
+            <Left>6.2in</Left>
             <Height>0.25in</Height>
-            <Width>1.51042in</Width>
+            <Width>1.56042in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -714,7 +714,7 @@
             </ActionInfo>
             <Top>1.06598in</Top>
             <Height>0.25in</Height>
-            <Width>1.30208in</Width>
+            <Width>1.05in</Width>
             <ZIndex>3</ZIndex>
             <Visibility>
               <Hidden>=(Parameters!EmpId.Value="")</Hidden>
@@ -964,7 +964,7 @@
             </Border>
           </Style>
         </PageFooter>
-        <PageWidth>10in</PageWidth>
+        <PageWidth>7.76042in</PageWidth>
         <LeftMargin>0.3in</LeftMargin>
         <RightMargin>0.3in</RightMargin>
         <TopMargin>0.5in</TopMargin>

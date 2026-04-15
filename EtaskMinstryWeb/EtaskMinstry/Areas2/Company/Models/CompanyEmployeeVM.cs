@@ -44,7 +44,7 @@ namespace EtaskMinstry.Areas.Company.Models
         [Required(ErrorMessageResourceName = "ValidRequired",
             ErrorMessageResourceType = typeof(ValidationMessage.ValidationMessages))]
         [Display(Name = "البريد الالكتروني")]
-        [Remote("CheckDuplicateEmail", "Employee", ErrorMessage = "البريد الالكتروني مستخدم من قبل")]
+        [Remote("CheckDuplicateEmail", "Employee", AdditionalFields = "EmpID", ErrorMessage = "البريد الالكتروني مستخدم من قبل")]
         public string Email { get; set; }
 
         [Display(Name = "فعال")]
@@ -145,13 +145,17 @@ namespace EtaskMinstry.Areas.Company.Models
         /// <param name="companyID"></param>
         /// <param name="Email"></param>
         /// <returns></returns>
-        public bool CheckForUniqueEmail(int? companyID, string Email)
+        public bool CheckForUniqueEmail(int? companyID, string Email, int? empID = null)
         {
-            //email cannot be repeated in the same comany
-            //email cannot repeated if it's existed in other comany and this record is not deleted
-            var Empresult = _unitOfWork.Employee.Get().Count(e => (companyID == 0 && e.Email.Contains(Email) && e.IsDeleted == true) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) > 0 ? false : true;
+            //email cannot be repeated in the same company or other companies
+            //exclude soft-deleted employees and exclude the current employee being edited
+            var Empresult = _unitOfWork.Employee.Get().Count(e =>
+                e.Email.Contains(Email) &&
+                e.IsDeleted == false &&
+                (empID == null || empID == 0 || e.EmpID != empID)
+            ) > 0 ? false : true;
 
-            //email cannot repeated in  any company 
+            //email cannot be repeated in any active company
             var CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false) > 0 ? false : true;
 
             return Empresult && CompResult;
