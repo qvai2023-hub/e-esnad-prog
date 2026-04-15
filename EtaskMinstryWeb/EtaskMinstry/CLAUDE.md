@@ -35,6 +35,86 @@ Plan → Discuss → Approve → Code → Report Files → Test Instructions →
 
 ---
 
+## Bug Fixing Workflow (MANDATORY)
+
+Every bug fix MUST follow this workflow — no exceptions.
+Four roles guide the process from report to resolution:
+
+### 1. Bug Investigator
+
+Before any fix, investigate and report:
+- **Exact file + line:** Identify the precise location of the bug in code
+- **Root cause:** Explain WHY the bug happens — not just the symptom
+- **Blast radius:** List what else could break if this code is changed (other features, areas, shared logic)
+
+### 2. Bug Analyst
+
+Produce a diagnosis report that includes:
+- **Severity:** Critical / High / Medium / Low (see reference table below)
+- **Affected users:** Which roles are impacted (Admin, Company, Employee, all)
+- **Fix risk level:**
+  - **Safe** — isolated change, only affects the reported bug
+  - **Risky** — touches shared code (BaseController, ServiceManger, TaskManger.cs, etc.)
+
+### 3. Bug Fixer
+
+Only after explicit approval:
+- Apply a **minimal fix only** — solve the bug and nothing else
+- Do NOT refactor nearby code
+- Do NOT change any behavior outside the bug scope
+- Do NOT add features, improvements, or "while I'm here" changes
+
+### 4. Bug Verifier
+
+After the fix is applied, provide:
+- **Repro steps:** Exact steps to confirm the bug is gone
+- **Regression checklist:** List of related features to re-test to ensure nothing else broke
+
+### Bug Fixing Workflow Summary
+```
+Bug Report → Investigate → Diagnosis Report → Approve → Minimal Fix → Report Files → Repro Test → Regression Test → Document
+```
+
+### Golden Bug Prompt Template
+
+Copy this template for every bug fix:
+
+```
+Read CLAUDE.md first.
+
+BUG: [one sentence describing what is wrong]
+Repro steps: [how to trigger it]
+Expected: [what should happen]
+Actual: [what happens instead]
+Suspected file: [file path if known, or "unknown"]
+
+Role: Bug Investigator — do NOT fix yet.
+Output: Root cause analysis only. Wait for my approval.
+```
+
+### Bug Severity Reference
+
+| Severity | Definition | Examples |
+|----------|------------|----------|
+| **Critical** | App crash / data loss / all users blocked | Server error page, database corruption, login broken |
+| **High** | Feature broken for most users, no workaround | Save button stuck, report crashes, task workflow broken |
+| **Medium** | Feature broken but workaround exists | Email not sending (user can reset manually), time entry mismatch |
+| **Low** | Visual/cosmetic issue, no functional impact | Duplicate column, unclear priority indicator, misaligned report |
+
+### Bug Fixing Rules
+
+1. **Never fix more than what the bug report describes.**
+   The bug report is the scope. If you notice other issues nearby, open a separate task — do not fix them in the same change.
+
+2. **Never refactor while fixing a bug — open a separate task for that.**
+   Bug fixes must be minimal and reviewable. Mixing refactoring with bug fixes makes it impossible to verify the fix in isolation.
+
+3. **If the fix touches shared code — flag it as HIGH RISK.**
+   Shared files include: `BaseController.cs`, `ServiceManger.cs`, `Notification.cs`, `TaskManger.cs`, `TaskWorkflow.cs`, `QvLib.cs`, `UnitOfWork.cs`, `GenericRepository.cs`.
+   These files affect multiple features across all areas. Require **explicit approval** before proceeding with any change to these files.
+
+---
+
 ## Project Overview
 
 **E-Esnad / Telesak** — A task management web application (E-Task Ministry) built with ASP.NET MVC 4 on .NET Framework 4.8. The application supports Arabic localization and both Hijri and Gregorian date systems.
