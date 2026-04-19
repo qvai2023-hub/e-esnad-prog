@@ -113,6 +113,38 @@ Output: Root cause analysis only. Wait for my approval.
    Shared files include: `BaseController.cs`, `ServiceManger.cs`, `Notification.cs`, `TaskManger.cs`, `TaskWorkflow.cs`, `QvLib.cs`, `UnitOfWork.cs`, `GenericRepository.cs`.
    These files affect multiple features across all areas. Require **explicit approval** before proceeding with any change to these files.
 
+### Anti-Reopen Rules (Lessons Learned)
+
+These rules exist to prevent bugs from being reopened. Every rule was learned from a real reopen.
+
+4. **Match the exact page, role, and area the tester reported.**
+   Read the bug report repro steps carefully. If the tester says "company account المهام page", fix THAT page — not the Admin page, not the Employee page. Confirm: which URL? Which user role? Which area controller?
+
+5. **Fix ALL areas — not just one.**
+   This codebase has `Areas/` and `Areas2/` with mirrored code. A fix in `Areas/Company/Models/` must also be applied to `Areas2/Company/Models/`. Additionally, if a bug exists in the Company area validation, check the Admin area for the same pattern — they often share the same broken logic.
+
+6. **Never change logic in shared code without tracing the full call chain.**
+   Before modifying a method in `TaskManger.cs`, `TaskWorkflow.cs`, or any shared file:
+   - Find ALL controllers that call this method
+   - Find ALL JS/views that call those controllers
+   - Understand the complete request flow (button click → JS → controller → method → DB)
+   - If the method is called by multiple flows, your change may break one while fixing another
+
+7. **CSS: verify the selector matches the exact HTML element on the exact page.**
+   Before writing a CSS rule, inspect the actual HTML of the page the bug is on. Don't assume — check class names, parent elements, and whether the element is inside a `<table>`, `<div>`, or `<form>`. A selector like `table .btn.active` will NOT work if the button is inside a `<div>`.
+
+8. **RDLC: align EVERY element to the tablix column grid.**
+   When fixing Excel export column spanning, check ALL elements — not just the body. PageHeader, PageFooter, and body items ALL contribute to the Excel column grid. Every element's `Left` and `Left + Width` must snap to a tablix column boundary. Also ensure `PageWidth` = `BodyWidth` + margins.
+
+9. **After fixing, re-read the bug repro steps and mentally walk through the fix.**
+   Ask yourself: "If the tester follows these exact steps, will my fix actually change what they see?" If you can't answer yes with confidence, investigate more before committing.
+
+10. **Close every fixed bug on GitHub with a comment.**
+    After committing and pushing a fix, ALWAYS:
+    - Add a comment on the GitHub issue explaining the root cause, files changed, and test instructions
+    - Close the issue with state `closed` and reason `completed`
+    - If the fix requires infrastructure work (not code), leave a comment explaining what the team needs to do and close with a note
+
 ---
 
 ## Project Overview
