@@ -161,12 +161,12 @@ namespace EtaskMinstry.Areas.Admin.Models
         public bool CheckForUniqueMobile(int? companyID, int? EmpID, string Mobile)
         {
 
-            var result = _unitOfWork.Employee.Get().Count(e => e.CompanyID == companyID && e.EmpID != EmpID && e.Mobile.Contains(Mobile) || (e.CompanyID != companyID && e.Mobile.Contains(Mobile) && e.IsDeleted == false)) > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get().Count(e => (e.CompanyID == companyID && e.EmpID != EmpID && e.Mobile.Contains(Mobile) && e.IsDeleted == false) || (e.CompanyID != companyID && e.Mobile.Contains(Mobile) && e.IsDeleted == false)) > 0 ? false : true;
             return result;
         }
         public bool CheckForUniqueNationalID(int? companyID, int EmpID, string NationalID)
         {
-            var result = _unitOfWork.Employee.Get().Count(e => e.EmpID != EmpID && e.NationalID.Contains(NationalID) || (e.CompanyID != companyID && e.NationalID.Contains(NationalID) && e.IsDeleted == false)) > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get().Count(e => (e.EmpID != EmpID && e.NationalID.Contains(NationalID) && e.IsDeleted == false) || (e.CompanyID != companyID && e.NationalID.Contains(NationalID) && e.IsDeleted == false)) > 0 ? false : true;
             return result;
         }
         /// <summary>

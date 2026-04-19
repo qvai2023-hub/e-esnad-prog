@@ -896,26 +896,10 @@ namespace EtaskMinstry.AppCode
             {
 
                 decimal totalDalyTime = 0;
+                var emp = new List<TaskTimeDetails>();
+                Dictionary<string, TaskTimeDetails> uniqueTimeLog = new Dictionary<string, TaskTimeDetails>();
 
-                // Find today's time log for the current employee and update it
-                var today = DateTime.Now.Date;
-                var tomorrow = today.AddDays(1);
-                var todayLog = _unitOfWork.TaskStatuseLog.Get(t =>
-                    t.TaskID == iTaskID &&
-                    t.EmpID == MvcApplication.userData.userId &&
-                    t.CreatedDate >= today && t.CreatedDate < tomorrow
-                ).OrderByDescending(t => t.CreatedDate).FirstOrDefault();
-
-                if (todayLog != null)
-                {
-                    todayLog.TimeCount = timeValue;
-                    _unitOfWork.TaskStatuseLog.Update(todayLog);
-                }
-
-                _unitOfWork.Save();
-
-                // Recalculate total ActualTime from all time logs
-                Dictionary<string, TaskTimeDetails> uniqueTimeLog = objTask.GetTaskTimeLog;
+                uniqueTimeLog = objTask.GetTaskTimeLog;
 
                 if (uniqueTimeLog.Count() < 1)
                 {
@@ -924,17 +908,7 @@ namespace EtaskMinstry.AppCode
                 else
                 {
                     objTask.ActualTime = 0;
-                    foreach (var itemTime in uniqueTimeLog.Values)
-                    {
-                        objTask.ActualTime += Decimal.Parse(itemTime.LogTime);
-                    }
                 }
-
-                _unitOfWork.TaskRepository.Update(objTask);
-                _unitOfWork.Save();
-
-                // Return today's time for the current employee
-                uniqueTimeLog = objTask.GetTaskTimeLog;
                 foreach (var itemTime in uniqueTimeLog.Values)
                 {
                     if (itemTime.isToday)

@@ -130,7 +130,7 @@ namespace EtaskMinstry.Models.Company
             strTitle = strTitle.Trim().ToLower();
 
             List<CompanyTaskVM> objTasks =
-                _unitOfWork.TaskRepository.Get(t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
+                _unitOfWork.TaskRepository.Get(includeProperties: "Project,Status,Priority,TaskTLogs", filter: t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
                                                     &&
                                                     (!bIsNotAssigned.HasValue || t.EmpID == null)
                                                     &&
