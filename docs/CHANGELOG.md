@@ -4,6 +4,69 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Bug Fixing Sprint: 14 Bugs (Session WQ5V1)
+
+#### Round 1 — Initial Fixes (14 bugs)
+
+**Security**
+- **Web.config** (all variants): Set `debug="false"`, `customErrors mode="On"` — stack traces no longer exposed to users (#43)
+
+**Double-Save & Validation UI**
+- **Admin/Company AddEdit.cshtml** (6 views): Added `_isSubmitting` guard flag + `ajaxComplete` listener to prevent double-save and re-enable save button after Remote validation errors (#30, #44)
+
+**Uniqueness Validation**
+- **CompanyEmployeeVM.cs** (Company area): Added `EmpID` to `CheckForUniqueEmail` + `AdditionalFields="EmpID"` on Remote attribute — employee's own email no longer blocks edit (#46)
+- **CompanyEmployeeVM.cs** (Company area): Added `IsDeleted == false` to email query — soft-deleted records excluded (#46)
+- **EmployeeController.cs** (Company area): `CheckDuplicateEmail` now accepts `int EmpID = 0` (#46)
+
+**Task Workflow**
+- **TaskWorkflow.cs**: Added `NotAproved → InProgress` transition in Accept action — employees can resume rejected tasks (#38)
+- **Employee/Tasks/Index.cshtml**: Removed "غيرمعتمدة" from hidden tab filter — tab now visible to employees (#38)
+- **Employee/Tasks/PartialEmpTask.cshtml**: Added "استئناف العمل" accept button for NotApproved tasks (#38)
+
+**Reports**
+- **ReportController.cs** (4 files): Added `ReportParameters.Clear()` before ProjectTasks report — prevents stale CompanyName parameter crash (#42)
+- **CompanyTasks.rdlc**: Aligned textbox positions to tablix column grid, set PageWidth to match body width (#47)
+
+**Views**
+- **Company/Index.cshtml**: Simplified date search from 4 fields (2 ranges) to 2 fields (Start Date + End Date) (#45)
+- **PartialCompTask.cshtml**: Wrapped generic delete column in condition — prevents duplicate column on جديدة tab (#40)
+
+**CSS**
+- **style.css**: Strengthened `.btn.active` style with thick black border, box-shadow, and scale (#37)
+
+**Performance**
+- **CompanyVM.cs** (Admin): Added `includeProperties: "UserAccounts"` to eliminate N+1 lazy loading (#36)
+
+**Password Reset**
+- **Security.cs**: Added null-check for SMTP settings + try-catch wrapper (#34) — actual fix requires SMTP credentials update in DB Settings table
+
+#### Round 2 — Reopened Bug Fixes (6 bugs)
+
+**Regression Revert**
+- **TaskManger.cs**: Reverted `EmpUpdateDalyTaskTime` to original code — previous fix caused regression breaking both total and daily time updates (#35)
+
+**Performance (correct page)**
+- **CompanyTaskVM.cs** (Areas + Areas2): Added `includeProperties: "Project,Status,Priority,TaskTLogs"` to `Select()` — fixes N+1 on Company المهام page, not Admin page (#36)
+
+**CSS (correct selector)**
+- **style.css**: Broadened selector to include `.Priorbtns .btn.active` and `.priortybar .btn.active` — covers TaskDetails page priority buttons which are in `<div>` not `<table>` (#37)
+
+**Uniqueness (all fields, all areas)**
+- **CompanyEmployeeVM.cs** (Admin + Company, Areas + Areas2): Added `IsDeleted == false` to `CheckForUniqueMobile` and `CheckForUniqueNationalID` same-company clauses — soft-deleted duplicates no longer block edits (#46)
+
+**RDLC (full alignment)**
+- **CompanyTasks.rdlc**: Aligned PageHeader (Logo, CompanyName, ReportPeriod) and PageFooter (PageNumber, PrintDate) elements to tablix column grid. Set margins to 0 (#47)
+
+**SMTP (infrastructure)**
+- **#34**: Posted comment explaining SMTP credentials in DB Settings table need verification — not a code issue
+
+#### CLAUDE.md Updates
+- Added **Bug Fixing Workflow** section with 4 roles (Investigator, Analyst, Fixer, Verifier)
+- Added **Anti-Reopen Rules** (7 rules) based on real reopened bugs
+- Added **Golden Bug Prompt Template** and **Severity Reference Table**
+
+---
 ### Fixed - Performance: Client-Side Filtering, N+1 Queries & Unbounded Loads (Session pw8mP)
 
 #### Areas/Company/Models
