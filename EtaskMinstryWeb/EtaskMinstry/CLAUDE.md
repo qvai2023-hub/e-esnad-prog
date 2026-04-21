@@ -145,6 +145,44 @@ These rules exist to prevent bugs from being reopened. Every rule was learned fr
     - Close the issue with state `closed` and reason `completed`
     - If the fix requires infrastructure work (not code), leave a comment explaining what the team needs to do and close with a note
 
+11. **Before changing any method — grep ALL callers across the entire codebase first.**
+    Run a grep for the method name across all `.cs`, `.cshtml`, and `.js` files.
+    List every file and line that calls this method. For each caller:
+    - Does it depend on the current return type or behavior?
+    - Will the fix break its flow?
+    If ANY caller is in a different context (Dashboard, Report, Admin, Employee), STOP and trace
+    that caller's full flow before touching the method. This rule prevented the #35 regression
+    where `EmpUpdateDalyTaskTime` was changed without checking that `EmpUpdateTaskTime` was
+    already handling the DB save.
+
+12. **After finding one broken pattern — search the ENTIRE file for all similar patterns.**
+    Do not commit after fixing the first match. Search the same file for every other method,
+    query, or check that follows the same broken pattern and fix them all in one pass.
+    Example: if `CheckForUniqueName` is missing `IsDeleted == false`, grep the whole file for
+    every other `Check*` method and verify each one before committing.
+    This rule would have caught the #46 partial fix (email fixed but Name/SequenceNumber missed).
+
+13. **Before writing any fix — state the exact URL and confirm which controller handles it.**
+    Open the `AreaRegistration.cs` for each area and trace the route.
+    Never assume the URL maps to the area you expect — always verify.
+    Example: `/Company/Company/index` → Area=Company, Controller=Company, not Admin.
+    This rule would have caught the #36 Round 1 mistake (fixed Admin instead of Company).
+
+14. **If the bug is a JS display issue — fix it in the JS callback, not in the server method.**
+    Visual DOM issues belong in the frontend. If the display is stale after an AJAX call,
+    the fix is: restructure the JS callbacks (sequential vs parallel, correct DOM selector).
+    Never change a server method's return format to fix a visual bug — server methods are
+    shared across multiple callers and changing their output breaks all of them.
+
+15. **After fixing — walk through the tester's exact repro steps one by one.**
+    For each step ask: "Does my fix change what happens at this step?"
+    If you reach the final step and cannot say "yes, the tester will now see the correct result"
+    with full confidence — do NOT commit. Investigate more.
+    This applies even when the code change looks obviously correct.
+
+16. **Areas2/ note — this project does NOT actively use the Areas2/ folder in production.**
+    Do NOT apply fixes to `Areas2/` unless explicitly asked. All fixes go to `Areas/` only.
+
 ---
 
 ## Project Overview

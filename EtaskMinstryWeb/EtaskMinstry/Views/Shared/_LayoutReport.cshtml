@@ -107,13 +107,22 @@
             $(".chzn-select").chosen();
 
 
-            $(".SetIsactive").on("change", function () {
-                var id = $(this).attr("id");
+            $(document).on("change", ".SetIsactive", function () {
+                var $cb = $(this);
+                var id = $cb.attr("id");
+                $cb.prop("disabled", true);
+                var $row = $cb.closest("tr");
+                var $spinner = $('<span class="spinner-text" style="margin-right:6px;font-size:11px;color:#888;"> جارٍ الحفظ…</span>');
+                $row.find("td:first").append($spinner);
                 $.ajax({
-                    type: 'Post',
+                    type: "Post",
                     url: '@Url.Action("SetIsActive")',
-                    dataType: 'json',
-                    data: { "Id": id }
+                    dataType: "json",
+                    data: { "Id": id },
+                    complete: function () {
+                        $cb.prop("disabled", false);
+                        $spinner.remove();
+                    }
                 });
             });
 

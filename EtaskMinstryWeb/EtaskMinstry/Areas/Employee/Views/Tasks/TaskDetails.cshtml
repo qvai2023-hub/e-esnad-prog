@@ -416,44 +416,27 @@
 
                     $(".errorWorkTime").hide();
                     $(".isFinish").hide();
-                    debugger;
-                    $.post(url, { taskID: '@Model.TaskID', Duration: parseFloat($('#time_value').val()).toFixed(2) }, function (data) {
+                    var duration = parseFloat($('#time_value').val());
+                    $.post(url, { taskID: '@Model.TaskID', Duration: duration.toFixed(2) }, function (data) {
                         if (data != 'Error') {
-                            debugger
                             //setStatus with Inprogress
                             $('#td_CurrentStatus').html("جارى العمل");
                             $('#Status').html('<a title="انهاء" class="Done"><img src="/Content/Main/images/end-icon.png" width="16" height="16"/></a>');
                             $('#estm_time').show();
                             $('.modify_time').show();
-                            
-                            //$('#estm_time').html($('#time_value').val() +  '<a time="3" class="edit-inline-icon modify_time" title="تعديل" ></a>');
-                            // $('#estm_time').html(data +  '<a time="3" class="edit-inline-icon modify_time" title="تعديل" ></a>');
-                            ///$('#estm_time').text(data);
                             $('#total_time').html(data);
                             $('#divTimeUpdate').hide();
                             $('#time_value').val('');
+
+                            // fire daily-time update AFTER total save succeeds so DB is current
+                            $.post("/Employee/Tasks/UpdateTaskDalyTime", { taskID: '@Model.TaskID', Duration: duration }, function (dailyData) {
+                                if (dailyData != 'Error') {
+                                    $('#estm_time').html(dailyData + '<a time="3" class="edit-inline-icon modify_time" title="تعديل" ></a>');
+                                }
+                            });
                         }
                     });
                 }
-
-
-                var url = "/Employee/Tasks/UpdateTaskDalyTime";
-                $.post(url, { taskID: '@Model.TaskID', Duration: parseFloat($('#time_value').val()) }, function (data) {
-                    if (data != 'Error') {
-                        debugger
-
-                        //setStatus with Inprogress
-                        $('#td_CurrentStatus').html("جارى العمل");
-                        $('#Status').html('<a title="انهاء" class="Done"><img src="/Content/Main/images/end-icon.png" width="16" height="16"/></a>');
-                        $('#estm_time').show();
-                        //$('#estm_time').html($('#time_value').val() +  '<a time="3" class="edit-inline-icon modify_time" title="تعديل" ></a>');
-                        $('#estm_time').html(data +  '<a time="3" class="edit-inline-icon modify_time" title="تعديل" ></a>');
-                        // $('#estm_time').text(data);
-                         $('.total_time').html(data);
-                        $('#divTimeUpdate').hide();
-                        $('#time_value').val('');
-                    }
-                });
 
 
             }
