@@ -121,7 +121,7 @@ These rules exist to prevent bugs from being reopened. Every rule was learned fr
    Read the bug report repro steps carefully. If the tester says "company account المهام page", fix THAT page — not the Admin page, not the Employee page. Confirm: which URL? Which user role? Which area controller?
 
 5. **Fix ALL areas — not just one.**
-   This codebase has `Areas/` and `Areas2/` with mirrored code. A fix in `Areas/Company/Models/` must also be applied to `Areas2/Company/Models/`. Additionally, if a bug exists in the Company area validation, check the Admin area for the same pattern — they often share the same broken logic.
+   If a bug exists in the Company area, check the Admin and Employee areas for the same pattern — they often share the same broken logic. `Areas2/` is NOT used in production — do NOT apply fixes there unless explicitly asked.
 
 6. **Never change logic in shared code without tracing the full call chain.**
    Before modifying a method in `TaskManger.cs`, `TaskWorkflow.cs`, or any shared file:
@@ -145,43 +145,116 @@ These rules exist to prevent bugs from being reopened. Every rule was learned fr
     - Close the issue with state `closed` and reason `completed`
     - If the fix requires infrastructure work (not code), leave a comment explaining what the team needs to do and close with a note
 
-11. **Before changing any method — grep ALL callers across the entire codebase first.**
-    Run a grep for the method name across all `.cs`, `.cshtml`, and `.js` files.
-    List every file and line that calls this method. For each caller:
-    - Does it depend on the current return type or behavior?
-    - Will the fix break its flow?
-    If ANY caller is in a different context (Dashboard, Report, Admin, Employee), STOP and trace
-    that caller's full flow before touching the method. This rule prevented the #35 regression
-    where `EmpUpdateDalyTaskTime` was changed without checking that `EmpUpdateTaskTime` was
-    already handling the DB save.
+---
 
-12. **After finding one broken pattern — search the ENTIRE file for all similar patterns.**
-    Do not commit after fixing the first match. Search the same file for every other method,
-    query, or check that follows the same broken pattern and fix them all in one pass.
-    Example: if `CheckForUniqueName` is missing `IsDeleted == false`, grep the whole file for
-    every other `Check*` method and verify each one before committing.
-    This rule would have caught the #46 partial fix (email fixed but Name/SequenceNumber missed).
+### Anti-Failure Rules for Bug Fixes
 
-13. **Before writing any fix — state the exact URL and confirm which controller handles it.**
-    Open the `AreaRegistration.cs` for each area and trace the route.
-    Never assume the URL maps to the area you expect — always verify.
-    Example: `/Company/Company/index` → Area=Company, Controller=Company, not Admin.
-    This rule would have caught the #36 Round 1 mistake (fixed Admin instead of Company).
+11. **Before touching any method — grep ALL callers first.**
+    Run: grep -rn "MethodName" across the entire codebase.
+    List every file that calls this method. For each caller,
+    check if changing the return type or behavior will break it.
+    If any caller is in a different context (Dashboard, Report,
+    API), STOP and flag it before writing code.
 
-14. **If the bug is a JS display issue — fix it in the JS callback, not in the server method.**
-    Visual DOM issues belong in the frontend. If the display is stale after an AJAX call,
-    the fix is: restructure the JS callbacks (sequential vs parallel, correct DOM selector).
-    Never change a server method's return format to fix a visual bug — server methods are
-    shared across multiple callers and changing their output breaks all of them.
+12. **Before writing the fix — state the exact file path AND
+    the exact URL that produces the bug.**
+    Confirm: which area registration handles this URL?
+    Open the AreaRegistration.cs for that area and verify the
+    route. Never assume the URL maps to the area you expect.
 
-15. **After fixing — walk through the tester's exact repro steps one by one.**
-    For each step ask: "Does my fix change what happens at this step?"
-    If you reach the final step and cannot say "yes, the tester will now see the correct result"
-    with full confidence — do NOT commit. Investigate more.
-    This applies even when the code change looks obviously correct.
+13. **After finding one broken pattern — search for all
+    similar patterns in the same file.**
+    Example: found CheckForUniqueName missing IsDeleted?
+    Search the ENTIRE file for every other Check* or Validate*
+    method and verify each one. Do not commit until all
+    variants are fixed.
 
-16. **Areas2/ note — this project does NOT actively use the Areas2/ folder in production.**
-    Do NOT apply fixes to `Areas2/` unless explicitly asked. All fixes go to `Areas/` only.
+14. **After writing the fix — walk through the exact repro
+    steps from the bug report line by line.**
+    Ask: "If the tester follows step 1, 2, 3 right now,
+    what is different? Is the bug gone?" If you cannot answer
+    YES with certainty, investigate more before committing.
+
+15. **Never change a server method's return type or response
+    format to fix a JS display bug.**
+    If the bug is visual (DOM not updating), the fix belongs
+    in the JS callback — not in the server method. Server
+    methods are shared; JS callbacks are not.
+
+16. **Before starting any fix — ask the user for explicit
+    confirmation.**
+    After delivering the diagnosis report, always output:
+
+    ```
+    Ready to fix Bug #[N].
+
+    Fix summary: [one sentence describing what will change]
+    Risk level: [Safe / Risky]
+    Files that will change: [list]
+
+    Shall I proceed with the fix?
+    ```
+
+    Do NOT write a single line of code until the user replies
+    with explicit approval ("yes", "proceed", "go ahead").
+    If the user says "investigate only", stop at the diagnosis
+    report — never suggest a fix unless asked.
+
+17. **After fixing — if ANY logic was changed, leave a
+    dedicated tester warning on the GitHub issue.**
+    A "logic change" means: a condition was added or removed,
+    a method's behavior was altered, a workflow transition
+    was modified, or a validation rule was changed.
+    CSS-only, RDLC layout, or config-only fixes do NOT require
+    this rule — Rule 10's standard comment is sufficient.
+
+    If ANY logic changed, the GitHub comment MUST include
+    this section written in the tester's language (Arabic
+    if the tester writes in Arabic):
+
+    ```
+    ⚠️ تنبيه للمختبِر — تغيير في المنطق:
+
+    ما الذي تغيّر في سلوك النظام:
+    [اشرح بلغة بسيطة ماذا يفعل النظام الآن بشكل مختلف]
+
+    ما يجب اختباره تحديداً بسبب هذا التغيير:
+    1. [سيناريو الاختبار 1]
+    2. [سيناريو الاختبار 2]
+
+    ما يجب أن يبقى كما هو (فحص الانحدار):
+    - [الميزة 1 التي يجب أن تعمل كالمعتاد]
+    - [الميزة 2 التي يجب أن تعمل كالمعتاد]
+    ```
+
+---
+
+### Pre-Fix Checklist (Mandatory Before Any Bug Fix)
+
+Before writing any code for a bug fix, output this checklist
+and wait for explicit user confirmation:
+
+```
+Before fixing #[N]:
+✅ Exact URL from bug report: [url]
+✅ Area/Controller confirmed by AreaRegistration: [file]
+✅ All callers of the method being changed: [list]
+✅ All similar patterns in the same file audited: [yes/no]
+✅ Areas2 mirror checked: [yes/no]
+Proceed?
+```
+
+---
+
+### Magic Phrases — Force Correct Behavior at Key Moments
+
+| When | Phrase to add to prompt |
+|------|------------------------|
+| Before fixing shared code | "Before changing this method, grep ALL callers across the entire codebase and list them." |
+| Before fixing an area bug | "State the exact URL from the bug report and confirm which AreaRegistration.cs handles it before touching any file." |
+| When fixing a Check* method | "After fixing this method, search the same file for ALL other Check* or Validate* methods and verify each one has the same fix." |
+| After writing the fix | "Walk through the tester's exact repro steps one by one and explain what is different after your fix." |
+| When the fix seems done | "List every file this change could affect, including Areas2 mirrors. Have you checked all of them?" |
 
 ---
 
@@ -270,6 +343,7 @@ EtaskMinstryWeb/
 
 ## Important Notes
 
+- `Areas2/` folder exists in the repo but is NOT used in production — all fixes go to `Areas/` only
 - Do NOT modify auto-generated Entity Framework files (`.Designer.cs`, files from `.tt` templates)
 - When adding new entities, update the `.edmx` model first
 - The `Web.config` contains environment-specific settings — be cautious with connection strings and server URLs
