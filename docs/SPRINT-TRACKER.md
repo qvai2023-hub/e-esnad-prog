@@ -1,6 +1,98 @@
 # Sprint Tracker
 
-## Current Sprint: Sprint 4 - Performance & Attachment Fixes
+## Current Sprint: Sprint 6 - Bug Fixing (14 GitHub Issues)
+
+### Sprint Goal
+Fix all 14 open bugs reported by tester (dr-emy) on GitHub issues #30–#47.
+
+---
+
+## Sprint 6 Task Status
+
+### Round 1 — Initial Fixes
+
+| # | Bug | Severity | Status | Notes |
+|---|-----|----------|--------|-------|
+| #43 | Debug mode on production | Severe | ✅ Done | `debug="false"`, `customErrors mode="On"` in 4 config files |
+| #30 | Double company/employee creation | Severe | ✅ Done | `_isSubmitting` guard + `ajaxComplete` in 6 AddEdit views |
+| #44 | Save button stuck "جاري الحفظ" | High | ✅ Done | Same fix as #30 — shared root cause |
+| #46 | Edit blocked after deleting duplicate | Severe | ✅ Done | Added EmpID to email check + IsDeleted filter |
+| #39 | Same company email accepted | Severe | ✅ Done | Same fix as #46 |
+| #45 | Duplicate date range fields | Mild | ✅ Done | Simplified to 2 single date fields |
+| #40 | Duplicate delete column | Mild | ✅ Done | Conditional guard on second column |
+| #37 | Priority level unclear | Mild | ✅ Done | Strengthened `.btn.active` CSS |
+| #42 | Report crash (CompanyName) | Severe | ✅ Done | `ReportParameters.Clear()` in 4 controllers |
+| #47 | Excel columns misaligned | Low | ✅ Done | Aligned RDLC elements to column grid |
+| #38 | Rejected task non-actionable | Severe | ✅ Done | غيرمعتمدة tab + Accept on NotApproved |
+| #35 | Daily time entry not updating | Moderate | ✅ Done | ⚠️ Reverted in Round 2 |
+| #36 | 20-25s TTFB Admin pages | Critical | ✅ Done | Eager loading UserAccounts (Admin page) |
+| #34 | Password reset email fails | Moderate | ✅ Done | Try-catch + SMTP infra note posted |
+
+### Round 2 — Reopened Bug Re-Fixes
+
+| # | Bug | Why Reopened | Status | Fix |
+|---|-----|-------------|--------|-----|
+| #35 | Time entry regression | My fix broke total + daily update | ✅ Reverted | Restored original code |
+| #36 | Company المهام still slow | Fixed wrong page (Admin vs Company) | ✅ Fixed | Eager loading in CompanyTaskVM.Select |
+| #37 | Priority still unclear | CSS targeted `table` not `div` | ✅ Fixed | Added `.Priorbtns`, `.priortybar` selectors |
+| #46 | Edit still blocked | Mobile/NationalID missing IsDeleted | ✅ Fixed | Added IsDeleted filter to 4 methods × 4 areas |
+| #47 | Excel still spanning | PageHeader/Footer misaligned | ✅ Fixed | Aligned all elements + zeroed margins |
+| #34 | Email still fails | SMTP config, not code | ✅ Closed | Infrastructure note posted |
+
+### Sprint 6 Files Modified
+
+**C# (compiled into bin/EtaskMinstry.dll)**
+- `AppCode/TaskManger.cs` — #35 revert
+- `AppCode/TaskWorkflow.cs` — #38 Accept on NotApproved
+- `Areas/Admin/Models/CompanyVM.cs` — #36 eager loading UserAccounts
+- `Areas/Admin/Models/CompanyEmployeeVM.cs` — #46 IsDeleted on Mobile/NationalID
+- `Areas/Company/Controllers/EmployeeController.cs` — #46 EmpID param
+- `Areas/Company/Controllers/ReportController.cs` — #42 ReportParameters.Clear
+- `Areas/Company/Models/CompanyEmployeeVM.cs` — #46 email/mobile/nationalID fixes
+- `Areas/Company/Models/CompanyTaskVM.cs` — #36 eager loading
+- `Areas/Employee/Controllers/ReportController.cs` — #42
+- `Areas2/Admin/Models/CompanyEmployeeVM.cs` — #46
+- `Areas2/Company/Controllers/EmployeeController.cs` — #46
+- `Areas2/Company/Controllers/ReportController.cs` — #42
+- `Areas2/Company/Models/CompanyEmployeeVM.cs` — #46
+- `Areas2/Company/Models/CompanyTaskVM.cs` — #36
+- `Areas2/Employee/Controllers/ReportController.cs` — #42
+- `Models/Login/Security.cs` — #34 error handling
+
+**Views (.cshtml)**
+- `Areas/Admin/Views/Company/AddEdit.cshtml` — #30/#44
+- `Areas/Admin/Views/Employee/AddEdit.cshtml` — #30/#44
+- `Areas/Company/Views/Company/Index.cshtml` — #45 date fields
+- `Areas/Company/Views/Company/PartialCompTask.cshtml` — #40 delete column
+- `Areas/Company/Views/Employee/AddEdit.cshtml` — #30
+- `Areas/Employee/Views/Tasks/Index.cshtml` — #38 غيرمعتمدة tab
+- `Areas/Employee/Views/Tasks/PartialEmpTask.cshtml` — #38 resume button
+- Areas2 mirrors (5 files)
+
+**CSS**
+- `Content/Site/css/style.css` — #37 priority buttons
+
+**Config**
+- `Web.config`, `webtele.config`, `webesnad.config`, `webuat.config` — #43
+
+**Reports**
+- `ReportsRDLC/CompanyTasks.rdlc` — #47
+
+**Docs**
+- `CLAUDE.md` — Bug Fixing Workflow + Anti-Reopen Rules
+
+### Lessons Learned (Anti-Reopen Rules added to CLAUDE.md)
+1. Match exact page/role/area from tester's report
+2. Fix ALL areas (Areas + Areas2, Admin + Company)
+3. Trace full call chain before changing shared code
+4. CSS: verify selector matches exact HTML on exact page
+5. RDLC: align EVERY element to column grid
+6. Re-read repro steps before committing
+7. Always close GitHub issues with comment
+
+---
+
+## Previous Sprint: Sprint 4 - Performance & Attachment Fixes
 
 ### Sprint Goal
 Fix N+1 query performance issues, add eager loading, and preserve original file names for task attachments.

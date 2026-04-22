@@ -409,6 +409,90 @@ Replace with a direct `Company.Get(filter:)` query that uses `.Any()` subquery t
 
 ---
 
+---
+
+## Sprint 6 Decisions
+
+### DEC-019: Revert EmpUpdateDalyTaskTime — Read-Only Display Method
+
+**Date:** 2026-04-20
+**Session:** WQ5V1
+**Status:** Implemented
+
+### Context
+Bug #35 reported daily time entry not updating. I added `_unitOfWork.Save()` and `Update()` calls to `EmpUpdateDalyTaskTime()`, which caused a regression: both total AND daily time stopped updating.
+
+### Decision
+Revert to original code. `EmpUpdateDalyTaskTime()` is a read-only display helper — it returns a value for the UI but does not save to DB. The actual saving is done by `EmpUpdateTaskTime()` (a separate endpoint).
+
+### Rationale
+- Changing a read-only method to write broke the save flow
+- `EmpUpdateTaskTime` handles all DB writes for time entries
+- Two methods writing to the same data creates race conditions
+- Minimal fix principle: revert the regression, investigate separately
+
+---
+
+### DEC-020: Anti-Reopen Rules in CLAUDE.md
+
+**Date:** 2026-04-20
+**Session:** WQ5V1
+**Status:** Implemented
+
+### Context
+5 out of 14 fixed bugs were reopened by the tester. Root causes: wrong page fixed (#36), wrong CSS selector (#37), incomplete area coverage (#46), incomplete RDLC alignment (#47), and regression from logic change in shared code (#35).
+
+### Decision
+Added 7 Anti-Reopen Rules to CLAUDE.md Bug Fixing Workflow to prevent recurrence.
+
+### Rationale
+- Each rule maps to a real reopened bug
+- Rules enforce verification before committing
+- Shared code changes now require explicit call-chain tracing
+- CSS/RDLC changes require element-level verification
+- GitHub issue closure with comments is now mandatory
+
+---
+
+### DEC-021: Eager Loading in CompanyTaskVM for Company المهام Page
+
+**Date:** 2026-04-20
+**Session:** WQ5V1
+**Status:** Implemented
+
+### Context
+Bug #36 was reopened because the original fix targeted Admin pages (`CompanyVM.Select`, `CompanyEmployeeVM.Search`). The Company account's المهام page uses `CompanyTaskVM.Select()` which lazy-loads `Project`, `Status`, `Priority`, and `TaskTLogs` per row.
+
+### Decision
+Add `includeProperties: "Project,Status,Priority,TaskTLogs"` to the `TaskRepository.Get()` call in `CompanyTaskVM.Select()`.
+
+### Rationale
+- Same N+1 pattern as Admin pages but different code path
+- 4 navigation properties × N tasks = 4N extra queries eliminated
+- Consistent with PERF-02 pattern already applied to Areas2
+- Minimal change: single parameter addition
+
+---
+
+### DEC-022: IsDeleted Filter on All Uniqueness Checks
+
+**Date:** 2026-04-20
+**Session:** WQ5V1
+**Status:** Implemented
+
+### Context
+Bug #46 was reopened because only the Email check was fixed. `CheckForUniqueMobile` and `CheckForUniqueNationalID` had the same bug: the same-company clause was missing `IsDeleted == false`, so soft-deleted duplicates still blocked edits.
+
+### Decision
+Add `&& e.IsDeleted == false` to the same-company clause in `CheckForUniqueMobile` and `CheckForUniqueNationalID` across all 4 code locations (Admin Areas, Admin Areas2, Company Areas, Company Areas2).
+
+### Rationale
+- All uniqueness checks must consistently exclude soft-deleted records
+- Remote validation fires for ALL fields on form submit — one broken check blocks the entire save
+- Fix must cover all areas (Areas + Areas2) and all roles (Admin + Company)
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports

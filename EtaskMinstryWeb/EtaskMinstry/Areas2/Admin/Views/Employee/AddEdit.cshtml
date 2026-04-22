@@ -430,14 +430,28 @@
 
     })
 
+    var _isSubmitting = false;
     $("form").on("submit", function () {
-        if ($(this).valid()) {
+        if (_isSubmitting) return false;
+        if ($(this).valid() && $('.field-validation-error:visible').length === 0) {
+            _isSubmitting = true;
             $("#btnSave").prop("disabled", true).val("جاري الحفظ...");
+        } else {
+            $("#btnSave").prop("disabled", false).val("حفظ");
+            return false;
+        }
+    });
+
+    $(document).ajaxComplete(function () {
+        if ($('.field-validation-error:visible').length > 0) {
+            _isSubmitting = false;
+            $("#btnSave").prop("disabled", false).val("حفظ");
         }
     });
 
     $(document).ready(function () {
         if ($('.field-validation-error:visible').length > 0) {
+            _isSubmitting = false;
             $("#btnSave").prop("disabled", false).val("حفظ");
         }
     });

@@ -206,15 +206,14 @@ gridColumns.Add(grid.Column("Refused", "رفض", @<text>
     </text>, "fivethColumn"));
 }
 gridColumns.Add(grid.Column("Edit", "تعديل", @<text><a class="fa fa-edit" id="a_@item.TaskID" href="/Company/Task/EDitTask?taskId=@item.TaskID"></a></text>, "EditCol"));
+if (!(Model.All(i => i.StatusID == (int)TaskStatus.New) && Model.Any(i => i.EmpName != "")))
+{
 gridColumns.Add(grid.Column("Delete", "حذف", @<text>
-        @*<span class='@(item.bCanDelete ? "" : "spandisabled")' has-tip' title='@(item.bCanDelete ? "حذف" : "لا يمكن الحذف")'>
-            <a id='@item.ID' class='@(item.bCanDelete ? "fa fa-trash" : "fa fa-trash disabled")'></a>
-            <i href="javascript:void(0);" currenclass="Project" id='@item.TaskID'></i>
-        </span>*@
         <a class="fa fa-trash" id="@item.TaskID"></a>
     </text>
 
     , "DeleteCol"));
+}
 
         }
         @grid.GetHtml(columns: gridColumns.ToArray(),

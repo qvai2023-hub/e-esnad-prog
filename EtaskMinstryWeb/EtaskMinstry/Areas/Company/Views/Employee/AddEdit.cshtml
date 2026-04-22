@@ -231,15 +231,40 @@
 <script>
     var isFirstClick = true;
     var isValidReCap = false;
+    var _isSubmitting = false;
     function Saveclick(event) {
         correctCaptcha();
         if (!isValidReCap) {
             $("#RecaptchaValidation").show();
+            return false;
         } else {
             $("#RecaptchaValidation").hide();
         }
-
     }
+
+    $(function () {
+        $("form").on("submit", function () {
+            if (_isSubmitting) return false;
+            if ($(this).valid() && $('.field-validation-error:visible').length === 0 && isValidReCap) {
+                _isSubmitting = true;
+                $("input[type='submit']").prop("disabled", true).val("جاري الحفظ...");
+            } else {
+                $("input[type='submit']").prop("disabled", false).val("حفظ");
+                return false;
+            }
+        });
+
+        $(document).ajaxComplete(function () {
+            if ($('.field-validation-error:visible').length > 0) {
+                _isSubmitting = false;
+                $("input[type='submit']").prop("disabled", false).val("حفظ");
+            }
+        });
+
+        if ($('.field-validation-error:visible').length > 0) {
+            $("input[type='submit']").prop("disabled", false).val("حفظ");
+        }
+    });
     //$(function () {
     var recaptcha_id;
     var onloadCallback = function () {

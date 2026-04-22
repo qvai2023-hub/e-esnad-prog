@@ -5671,4 +5671,6 @@ table .btn-group{
   text-align: center;
   justify-content: center;
 }
-table .btn-group .btn.active{border:solid 2px #2c3e50; box-shadow:0 0 0px rgba(0,0,0,.5)}
+table .btn-group .btn.active,
+.Priorbtns .btn.active,
+.priortybar .btn.active{border:solid 3px #000; box-shadow:0 0 4px rgba(0,0,0,.6); transform:scale(1.2); z-index:1; position:relative}

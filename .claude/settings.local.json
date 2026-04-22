@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue *)",
+      "Bash(gh repo *)",
+      "Bash(command -v gh)",
+      "Bash(where gh *)",
+      "PowerShell(Get-Command gh -ErrorAction SilentlyContinue)",
+      "PowerShell(& \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" --version 2>&1)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:github.com)",
+      "Read(//c/Users/nesma/.config/gh/**)",
+      "Read(//c/Users/nesma/.gh/**)",
+      "Bash(git config *)",
+      "PowerShell(cmdkey /list)",
+      "Bash(xargs grep *)",
+      "Bash(find /e/work/2026/ai_vibe/Esnad_ai -type f -name \"*.js\" -exec grep -l \"SetIsactive\" {} \\\\;)",
+      "Bash(find \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\EtaskMinstryWeb\" -type f -name \"*.cs\" -exec grep -l \"LoadMailTemplate\\\\|QvLib\" {} \\\\;)"
+    ]
+  }
+}

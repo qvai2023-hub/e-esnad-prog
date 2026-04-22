@@ -60,6 +60,12 @@ namespace EtaskMinstry.AppCode
                                     isStatusChanged = true;
                                 }
                             }
+                            //allow employee to resume work on a disapproved task
+                            else if (currentTaskStatus == TaskStatus.NotAproved)
+                            {
+                                task.StatusID = (int)TaskStatus.Inprogress;
+                                isStatusChanged = true;
+                            }
                             break;
                         }
 

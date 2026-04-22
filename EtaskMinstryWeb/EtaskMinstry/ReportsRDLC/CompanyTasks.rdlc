@@ -667,9 +667,9 @@
             </Paragraphs>
             <rd:DefaultName>Textbox11</rd:DefaultName>
             <Top>1.06778in</Top>
-            <Left>6.25in</Left>
+            <Left>6.2in</Left>
             <Height>0.25in</Height>
-            <Width>1.51042in</Width>
+            <Width>1.56042in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -714,7 +714,7 @@
             </ActionInfo>
             <Top>1.06598in</Top>
             <Height>0.25in</Height>
-            <Width>1.30208in</Width>
+            <Width>1.05in</Width>
             <ZIndex>3</ZIndex>
             <Visibility>
               <Hidden>=(Parameters!EmpId.Value="")</Hidden>
@@ -747,9 +747,9 @@
               <Value>=Parameters!LogoUrl.Value</Value>
               <Sizing>FitProportional</Sizing>
               <Top>0.05in</Top>
-              <Left>6.06in</Left>
+              <Left>6.2in</Left>
               <Height>0.55in</Height>
-              <Width>1.7in</Width>
+              <Width>1.56042in</Width>
               <Style>
                 <Border>
                   <Style>None</Style>
@@ -777,9 +777,9 @@
                 </Paragraph>
               </Paragraphs>
               <Top>0.62in</Top>
-              <Left>4.5in</Left>
+              <Left>3.9in</Left>
               <Height>0.25in</Height>
-              <Width>3.26in</Width>
+              <Width>3.86042in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -809,9 +809,9 @@
                 </Paragraph>
               </Paragraphs>
               <Top>0.88in</Top>
-              <Left>4.5in</Left>
+              <Left>3.9in</Left>
               <Height>0.25in</Height>
-              <Width>3.26in</Width>
+              <Width>3.86042in</Width>
               <ZIndex>2</ZIndex>
               <Style>
                 <Border>
@@ -871,7 +871,7 @@
               <rd:DefaultName>Textbox12</rd:DefaultName>
               <Top>0.1in</Top>
               <Height>0.25in</Height>
-              <Width>2in</Width>
+              <Width>1.05in</Width>
               <Style>
                 <Border>
                   <Style>None</Style>
@@ -910,9 +910,9 @@
               </Paragraphs>
               <rd:DefaultName>Textbox8</rd:DefaultName>
               <Top>0.1in</Top>
-              <Left>4.76042in</Left>
+              <Left>3.9in</Left>
               <Height>0.25in</Height>
-              <Width>3in</Width>
+              <Width>3.86042in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -964,9 +964,9 @@
             </Border>
           </Style>
         </PageFooter>
-        <PageWidth>10in</PageWidth>
-        <LeftMargin>0.3in</LeftMargin>
-        <RightMargin>0.3in</RightMargin>
+        <PageWidth>7.76042in</PageWidth>
+        <LeftMargin>0in</LeftMargin>
+        <RightMargin>0in</RightMargin>
         <TopMargin>0.5in</TopMargin>
         <Style />
       </Page>

@@ -888,7 +888,7 @@ namespace EtaskMinstry.AppCode
         /// <returns></returns>
         public static string EmpUpdateDalyTaskTime(int iTaskID, decimal timeValue)
         {
-            //Define Unit ofWork 
+            //Define Unit ofWork
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);

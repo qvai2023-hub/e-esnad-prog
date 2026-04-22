@@ -27,7 +27,7 @@
     @foreach (StatusDisplay TaskStatus in ViewBag.status)
     {
         <li>
-            @if (TaskStatus.Name != "مرفوضة" && TaskStatus.Name != "مقبولة" && TaskStatus.Name != "غيرمعتمدة")
+            @if (TaskStatus.Name != "مرفوضة" && TaskStatus.Name != "مقبولة")
             {
                 @Ajax.RawActionLink(String.Concat("<i class='", TaskStatus.DesignClass, "'></i>", TaskStatus.Name, (TaskStatus.Name == "جديدة") ? "<span class='label label-success'>" + (string)ViewBag.NewCount + "</span>" : (TaskStatus.Name == "انتهت") ? "<span class='label label-success'>" + (string)ViewBag.EndedCount + "</span>" : ""), "GetTasks", null, new { status = TaskStatus.ID },
                 new AjaxOptions

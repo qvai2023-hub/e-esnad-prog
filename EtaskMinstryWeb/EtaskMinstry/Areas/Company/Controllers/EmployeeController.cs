@@ -95,11 +95,11 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// </summary>
         /// <param name="Email"></param>
         /// <returns></returns>
-        public ActionResult CheckDuplicateEmail(string Email)
+        public ActionResult CheckDuplicateEmail(string Email, int EmpID = 0)
         {
             int? companyID = MvcApplication.userData.CompanyId;
 
-            var result = new CompanyEmployeeVM().CheckForUniqueEmail(companyID, Email);
+            var result = new CompanyEmployeeVM().CheckForUniqueEmail(companyID, Email, EmpID);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 

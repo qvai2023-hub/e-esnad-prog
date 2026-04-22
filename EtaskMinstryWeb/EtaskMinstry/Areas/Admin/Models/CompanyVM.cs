@@ -127,8 +127,9 @@ namespace EtaskMinstry.Areas.Admin.Models
                 }).ToDictionary(x => x.CompanyID);
 
             List<CompanyVM> companies = new List<CompanyVM>();
-            companies = _unitOfWork.Company.Get(a => a.IsDeleted == false && a.Name.Contains(Name) && a.Email.Contains(Email)
-                && a.CommercialRegister.Contains(CommercialRegister) && (IsActive == null || a.IsActive == IsActive)).ToList().Select(a => new CompanyVM()
+            companies = _unitOfWork.Company.Get(filter: a => a.IsDeleted == false && a.Name.Contains(Name) && a.Email.Contains(Email)
+                && a.CommercialRegister.Contains(CommercialRegister) && (IsActive == null || a.IsActive == IsActive),
+                includeProperties: "UserAccounts").ToList().Select(a => new CompanyVM()
                 {
                     Id = a.CompanyID,
                     Name = a.Name,
