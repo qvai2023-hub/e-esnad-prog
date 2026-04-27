@@ -311,8 +311,10 @@ namespace EtaskMinstry.Areas.Admin.Models
 
         public bool CheckDublicateEmail(string Email, int Id)
         {
-            // return _unitOfWork.Company.Get(a => a.Email == Email && a.CompanyID != Id && a.IsDeleted == false).FirstOrDefault() == null ? true : false;
-            return new CompanyEmployeeVM().CheckForUniqueEmail(Id, Email);
+            if (Id != 0)
+                return _unitOfWork.Company.Get(a => a.Email == Email && a.CompanyID != Id && a.IsDeleted == false).FirstOrDefault() == null ? true : false;
+            else
+                return _unitOfWork.Company.Get(a => a.Email == Email && a.IsDeleted == false).FirstOrDefault() == null ? true : false;
         }
 
 
