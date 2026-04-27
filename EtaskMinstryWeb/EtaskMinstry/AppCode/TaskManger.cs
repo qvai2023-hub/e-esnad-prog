@@ -30,7 +30,13 @@ namespace EtaskMinstry.AppCode
 
         public static void UpdateTaskStatus()
         {
-            //Define Unit ofWork 
+            // #36: throttle to once per 5 min per user — was running on every page load,
+            // doing N UPDATEs each time on Tasks where StartDate <= today (date-level threshold)
+            var cacheKey = "UpdateTaskStatus_" + (MvcApplication.userData.isCompany ? "C" : "E") + "_" + MvcApplication.userData.userId;
+            if (HttpRuntime.Cache[cacheKey] != null) return;
+            HttpRuntime.Cache.Insert(cacheKey, true, null, DateTime.Now.AddMinutes(5), System.Web.Caching.Cache.NoSlidingExpiration);
+
+            //Define Unit ofWork
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
             //     UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.AppSettings["ETaskEntities"].ToString());         
             if (MvcApplication.userData.isCompany)
