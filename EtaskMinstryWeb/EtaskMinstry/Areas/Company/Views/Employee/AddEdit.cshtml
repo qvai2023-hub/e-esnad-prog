@@ -244,6 +244,8 @@
 
     $(function () {
         $("form").on("submit", function () {
+            var validator = $(this).data("validator");
+            if (validator && validator.formSubmitted) return;
             if (_isSubmitting) return false;
             if ($(this).valid() && $('.field-validation-error:visible').length === 0 && isValidReCap) {
                 _isSubmitting = true;
