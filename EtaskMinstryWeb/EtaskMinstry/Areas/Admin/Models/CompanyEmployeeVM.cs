@@ -133,7 +133,7 @@ namespace EtaskMinstry.Areas.Admin.Models
         public bool CheckForUniqueName(int? companyID, int? empID, string Name)
         {
 
-            var result = _unitOfWork.Employee.Get().Count(e => e.CompanyID == companyID && e.EmpID != empID && e.Name.Contains(Name)) > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get().Count(e => e.CompanyID == companyID && e.EmpID != empID && e.Name.Contains(Name) && e.IsDeleted == false) > 0 ? false : true;
             return result;
         }
 

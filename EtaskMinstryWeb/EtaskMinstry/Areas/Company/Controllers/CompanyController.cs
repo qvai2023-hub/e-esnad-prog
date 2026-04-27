@@ -32,7 +32,6 @@ namespace EtaskMinstry.Areas.Company.Controllers
              EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
              ViewData["CompanyTask"] = new CompanyTaskVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), 0, isArchive, isNotAssign, 0, 0);
 
-            ViewBag.statuse = new SelectList(new StatusDisplay().Get().ToList(), "ID", "Name");
             ViewBag.Employee = new SelectList(EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployeeNotDeleted(MvcApplication.userData.userId), "id", "name");
             ViewBag.Project = new SelectList(new ProjectDisplay().Get(), "ID", "Name");
             Generallog.LogView();
