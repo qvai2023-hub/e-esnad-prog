@@ -40,7 +40,7 @@
                     return false;
                 }
                 else if (files[0].size > size) {
-                    $('.UploadErrorMsg').text('يجب ان لا يتجاوز حجم الملف 4 ميجا').css('color', 'red');
+                    $('.UploadErrorMsg').text('يجب ان لا يتجاوز حجم الملف 10 ميجا').css('color', 'red');
                     $("#imgSt").hide();
                     return false;
                 }
@@ -65,8 +65,9 @@
                                 $("#imgSt").attr('src', '/Content/Main/images/img-icon.png').css({ 'width': '50px', 'height': '50px' }).show();
                             }
 
-                            $('.UploadErrorMsg').text('تم رفع الملف بنجاح').css('color', 'green');
+                            $('.UploadErrorMsg').text('تم اختيار الملف، سيتم رفعه عند الحفظ').css('color', '#0a7ec2');
                             $('#hiddenfileName').val(files[0].name);
+                            $('#isFileValid').val('1');
                             $('#trUploadvalidation')[0].innerHTML = '';
                         };
                     })(files[0]);
@@ -86,6 +87,47 @@
             return ext == 'jpg' || ext == 'jpeg' || ext == 'png';
         }, 'امتداد هذا الملف غير مسموح به');
     });
+
+    // Bug #60: prevent silent attachment loss during slow uploads
+    (function () {
+        var isUploading = false;
+
+        // Warn the user before they leave while a file is selected but the form hasn't been saved
+        window.addEventListener('beforeunload', function (e) {
+            var hasPendingFile = $('#hiddenfileName').val();
+            if (hasPendingFile && !isUploading) {
+                var msg = 'لديك ملف مرفق لم يتم حفظه بعد. هل تريد المغادرة؟';
+                e.preventDefault();
+                e.returnValue = msg;
+                return msg;
+            }
+            // While the upload is in flight, also warn — refreshing kills the POST and loses the file
+            if (isUploading) {
+                var uploadMsg = 'جاري رفع الملف، الخروج الآن سيؤدي إلى فقدان المرفق.';
+                e.preventDefault();
+                e.returnValue = uploadMsg;
+                return uploadMsg;
+            }
+        });
+
+        // On any form submit on the page that contains the upload, show an overlay and disable submit
+        $(document).on('submit', 'form', function () {
+            if (!$('#hiddenfileName').val()) return; // no file attached → no need
+            isUploading = true;
+            $(this).find('input[type=submit], button[type=submit]').prop('disabled', true);
+            if ($('#uploadOverlay').length === 0) {
+                $('body').append(
+                    '<div id="uploadOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;' +
+                    'background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;' +
+                    'justify-content:center;color:#fff;font-size:18px;direction:rtl;">' +
+                    '<div style="text-align:center;background:#222;padding:30px 40px;border-radius:8px;">' +
+                    '<i class="fa fa-spinner fa-spin fa-3x" style="margin-bottom:15px;"></i><br/>' +
+                    'جاري رفع الملف، يرجى الانتظار وعدم إغلاق الصفحة...' +
+                    '</div></div>'
+                );
+            }
+        });
+    })();
 
     function CheckIsValid(Extentions, ext, fileType) {
         var valid = false;
