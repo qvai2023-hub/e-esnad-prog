@@ -241,11 +241,12 @@ namespace EtaskMinstry.Areas.Company.Controllers
             int Taskid = int.Parse(Request.Form["taskID"]);
             //if (Extentions.ValidateReCaptcha())
             //{
+                string originalFileName = Request.Files.Count > 0 ? Extentions.SanitizeFileName(Request.Files[0].FileName) : null;
                 string filename = new EtaskMinstry.AppCode.UploadFile().Uploadfile(Request,"/Upload/Task/");
                 if (filename != "FAILED")
                 {
                     var description = Request.Form["txtFileDescription"];
-                    EtaskMinstry.AppCode.TaskManger.AttachTaskFile(Taskid, filename, description);
+                    EtaskMinstry.AppCode.TaskManger.AttachTaskFile(Taskid, filename, description, originalFileName);
                     return RedirectToAction("TaskDetails", new { id = Taskid, isAttach = 1 });
                 }
                 else
