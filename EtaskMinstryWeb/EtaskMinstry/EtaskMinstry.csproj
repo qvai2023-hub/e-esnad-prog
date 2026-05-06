@@ -781,6 +781,7 @@
     <Content Include="Areas\Company\Views\Report\EmployeeReport.cshtml" />
     <Content Include="Areas\Admin\Views\Employee\_Index.cshtml" />
     <Content Include="Areas\Company\Views\Task\EDitTask.cshtml" />
+    <Content Include="App_Data\telesak-qa.json" />
     <None Include="Properties\PublishProfiles\Ayman.pubxml" />
     <None Include="Properties\PublishProfiles\k.pubxml" />
     <Content Include="Report\TotalEmployeeTasks.rdl" />

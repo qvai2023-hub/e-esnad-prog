@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Bug #60 Round 2 (Session WQ5V1, 2026-05-06)
+
+After Round 1 deploy, tester reopened #60 with valid UX feedback: the `beforeunload`
+guard was triggering Chrome's generic native "Leave site? Changes you may not be
+saved" dialog. Clicking **Cancel** left the user looking at a static overlay
+(misperceived as frozen). Clicking **Leave** actually let the upload finish on the
+server but the user got no confirmation.
+
+Browsers (Chrome/Firefox/Safari/Edge) deliberately ignore custom messages in
+`beforeunload` for security reasons, so a custom "Wait / Leave" dialog there
+is technically impossible. Approach changed to: drop `beforeunload` entirely,
+make the overlay do the communication.
+
+**Changes — `Views/Shared/PartialUploadFile.cshtml` only (1 file):**
+- Removed both `beforeunload` listeners (the file-pending one + the in-flight one)
+- Overhauled the upload overlay:
+  - Bigger, layered text in RTL: bold "جاري رفع الملف..." headline + clear sub-message asking the user not to refresh
+  - Animated CSS marquee progress bar (striped, perpetually moving) so motion is visible — proves the page isn't frozen even though we can't compute a real % from a synchronous form POST
+  - Live time-elapsed counter ("الوقت المنقضي: N ثانية") updating every second
+  - Bigger cloud-upload icon, dark backdrop, blocks all click-through
+- New "تم الرفع بنجاح" success toast: detects `?isAttach=1` query string on page load (both Company and Employee `AddAttachment` redirect with that param), shows a green dismissable toast for 3.5s, then fades out. URL is cleaned via `history.replaceState` so refreshing the page doesn't re-show the toast.
+
 ### Fixed - Bug #36 Round 3 (Session WQ5V1, 2026-05-06)
 
 The reported 80s+ TTFB on `/Company/Company/index` for companies with thousands of tasks was traced to **no server-side pagination** — the controller loaded every task from the DB and `WebGrid` paginated client-side after materializing the whole list. Confirmed by Chrome instrumentation against `app-test.telesak.com`.
