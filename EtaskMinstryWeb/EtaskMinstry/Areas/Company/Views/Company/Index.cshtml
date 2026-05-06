@@ -269,7 +269,7 @@
 
         @* --------------------  Start Partial Table Return With Result---------- *@
         <div id="divTasks" class="datatable-tasks">
-            @{ Html.RenderPartial("PartialCompTask", (IEnumerable<EtaskMinstry.Models.Company.CompanyTaskVM>)ViewData["CompanyTask"]);}
+            @{ Html.RenderPartial("PartialCompTask", (EtaskMinstry.Models.PagedResult<EtaskMinstry.Models.Company.CompanyTaskVM>)ViewData["CompanyTask"]);}
         </div>
         @* --------------------  End Partial Table Return With Result---------- *@
     </div>
@@ -306,6 +306,23 @@
 
     $( document ).ready(function() {
         $('#navTabs li').first().addClass('active');
+    });
+
+    // Bug #36 — AJAX-aware WebGrid pagination.
+    // The WebGrid pager renders <a href="?page=N&..."> links inside #divTasks. By default
+    // clicking them does a full page reload to whichever URL produced the partial — which
+    // is broken when the partial was loaded via AJAX from /Company/Company/GetTasks.
+    // Event delegation here intercepts those clicks and re-fetches just the partial,
+    // replacing #divTasks. Falls back to full navigation if the AJAX call fails.
+    $(document).on('click', '#divTasks tfoot a, #divTasks .pagerbar a', function (e) {
+        var url = $(this).attr('href');
+        if (!url || url === '#') return;
+        e.preventDefault();
+        $('#loadding').show();
+        $.get(url)
+            .done(function (data) { $('#divTasks').html(data); })
+            .fail(function () { window.location = url; })
+            .always(function () { $('#loadding').hide(); });
     });
 
     $(function() {

@@ -144,7 +144,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                     Password = QvLib.Security.DataProtection.Decrypt(a.UserAccounts.FirstOrDefault().Password),
                     DonetasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Done : 0,
                     tasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Total : 0,
-                }).OrderByDescending(x=>x.Id).ToList();
+                }).OrderByDescending(x=>x.Id).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return companies;
         }

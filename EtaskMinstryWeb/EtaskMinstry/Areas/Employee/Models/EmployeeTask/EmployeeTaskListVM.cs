@@ -107,7 +107,7 @@ namespace EtaskMinstry.Models.EmployeeTask
                                                     && (String.IsNullOrEmpty(ToEndDate) ||
                                                         o.EndDate.Value <= dtToEndDate)
 
-                  ).OrderByDescending(t => t.TaskID).ToList();
+                  ).OrderByDescending(t => t.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
 
             for (int i = 0; i < tasks.Count; i++)

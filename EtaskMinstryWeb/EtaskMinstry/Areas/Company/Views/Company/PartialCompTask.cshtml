@@ -1,15 +1,24 @@
 ﻿@using EtaskMinstry
-@model IEnumerable<EtaskMinstry.Models.Company.CompanyTaskVM>
-@if (Model.Any())
+@using EtaskMinstry.Models
+@model PagedResult<EtaskMinstry.Models.Company.CompanyTaskVM>
+@if (Model != null && Model.Items.Any())
 {
     <div id="list" class="table-responsive">
         @{
-
-            var grid = new WebGrid(Model);
+            // Bug #36 — server-side pagination.
+            // We pass rowCount = current page size, totalRowCount = total across all pages.
+            // WebGrid uses these to render numbered pager links that trigger full-page navigation
+            // back to /Company/Company/Index?page=N (handled by Index() action).
+            var grid = new WebGrid(
+                source: Model.Items,
+                rowsPerPage: Model.PageSize,
+                canPage: true,
+                canSort: false);
+            grid.Bind(source: Model.Items, rowCount: Model.TotalCount, autoSortAndPage: false);
             var gridColumns = new List<WebGridColumn>();
 
 // Show checkbox column only for New tasks tab
-if (Model.All(i => i.StatusID == (int)TaskStatus.New))
+if (Model.Items.All(i => i.StatusID == (int)TaskStatus.New))
 {
             gridColumns.Add(grid.Column("Select", "تحديد",
                 format: @<text><input type="checkbox" class="chkTask" value="@item.TaskID" data-statusid="@item.StatusID" /></text>, style: "text-center", canSort: false));
@@ -36,9 +45,9 @@ gridColumns.Add(grid.Column("FinishedDate", "تاريخ التسليم", @<text>
 
 gridColumns.Add(grid.Column("Link", "الرابط", @<text><a class="copy_text" data-toggle="tooltip" title="نسخ الرابط " href="@ViewContext.Controller.ViewBag.domain/Company/Company/TaskDetails/@item.TaskID">نسخ الرابط </a></text>, "Link"));
 
-if (!Model.All(i => i.IsDelayed) && !Model.All(i => i.StatusID == (int)TaskStatus.Done) && !Model.All(i => i.IsArchived)
-&& !Model.All(i => i.StatusID == (int)TaskStatus.Rejected) && !Model.All(i => i.StatusID == (int)TaskStatus.NotAproved)
-&& !Model.All(i => i.StatusID == (int)TaskStatus.Approved))
+if (!Model.Items.All(i => i.IsDelayed) && !Model.Items.All(i => i.StatusID == (int)TaskStatus.Done) && !Model.Items.All(i => i.IsArchived)
+&& !Model.Items.All(i => i.StatusID == (int)TaskStatus.Rejected) && !Model.Items.All(i => i.StatusID == (int)TaskStatus.NotAproved)
+&& !Model.Items.All(i => i.StatusID == (int)TaskStatus.Approved))
 {
 gridColumns.Add(grid.Column("Progressbar", "المؤشرالزمنى"
 ,@<text>@if (@item.StatusID == (int)TaskStatus.New || @item.StatusID == (int)TaskStatus.Inprogress)
@@ -129,19 +138,19 @@ gridColumns.Add(grid.Column("Prioirty", "الأهمية", @<text><div class='@((
 
         </div></text>, "SecondColumn"));
 
-if (!Model.All(i => i.IsArchived))
+if (!Model.Items.All(i => i.IsArchived))
 {
-if (!Model.All(i => i.StatusID == (int)TaskStatus.Rejected) && !Model.All(i => i.StatusID == (int)TaskStatus.Approved)
-&& !Model.All(i => i.StatusID == (int)TaskStatus.Delay) && !Model.All(i => i.StatusID == (int)TaskStatus.Done)
-&& !Model.All(i => i.StatusID == (int)TaskStatus.Inprogress) && !Model.All(i => i.StatusID == (int)TaskStatus.New)
-&& !Model.All(i => i.StatusID == (int)TaskStatus.NotAproved) && !Model.All(i => i.StatusID == (int)TaskStatus.Pending))
+if (!Model.Items.All(i => i.StatusID == (int)TaskStatus.Rejected) && !Model.Items.All(i => i.StatusID == (int)TaskStatus.Approved)
+&& !Model.Items.All(i => i.StatusID == (int)TaskStatus.Delay) && !Model.Items.All(i => i.StatusID == (int)TaskStatus.Done)
+&& !Model.Items.All(i => i.StatusID == (int)TaskStatus.Inprogress) && !Model.Items.All(i => i.StatusID == (int)TaskStatus.New)
+&& !Model.Items.All(i => i.StatusID == (int)TaskStatus.NotAproved) && !Model.Items.All(i => i.StatusID == (int)TaskStatus.Pending))
 {
 gridColumns.Add(grid.Column("Status", "الارشيف", @<text>@(item.IsArchived ? "نعم" : "لا")</text>, "ThirdColumn"));
 }
 }
 
 
-if (Model.All(i => i.IsDelayed))
+if (Model.Items.All(i => i.IsDelayed))
 {
 gridColumns.Add(grid.Column("Delay", "مدة التأخير", @<text>@item.Delay</text>, "FirstColumn"));
 
@@ -149,7 +158,7 @@ gridColumns.Add(grid.Column("Delay", "مدة التأخير", @<text>@item.Delay
 
 // For Approved Tasks .
 
-if (Model.All(i => i.StatusID == (int)TaskStatus.Approved))
+if (Model.Items.All(i => i.StatusID == (int)TaskStatus.Approved))
 {
 
 gridColumns.Add(grid.Column("Archive", "الأرشيف", @<text>@if (@item.StatusID == (int)TaskStatus.Approved && !@item.IsArchived)
@@ -178,7 +187,7 @@ gridColumns.Add(grid.Column("Archive", "الأرشيف", @<text>@if (@item.Statu
 
 // For New Tasks .
 
-if (Model.All(i => i.StatusID == (int)TaskStatus.New) && Model.Any(i => i.EmpName != ""))
+if (Model.Items.All(i => i.StatusID == (int)TaskStatus.New) && Model.Items.Any(i => i.EmpName != ""))
 {
 gridColumns.Add(grid.Column("Delete", "حذف",
     @<text><span class="iconbox has-tip" title="" data-original-title="حذف">
@@ -187,7 +196,7 @@ gridColumns.Add(grid.Column("Delete", "حذف",
 }
 
 // For Done Tasks .
-if (Model.All(i => i.StatusID == (int)TaskStatus.Done))
+if (Model.Items.All(i => i.StatusID == (int)TaskStatus.Done))
 {
 gridColumns.Add(grid.Column("WorkedHours", "الوقت المستغرق", @<text>@item.SpendtimebyDay</text>, "ForthColumn"));
 
@@ -206,7 +215,7 @@ gridColumns.Add(grid.Column("Refused", "رفض", @<text>
     </text>, "fivethColumn"));
 }
 gridColumns.Add(grid.Column("Edit", "تعديل", @<text><a class="fa fa-edit" id="a_@item.TaskID" href="/Company/Task/EDitTask?taskId=@item.TaskID"></a></text>, "EditCol"));
-if (!(Model.All(i => i.StatusID == (int)TaskStatus.New) && Model.Any(i => i.EmpName != "")))
+if (!(Model.Items.All(i => i.StatusID == (int)TaskStatus.New) && Model.Items.Any(i => i.EmpName != "")))
 {
 gridColumns.Add(grid.Column("Delete", "حذف", @<text>
         <a class="fa fa-trash" id="@item.TaskID"></a>

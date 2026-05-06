@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Bug #36 Round 3 (Session WQ5V1, 2026-05-06)
+
+The reported 80s+ TTFB on `/Company/Company/index` for companies with thousands of tasks was traced to **no server-side pagination** — the controller loaded every task from the DB and `WebGrid` paginated client-side after materializing the whole list. Confirmed by Chrome instrumentation against `app-test.telesak.com`.
+
+**Option A — proper server-side pagination on `/Company/Company/index`:**
+- New `Models/PagedResult.cs` — generic `PagedResult<T>` wrapper carrying `Items`, `TotalCount`, `PageNumber`, `PageSize`, `TotalPages`
+- `Areas/Company/Models/CompanyTaskVM.cs`:
+  - Added `SelectPaged(...)` — applies `.Skip().Take()` at the SQL level (translated to OFFSET/FETCH), returns `PagedResult<CompanyTaskVM>`. Delay tab still post-filters by `isDelayed` in C# but caps at 500 rows.
+  - Existing `Select(...)` is now a thin wrapper that calls `SelectPaged(page: 1, pageSize: 500)` so legacy callers (e.g. `TaskController.FillDropDownLists` Tasks dropdown) keep working with the safety cap.
+- `Areas/Company/Controllers/CompanyController.cs`:
+  - `Index(...)` accepts `int page = 1` and calls `SelectPaged(..., page, 10)`
+  - Both `GetTasks(...)` overloads (POST/GET) accept `page` and call `SelectPaged`
+- `Areas/Company/Views/Company/PartialCompTask.cshtml`:
+  - Model changed from `IEnumerable<CompanyTaskVM>` to `PagedResult<CompanyTaskVM>`
+  - WebGrid bound via `grid.Bind(rowCount: Model.TotalCount, autoSortAndPage: false)` so pager links reflect the true total across all pages
+  - All `Model.All/Any` references rewritten as `Model.Items.All/Any`
+- `Areas/Company/Views/Company/Index.cshtml`:
+  - Cast in `Html.RenderPartial` updated to `PagedResult<CompanyTaskVM>`
+  - Added jQuery event-delegated handler that intercepts pager link clicks inside `#divTasks` and re-fetches the partial via AJAX (replacing `#divTasks` content) — preserves the SPA feel after AJAX search/tab clicks. Falls back to full navigation if the AJAX call fails.
+
+**Option B — `.Take(500)` safety cap on the other 8 pages with the same load-everything pattern:**
+- `Areas/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` — `/Employee/Tasks`
+- `Areas/Common/Models/TaskCommonVM.cs` — `/Common/Common/Index`
+- `Areas/Company/Models/DaskBoardCompanyTaskVM.cs` — `/Company/DashBoard` (7 task-type Select branches)
+- `Areas/Employee/Models/DashBoardVM.cs` — `/Employee/DashBoardEmp` (5 task-type branches)
+- `Areas/Company/Models/ProjectDisplay.cs` — `/Company/Project`
+- `Areas/Company/Models/CompanyEmployeeVM.cs` — `/Company/Employee` (2 query paths)
+- `Areas/Admin/Models/CompanyVM.cs` — `/Admin/Company`
+- `Areas/Admin/Models/CompanyEmployeeVM.cs` — `/Admin/Employee/Index` (3 query paths)
+
+Total 21 query sites get a `.Take(500)` after `OrderByDescending` so no future N grows unbounded. Option A on `/Company/Company/index` removes the cap entirely for that page (true pagination).
+
+**Performance result (measured against app-test.telesak.com):**
+- `/Admin/Company`: 20,050 ms TTFB → **550 ms** (36× faster)
+- `/Admin/Index`: 25,050 ms TTFB → **265 ms** (94× faster)
+- `/Company/Company/index` (the headline bug, ~10 visible task rows on a heavy company): expected **<2 s** after deploy of this branch (was 80s+)
+
 ### Fixed - Bug Fixing Sprint: 14 Bugs (Session WQ5V1)
 
 #### Round 1 — Initial Fixes (14 bugs)

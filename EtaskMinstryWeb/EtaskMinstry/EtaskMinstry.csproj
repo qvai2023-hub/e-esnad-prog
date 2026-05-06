@@ -276,6 +276,7 @@
     <Compile Include="Models\Login\LoginVM.cs" />
     <Compile Include="Models\Login\Security.cs" />
     <Compile Include="Models\Login\UserAccountVM.cs" />
+    <Compile Include="Models\PagedResult.cs" />
     <Compile Include="Models\Priority\PriorityDisplay.cs" />
     <Compile Include="Models\PushNotificationVM.cs" />
     <Compile Include="Models\Status\StatusDisplay.cs" />

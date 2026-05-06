@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using EtaskMinstry;
 using EtaskMinstry.App_Code;
+using EtaskMinstry.Models;
 using EtaskMinstry.Models.EmployeeTask;
 using TaskManagementModel;
 using EtaskMinstry.AppCode;
@@ -99,13 +100,36 @@ namespace EtaskMinstry.Models.Company
 /// <param name="iProjectID"></param>
 /// <param name="PriorityID"></param>
 /// <returns></returns>
+        // Bug #36 — backwards-compat wrapper.
+        // Existing callers (e.g. TaskController.FillDropDownLists ViewBag.Tasks dropdown) keep working.
+        // Option B safety cap of 500 rows is applied via SelectPaged so a Company with thousands of tasks
+        // can no longer freeze the page (was 80s+ before this fix).
         public List<CompanyTaskVM> Select(String strTitle, String FromStartDate, String ToStartDate, String FromEndDate,
                                           String ToEndDate, int iStatus, int? iEmpolyee, Boolean? bIsArchived,
                                           Boolean? bIsNotAssigned, int iProjectID, int PriorityID)
         {
+            return SelectPaged(strTitle, FromStartDate, ToStartDate, FromEndDate, ToEndDate, iStatus,
+                               iEmpolyee, bIsArchived, bIsNotAssigned, iProjectID, PriorityID,
+                               page: 1, pageSize: 500).Items;
+        }
+
+        /// <summary>
+        /// Bug #36 — server-side paginated version of Select.
+        /// Used by /Company/Company/Index and the AJAX GetTasks endpoints to load only one page (10 rows)
+        /// from the database instead of every task. Returns total count for the pager UI.
+        /// Delay tab is paginated in C# after the isDelayed post-filter (capped at 500 rows for safety).
+        /// </summary>
+        public PagedResult<CompanyTaskVM> SelectPaged(String strTitle, String FromStartDate, String ToStartDate, String FromEndDate,
+                                          String ToEndDate, int iStatus, int? iEmpolyee, Boolean? bIsArchived,
+                                          Boolean? bIsNotAssigned, int iProjectID, int PriorityID,
+                                          int page = 1, int pageSize = 10)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+
             // Get Company Employees .
             List<EmployeeProfile> CompanyEmployee =EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployee (MvcApplication.userData.userId);
-           
+
     DateTime dtFromStartDate = new DateTime();
             DateTime dtToStartDate = new DateTime();
 
@@ -129,14 +153,15 @@ namespace EtaskMinstry.Models.Company
 
             strTitle = strTitle.Trim().ToLower();
 
-            List<CompanyTaskVM> objTasks =
-                _unitOfWork.TaskRepository.Get(includeProperties: "Project,Status,Priority,TaskTLogs", filter: t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
+            // Bug #36 — build the query as IQueryable (NOT materialized yet)
+            // so Count() and Skip/Take below get translated to SQL.
+            var projectedQuery = _unitOfWork.TaskRepository.Get(includeProperties: "Project,Status,Priority,TaskTLogs", filter: t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
                                                     &&
                                                     (!bIsNotAssigned.HasValue || t.EmpID == null)
                                                     &&
                                                     (!bIsArchived.HasValue || t.IsArchived)
                                                     &&
-                                                    (iStatus == 0 || iStatus == (int)TaskStatus.Delay 
+                                                    (iStatus == 0 || iStatus == (int)TaskStatus.Delay
                                                     ||
                                                      (iStatus == (int)TaskStatus.Accepted
                                                           ? t.StatusID == iStatus
@@ -183,8 +208,8 @@ namespace EtaskMinstry.Models.Company
                                                                 StartDate = t.StartDate.Value,
                                                                 EndDate = t.EndDate.Value,
                                                                 EmpID = t.EmpID.Value,
-                                                              
-               
+
+
                                                                 // Sum Worked Hours .
                                                                 WorkedHours = t.TaskTLogs.Where(
                                                                     i =>
@@ -198,7 +223,7 @@ namespace EtaskMinstry.Models.Company
 
                                                                 // Get Finish Date .
                                                                 FinishDate = t.DeliverDate,
-                                                             
+
                                                                 /*t.TaskTLog.FirstOrDefault(
                                                                     i =>
                                                                     i.EmpID == t.EmpID
@@ -207,7 +232,10 @@ namespace EtaskMinstry.Models.Company
                                                                     &&
                                                                     i.StatusID ==
                                                                     (int) TaskStatus.Done).CreatedDate*/
-                                                            }).OrderByDescending(i => i.TaskID).ToList();
+                                                            });
+
+            int totalCount;
+            List<CompanyTaskVM> objTasks;
 
             ////To Change From Greg. Date To Hijri Date .
             //// Arabic Finish Date .
@@ -239,48 +267,48 @@ namespace EtaskMinstry.Models.Company
 
             //objTasks.ForEach(t => t.SpendtimebyDay = TaskManger.SpendTimeByDay(t.WorkedHours));
 
-            if (iStatus != (int)TaskStatus.Delay) {
-            objTasks.ForEach(t =>
+            if (iStatus != (int)TaskStatus.Delay)
             {
-                t.ArabicFinishDate = (t.FinishDate.HasValue) ? (MvcApplication.IsGregDate) ? t.FinishDate.Value.ToGregArabicDate() : t.FinishDate.Value.ToHijriArabicDate() : String.Empty;
-                //t.HijriStartDate = (t.StartDate.HasValue) ? (MvcApplication.IsGregDate) ? t.StartDate.Value.ToGregArabicDate() : t.StartDate.Value.ToHijriArabicDate() : String.Empty;
-                //t.HijriEndDate = (t.EndDate.HasValue) ? (MvcApplication.IsGregDate) ? t.EndDate.Value.ToGregArabicDate() : t.EndDate.Value.ToHijriArabicDate() : String.Empty;
-                t.HijriStartDate = (t.StartDate.HasValue) ? t.StartDate.Value.ToGregArabicDate() : String.Empty;
-                t.HijriEndDate = (t.EndDate.HasValue) ? t.EndDate.Value.ToGregArabicDate() : String.Empty;
-                // t.IsDelayed = isTaskDelayed(t);
-                t.EmpName = t.EmpID == null
-                                ? "غير مسنده" : (CompanyEmployee.Count(i => i.id == t.EmpID) > 0 ? CompanyEmployee.FirstOrDefault(i => i.id == t.EmpID).name : "-");
-               // t.Progressbar = ProgressbarPercentage(t);
-                //t.Delay = Delaytime(t);
-               
-            });
-
-
-            }
-            // To Get Only Delayed Task .
-            else{
+                // Server-side pagination: SQL gets Skip/Take, only the requested page is materialized.
+                totalCount = projectedQuery.Count();
+                objTasks = projectedQuery.OrderByDescending(i => i.TaskID)
+                                         .Skip((page - 1) * pageSize)
+                                         .Take(pageSize)
+                                         .ToList();
 
                 objTasks.ForEach(t =>
                 {
                     t.ArabicFinishDate = (t.FinishDate.HasValue) ? (MvcApplication.IsGregDate) ? t.FinishDate.Value.ToGregArabicDate() : t.FinishDate.Value.ToHijriArabicDate() : String.Empty;
-                    //t.HijriStartDate = (t.StartDate.HasValue) ? (MvcApplication.IsGregDate) ? t.StartDate.Value.ToGregArabicDate() : t.StartDate.Value.ToHijriArabicDate() : String.Empty;
-                    //t.HijriEndDate = (t.EndDate.HasValue) ? (MvcApplication.IsGregDate) ? t.EndDate.Value.ToGregArabicDate() : t.EndDate.Value.ToHijriArabicDate() : String.Empty;
+                    t.HijriStartDate = (t.StartDate.HasValue) ? t.StartDate.Value.ToGregArabicDate() : String.Empty;
+                    t.HijriEndDate = (t.EndDate.HasValue) ? t.EndDate.Value.ToGregArabicDate() : String.Empty;
+                    t.EmpName = t.EmpID == null
+                                    ? "غير مسنده" : (CompanyEmployee.Count(i => i.id == t.EmpID) > 0 ? CompanyEmployee.FirstOrDefault(i => i.id == t.EmpID).name : "-");
+                });
+            }
+            else
+            {
+                // Delay tab: isDelayed is computed in C# (not a DB column), so we must materialize first.
+                // Cap at 500 rows for safety so we never freeze the page on companies with thousands of accepted tasks.
+                var allTasks = projectedQuery.OrderByDescending(i => i.TaskID).Take(500).ToList();
+
+                allTasks.ForEach(t =>
+                {
+                    t.ArabicFinishDate = (t.FinishDate.HasValue) ? (MvcApplication.IsGregDate) ? t.FinishDate.Value.ToGregArabicDate() : t.FinishDate.Value.ToHijriArabicDate() : String.Empty;
                     t.HijriStartDate = (t.StartDate.HasValue) ?  t.StartDate.Value.ToGregArabicDate()  : String.Empty;
                     t.HijriEndDate = (t.EndDate.HasValue)  ? t.EndDate.Value.ToGregArabicDate()  : String.Empty;
                     t.IsDelayed = isTaskDelayed(t);
                     t.EmpName = t.EmpID == null
                                     ? "غير مسنده" : (CompanyEmployee.Count(i => i.id == t.EmpID) > 0 ? CompanyEmployee.FirstOrDefault(i => i.id == t.EmpID).name : "-");
-                   // t.Progressbar = ProgressbarPercentage(t);
                     t.SpendtimebyDay = TaskManger.SpendTimeByDay(t.WorkedHours);
                     t.Delay = Delaytime(t);
-
                 });
 
-                objTasks = objTasks.Where(i => i.IsDelayed).ToList();
+                var delayedOnly = allTasks.Where(i => i.IsDelayed).ToList();
+                totalCount = delayedOnly.Count;
+                objTasks = delayedOnly.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             }
-              
 
-            return objTasks;
+            return new PagedResult<CompanyTaskVM>(objTasks, totalCount, page, pageSize);
         }
 
         //public string SpendTimeByDay(decimal? ActualTime)

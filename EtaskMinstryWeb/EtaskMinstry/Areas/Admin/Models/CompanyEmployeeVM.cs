@@ -350,7 +350,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                     IsActive = (bool)e.IsActive,
                     IsDeleted = (bool)e.IsDeleted,
                     tasksCount = e.Tasks.Where(x => x.IsDeleted == false).Count()
-                }).OrderByDescending(x=>x.Id).ToList();
+                }).OrderByDescending(x=>x.Id).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }
@@ -391,7 +391,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                     DonetasksCount = taskCounts.ContainsKey(e.EmpID) ? taskCounts[e.EmpID].Done : 0,
                     tasksCount = taskCounts.ContainsKey(e.EmpID) ? taskCounts[e.EmpID].Total : 0,
                     Password = QvLib.Security.DataProtection.Decrypt(e.UserAccounts.FirstOrDefault().Password)
-                }).OrderByDescending(x => x.Id).ToList();
+                }).OrderByDescending(x => x.Id).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }
@@ -411,7 +411,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                     Email = e.Email,
                     IsActive = (bool)e.IsActive,
                     IsDeleted = (bool)e.IsDeleted
-                }).OrderByDescending(x => x.Id).ToList();
+                }).OrderByDescending(x => x.Id).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }

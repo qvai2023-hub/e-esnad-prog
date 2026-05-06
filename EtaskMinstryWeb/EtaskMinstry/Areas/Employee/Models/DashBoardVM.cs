@@ -111,7 +111,7 @@ namespace EtaskMinstry.Models.Employee
                             EmpID=t.EmpID
                             
                             
-                        }).OrderByDescending(i => i.taskID).ToList();
+                        }).OrderByDescending(i => i.taskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                     // Arabic End Date .                     
                     objTasks.ForEach(
@@ -145,7 +145,7 @@ namespace EtaskMinstry.Models.Employee
                         DateTime.MinValue : t.TaskTLogs.Where(l => l.StatusID == (int)TaskStatus.Pending).OrderByDescending(s => s.TaskTLogID).FirstOrDefault().CreatedDate,
                         
 
-                    }).OrderByDescending(i => i.taskID).ToList();
+                    }).OrderByDescending(i => i.taskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
 
                     objTasks.ForEach(
@@ -169,7 +169,7 @@ namespace EtaskMinstry.Models.Employee
                         SpendTime = t.TaskTLogs.Count(),
                         EmpID = t.EmpID,
                         actualTime = t.ActualTime
-                    }).OrderByDescending(i => i.taskID).ToList();
+                    }).OrderByDescending(i => i.taskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                     //Calculate Spending Time
                     var finishIds = objTasks.Select(t => t.taskID).ToList();
@@ -275,7 +275,7 @@ namespace EtaskMinstry.Models.Employee
                         actualTime = t.ActualTime,
                           Status = t.Status.Name
 
-                    }).OrderByDescending(i => i.taskID).ToList();
+                    }).OrderByDescending(i => i.taskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                     // Arabic Start Date .
                     objTasks.ForEach(
@@ -318,7 +318,7 @@ namespace EtaskMinstry.Models.Employee
                         SpendTime = t.TaskTLogs.Count(),
                         EmpID = t.EmpID,
                         actualTime=t.ActualTime
-                    }).OrderByDescending(i => i.taskID).ToList();
+                    }).OrderByDescending(i => i.taskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                     objTasks.ForEach(i => i.TimeDetails = new List<TaskTimeDetails>());
                    

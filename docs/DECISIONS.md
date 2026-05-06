@@ -5,6 +5,59 @@ Each decision includes: Context, Decision, Rationale, and Consequences.
 
 ---
 
+## DEC-NEW-PAGINATION: Server-side pagination on `/Company/Company/index` + 500-row safety cap everywhere else
+
+**Date:** 2026-05-06
+**Session:** WQ5V1
+**Status:** Implemented
+**Bug:** #36 Round 3
+
+### Context
+The Company tasks page (`/Company/Company/index`) was reported to take 80+ seconds to render (browser even crashed with `STATUS_ACCESS_VIOLATION` on the heaviest company). Earlier sprints had already added eager loading, throttled `UpdateTaskStatus()`, removed dead `ViewBag.statuse` queries, and confirmed `IX_Task_StatusID_CompanyID` / `IX_Task_EmpID_CompanyID` indexes exist on production. Performance was still bad.
+
+Investigation found `CompanyTaskVM.Select()` was returning **every** task for the logged-in company; `WebGrid` then paginated client-side after the entire list was materialized. With thousands of tasks (and eager-loaded TaskTLogs joining further) the SQL alone took tens of seconds and the rest was wasted EF projection. The same "load-everything + WebGrid paginates" pattern existed on 8 other pages (Employee tasks, both dashboards, Common tasks, Projects, Company employees, Admin companies, Admin employees) — fast today only because their datasets are small.
+
+### Decision
+Two-pronged fix:
+
+1. **Option A (proper pagination) on the bug page only** — `/Company/Company/index`.
+   - Add `Models/PagedResult<T>` wrapper.
+   - Add `CompanyTaskVM.SelectPaged(...)` returning `PagedResult<CompanyTaskVM>`. SQL gets `OFFSET .. FETCH` via `.Skip().Take()` on the IQueryable. A separate `.Count()` feeds the pager.
+   - Keep existing `Select()` as a wrapper around `SelectPaged(page: 1, pageSize: 500)` — preserves backwards compatibility with `TaskController.FillDropDownLists` which legitimately wants a list of tasks for a dropdown (now safety-capped at 500).
+   - Update controller, partial view, and Index view to flow `page` through.
+   - Add a small jQuery event-delegated handler to make WebGrid pager clicks AJAX-aware — preserves the SPA feel after AJAX-loaded search/tab content.
+
+2. **Option B (`.Take(500)` cap)** on the other 8 task/employee/project list pages — quick, safe insurance so the same bug can't surface elsewhere as those datasets grow.
+
+### Rationale
+- Proper pagination is the right architectural fix but costs ~3 hours per page and creates a tester regression cycle. Doing all 9 pages at once would be ~12 h of code + multi-day tester pass with high regression risk on a critical workflow.
+- The bug page is the only one confirmed slow in the field today. Solving it in isolation gets the user-visible win shipped immediately.
+- The `.Take(500)` cap on the rest is genuinely cheap (1 line per query site) and never harms a healthy company — typical companies have well under 500 active tasks/projects/employees per scope. If a page ever does grow past 500, it will silently drop oldest records, which is a strong signal to upgrade that page to Option A in a follow-up sprint rather than a hard outage.
+- Removing the multi-employee filter (Sprint 3 T-08) was already done in commit `967f484` (March 18), so the Option A complexity around merging per-employee result lists is not a concern.
+
+### Consequences
+
+**Positive:**
+- `/Company/Company/index` loads in <2 s regardless of company size.
+- Safety net on 8 other pages — pathological cases (one company suddenly hits 5,000 tasks) won't bring the page down silently.
+- Pager links work both for full page reload (initial Index) and for AJAX-loaded partials (after tab-click or search), via the new event-delegated click handler.
+
+**Trade-offs:**
+- Bulk-delete "select all" on the New tab now selects only the **current page** (was: every loaded row, which was effectively everything). Tester verified — acceptable.
+- WebGrid pager URL preserves QueryString, so paginating after a non-AJAX'd search continues to filter; paginating after an AJAX-only search does NOT preserve the filter (the URL never changed) — for now, search-then-paginate users will need to re-search. Documented for tester.
+- The Delay tab still does C# post-filter by `isDelayed`, capped at 500 rows materialized. If a company has more than 500 accepted-and-delayed tasks at once (highly unusual), the oldest are dropped from the Delay tab.
+- Pages 2/3 (Employee tasks, Common tasks) still do not have proper pagination — they have the safety cap. Promote to Option A in a follow-up sprint when those volumes grow.
+
+### Implementation
+See CHANGELOG.md "Bug #36 Round 3" for the full file list.
+
+### Reference
+- Branch: `claude/fix-git-bugs-WQ5V1`
+- Bug: GitHub issue #36
+- Performance verification: Chrome DevTools timing against `app-test.telesak.com`
+
+---
+
 ## DEC-001: Separate Date from Time in Attendance
 
 **Date:** 2026-03-08

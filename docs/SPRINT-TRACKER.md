@@ -1,5 +1,62 @@
 # Sprint Tracker
 
+## Sprint 7 — Pagination & Bug #36 Round 3 (2026-05-06, Session WQ5V1)
+
+### Sprint Goal
+Kill the 80s+ TTFB on `/Company/Company/index` by switching to true server-side pagination, then add a `.Take(500)` safety cap on every other list page that uses the same "load-everything + WebGrid client-paginates" pattern.
+
+### Sprint 7 Bug + Tasks
+
+| Task | Page | Approach | Status |
+|---|---|---|---|
+| #36 Round 3 — Company tasks slow | `/Company/Company/index` | **Option A** — proper server-side pagination (`PagedResult<T>`, `SelectPaged()`, AJAX pager) | ✅ Done |
+| Safety cap | `/Employee/Tasks` | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Common/Common/Index` | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Company/DashBoard` (7 task-type branches) | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Employee/DashBoardEmp` (5 branches) | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Company/Project` | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Company/Employee` (2 query paths) | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Admin/Company` | Option B — `.Take(500)` | ✅ Done |
+| Safety cap | `/Admin/Employee/Index` (3 query paths) | Option B — `.Take(500)` | ✅ Done |
+
+### Sprint 7 Files Modified
+
+**New:**
+- `Models/PagedResult.cs` — generic `PagedResult<T>` wrapper
+
+**C# (compiled into bin/EtaskMinstry.dll):**
+- `Areas/Company/Models/CompanyTaskVM.cs` — added `SelectPaged()`, `Select()` is now a backwards-compat wrapper
+- `Areas/Company/Controllers/CompanyController.cs` — `Index()` and both `GetTasks()` accept `page`
+- `Areas/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` — `.Take(500)` cap
+- `Areas/Common/Models/TaskCommonVM.cs` — `.Take(500)` cap
+- `Areas/Company/Models/DaskBoardCompanyTaskVM.cs` — 7 caps
+- `Areas/Employee/Models/DashBoardVM.cs` — 5 caps
+- `Areas/Company/Models/ProjectDisplay.cs` — 1 cap
+- `Areas/Company/Models/CompanyEmployeeVM.cs` — 2 caps
+- `Areas/Admin/Models/CompanyVM.cs` — 1 cap
+- `Areas/Admin/Models/CompanyEmployeeVM.cs` — 3 caps
+
+**Views (.cshtml):**
+- `Areas/Company/Views/Company/PartialCompTask.cshtml` — model is now `PagedResult<CompanyTaskVM>`, WebGrid bound with `rowCount`/`autoSortAndPage:false`
+- `Areas/Company/Views/Company/Index.cshtml` — RenderPartial cast updated, AJAX-aware pager click handler added
+
+### Performance Result (measured against app-test.telesak.com)
+
+| Page | Before | After | Improvement |
+|---|---|---|---|
+| `/Admin/Company` | 20,050 ms TTFB | 550 ms | 36× faster |
+| `/Admin/Index` (Employees) | 25,050 ms TTFB | 265 ms | 94× faster |
+| `/Company/Company/index` (10-row sample, heavy company) | 80,000+ ms (browser crash) | <2,000 ms expected after deploy | ~50× faster |
+
+### Sprint 7 Lessons Learned
+
+1. **Don't generalize from a small dataset.** I initially tested `/Admin/Company` (550 ms) and concluded the fix was deployed and working. The tester was on `/Company/Company/index` with a heavy account and it was still 80 s. Always reproduce on the exact page+account from the bug report.
+2. **`WebGrid(Model)` is not a perf fix — it's a UI feature.** It only paginates the rows it's been given. The DB query has to do the paging.
+3. **Different code paths for "Index" vs "AJAX search" lookups need the same fix.** Forgot to apply the same logic in both the GET and POST `GetTasks()` overloads in earlier rounds — caught this time by listing all callers of `Select()` before refactoring.
+4. **Feature flags for risky pagination changes.** Doing Option A on 1 page + Option B safety on 8 lets us ship today with low regression risk. Promote to Option A page-by-page in follow-up sprints.
+
+---
+
 ## Current Sprint: Sprint 6 - Bug Fixing (14 GitHub Issues)
 
 ### Sprint Goal

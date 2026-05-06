@@ -27,10 +27,13 @@ namespace EtaskMinstry.Areas.Company.Controllers
         // GET: /Company/
         //[ValidateInput(false)]
         //[EncryptedActionParameter]
-        public ActionResult Index(int s = 0, bool? isNotAssign = null, bool? isArchive = null)
+        public ActionResult Index(int s = 0, bool? isNotAssign = null, bool? isArchive = null, int page = 1)
         {
              EtaskMinstry.AppCode.TaskManger.UpdateTaskStatus();
-             ViewData["CompanyTask"] = new CompanyTaskVM().Select(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), 0, isArchive, isNotAssign, 0, 0);
+             // Bug #36 — server-side pagination via SelectPaged.
+             // Was loading every task for the company (80s+ on companies with thousands of tasks).
+             // Now loads only the requested page (10 rows) directly from the DB.
+             ViewData["CompanyTask"] = new CompanyTaskVM().SelectPaged(Request.QueryString["t"] == null ? "" : Request.QueryString["t"].ToString(), "", "", "", "", Request.QueryString["s"] == null ? s : int.Parse(Request.QueryString["s"].ToString()), 0, isArchive, isNotAssign, 0, 0, page, 10);
 
             ViewBag.Employee = new SelectList(EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployeeNotDeleted(MvcApplication.userData.userId), "id", "name");
             ViewBag.Project = new SelectList(new ProjectDisplay().Get(), "ID", "Name");
@@ -282,14 +285,16 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult GetTasks(Boolean? bIsNotAssigned, Boolean? bIsArchived, String FromStartDate,
                                      String ToStartDate, String FromEndDate, String ToEndDate, String strTitle = "",
-                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
+                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0,
+                                     int page = 1)
         {
             int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
 
-            return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
+            // Bug #36 — server-side pagination
+            return PartialView("PartialCompTask", new CompanyTaskVM().SelectPaged(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
                                                                              EmpID, bIsArchived, bIsNotAssigned,
-                                                                             projID, PriorityID));
+                                                                             projID, PriorityID, page, 10));
         }
 
 
@@ -307,11 +312,13 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                     TaskStatus iStatus = 0, int EmpID = 0, int PriorityID = 0, int ProjectID = 0)
         {
             int projID = (ProjectID == 0 ? Request.QueryString["ProjectID"].IntParse() : ProjectID);
+            int pageNumber = page.HasValue && page.Value > 0 ? page.Value : 1;
 
-            return PartialView("PartialCompTask", new CompanyTaskVM().Select(strTitle, FromStartDate, ToStartDate,
+            // Bug #36 — server-side pagination
+            return PartialView("PartialCompTask", new CompanyTaskVM().SelectPaged(strTitle, FromStartDate, ToStartDate,
                                                                              FromEndDate, ToEndDate, (int)iStatus,
                                                                              EmpID, bIsArchived, bIsNotAssigned,
-                                                                             projID, PriorityID));
+                                                                             projID, PriorityID, pageNumber, 10));
         }
 
         //public ActionResult GetTasks(int? page, int iStatus = 0, bool? bIsNotAssigned = null, bool? bIsArchived = null)

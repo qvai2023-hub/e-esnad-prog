@@ -110,7 +110,7 @@ namespace EtaskMinstry.Models.Project
                         FullDescription = i.Description,
                         ShortDescription = i.Description,
                         bCanDelete = (!i.Tasks.Any() || i.Tasks.All(t => t.IsDeleted))
-                    }).OrderByDescending(i => i.ID).ToList();
+                    }).OrderByDescending(i => i.ID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             objProject.ForEach(i => i.ShortDescription = Extentions.SubString(i.ShortDescription, 30));
             return objProject;

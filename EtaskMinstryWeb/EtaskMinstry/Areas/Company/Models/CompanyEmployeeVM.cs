@@ -121,8 +121,8 @@ namespace EtaskMinstry.Areas.Company.Models
                 {
                     Id = e.EmpID,
                     Name = e.Name,
-                  
-                }).ToList();
+
+                }).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }
@@ -328,7 +328,7 @@ namespace EtaskMinstry.Areas.Company.Models
                     Email = e.Email,
                     IsActive = (bool)e.IsActive,
                     IsDeleted = (bool)e.IsDeleted
-                }).ToList();
+                }).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }
