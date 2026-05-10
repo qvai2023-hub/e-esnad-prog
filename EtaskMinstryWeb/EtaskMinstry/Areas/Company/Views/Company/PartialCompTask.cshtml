@@ -6,15 +6,11 @@
     <div id="list" class="table-responsive">
         @{
             // Bug #36 — server-side pagination.
-            // We pass rowCount = current page size, totalRowCount = total across all pages.
-            // WebGrid uses these to render numbered pager links that trigger full-page navigation
-            // back to /Company/Company/Index?page=N (handled by Index() action).
-            var grid = new WebGrid(
-                source: Model.Items,
-                rowsPerPage: Model.PageSize,
-                canPage: true,
-                canSort: false);
-            grid.Bind(source: Model.Items, rowCount: Model.TotalCount, autoSortAndPage: false);
+            // Construct WebGrid with no source, then Bind with autoSortAndPage:false +
+            // rowCount=total. This tells WebGrid we already paged at the SQL level — it
+            // should render the rows we hand it (10) and emit pager links for all N pages.
+            var grid = new WebGrid(rowsPerPage: Model.PageSize, canPage: true, canSort: false);
+            grid.Bind(Model.Items, autoSortAndPage: false, rowCount: Model.TotalCount);
             var gridColumns = new List<WebGridColumn>();
 
 // Show checkbox column only for New tasks tab

@@ -153,9 +153,11 @@ namespace EtaskMinstry.Models.Company
 
             strTitle = strTitle.Trim().ToLower();
 
-            // Bug #36 — build the query as IQueryable (NOT materialized yet)
-            // so Count() and Skip/Take below get translated to SQL.
-            var projectedQuery = _unitOfWork.TaskRepository.Get(includeProperties: "Project,Status,Priority,TaskTLogs", filter: t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
+            // Bug #36 — build the FILTER as an IQueryable<Task> (NOT projected, NOT materialized).
+            // Counting and paginating at the entity level is much more EF-friendly than
+            // counting a complex projection with navigation properties / .Value calls.
+            // We project to CompanyTaskVM in-memory AFTER paging, on at most pageSize rows.
+            var filteredQuery = _unitOfWork.TaskRepository.Get(includeProperties: "Project,Status,Priority,TaskTLogs", filter: t => (iEmpolyee == 0 || t.EmpID == iEmpolyee)
                                                     &&
                                                     (!bIsNotAssigned.HasValue || t.EmpID == null)
                                                     &&
@@ -188,51 +190,30 @@ namespace EtaskMinstry.Models.Company
                                                     && (iProjectID == 0 || t.ProjectID == iProjectID)
 
                                                     && (PriorityID == 0 ||
-                                                        t.PriorityID == PriorityID)   ).Select(t => new CompanyTaskVM()
-                                                            {
-                                                                TaskID = t.TaskID,
-                                                                Task =  t.Title,
-                                                                Project = (t.ProjectID== null)? "لا يوجد مشروع" :t.Project.Name,
-                                                                Status = t.Status.Name,
-                                                                DeleteClass =
-                                                                    (t.StatusID == (int) TaskStatus.New
-                                                                         // New Tasks Only Can Delete .
-                                                                         ? "Delete-icon deleteAction"
-                                                                         : "DisDelete-icon"),
-                                                                StatusID = t.StatusID,
-                                                                IsArchived = t.IsArchived,
-                                                                PrioirtyID = t.PriorityID,
-                                                                Prioirty = t.Priority.Name,
-                                                                RowColor = t.Priority.Color,
-                                                                TaskTLog = t.TaskTLogs,
-                                                                StartDate = t.StartDate.Value,
-                                                                EndDate = t.EndDate.Value,
-                                                                EmpID = t.EmpID.Value,
+                                                        t.PriorityID == PriorityID));
 
-
-                                                                // Sum Worked Hours .
-                                                                WorkedHours = t.TaskTLogs.Where(
-                                                                    i =>
-                                                                    i.EmpID == t.EmpID
-                                                                    &&
-                                                                    i.TaskID == t.TaskID
-                                                                    &&
-                                                                    i.StatusID ==
-                                                                    (int) TaskStatus.Inprogress)
-                                                                               .Sum(i => i.TimeCount),
-
-                                                                // Get Finish Date .
-                                                                FinishDate = t.DeliverDate,
-
-                                                                /*t.TaskTLog.FirstOrDefault(
-                                                                    i =>
-                                                                    i.EmpID == t.EmpID
-                                                                    &&
-                                                                    i.TaskID == t.TaskID
-                                                                    &&
-                                                                    i.StatusID ==
-                                                                    (int) TaskStatus.Done).CreatedDate*/
-                                                            });
+            // Helper for in-memory projection (runs on at most pageSize entities — fast)
+            Func<TaskManagementModel.Task, CompanyTaskVM> projectToVM = t => new CompanyTaskVM()
+            {
+                TaskID = t.TaskID,
+                Task = t.Title,
+                Project = (t.ProjectID == null) ? "لا يوجد مشروع" : (t.Project != null ? t.Project.Name : ""),
+                Status = t.Status != null ? t.Status.Name : "",
+                DeleteClass = (t.StatusID == (int)TaskStatus.New ? "Delete-icon deleteAction" : "DisDelete-icon"),
+                StatusID = t.StatusID,
+                IsArchived = t.IsArchived,
+                PrioirtyID = t.PriorityID,
+                Prioirty = t.Priority != null ? t.Priority.Name : "",
+                RowColor = t.Priority != null ? t.Priority.Color : "",
+                TaskTLog = t.TaskTLogs,
+                StartDate = t.StartDate,
+                EndDate = t.EndDate,
+                EmpID = t.EmpID,
+                WorkedHours = t.TaskTLogs != null
+                    ? t.TaskTLogs.Where(i => i.EmpID == t.EmpID && i.TaskID == t.TaskID && i.StatusID == (int)TaskStatus.Inprogress).Sum(i => i.TimeCount)
+                    : 0,
+                FinishDate = t.DeliverDate
+            };
 
             int totalCount;
             List<CompanyTaskVM> objTasks;
@@ -269,12 +250,17 @@ namespace EtaskMinstry.Models.Company
 
             if (iStatus != (int)TaskStatus.Delay)
             {
-                // Server-side pagination: SQL gets Skip/Take, only the requested page is materialized.
-                totalCount = projectedQuery.Count();
-                objTasks = projectedQuery.OrderByDescending(i => i.TaskID)
-                                         .Skip((page - 1) * pageSize)
-                                         .Take(pageSize)
-                                         .ToList();
+                // Step 1: SELECT COUNT(*) on entities — simple SQL, no projection translation needed.
+                totalCount = filteredQuery.Count();
+
+                // Step 2: SELECT TOP pageSize entities at SQL level (OFFSET/FETCH).
+                var pagedEntities = filteredQuery.OrderByDescending(t => t.TaskID)
+                                                 .Skip((page - 1) * pageSize)
+                                                 .Take(pageSize)
+                                                 .ToList();
+
+                // Step 3: project to VM in memory (only pageSize rows — fast, no EF gymnastics).
+                objTasks = pagedEntities.Select(projectToVM).ToList();
 
                 objTasks.ForEach(t =>
                 {
@@ -288,8 +274,9 @@ namespace EtaskMinstry.Models.Company
             else
             {
                 // Delay tab: isDelayed is computed in C# (not a DB column), so we must materialize first.
-                // Cap at 500 rows for safety so we never freeze the page on companies with thousands of accepted tasks.
-                var allTasks = projectedQuery.OrderByDescending(i => i.TaskID).Take(500).ToList();
+                // Cap at 500 entities for safety so we never freeze the page on companies with thousands of accepted tasks.
+                var entities = filteredQuery.OrderByDescending(t => t.TaskID).Take(500).ToList();
+                var allTasks = entities.Select(projectToVM).ToList();
 
                 allTasks.ForEach(t =>
                 {

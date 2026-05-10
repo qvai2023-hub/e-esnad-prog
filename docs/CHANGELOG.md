@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Hotfix - Bug #36 Round 3.1 (Session WQ5V1, 2026-05-06)
+
+After the Round 3 deploy, `/Company/Company/index` threw a generic ASP.NET error ("Sorry, an error occurred…"). Root cause: calling `.Count()` on a complex `IQueryable<CompanyTaskVM>` projection (with navigation properties, ternaries, and `.Value` calls) is fragile — EF6 has to translate the entire projection just to count, which can throw `NotSupportedException` for some predicates.
+
+**Fix — refactor `CompanyTaskVM.SelectPaged()` to be EF-safe:**
+- Build the filter as an `IQueryable<Task>` (entity-level, no projection)
+- Count at the entity level (`SELECT COUNT(*) FROM Task WHERE …`) — simple SQL
+- Paginate at the entity level (`OFFSET … FETCH NEXT … ROWS ONLY` on Task)
+- **Project to `CompanyTaskVM` in-memory** on at most `pageSize` rows — no EF translation gymnastics, all C# code, handles null navigation properties defensively (`t.Project != null ? t.Project.Name : ""`, etc.)
+
+**Bonus — also tightened the WebGrid binding in `PartialCompTask.cshtml`:**
+- Construct WebGrid with no source, then `Bind(items, autoSortAndPage:false, rowCount: total)` (the previous double-source pattern may have confused WebGrid's pager)
+
+**Files changed (2):**
+- `Areas/Company/Models/CompanyTaskVM.cs` — refactored `SelectPaged()` body
+- `Areas/Company/Views/Company/PartialCompTask.cshtml` — single-bind WebGrid
+
 ### Fixed - Bug #60 Round 2 (Session WQ5V1, 2026-05-06)
 
 After Round 1 deploy, tester reopened #60 with valid UX feedback: the `beforeunload`
