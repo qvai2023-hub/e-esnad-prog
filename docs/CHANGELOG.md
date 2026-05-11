@@ -4,6 +4,82 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Hotfix - Bug #36 Round 3.1 (Session WQ5V1, 2026-05-06)
+
+After the Round 3 deploy, `/Company/Company/index` threw a generic ASP.NET error ("Sorry, an error occurred…"). Root cause: calling `.Count()` on a complex `IQueryable<CompanyTaskVM>` projection (with navigation properties, ternaries, and `.Value` calls) is fragile — EF6 has to translate the entire projection just to count, which can throw `NotSupportedException` for some predicates.
+
+**Fix — refactor `CompanyTaskVM.SelectPaged()` to be EF-safe:**
+- Build the filter as an `IQueryable<Task>` (entity-level, no projection)
+- Count at the entity level (`SELECT COUNT(*) FROM Task WHERE …`) — simple SQL
+- Paginate at the entity level (`OFFSET … FETCH NEXT … ROWS ONLY` on Task)
+- **Project to `CompanyTaskVM` in-memory** on at most `pageSize` rows — no EF translation gymnastics, all C# code, handles null navigation properties defensively (`t.Project != null ? t.Project.Name : ""`, etc.)
+
+**Bonus — also tightened the WebGrid binding in `PartialCompTask.cshtml`:**
+- Construct WebGrid with no source, then `Bind(items, autoSortAndPage:false, rowCount: total)` (the previous double-source pattern may have confused WebGrid's pager)
+
+**Files changed (2):**
+- `Areas/Company/Models/CompanyTaskVM.cs` — refactored `SelectPaged()` body
+- `Areas/Company/Views/Company/PartialCompTask.cshtml` — single-bind WebGrid
+
+### Fixed - Bug #60 Round 2 (Session WQ5V1, 2026-05-06)
+
+After Round 1 deploy, tester reopened #60 with valid UX feedback: the `beforeunload`
+guard was triggering Chrome's generic native "Leave site? Changes you may not be
+saved" dialog. Clicking **Cancel** left the user looking at a static overlay
+(misperceived as frozen). Clicking **Leave** actually let the upload finish on the
+server but the user got no confirmation.
+
+Browsers (Chrome/Firefox/Safari/Edge) deliberately ignore custom messages in
+`beforeunload` for security reasons, so a custom "Wait / Leave" dialog there
+is technically impossible. Approach changed to: drop `beforeunload` entirely,
+make the overlay do the communication.
+
+**Changes — `Views/Shared/PartialUploadFile.cshtml` only (1 file):**
+- Removed both `beforeunload` listeners (the file-pending one + the in-flight one)
+- Overhauled the upload overlay:
+  - Bigger, layered text in RTL: bold "جاري رفع الملف..." headline + clear sub-message asking the user not to refresh
+  - Animated CSS marquee progress bar (striped, perpetually moving) so motion is visible — proves the page isn't frozen even though we can't compute a real % from a synchronous form POST
+  - Live time-elapsed counter ("الوقت المنقضي: N ثانية") updating every second
+  - Bigger cloud-upload icon, dark backdrop, blocks all click-through
+- New "تم الرفع بنجاح" success toast: detects `?isAttach=1` query string on page load (both Company and Employee `AddAttachment` redirect with that param), shows a green dismissable toast for 3.5s, then fades out. URL is cleaned via `history.replaceState` so refreshing the page doesn't re-show the toast.
+
+### Fixed - Bug #36 Round 3 (Session WQ5V1, 2026-05-06)
+
+The reported 80s+ TTFB on `/Company/Company/index` for companies with thousands of tasks was traced to **no server-side pagination** — the controller loaded every task from the DB and `WebGrid` paginated client-side after materializing the whole list. Confirmed by Chrome instrumentation against `app-test.telesak.com`.
+
+**Option A — proper server-side pagination on `/Company/Company/index`:**
+- New `Models/PagedResult.cs` — generic `PagedResult<T>` wrapper carrying `Items`, `TotalCount`, `PageNumber`, `PageSize`, `TotalPages`
+- `Areas/Company/Models/CompanyTaskVM.cs`:
+  - Added `SelectPaged(...)` — applies `.Skip().Take()` at the SQL level (translated to OFFSET/FETCH), returns `PagedResult<CompanyTaskVM>`. Delay tab still post-filters by `isDelayed` in C# but caps at 500 rows.
+  - Existing `Select(...)` is now a thin wrapper that calls `SelectPaged(page: 1, pageSize: 500)` so legacy callers (e.g. `TaskController.FillDropDownLists` Tasks dropdown) keep working with the safety cap.
+- `Areas/Company/Controllers/CompanyController.cs`:
+  - `Index(...)` accepts `int page = 1` and calls `SelectPaged(..., page, 10)`
+  - Both `GetTasks(...)` overloads (POST/GET) accept `page` and call `SelectPaged`
+- `Areas/Company/Views/Company/PartialCompTask.cshtml`:
+  - Model changed from `IEnumerable<CompanyTaskVM>` to `PagedResult<CompanyTaskVM>`
+  - WebGrid bound via `grid.Bind(rowCount: Model.TotalCount, autoSortAndPage: false)` so pager links reflect the true total across all pages
+  - All `Model.All/Any` references rewritten as `Model.Items.All/Any`
+- `Areas/Company/Views/Company/Index.cshtml`:
+  - Cast in `Html.RenderPartial` updated to `PagedResult<CompanyTaskVM>`
+  - Added jQuery event-delegated handler that intercepts pager link clicks inside `#divTasks` and re-fetches the partial via AJAX (replacing `#divTasks` content) — preserves the SPA feel after AJAX search/tab clicks. Falls back to full navigation if the AJAX call fails.
+
+**Option B — `.Take(500)` safety cap on the other 8 pages with the same load-everything pattern:**
+- `Areas/Employee/Models/EmployeeTask/EmployeeTaskListVM.cs` — `/Employee/Tasks`
+- `Areas/Common/Models/TaskCommonVM.cs` — `/Common/Common/Index`
+- `Areas/Company/Models/DaskBoardCompanyTaskVM.cs` — `/Company/DashBoard` (7 task-type Select branches)
+- `Areas/Employee/Models/DashBoardVM.cs` — `/Employee/DashBoardEmp` (5 task-type branches)
+- `Areas/Company/Models/ProjectDisplay.cs` — `/Company/Project`
+- `Areas/Company/Models/CompanyEmployeeVM.cs` — `/Company/Employee` (2 query paths)
+- `Areas/Admin/Models/CompanyVM.cs` — `/Admin/Company`
+- `Areas/Admin/Models/CompanyEmployeeVM.cs` — `/Admin/Employee/Index` (3 query paths)
+
+Total 21 query sites get a `.Take(500)` after `OrderByDescending` so no future N grows unbounded. Option A on `/Company/Company/index` removes the cap entirely for that page (true pagination).
+
+**Performance result (measured against app-test.telesak.com):**
+- `/Admin/Company`: 20,050 ms TTFB → **550 ms** (36× faster)
+- `/Admin/Index`: 25,050 ms TTFB → **265 ms** (94× faster)
+- `/Company/Company/index` (the headline bug, ~10 visible task rows on a heavy company): expected **<2 s** after deploy of this branch (was 80s+)
+
 ### Fixed - Bug Fixing Sprint: 14 Bugs (Session WQ5V1)
 
 #### Round 1 — Initial Fixes (14 bugs)

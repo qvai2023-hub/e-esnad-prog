@@ -438,10 +438,18 @@
 
     var _isSubmitting = false;
     $("form").on("submit", function () {
+        var validator = $(this).data("validator");
+        if (validator && validator.formSubmitted) return;
         if (_isSubmitting) return false;
         if ($(this).valid() && $('.field-validation-error:visible').length === 0) {
             _isSubmitting = true;
             $("#btnSave").prop("disabled", true).val("جاري الحفظ...");
+            setTimeout(function () {
+                if (_isSubmitting) {
+                    _isSubmitting = false;
+                    $("#btnSave").prop("disabled", false).val("حفظ");
+                }
+            }, 30000);
         } else {
             $("#btnSave").prop("disabled", false).val("حفظ");
             return false;

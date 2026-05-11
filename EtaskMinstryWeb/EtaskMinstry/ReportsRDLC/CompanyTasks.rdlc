@@ -96,7 +96,7 @@
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
             <Height>0.36in</Height>
-            <Width>7.76042in</Width>
+            <Width>7.76in</Width>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -128,7 +128,7 @@
                   <Width>2.3in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.56042in</Width>
+                  <Width>1.56in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -634,7 +634,7 @@
             <DataSetName>DS_CompanyTasks</DataSetName>
             <Top>0.36in</Top>
             <Height>0.56541in</Height>
-            <Width>7.76042in</Width>
+            <Width>7.76in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -666,10 +666,10 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox11</rd:DefaultName>
-            <Top>1.06778in</Top>
+            <Top>1.07in</Top>
             <Left>6.2in</Left>
             <Height>0.25in</Height>
-            <Width>1.56042in</Width>
+            <Width>1.56in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -712,7 +712,7 @@
                 </Action>
               </Actions>
             </ActionInfo>
-            <Top>1.06598in</Top>
+            <Top>1.07in</Top>
             <Height>0.25in</Height>
             <Width>1.05in</Width>
             <ZIndex>3</ZIndex>
@@ -734,7 +734,7 @@
         <Height>1.31778in</Height>
         <Style />
       </Body>
-      <Width>7.76042in</Width>
+      <Width>7.76in</Width>
       <Page>
         <PageHeader>
           <Height>1.5in</Height>
@@ -749,7 +749,7 @@
               <Top>0.05in</Top>
               <Left>6.2in</Left>
               <Height>0.55in</Height>
-              <Width>1.56042in</Width>
+              <Width>1.56in</Width>
               <Style>
                 <Border>
                   <Style>None</Style>
@@ -779,7 +779,7 @@
               <Top>0.62in</Top>
               <Left>3.9in</Left>
               <Height>0.25in</Height>
-              <Width>3.86042in</Width>
+              <Width>3.86in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -811,7 +811,7 @@
               <Top>0.88in</Top>
               <Left>3.9in</Left>
               <Height>0.25in</Height>
-              <Width>3.86042in</Width>
+              <Width>3.86in</Width>
               <ZIndex>2</ZIndex>
               <Style>
                 <Border>
@@ -825,7 +825,7 @@
               <Top>1.3in</Top>
               <Left>0in</Left>
               <Height>0in</Height>
-              <Width>7.76042in</Width>
+              <Width>7.76in</Width>
               <ZIndex>4</ZIndex>
               <Style>
                 <Border>
@@ -912,7 +912,7 @@
               <Top>0.1in</Top>
               <Left>3.9in</Left>
               <Height>0.25in</Height>
-              <Width>3.86042in</Width>
+              <Width>3.86in</Width>
               <ZIndex>1</ZIndex>
               <Style>
                 <Border>
@@ -946,7 +946,7 @@
               <Top>0.38in</Top>
               <Left>0in</Left>
               <Height>0.25in</Height>
-              <Width>7.76042in</Width>
+              <Width>7.76in</Width>
               <ZIndex>2</ZIndex>
               <Visibility>
                 <Hidden>true</Hidden>
@@ -964,7 +964,7 @@
             </Border>
           </Style>
         </PageFooter>
-        <PageWidth>7.76042in</PageWidth>
+        <PageWidth>7.76in</PageWidth>
         <LeftMargin>0in</LeftMargin>
         <RightMargin>0in</RightMargin>
         <TopMargin>0.5in</TopMargin>

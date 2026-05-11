@@ -210,7 +210,7 @@ namespace EtaskMinstry.Models.Common
                                                                     &&
                                                                     i.StatusID ==
                                                                     (int) TaskStatus.Done).CreatedDate*/
-                                                            }).OrderByDescending(i => i.TaskID).ToList();
+                                                            }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             //To Change From Greg. Date To Hijri Date .
             // Arabic Finish Date .

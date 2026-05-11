@@ -110,7 +110,7 @@ namespace EtaskMinstry.Models.Company
                                                             EmpID = t.EmpID,
                                                            // Get Finish Date .
                                                             FinishDate = t.DeliverDate                                                        
-                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                                                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                     break;
                     case DashBoaedTaskType.Delayed: // Delayed Tasks
@@ -128,7 +128,7 @@ namespace EtaskMinstry.Models.Company
                                                             EmpID = t.EmpID,
                                                           // Get Finish Date .
                                                             FinishDate = t.DeliverDate                                                          
-                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                                                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                        // Batch load task entities to evaluate isDelayed (avoids N+1 GetByID per task)
                        var taskIds1 = objTasks.Select(t => t.TaskID).ToList();
@@ -158,7 +158,7 @@ namespace EtaskMinstry.Models.Company
                                  EmpID = t.EmpID.Value,
                                  // Get Finish Date .
                                  FinishDate = t.DeliverDate                                                    
-                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                                                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                      
 
@@ -181,7 +181,7 @@ namespace EtaskMinstry.Models.Company
                                  SuspendedDate = t.TaskTLogs.Where(l => l.StatusID == (int)TaskStatus.Pending).OrderByDescending(s => s.TaskTLogID).FirstOrDefault() == null ?
                                  DateTime.MinValue : t.TaskTLogs.Where(l => l.StatusID == (int)TaskStatus.Pending).OrderByDescending(s => s.TaskTLogID).FirstOrDefault().CreatedDate,
                                  FinishDate = t.EndDate                                                    
-                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                                                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                          objTasks.ForEach(
                      i => i.HijriSuspendedDate = (i.SuspendedDate != DateTime.MinValue) ? MvcApplication.IsGregDate ? i.SuspendedDate.Value.ToGregArabicDate() : i.SuspendedDate.Value.ToHijriArabicDate() : String.Empty);
@@ -205,7 +205,7 @@ namespace EtaskMinstry.Models.Company
                                  EmpID = t.EmpID.Value,
                                  // Get Finish Date .
                                  FinishDate = t.DeliverDate                                                    
-                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                                                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                     objTasks.ForEach(
                         i => i.HijriFinishDate = (i.FinishDate.HasValue) ? MvcApplication.IsGregDate ? i.FinishDate.Value.ToGregArabicDate() : i.FinishDate.Value.ToHijriArabicDate() : String.Empty);
@@ -230,7 +230,7 @@ namespace EtaskMinstry.Models.Company
                                  EmpID = t.EmpID.Value,
                                 // Get Finish Date .
                                  FinishDate = t.DeliverDate                                                    
-                                                        }).OrderByDescending(i => i.TaskID).ToList();
+                                                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
 
                           objTasks.ForEach(
                    i => i.HijriRejectedDate = (i.RejectedDate != DateTime.MinValue) ? MvcApplication.IsGregDate ? i.RejectedDate.Value.ToGregArabicDate() : i.RejectedDate.Value.ToHijriArabicDate() : String.Empty);
@@ -252,7 +252,7 @@ namespace EtaskMinstry.Models.Company
                             EmpID = t.EmpID,
                             // Get Finish Date .
                             FinishDate = t.DeliverDate
-                        }).OrderByDescending(i => i.TaskID).ToList();
+                        }).OrderByDescending(i => i.TaskID).Take(500).ToList(); // Bug #36 — Option B safety cap
                     objTasks.ForEach(
                                            i => i.HijriStartDate = (i.StartDate.HasValue) ? MvcApplication.IsGregDate ? i.StartDate.Value.ToGregArabicDate() : i.StartDate.Value.ToHijriArabicDate() : String.Empty);
 

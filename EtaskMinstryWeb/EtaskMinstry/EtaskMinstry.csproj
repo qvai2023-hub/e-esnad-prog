@@ -276,6 +276,7 @@
     <Compile Include="Models\Login\LoginVM.cs" />
     <Compile Include="Models\Login\Security.cs" />
     <Compile Include="Models\Login\UserAccountVM.cs" />
+    <Compile Include="Models\PagedResult.cs" />
     <Compile Include="Models\Priority\PriorityDisplay.cs" />
     <Compile Include="Models\PushNotificationVM.cs" />
     <Compile Include="Models\Status\StatusDisplay.cs" />
@@ -723,6 +724,7 @@
     <Content Include="MailTemplate\Notification.html" />
     <Content Include="Report\Report.aspx" />
     <Content Include="Scripts\application.js" />
+    <Content Include="Scripts\attendance-tracker.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\chosen.jquery.js" />
     <Content Include="Scripts\datatables.min.js" />
@@ -779,6 +781,7 @@
     <Content Include="Areas\Company\Views\Report\EmployeeReport.cshtml" />
     <Content Include="Areas\Admin\Views\Employee\_Index.cshtml" />
     <Content Include="Areas\Company\Views\Task\EDitTask.cshtml" />
+    <Content Include="App_Data\telesak-qa.json" />
     <None Include="Properties\PublishProfiles\Ayman.pubxml" />
     <None Include="Properties\PublishProfiles\k.pubxml" />
     <Content Include="Report\TotalEmployeeTasks.rdl" />
@@ -843,6 +846,7 @@
     <Content Include="Scripts\select2\select2.min.css" />
     <Content Include="Scripts\tabs-src.js" />
     <Content Include="Scripts\tabs.ui.js" />
+    <Content Include="Scripts\telesak-chat.js" />
     <Content Include="Scripts\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Scripts\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
     <Content Include="Scripts\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />

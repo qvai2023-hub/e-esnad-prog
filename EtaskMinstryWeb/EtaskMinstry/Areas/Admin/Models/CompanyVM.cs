@@ -144,7 +144,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                     Password = QvLib.Security.DataProtection.Decrypt(a.UserAccounts.FirstOrDefault().Password),
                     DonetasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Done : 0,
                     tasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Total : 0,
-                }).OrderByDescending(x=>x.Id).ToList();
+                }).OrderByDescending(x=>x.Id).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return companies;
         }
@@ -311,8 +311,10 @@ namespace EtaskMinstry.Areas.Admin.Models
 
         public bool CheckDublicateEmail(string Email, int Id)
         {
-            // return _unitOfWork.Company.Get(a => a.Email == Email && a.CompanyID != Id && a.IsDeleted == false).FirstOrDefault() == null ? true : false;
-            return new CompanyEmployeeVM().CheckForUniqueEmail(Id, Email);
+            if (Id != 0)
+                return _unitOfWork.Company.Get(a => a.Email == Email && a.CompanyID != Id && a.IsDeleted == false).FirstOrDefault() == null ? true : false;
+            else
+                return _unitOfWork.Company.Get(a => a.Email == Email && a.IsDeleted == false).FirstOrDefault() == null ? true : false;
         }
 
 

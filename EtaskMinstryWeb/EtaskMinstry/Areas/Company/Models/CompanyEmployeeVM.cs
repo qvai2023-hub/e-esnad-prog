@@ -121,8 +121,8 @@ namespace EtaskMinstry.Areas.Company.Models
                 {
                     Id = e.EmpID,
                     Name = e.Name,
-                  
-                }).ToList();
+
+                }).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }
@@ -135,7 +135,7 @@ namespace EtaskMinstry.Areas.Company.Models
         public bool CheckForUniqueName(int? companyID, int? empID, string Name)
         {
 
-            var result = _unitOfWork.Employee.Get(filter: e => e.CompanyID == companyID && e.EmpID != empID && e.Name.Contains(Name)).Count() > 0 ? false : true;
+            var result = _unitOfWork.Employee.Get(filter: e => e.CompanyID == companyID && e.EmpID != empID && e.Name.Contains(Name) && e.IsDeleted == false).Count() > 0 ? false : true;
             return result;
         }
 
@@ -328,7 +328,7 @@ namespace EtaskMinstry.Areas.Company.Models
                     Email = e.Email,
                     IsActive = (bool)e.IsActive,
                     IsDeleted = (bool)e.IsDeleted
-                }).ToList();
+                }).Take(500).ToList(); // Bug #36 — Option B safety cap
 
             return objEmp;
         }

@@ -110,10 +110,10 @@
                                 <div class="row">
                                     <div class="form-group col-sm-6">
 
-                                        <label class="col-sm-4 control-label">تاريخ البداية من: </label>
+                                        <label class="col-sm-4 control-label">تاريخ البداية: </label>
                                         <div class="col-sm-8">
                                             <div class='input-group date'>
-                                                @Html.TextBox("fDate", "", new { @class = "form-control", @style = "margin-left:47px;", @readonly = "true" })
+                                                @Html.TextBox("fDate", "", new { @class = "form-control", @readonly = "true" })
                                                 <span class="input-group-addon">
                                                     <span class="fa fa-calendar"></span>
                                                 </span>
@@ -125,7 +125,7 @@
                                     </div>
                                     <div class="form-group col-sm-6">
 
-                                        <label class="col-sm-4 control-label">إلى: </label>
+                                        <label class="col-sm-4 control-label">تاريخ النهاية: </label>
                                         <div class="col-sm-8">
                                             <div class='input-group date'>
                                                 @Html.TextBox("tDate", "", new { @class = "form-control", @readonly = "true" })
@@ -137,33 +137,6 @@
                                         <p class="errorMsgEndDate" style="display: none; color: red; margin-right: 85px; margin-top: 5px">
                                             يجب ان يكون تاريخ النهاية اكبر من تاريخ البداية
                                         </p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-sm-6">
-
-                                        <label class="col-sm-4 control-label">تاريخ النهاية من: </label>
-
-                                        <div class="col-sm-8">
-                                            <div class='input-group date'>
-                                                <input readonly type="text" id="fromenddate" name="FromEndDate" class="form-control" style="margin-left:47px;" />
-                                                <span class="input-group-addon">
-                                                    <span class="fa fa-calendar"></span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-sm-6">
-
-                                        <label class="col-sm-4 control-label">إلى: </label>
-                                        <div class="col-sm-8">
-                                            <div class='input-group date'>
-                                                <input readonly type="text" id="toendtdate" name="ToEndDate" class="form-control" />
-                                                <span class="input-group-addon">
-                                                    <span class="fa fa-calendar"></span>
-                                                </span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -237,13 +210,11 @@
             //datepicker Grerg
             $("#fDate").datepicker($.datepicker.regional[ "ar" ]);
             $("#tDate").datepicker($.datepicker.regional[ "ar" ]);
-            $("#fromenddate").datepicker($.datepicker.regional[ "ar" ]);
-            $("#toendtdate").datepicker($.datepicker.regional[ "ar" ]);
         }
         else
         {
             //calendar Hijrii
-            $('#fDate,#tDate,#fromenddate,#toendtdate').calendarsPicker({
+            $('#fDate,#tDate').calendarsPicker({
                 changeMonth: true,
                 changeYear: true,
                 showTrigger: '#calImg',
@@ -276,8 +247,6 @@
             $('#taskTitle').val('');
             $('#fDate').val('');
             $('#tDate').val('');
-            $("#fromenddate").val('');
-            $("#toendtdate").val('');
             $('#priorityId').val(0);
             $('.custom-bar .strenth-colors').css('width', '0px');
         });
@@ -289,8 +258,6 @@
             $('#taskTitle').val('');
             $('#fDate').val('');
             $('#tDate').val('');
-            $("#fromenddate").val('');
-            $("#toendtdate").val('');
             $('#priorityId').val(0);
             $('.custom-bar .strenth-colors').css('width', '0px');
         });
@@ -320,18 +287,6 @@
                     } else {
                         e.preventDefault();
                         $('.errorMsgDate').show();
-                    }
-                }
-
-                // Check End Date .
-                var sEndDate = $('input[type=text]#fromenddate').val();
-                var eEndDate = $('input[type=text]#toendtdate').val();
-                if (sEndDate !== "" && eEndDate !== "") {
-                    if (dateCompare(sEndDate, eEndDate) == -1 || HijridateCompare(sEndDate, eEndDate) == 0) {
-                        $('.errorMsgEndDate').hide();
-                    } else {
-                        e.preventDefault();
-                        $('.errorMsgEndDate').show();
                     }
                 }
             });

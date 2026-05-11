@@ -61,7 +61,7 @@
                         return false;
                     }
                     else if (files[0].size > size) {
-                        $("#" + parentdiv + ' .UploadErrorMsg').text('يجب ان لا يتجاوز حجم الملف 4 ميجا').css('color', 'red');
+                        $("#" + parentdiv + ' .UploadErrorMsg').text('يجب ان لا يتجاوز حجم الملف 10 ميجا').css('color', 'red');
 
                         return false;
                     }

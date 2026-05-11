@@ -30,7 +30,13 @@ namespace EtaskMinstry.AppCode
 
         public static void UpdateTaskStatus()
         {
-            //Define Unit ofWork 
+            // #36: throttle to once per 5 min per user — was running on every page load,
+            // doing N UPDATEs each time on Tasks where StartDate <= today (date-level threshold)
+            var cacheKey = "UpdateTaskStatus_" + (MvcApplication.userData.isCompany ? "C" : "E") + "_" + MvcApplication.userData.userId;
+            if (HttpRuntime.Cache[cacheKey] != null) return;
+            HttpRuntime.Cache.Insert(cacheKey, true, null, DateTime.Now.AddMinutes(5), System.Web.Caching.Cache.NoSlidingExpiration);
+
+            //Define Unit ofWork
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
             //     UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.AppSettings["ETaskEntities"].ToString());         
             if (MvcApplication.userData.isCompany)
@@ -939,7 +945,7 @@ namespace EtaskMinstry.AppCode
         /// <returns></returns>
         public static string EmpUpdateTaskTime(int iTaskID, decimal timeValue)
         {
-            //Define Unit ofWork 
+            //Define Unit ofWork
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);
@@ -949,45 +955,45 @@ namespace EtaskMinstry.AppCode
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
                 if (objTask.StatusID == (int)TaskStatus.New)
                     objTask.StatusID = (int)TaskStatus.Inprogress;
-                //Insert TaskStatusLog Record 
-                _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+
+                // Update existing today's log or insert a new one to avoid accumulating duplicate entries
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+                var todayLog = _unitOfWork.TaskStatuseLog.Get(
+                    filter: l => l.TaskID == iTaskID &&
+                                 l.EmpID == objTask.EmpID &&
+                                 l.CreatedDate >= today &&
+                                 l.CreatedDate < tomorrow
+                ).FirstOrDefault();
+
+                if (todayLog != null)
                 {
-                    TaskID = iTaskID,
-                    CreatedDate = DateTime.Now,
-                    EmpID = objTask.EmpID,
-                    StatusID = objTask.StatusID,
-                    TimeCount = timeValue,
-                    TimUnitID = (int)TimeUnit.Hour
-                });
-                _unitOfWork.Save();
-
-
-                //get all emps that work in this task
-                Dictionary<string, TaskTimeDetails> uniqueTimeLog = new Dictionary<string, TaskTimeDetails>();
-
-                uniqueTimeLog = objTask.GetTaskTimeLog;
-                if (uniqueTimeLog.Count() < 1)
-                {
-                    objTask.ActualTime = timeValue;
+                    todayLog.TimeCount = timeValue;
+                    _unitOfWork.TaskStatuseLog.Update(todayLog);
                 }
                 else
                 {
-                    objTask.ActualTime = 0;
-                    _unitOfWork.Save();
-                    foreach (var itemTime in uniqueTimeLog.Values)
+                    _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
                     {
-
-                        objTask.ActualTime += Decimal.Parse(itemTime.LogTime);
-
-                    }
-                    //objTask.ActualTime += timeValue;
+                        TaskID = iTaskID,
+                        CreatedDate = DateTime.Now,
+                        EmpID = objTask.EmpID,
+                        StatusID = objTask.StatusID,
+                        TimeCount = timeValue,
+                        TimUnitID = (int)TimeUnit.Hour
+                    });
                 }
-                // objTask.ActualTime = uniqueTimeLog.Values.Sum();
+                _unitOfWork.Save();
+
+                // Recompute ActualTime as sum of latest daily logs across all employees
+                Dictionary<string, TaskTimeDetails> uniqueTimeLog = objTask.GetTaskTimeLog;
+                objTask.ActualTime = uniqueTimeLog.Values.Sum(t => Decimal.Parse(t.LogTime));
+
                 //Log TaskRecord
                 EtaskMinstry.AppCode.LogTask.Log(objTask, beforeUpdateObj);
-                //Update Task 
+                //Update Task
                 _unitOfWork.TaskRepository.Update(objTask);
-                //TODO: ADD NOTIFICATION  Emp Start  iTaskID  objTask.EmpID  
+                //TODO: ADD NOTIFICATION  Emp Start  iTaskID  objTask.EmpID
                 if (objTask.EmpID.HasValue)
                     NotificationHub.Send(Users.Employee(objTask.EmpID.Value), NotificationType.NewTask, "تم تعديل الوقت المستغرق من قبل الموظف :" + ServiceManger.GetEmplyeeName(objTask.EmpID.Value) + "::" + objTask.Title + "::", @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
                 NotificationHub.Send(Users.Company(objTask.CompanyID), NotificationType.NewTask, " تم تعديل الوقت المستغرق من قبل الموظف :" + ServiceManger.GetEmplyeeName(objTask.EmpID.Value)  + "::" + objTask.Title + "::", @"/company/company/TaskDetails/" + objTask.TaskID);
