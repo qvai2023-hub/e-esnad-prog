@@ -278,6 +278,13 @@ Proceed?
 ```
 EtaskMinstryWeb/
 ├── EtaskMinstry/                  # Main MVC web project
+│   ├── Api/                       # Mobile API layer (NEW — see "Mobile API Layer" section)
+│   │   ├── Configuration/         # JSON formatter + CORS for /api/v1/
+│   │   ├── Controllers/           # JWT-gated thin controllers
+│   │   ├── Dtos/                  # Hand-written POCOs (never EF entities)
+│   │   ├── Filters/               # JwtAuthorize, ApiResponse wrapper, ApiException
+│   │   ├── Mapping/               # entity → DTO mappers
+│   │   └── Services/              # JWT issue/validate, refresh tokens, FCM
 │   ├── Areas/                     # MVC Areas (role-based modules)
 │   │   ├── Admin/                 # Admin area (controllers, models, views)
 │   │   ├── Common/                # Shared/common area
@@ -480,3 +487,419 @@ Constraints: Do NOT touch other files. Skip explanation.
 - [ ] Did I say "Skip explanation" if I just need code?
 - [ ] Did I say "Do NOT touch other files"?
 - [ ] Did I reference an existing file as a pattern instead of re-explaining the rules?
+
+---
+
+# Mobile API Layer
+
+Added in 2026 to serve a future mobile app. All Mobile API code lives under
+`EtaskMinstry/Api/` and ships in the SAME project as the web. The web app
+and Mobile API share the SAME database and the SAME `AppCode` / `Services`
+business logic.
+
+## Non-negotiable rules for the Mobile API
+
+1. **Sync only** — no `async`/`await`. Matches the rest of the project.
+2. **EF6 Database-First stays untouched** — do not edit `.edmx` or any
+   auto-generated entity files. Direct ADO.NET (`SqlConnection`,
+   parameterized SQL) is the approved escape hatch for the two new
+   tables (`MobileDeviceToken`, `RefreshToken`).
+3. **Newtonsoft.Json 5.x only** — never `System.Text.Json`.
+4. **NO new business logic in Mobile API code.** API controllers MUST
+   call existing AppCode methods (`TaskWorkflow.ChangeTaskStatus`,
+   `TaskManger.EmpUpdateTaskTime`, `UserAccountVM.Checkin`, etc.).
+5. **NO modifications to existing tables.** The Mobile API adds exactly
+   two tables: `MobileDeviceToken` and `RefreshToken`. See
+   `Telesak-Docs/sql/mobile-api-tables.sql`.
+6. **NO changes to existing controllers, views, AppCode, Services, or
+   Areas — except** one explicitly-allowed FCM line inside
+   `AppCode/Notification.cs` (Slice 6). Anything else must be done as a
+   wrapper or new method beside the existing one.
+7. **Web behavior MUST remain unchanged.** Every regression in the web
+   means stop, revert, redesign.
+
+## Reuse, don't rewrite — overwrite vs. extension policy
+
+When the Mobile API needs a variant of an existing method:
+
+- ✅ **Call existing method directly** if no variation is needed.
+- ✅ **Write a new method beside the old one** (same file or
+  `Api/Services/`) when you need a variant. Naming convention:
+  `LoginETaskForApi`, `CheckinForApi`, etc.
+- ✅ **Trigger from a shared call site** (e.g. one FCM line inside
+  `NotificationHub.Send` benefits both web and API).
+- ❌ **DO NOT overwrite an existing method body.** This is a HIGH-RISK
+  shared-code change per bug-fix Rule 3 and requires explicit user
+  approval with rationale.
+
+If a wrapper would mean copy-pasting more than ~15 lines of business
+logic, stop and surface it as an open question — that's the line where
+"wrapper" becomes "fork".
+
+## Architecture
+
+```
+Mobile Client
+     ↓ HTTPS + JWT Bearer
+┌──────────────────────────────────────────┐
+│ Api/Controllers/   ← THIN (30-50 lines)  │
+│  - extract JWT claims via JwtAuthorize    │
+│  - call existing AppCode/Services         │
+│  - map entity → DTO via Api/Mapping/      │
+│  - return ApiResponse<T> / PagedResponse  │
+└──────────────────────────────────────────┘
+     ↓ direct C# calls (no HTTP)
+┌──────────────────────────────────────────┐
+│ AppCode/, Services/, Models/   (UNCHANGED)│
+└──────────────────────────────────────────┘
+     ↓
+SQL Server (same DB as web)
+```
+
+## Roles & identity model
+
+The Mobile API serves two roles only — the same two the web app serves
+to end users:
+
+| JWT claim `userTypeId` | LoggedUserType enum | Role     | Notes |
+|------------------------|--------------------|----------|-------|
+| `2`                    | Employee           | Employee | Task lifecycle: accept, reject, complete, log time |
+| `3`                    | Company            | Company  | Task creation, approve, disapprove, soft-delete; sees employee list |
+
+Admin (`userTypeId = 1`) is **NOT exposed via the Mobile API** — admin
+functions stay on the web. Anyone attempting to log in to the API with
+an admin account is rejected as 401.
+
+JWT claim set (RFC 7519):
+
+| Claim         | Type       | Meaning |
+|---------------|-----------|---------|
+| `sub`         | string    | user ID (employee ID or company ID) |
+| `userTypeId`  | int       | 2 = Employee, 3 = Company |
+| `companyId`   | int?      | the user's company ID (employee → their employer's id; company → self) |
+| `name`        | string    | display name |
+| `iss`         | string    | "Telesak" / "E-snad" (per env) |
+| `iat`, `exp`  | long      | Unix-seconds issued-at / expiry |
+| `jti`         | string    | random id, prevents token caching |
+
+`JwtAuthorizeAttribute` validates the token and populates
+`MvcApplication.userData` from these claims, so any downstream call
+into AppCode that reads `MvcApplication.userData` (e.g.
+`NotificationHub.Send`'s sender-skip guard) continues to work
+identically for both web (session) and API (JWT) callers.
+
+## Standard response envelope
+
+Every Mobile API endpoint returns one of:
+
+```json
+{ "success": true, "data": <obj|array|null>, "message": "", "errors": [] }
+```
+
+Paginated lists also include `page`, `pageSize`, `totalCount`, `totalPages`.
+Errors are Arabic-only. Field names are camelCase (Newtonsoft
+`CamelCasePropertyNamesContractResolver` applied to the Web API
+JsonFormatter only — MVC's `Json()` action result stays PascalCase).
+
+Dates are ISO 8601 Gregorian (`2026-05-11T14:30:00Z`). Hijri display
+is the mobile client's responsibility.
+
+## Routes & versioning
+
+- All Mobile API routes are under `/api/v1/`.
+- Routes are declared via attribute routing
+  (`[RoutePrefix("api/v1/...")]` + `[Route("...")]`). Attribute routing
+  is enabled in `App_Start/WebApiConfig.cs`; the existing convention
+  route `api/{controller}/{id}` is kept intact for any non-versioned
+  Web API endpoints.
+
+## Performance standards (same as web)
+
+All 7 performance rules from this CLAUDE.md apply to API code:
+no `.ToList()` before filtering, always use `includeProperties`, no N+1
+in loops, no `GetByID()` inside loops, `isDelayed` rule, `GetByID()` does
+not support `includeProperties`, named lambda parameters
+(`Get(filter: ...)`).
+
+## What is OUT OF SCOPE for the Mobile API
+
+Do NOT add: reports / PDF / RDLC endpoints, bulk operations, forgot
+password / reset password endpoints, admin endpoints, activity log /
+audit feed endpoints, file upload endpoints, offline / sync logic,
+Hijri date conversion in API responses, bilingual error messages
+(Arabic only), TenantId concept (single tenant), Swagger in
+production (optional in dev only).
+
+## Routing model
+
+WebApi version in this project is 1.0 (`Microsoft.AspNet.WebApi 4.0.20710.0`).
+Attribute routing (`[RoutePrefix]` / `[Route]`) was added in WebApi 2 and is
+NOT available. The Mobile API therefore uses **convention routing** in
+`App_Start/WebApiConfig.cs`:
+
+```
+api/v1/me                                  → MeController.Get (explicit)
+api/v1/{controller}/{action}/{id}          → action-named convention
+api/{controller}/{id}                      → existing default route, untouched
+```
+
+Implications when adding a new endpoint:
+
+- Controller class names drop the "Api" suffix so `{controller}` matches the
+  desired URL segment: `AuthController` not `AuthApiController` (file name
+  may keep "Api" but class name must match the route token).
+- The action name appears in the URL: `POST /api/v1/auth/login` →
+  `AuthController.Login`. For dashed paths use `[ActionName("change-password")]`.
+- For ergonomic URLs without an action segment (like `/api/v1/me`), add an
+  explicit `MapHttpRoute` BEFORE the generic action route.
+
+## Files added in Slice 1 (foundation)
+
+- `Api/Configuration/{ApiJsonFormatter,ApiCorsConfig}.cs`
+- `Api/Filters/{JwtAuthorizeAttribute,ApiResponseFilter,ApiExceptionFilter}.cs`
+- `Api/Dtos/Common/{ApiResponse,PagedResponse,ErrorItem}.cs`
+- `Api/Services/{JwtIssuer,JwtValidator,RefreshTokenService,RefreshTokenCleanupJob}.cs`
+- `Telesak-Docs/sql/mobile-api-tables.sql`  *(creates `MobileDeviceToken`, `RefreshToken`)*
+
+Existing files edited in Slice 1 (additive only):
+- `App_Start/WebApiConfig.cs` — add `/api/v1/` convention route + camelCase formatter + register API filters
+- `Global.asax.cs` — start/stop `RefreshTokenCleanupJob`
+- `Web.config` + `webesnad.config` + `webuat.config` + `webtele.config` — add 5 appSettings keys (`FcmServerKey`, `JwtSecret`, `JwtIssuer`, `JwtAccessExpiryMinutes`, `JwtRefreshExpiryDays`)
+
+## Files added in Slice 6 (notifications + FCM)
+
+- `Api/Controllers/NotificationsController.cs` — `GET /api/v1/notifications`, `POST /api/v1/notifications/{id}/read`, `POST /api/v1/notifications/read-all`
+- `Api/Controllers/DeviceTokensController.cs` — `POST /api/v1/device-tokens`, `DELETE /api/v1/device-tokens/{token}`
+- `Api/Dtos/Notifications/{NotificationDto,DeviceTokenRequest}.cs`
+- `Api/Mapping/NotificationMapper.cs`
+- `Api/Services/DeviceTokenService.cs` — direct ADO.NET CRUD over `MobileDeviceToken`
+- `Api/Services/FcmDispatcher.cs` — fire-and-forget FCM HTTP POST
+
+Existing files edited in Slice 6:
+- `AppCode/Notification.cs` — **one line** inside `NotificationHub.Send` (after the existing `HubContext.Clients.Clients(...)` SignalR call) calling `FcmDispatcher.Dispatch`. Wrapped in try/catch so any FCM failure cannot disrupt the web's SignalR path.
+- `Api/Controllers/AuthController.cs` — `Logout` now consumes `request.DeviceToken` and calls `DeviceTokenService.Unregister`
+- `App_Start/WebApiConfig.cs` — +5 routes (notifications list, read-all, {id}/read, device-tokens POST, device-tokens DELETE)
+
+## Slice 6 — FCM flow notes
+
+- **Single injection point in existing AppCode.** All notification triggers
+  in the web (TaskManger.EmpAcceptTask, EmpRejectTask, EmpFinishTask,
+  EmpUpdateTaskTime, CompanyAcceptTask, CompanyRejectTask, ReassignTask,
+  TaskAddEdit.Save, etc.) ALREADY call `NotificationHub.Send` internally.
+  Adding `FcmDispatcher.Dispatch(...)` once at the end of that method means
+  EVERY existing notification trigger automatically fans out to FCM —
+  zero changes to any controller, no `Api/Services/TaskNotifier` wrapper,
+  no duplicated business logic. This is the single brief-sanctioned edit
+  to existing AppCode.
+- **Fire-and-forget.** `FcmDispatcher.Dispatch` snapshots the inputs as
+  plain values, then queues a `ThreadPool.QueueUserWorkItem` worker. The
+  original web/API request returns immediately (Risk R4 mitigation).
+- **No async/await.** Per CLAUDE.md sync-only rule, FCM HTTP is via
+  `HttpWebRequest` synchronously inside the worker thread. The worker
+  thread itself is the asynchronicity boundary.
+- **Stale-token cleanup.** FCM legacy API returns `NotRegistered` /
+  `InvalidRegistration` / `MismatchSenderId` for expired or wrong-app
+  tokens. The dispatcher parses the response body for those substrings
+  and calls `DeviceTokenService.MarkInvalid` to flip `IsActive=0`. Token
+  is never deleted (audit trail kept).
+- **Server key.** `FcmServerKey` Web.config app setting. When the value
+  is missing or starts with `REPLACE_`, the dispatcher silently no-ops
+  — keeps dev environments unblocked without producing noisy errors.
+- **Idempotent device-token register.** Re-registering the same token
+  updates `LastSeenDate` (and reactivates if it was disabled by a prior
+  FCM error). One user can hold many active tokens (phone + tablet).
+- **Notifications endpoints reuse existing data.** No change to
+  `NotificationCollection` schema; the controller reads rows scoped to
+  `(InstanceID, UserTypeID)` exactly the way `NotificationHub.Get`
+  already does. Mark-as-read flips `IsSeen=1` and sets `SeenDate=now`
+  — matches the column semantics the web's UI assumes.
+- **Per-user scoping** is enforced on read/unregister so a compromised
+  token from one account can't disable another account's pushes
+  (covered by `DeviceTokenService.Unregister(userId, token)` rather than
+  by token value alone).
+- **Logout side effect:** `/auth/logout` now accepts `{ refreshToken,
+  deviceToken? }`. If `deviceToken` is present we deactivate it so push
+  stops going to a logged-out phone.
+- **Error codes (Slice 6 additions):**
+  | Code | When | HTTP |
+  |---|---|---|
+  | `NOTIFICATION_NOT_FOUND` | mark-read on an unknown id | 404 |
+  | `NOTIFICATION_FORBIDDEN` | mark-read on someone else's notification | 403 |
+  | `INVALID_REQUEST` | device-token register/unregister with empty token | 400 |
+
+## Files added in Slice 5 (company task flow)
+
+- `Api/Dtos/Tasks/CreateTaskDto.cs` — body for POST /api/v1/tasks
+
+Existing files edited in Slice 5:
+- `Api/Controllers/TasksController.cs` — added `Create`, `Approve`, `Disapprove`, `Delete` methods + `InvokeCompanyAction` helper + `IsLegalTransition` Done case
+- `App_Start/WebApiConfig.cs` — split `/api/v1/tasks` into GET+POST verb-constrained routes; added DELETE `/api/v1/tasks/{id}` route
+
+## Slice 5 — company task flow notes
+
+- **Deviation from brief reuse map (same pattern as Slice 4):** brief said
+  `Approve → ChangeTaskStatus(Approve)` / `Disapprove → ChangeTaskStatus(Disapprove)`.
+  The web actually calls `TaskManger.CompanyAcceptTask` (line 514) and
+  `TaskManger.CompanyRejectTask` (line 359). Those methods send
+  `NotificationHub.Send` notifications internally; ChangeTaskStatus does not.
+  TasksController calls the `TaskManger.Company*Task` methods for behavior
+  parity with web (and so Slice 6 FCM works automatically).
+- **Create flow is inlined** in `TasksController.Create` (~30 lines). The web's
+  `Areas/Company/Models/TaskAddEdit.Save()` mixes view-model concerns
+  (Hijri↔Greg string parsing) that don't apply to the API. The inline copy
+  uses the same Task field assignments, same `StatusID = New`, same
+  `NotificationHub.Send` call, same `TaskTLog` insert, same `LogTask.Log`.
+  Right at the ~15-line "fork vs wrap" threshold from CLAUDE.md — flagged in
+  the controller comment.
+- **Soft delete** mirrors `Areas/Company/Models/CompanyTaskVM.cs:413`:
+  `LogTask.Log(task, null, true)` → `task.IsDeleted = true` → Save.
+  Single-task only — no bulk delete (per brief).
+- **Per-task authorization (company):**
+  - Approve / Disapprove / Delete: `task.CompanyID == userData.userId`.
+  - Create: assignee `Employee.CompanyID` must equal caller's company.
+  - Project (if provided): `Project.CompanyID` must equal caller's company.
+- **Routing:** `/api/v1/tasks` is now split by HTTP verb via
+  `HttpMethodConstraint`. GET → `List`, POST → `Create`. Same trick on
+  `/api/v1/tasks/{id}` for GET (`Detail`) vs DELETE (`Delete`). The
+  `/api/v1/tasks/{id}/{action}` route handles all named POST actions
+  (accept, reject, complete, time, approve, disapprove).
+- **Error codes (Slice 5 additions):**
+  | Code | When | HTTP |
+  |---|---|---|
+  | `COMPANY_ONLY` | Employee tried a Company-only endpoint | 403 |
+  | `INVALID_REQUEST` | missing title / empId / priorityId on Create | 400 |
+  | `INVALID_EMPLOYEE` | assignee not in caller's company, or inactive/deleted | 400 |
+  | `INVALID_PROJECT` | project not in caller's company | 400 |
+  | `INVALID_STATE` | approve/disapprove against a non-Done task | 409 |
+
+## Files added in Slice 4 (employee task flow + projects + employees pickers)
+
+- `Api/Controllers/TasksController.cs` — list, detail, accept, reject, complete, time (Employee actions only; Slice 5 adds company-side)
+- `Api/Controllers/ProjectsController.cs` — GET `/api/v1/projects` (both roles)
+- `Api/Controllers/EmployeesController.cs` — GET `/api/v1/employees` (Company only)
+- `Api/Dtos/Tasks/{TaskListItemDto,TaskDetailDto,TaskStatusLogDto,UpdateTimeDto,TaskActionResultDto}.cs`
+- `Api/Dtos/Projects/ProjectListItemDto.cs`
+- `Api/Dtos/Employees/EmployeeListItemDto.cs`
+- `Api/Mapping/{TaskMapper,ProjectMapper,EmployeeMapper}.cs`
+
+Existing files edited in Slice 4:
+- `App_Start/WebApiConfig.cs` — added 5 explicit routes for tasks (list, detail, action) + projects + employees
+
+## Slice 4 — task flow notes
+
+- **Deviation from brief's reuse map:** the web's employee accept/reject/
+  complete actions actually call `TaskManger.EmpAcceptTask`, `EmpRejectTask`,
+  `EmpFinishTask` (lines 749, 811, 852 of `AppCode/TaskManger.cs`), NOT
+  `TaskWorkflow.ChangeTaskStatus` as the brief listed. The `TaskManger.Emp*Task`
+  methods send `NotificationHub.Send` notifications internally; ChangeTaskStatus
+  does not. To mirror web behavior exactly (and to let Slice 6's FCM line
+  piggyback automatically), `TasksController` calls the `TaskManger.Emp*Task`
+  methods. Same reuse policy as everywhere else — no duplicated business logic.
+- **Per-task authorization:**
+  - Employee can act on (accept/reject/complete/time) only tasks where
+    `task.EmpID == userData.userId`.
+  - Employee can READ tasks where they are the current assignee OR they
+    appear in `TaskTLogs` (matches web list rule for reassignment history).
+  - Company can read tasks in their company.
+- **State guards:** controller pre-checks `task.StatusID` against the
+  expected source status before invoking `TaskManger.Emp*Task`. Returns
+  409 `INVALID_STATE` on illegal transitions (e.g. complete on a `New` task).
+  This mirrors what the workflow refuses internally — surfaces a clean
+  4xx instead of a silent no-op.
+- **`isDelayed` is client-side:** `Task.isDelayed` is a partial-class
+  property — not safe inside an EF query. List endpoint materializes with
+  `.ToList()` THEN maps, per the CLAUDE.md performance rule.
+- **Pagination:** default 20, max 100, server clamps page<1 to 1, pageSize>max
+  to max. `.Skip/.Take` applied on IQueryable BEFORE materialization — counts
+  via `.Count()` against the same IQueryable, pushed to SQL.
+- **Status filter param:** lowercase strings — `all`, `new`, `inprogress`,
+  `done`, `accepted`, `approved`, `notapproved`, `pending`. Unknown values
+  are treated as `all`.
+- **Error codes (Slice 4):**
+  | Code | When | HTTP |
+  |---|---|---|
+  | `TASK_NOT_FOUND` | task id missing or soft-deleted | 404 |
+  | `TASK_FORBIDDEN` | caller cannot read this task | 403 |
+  | `TASK_NOT_ASSIGNED` | employee tries to mutate a task not assigned to them | 403 |
+  | `EMPLOYEE_ONLY` | Company hits an Employee-only endpoint | 403 |
+  | `COMPANY_ONLY` | Employee hits a Company-only endpoint (e.g. `/employees`) | 403 |
+  | `INVALID_STATE` | workflow refused the transition | 409 |
+  | `ACTION_FAILED` | `TaskManger.Emp*Task` returned false | 500 |
+
+## Files added in Slice 3 (attendance)
+
+- `Api/Controllers/AttendanceController.cs` — POST `check-in`, `heartbeat`, `check-out`; GET `today`
+- `Api/Dtos/Attendance/{CheckInResponse,HeartbeatResponse,TodayAttendanceDto}.cs`
+
+Existing files edited in Slice 3:
+- `Api/Dtos/Auth/MeResponse.cs` — moved TodayAttendanceDto to `Api/Dtos/Attendance/` namespace
+- `Api/Controllers/MeController.cs` — uses new TodayAttendanceDto namespace + sets `IsOpen` flag
+- `Api/Filters/ApiExceptionFilter.cs` — optional detailed errors via Web.config `ApiDetailedErrors=true` (DEV ONLY)
+- `Web.config` — added `ApiDetailedErrors` key (default true in dev)
+
+## Slice 3 — attendance flow notes
+
+- **Employee-only:** `RequireEmployee()` guard returns 403 `EMPLOYEE_ONLY` for
+  Company users on `/check-in`, `/heartbeat`, `/check-out`. `/today` returns
+  `{ hasAttendance: false }` for Company (mirrors web's
+  `AttendanceController.GetCurrentAttendance`).
+- **Check-in is idempotent:** if today's latest Attendance row is still open
+  (CheckOut null), it is returned with `isNew=false`. Otherwise a new row is
+  created by calling `new UserAccountVM().Checkin(empId)` — same call the
+  web's `LoginETask` line 135 makes, so any side effects (LastHeartbeat seed,
+  Session["HasActiveAttendance"]) match the web exactly.
+- **Heartbeat uses direct SQL** on `Attendance.LastHeartbeat`. The column is
+  `[NotMapped]` on the EF entity (see `Attendance.Partial.cs`), so we cannot
+  set it via EF. Mirrors `AttendanceController.LogActivity` exactly.
+- **Check-out** uses the EF entity (CheckOut column IS mapped).
+- **Error codes:**
+  | Code | When | HTTP |
+  |---|---|---|
+  | `EMPLOYEE_ONLY` | Company user hits an employee-only attendance endpoint | 403 |
+  | `NO_ACTIVE_ATTENDANCE` | heartbeat / check-out called without an open row today | 404 |
+  | `CHECKIN_FAILED` | check-in tried to create a row but post-insert lookup found none | 500 |
+
+## Files added in Slice 2 (auth + me)
+
+- `Api/Controllers/AuthController.cs` — POST `/api/v1/auth/login`, `/refresh`, `/logout`
+- `Api/Controllers/MeController.cs` — GET `/api/v1/me`, POST `/api/v1/me/change-password`
+- `Api/Services/AuthValidator.cs` — credentials + tenant + active-account check (no session writes)
+- `Api/Dtos/Auth/{LoginRequest,RefreshRequest,LogoutRequest,ChangePasswordRequest,DeviceInfoDto,TokenResponse,UserSummaryDto,TodayAttendanceDto,MeResponse}.cs`
+
+Existing files edited in Slice 2:
+- `App_Start/WebApiConfig.cs` — explicit `/api/v1/me` route
+- `Api/Dtos/Common/ApiResponse.cs` — optional `Code` field for machine-readable error codes (`INVALID_CREDENTIALS`, `ACCOUNT_STOPPED`, `INVALID_REFRESH`, `REUSE_DETECTED`)
+
+Removed in Slice 2:
+- `Api/Controllers/PingController.cs` (was a temporary smoke-test endpoint from Slice 1)
+
+## Slice 2 — auth flow notes
+
+- **Login reuse policy:** `AuthValidator` mirrors the EF queries of
+  `Models/Login/UserAccountVM.LoginETask` but does NOT write to
+  `MvcApplication.userData`. The web `LoginETask` writes the session as a
+  side effect of validation — we want validation only. The class-level
+  encryption + tenant check + IsActive/IsDeleted gates are exactly the
+  same, just packaged into a method that returns a result instead of
+  mutating state.
+- **Auto check-in at login (Q1=a):** `AuthController.Login` calls
+  `new UserAccountVM().Checkin(empId)` for employees, mirroring the web's
+  `LoginETask` line 135 behavior. Failures are swallowed so login succeeds
+  even if attendance insert fails.
+- **`MvcApplication.userData` for API:** set by `JwtAuthorizeAttribute` on
+  every authenticated request from JWT claims. Endpoints that downstream
+  read `userData` (e.g. `UserAccountVM.ChangePassowrd` reads
+  `userData.userId`) work unchanged.
+- **Refresh-token reuse detection:** if a refresh token marked `IsRevoked=1`
+  is presented, every active refresh token for that user is revoked
+  (`RevokeAllForUser(userId, "Compromised")`). The mobile app must force
+  re-login after a `REUSE_DETECTED` response.
+- **Error codes** (in `ApiResponse.code`):
+  | Code | When | HTTP |
+  |---|---|---|
+  | `INVALID_REQUEST` | malformed body / missing fields | 400 |
+  | `INVALID_CREDENTIALS` | wrong username / password / tenant mismatch | 401 |
+  | `INVALID_REFRESH` | refresh token unknown or expired | 401 |
+  | `REUSE_DETECTED` | revoked refresh token replayed (all user tokens revoked) | 401 |
+  | `ACCOUNT_STOPPED` | employee/company inactive or deleted | 403 |
+  | `INVALID_OLD_PASSWORD` | change-password called with wrong old password | 400 |

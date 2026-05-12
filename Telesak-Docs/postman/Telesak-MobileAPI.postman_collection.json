@@ -1,0 +1,731 @@
+{
+  "info": {
+    "name": "Telesak Mobile API",
+    "description": "Mobile API smoke + happy-path tests. Set environment variables `baseUrl`, `username`, `password` before running.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:43305" },
+    { "key": "username", "value": "" },
+    { "key": "password", "value": "" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('success true', () => pm.expect(body.success).to.eql(true));",
+                  "pm.test('accessToken present', () => pm.expect(body.data.accessToken).to.be.a('string'));",
+                  "pm.test('refreshToken present', () => pm.expect(body.data.refreshToken).to.be.a('string'));",
+                  "pm.collectionVariables.set('accessToken', body.data.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', body.data.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"deviceInfo\": { \"model\": \"Postman\", \"platform\": \"FCM\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login - bad credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));",
+                  "pm.test('code = INVALID_CREDENTIALS', () => pm.expect(pm.response.json().code).to.eql('INVALID_CREDENTIALS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nobody\",\n  \"password\": \"wrong\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('new accessToken', () => pm.expect(body.data.accessToken).to.be.a('string'));",
+                  "pm.test('new refreshToken differs', () => pm.expect(body.data.refreshToken).to.not.eql(pm.collectionVariables.get('refreshToken')));",
+                  "pm.collectionVariables.set('accessToken', body.data.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', body.data.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "Refresh - reuse detection",
+          "description": "Re-send a refresh token that was just rotated. Should 401 with code REUSE_DETECTED and revoke all this user's tokens. To run, save the OLD refreshToken from the first Login, run Refresh once (which rotates it), then run this with the OLD value.",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"<paste OLD refresh token here>\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Notifications + FCM",
+      "item": [
+        {
+          "name": "Register device token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"fake-fcm-token-{{$timestamp}}\",\n  \"platform\": \"FCM\",\n  \"model\": \"Postman\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/device-tokens"
+          }
+        },
+        {
+          "name": "Register same token again (idempotent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"my-stable-test-token-123\",\n  \"platform\": \"FCM\",\n  \"model\": \"Postman\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/device-tokens",
+            "description": "Run twice — second call should update LastSeenDate not insert a new row. DB verify: SELECT COUNT(*) FROM MobileDeviceToken WHERE DeviceToken='my-stable-test-token-123' → 1."
+          }
+        },
+        {
+          "name": "Unregister device token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/device-tokens/my-stable-test-token-123",
+            "description": "DB verify: SELECT IsActive FROM MobileDeviceToken WHERE DeviceToken='my-stable-test-token-123' → 0."
+          }
+        },
+        {
+          "name": "List notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('paged shape', () => pm.expect(body).to.have.property('totalCount'));",
+                  "if (Array.isArray(body.data) && body.data.length > 0) {",
+                  "  pm.collectionVariables.set('notificationId', body.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications?page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "Mark one as read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/read"
+          }
+        },
+        {
+          "name": "Read-all",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('marked is a number', () => pm.expect(pm.response.json().data.marked).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/read-all"
+          }
+        },
+        {
+          "name": "Logout (with deviceToken)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\",\n  \"deviceToken\": \"my-stable-test-token-123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Tasks (Company)",
+      "item": [
+        {
+          "name": "Create task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('taskId returned', () => pm.expect(body.data.taskId).to.be.a('number'));",
+                  "pm.collectionVariables.set('newTaskId', body.data.taskId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"مهمة تجريبية من Mobile API\",\n  \"description\": \"تجربة إنشاء مهمة عبر الواجهة الجديدة\",\n  \"summary\": \"\",\n  \"briefTaskName\": \"\",\n  \"priorityId\": 1,\n  \"empId\": 0,\n  \"projectId\": null,\n  \"startDate\": \"2026-05-12T08:00:00Z\",\n  \"endDate\": \"2026-05-20T17:00:00Z\",\n  \"expectedTime\": 8,\n  \"timeUnitId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tasks",
+            "description": "Replace empId with a real employee id from the /employees picker. priorityId must exist in the Priority table (1 is usually defined)."
+          }
+        },
+        {
+          "name": "Create - bad employee (different company)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"تجربة فشل\",\n  \"priorityId\": 1,\n  \"empId\": 999999\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tasks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_EMPLOYEE', () => pm.expect(pm.response.json().code).to.eql('INVALID_EMPLOYEE'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/approve",
+            "description": "Task must be in Done status (5). Otherwise expect 409 INVALID_STATE."
+          }
+        },
+        {
+          "name": "Disapprove",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/disapprove"
+          }
+        },
+        {
+          "name": "Delete (soft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{newTaskId}}",
+            "description": "Soft delete — sets Task.IsDeleted=1. Verify in DB: SELECT IsDeleted FROM Task WHERE TaskID = <newTaskId>"
+          }
+        },
+        {
+          "name": "Delete - already deleted (should 404)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{newTaskId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('code = TASK_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('TASK_NOT_FOUND'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Tasks (Employee)",
+      "item": [
+        {
+          "name": "List - all",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('paged shape', () => { pm.expect(body).to.have.property('page'); pm.expect(body).to.have.property('totalCount'); });",
+                  "if (Array.isArray(body.data) && body.data.length > 0) {",
+                  "  pm.collectionVariables.set('taskId', body.data[0].taskId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks?status=all&page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "List - new",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks?status=new"
+          }
+        },
+        {
+          "name": "List - inprogress",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks?status=inprogress"
+          }
+        },
+        {
+          "name": "List - done",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks?status=done"
+          }
+        },
+        {
+          "name": "Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('statusLog present', () => pm.expect(pm.response.json().data.statusLog).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}"
+          }
+        },
+        {
+          "name": "Accept",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/accept"
+          }
+        },
+        {
+          "name": "Reject",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/reject"
+          }
+        },
+        {
+          "name": "Complete",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/complete"
+          }
+        },
+        {
+          "name": "Update time",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": 2.5\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/time"
+          }
+        },
+        {
+          "name": "Projects (picker)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/projects"
+          }
+        },
+        {
+          "name": "Employees (Company-only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/employees"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Attendance",
+      "item": [
+        {
+          "name": "Check-in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('attendanceId returned', () => pm.expect(body.data.attendanceId).to.be.a('number'));",
+                  "pm.collectionVariables.set('attendanceId', body.data.attendanceId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/check-in"
+          }
+        },
+        {
+          "name": "Check-in (idempotent re-call)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('isNew = false on second call', () => pm.expect(pm.response.json().data.isNew).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/check-in"
+          }
+        },
+        {
+          "name": "Heartbeat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('lastHeartbeat present', () => pm.expect(pm.response.json().data.lastHeartbeat).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/heartbeat"
+          }
+        },
+        {
+          "name": "Today",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('hasAttendance = true', () => pm.expect(pm.response.json().data.hasAttendance).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/today"
+          }
+        },
+        {
+          "name": "Check-out",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('checkOut set', () => pm.expect(pm.response.json().data.checkOut).to.be.a('string'));",
+                  "pm.test('isOpen = false', () => pm.expect(pm.response.json().data.isOpen).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/check-out"
+          }
+        },
+        {
+          "name": "Heartbeat after check-out (should 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('code = NO_ACTIVE_ATTENDANCE', () => pm.expect(pm.response.json().code).to.eql('NO_ACTIVE_ATTENDANCE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/attendance/heartbeat"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Me",
+      "item": [
+        {
+          "name": "GET /me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('user.userId present', () => pm.expect(body.data.user.userId).to.be.a('number'));",
+                  "pm.test('role is Employee or Company', () => pm.expect(['Employee','Company']).to.include(body.data.user.role));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/me"
+          }
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"<your current password>\",\n  \"newPassword\": \"<your new password>\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/me/change-password"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -267,6 +267,11 @@ public class NotificationHub : Hub
         };
         //call SendGeneralNotification function that's exists on the client's browser and pass the object we created.
         HubContext.Clients.Clients(lstToSend).SendGeneralNotification(new JavaScriptSerializer().Serialize(objToSend));
+
+        // Mobile API (Slice 6): fan out the same notification to FCM tokens
+        // of every recipient. Fire-and-forget — failures are swallowed inside
+        // the dispatcher so this line cannot disrupt the SignalR/web path.
+        try { EtaskMinstry.Api.Services.FcmDispatcher.Dispatch(collection, notification.ID, type.ToString(), message, linkToGo); } catch { }
     }
 
 

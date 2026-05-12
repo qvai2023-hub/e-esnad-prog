@@ -110,12 +110,17 @@ namespace EtaskMinstry
             // Start the auto-checkout background job
             // This job runs every 15 minutes to close orphaned attendance sessions
             AutoCheckoutJob.Start();
+
+            // Start the Mobile API refresh-token cleanup job (runs once a day,
+            // deletes refresh-token rows expired more than 30 days)
+            EtaskMinstry.Api.Services.RefreshTokenCleanupJob.Start();
         }
 
         protected void Application_End()
         {
             // Stop the auto-checkout background job
             AutoCheckoutJob.Stop();
+            EtaskMinstry.Api.Services.RefreshTokenCleanupJob.Stop();
         }
 
         /// <summary>

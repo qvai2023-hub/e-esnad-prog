@@ -4,6 +4,110 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## Sprint 8 - Mobile API Layer
+
+**Status:** Completed (pending tester sign-off)
+**Date Completed:** 2026-05-12
+
+A JSON Mobile API layer was added to serve a future mobile app. Same project,
+same solution, same database. **Web behavior is unchanged.** Full reference
+for testers + mobile devs: see `Telesak-Docs/4-MOBILE-API.md`.
+
+### SLICE-1: Foundation — JWT, formatter, filters, two new tables
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Configuration/ApiJsonFormatter.cs` | New | camelCase + ISO 8601 + drops XML. Web API only; MVC `Json()` unaffected |
+| `Api/Configuration/ApiCorsConfig.cs` | New | CORS via `DelegatingHandler` (no NuGet add) |
+| `Api/Filters/JwtAuthorizeAttribute.cs` | New | Validates Bearer JWT + populates `MvcApplication.userData` from claims |
+| `Api/Filters/ApiResponseFilter.cs` | New | Wraps raw DTOs in `ApiResponse` envelope |
+| `Api/Filters/ApiExceptionFilter.cs` | New | Sanitized Arabic 500s; honors `ApiDetailedErrors=true` for dev |
+| `Api/Dtos/Common/{ApiResponse,PagedResponse,ErrorItem}.cs` | New | Standard envelope shapes |
+| `Api/Services/JwtIssuer.cs` | New | HS256 access token + 64-byte refresh token (no NuGet add — hand-rolled HMACSHA256) |
+| `Api/Services/JwtValidator.cs` | New | Constant-time signature check, issuer + exp validation |
+| `Api/Services/RefreshTokenService.cs` | New | SHA-256 hashed refresh tokens via direct ADO.NET (EDMX unchanged) |
+| `Api/Services/RefreshTokenCleanupJob.cs` | New | Daily timer-based purge, mirrors `AutoCheckoutJob` lifecycle |
+| `App_Start/WebApiConfig.cs` | Modified | Added `/api/v1/` convention route, installed JSON formatter + CORS + filters |
+| `Global.asax.cs` | Modified | Start/stop `RefreshTokenCleanupJob` (2 lines) |
+| `Web.config` (+ `webesnad.config`, `webuat.config`, `webtele.config`) | Modified | +5 appSettings keys: `FcmServerKey`, `JwtSecret`, `JwtIssuer`, `JwtAccessExpiryMinutes`, `JwtRefreshExpiryDays` (+`ApiDetailedErrors` in dev) |
+| `Telesak-Docs/sql/mobile-api-tables.sql` | New | Creates `MobileDeviceToken` + `RefreshToken` (additive only, idempotent) |
+
+### SLICE-2: Auth + Me
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Controllers/AuthController.cs` | New | POST `/auth/login` `/auth/refresh` `/auth/logout` |
+| `Api/Controllers/MeController.cs` | New | GET `/me`, POST `/me/change-password` |
+| `Api/Services/AuthValidator.cs` | New | Mirrors `LoginETask` EF queries; does NOT write to session |
+| `Api/Dtos/Auth/{LoginRequest,RefreshRequest,LogoutRequest,ChangePasswordRequest,DeviceInfoDto,TokenResponse,UserSummaryDto,MeResponse}.cs` | New | Request + response shapes |
+| `Api/Dtos/Common/ApiResponse.cs` | Modified | Added optional `Code` field for machine-readable error codes |
+| `App_Start/WebApiConfig.cs` | Modified | Added explicit `/api/v1/me` route |
+
+### SLICE-3: Attendance
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Controllers/AttendanceController.cs` | New | POST `check-in`, `heartbeat`, `check-out`; GET `today` |
+| `Api/Dtos/Attendance/{CheckInResponse,HeartbeatResponse,TodayAttendanceDto}.cs` | New | Response shapes |
+| `Api/Dtos/Auth/MeResponse.cs` | Modified | Uses moved `TodayAttendanceDto` namespace |
+| `Api/Controllers/MeController.cs` | Modified | Uses moved namespace + sets `IsOpen` |
+| `Api/Filters/ApiExceptionFilter.cs` | Modified | Honors `ApiDetailedErrors` (dev visibility) |
+
+### SLICE-4: Tasks (Employee) + Projects + Employees pickers
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Controllers/TasksController.cs` | New | GET list (paged), GET detail, POST `accept`/`reject`/`complete`/`time` |
+| `Api/Controllers/ProjectsController.cs` | New | GET `/projects` — both roles |
+| `Api/Controllers/EmployeesController.cs` | New | GET `/employees` — Company only |
+| `Api/Dtos/Tasks/{TaskListItemDto,TaskDetailDto,TaskStatusLogDto,UpdateTimeDto,TaskActionResultDto}.cs` | New | Task DTOs |
+| `Api/Dtos/Projects/ProjectListItemDto.cs` | New | |
+| `Api/Dtos/Employees/EmployeeListItemDto.cs` | New | |
+| `Api/Mapping/{TaskMapper,ProjectMapper,EmployeeMapper}.cs` | New | Entity → DTO (only place that touches both) |
+| `App_Start/WebApiConfig.cs` | Modified | +5 explicit routes for tasks/projects/employees |
+
+### SLICE-5: Tasks (Company)
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Dtos/Tasks/CreateTaskDto.cs` | New | Body for POST /tasks |
+| `Api/Controllers/TasksController.cs` | Modified | +`Create`, `Approve`, `Disapprove`, `Delete` actions + helpers |
+| `App_Start/WebApiConfig.cs` | Modified | Split `/api/v1/tasks` into GET/POST verb-constrained routes; added DELETE `/api/v1/tasks/{id}` |
+
+### SLICE-6: Notifications + FCM (single AppCode line)
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Controllers/NotificationsController.cs` | New | GET list, POST `{id}/read`, POST `read-all` |
+| `Api/Controllers/DeviceTokensController.cs` | New | POST register, DELETE `{token}` unregister |
+| `Api/Dtos/Notifications/{NotificationDto,DeviceTokenRequest}.cs` | New | Notification + device-token shapes |
+| `Api/Mapping/NotificationMapper.cs` | New | NotificationCollection → DTO |
+| `Api/Services/DeviceTokenService.cs` | New | Direct-SQL CRUD on `MobileDeviceToken` |
+| `Api/Services/FcmDispatcher.cs` | New | Fire-and-forget FCM HTTP POST. Auto-deactivates stale tokens |
+| **`AppCode/Notification.cs`** | **Modified** | **+1 line** inside `NotificationHub.Send` after the existing SignalR call — calls `FcmDispatcher.Dispatch` (try/catch wrapped). This is the **only** AppCode change in the whole Mobile API project |
+| `Api/Controllers/AuthController.cs` | Modified | `Logout` honors `request.DeviceToken` and deactivates the token |
+| `App_Start/WebApiConfig.cs` | Modified | +5 routes for notifications + device-tokens |
+
+### Migration & Configuration (Manual)
+
+| # | Action | Slice | Priority |
+|---|--------|-------|----------|
+| 1 | Run `Telesak-Docs/sql/mobile-api-tables.sql` on the target DB | 1 | High |
+| 2 | Generate a fresh 64+ char random `JwtSecret` and paste into Web.config | 1 | High |
+| 3 | Paste real Firebase server key into `FcmServerKey` (dev can leave placeholder; dispatcher silently no-ops) | 6 | Med |
+| 4 | Import `Telesak-Docs/postman/Telesak-MobileAPI.postman_collection.json` | 1–6 | High (testers) |
+| 5 | Distribute `Telesak-Docs/4-MOBILE-API.md` to mobile dev + tester | 1–6 | High |
+
+### Documentation
+
+| File | Type | Description |
+|------|------|-------------|
+| `Telesak-Docs/4-MOBILE-API.md` | New | Single reference doc for testers + mobile devs. Auth flow, endpoint reference, error codes, environment setup, testing checklist |
+| `Telesak-Docs/postman/Telesak-MobileAPI.postman_collection.json` | New | Postman v2.1 collection covering all 6 slices with auto-token capture |
+| `EtaskMinstry/CLAUDE.md` | Modified | Added "Mobile API Layer" section + per-slice notes + error code tables |
+
+---
+
 ## Sprint 7 - Reports & Attendance Improvements
 
 **Status:** Completed

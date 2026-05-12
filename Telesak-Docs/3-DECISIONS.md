@@ -650,6 +650,238 @@ Only apply code changes to Areas/ folder. Areas2 is not part of the active appli
 
 ---
 
+## Sprint 8 Decisions (Mobile API)
+
+---
+
+### DEC-032: Hand-rolled HS256 JWT (no NuGet add)
+
+**Date:** 2026-05-11 | **Slice:** 1 | **Status:** Implemented
+
+#### Context
+The project's installed `Microsoft.AspNet.WebApi 4.0.20710.0` corresponds to
+WebApi 1.0 (MVC 4 era). Modern JWT libraries (`System.IdentityModel.Tokens.Jwt`)
+target WebApi 2 / .NET 4.5.1+. Adding the library would pull a graph of
+transitive deps and modify `packages.config`.
+
+#### Decision
+Implement HS256 sign + validate manually in `Api/Services/JwtIssuer.cs` and
+`Api/Services/JwtValidator.cs` using `System.Security.Cryptography.HMACSHA256`
++ Newtonsoft for the JSON payload. Total ~120 LOC, fully under our control.
+
+#### Rationale
+- Zero new dependencies; no risk to existing web behavior
+- Constant-time signature comparison (security)
+- Easier to audit for a single environment
+- Avoids the trap of upgrading WebApi → MVC 5 implicitly
+
+#### Trade-off
+- We're responsible for getting the crypto and base64-url-encoding right
+- No built-in support for nested tokens / signed assertions (we don't need them)
+
+---
+
+### DEC-033: Direct ADO.NET for the two new tables
+
+**Date:** 2026-05-11 | **Slice:** 1, 6 | **Status:** Implemented
+
+#### Context
+The Mobile API adds two tables (`RefreshToken`, `MobileDeviceToken`) but the
+brief forbids EF version upgrades or `.edmx` model changes.
+
+#### Decision
+Both tables are accessed via direct `SqlConnection` + parameterized SQL inside
+`RefreshTokenService.cs` and `DeviceTokenService.cs`. The EDMX model stays
+untouched. Pattern mirrors `AttendanceController.LogActivity` which already
+uses direct SQL for the `LastHeartbeat` column (also unmapped in EDMX).
+
+#### Rationale
+- Avoids EDMX regen risk
+- Tables are simple enough that EF would add overhead without benefit
+- Same connection-string-derivation trick as `AutoCheckoutJob`
+
+#### Trade-off
+- No automatic change tracking — but these tables don't need it
+- Future devs touching these tables must use the service layer, not EF
+
+---
+
+### DEC-034: Single AppCode line for FCM fan-out
+
+**Date:** 2026-05-12 | **Slice:** 6 | **Status:** Implemented
+
+#### Context
+Every notification in the web (employee accept/reject/complete, time update,
+company approve/disapprove, task create, reassign, etc.) already calls
+`NotificationHub.Send`. To fan out to FCM we could either inject calls in
+each AppCode method, or hook the single sink point.
+
+#### Decision
+Inject one call to `FcmDispatcher.Dispatch(...)` at the bottom of
+`NotificationHub.Send` (`AppCode/Notification.cs`), after the existing
+SignalR `HubContext.Clients.Clients(...).SendGeneralNotification` line. The
+call is wrapped in a same-line `try { ... } catch { }` so any FCM failure
+cannot disrupt the web's SignalR path.
+
+#### Rationale
+- Every existing trigger fans out to FCM automatically — no duplicated logic
+- Honors the brief's "only one new line in existing AppCode" constraint
+- Slice 6 controllers stay simple; they never touch FCM directly
+- Wrapped in try/catch — preserves Risk R9 mitigation
+
+#### Trade-off
+- The line is in HIGH-RISK shared code per CLAUDE.md Rule 3
+- Mitigated by: try/catch + fire-and-forget dispatch + Risk R4 thread pool
+
+---
+
+### DEC-035: TaskManger.Emp*Task / Company*Task (brief reuse-map deviation)
+
+**Date:** 2026-05-12 | **Slices:** 4, 5 | **Status:** Implemented
+
+#### Context
+The master brief's Section 12 reuse map listed:
+`Task accept → TaskWorkflow.ChangeTaskStatus(Accept)` (and similar for reject,
+complete, approve, disapprove). On inspection, the web's actual employee /
+company controllers call:
+- `TaskManger.EmpAcceptTask`, `EmpRejectTask`, `EmpFinishTask`
+- `TaskManger.CompanyAcceptTask`, `CompanyRejectTask`
+
+These methods set the new status, log, AND **send `NotificationHub.Send`
+notifications internally**. `TaskWorkflow.ChangeTaskStatus` does not.
+
+#### Decision
+Mobile API task endpoints call the `TaskManger.Emp*Task` / `Company*Task`
+methods (matching what the web's `Employee.TasksController` /
+`Company.CompanyController` actually do) — NOT `TaskWorkflow.ChangeTaskStatus`.
+
+#### Rationale
+- Mirrors web behavior exactly — same status changes, same notifications,
+  same TaskTLog rows for both web and mobile users
+- Slice 6 FCM fan-out works automatically (notifications fire from inside
+  `Emp*Task` / `Company*Task`)
+- Avoids dual sources of truth for "what happens on accept"
+
+#### Trade-off
+- Deviates from the brief's reuse map (flagged in plan delivery + in CLAUDE.md
+  Slice 4/5 notes)
+
+---
+
+### DEC-036: Convention routing (WebApi 1 has no attribute routing)
+
+**Date:** 2026-05-12 | **Slice:** 1 | **Status:** Implemented
+
+#### Context
+The brief described `[RoutePrefix("api/v1/...")]` + `[Route(...)]` attribute
+routing. WebApi attribute routing was added in WebApi 2 (System.Web.Http 5.x).
+This project has WebApi 1 (4.0.20710). Initial attempt to use `[RoutePrefix]`
+in `PingApiController` produced compile errors `CS0246: RoutePrefix could
+not be found`.
+
+#### Decision
+Use convention routing in `App_Start/WebApiConfig.cs`:
+- Generic: `api/v1/{controller}/{action}/{id}` (id optional)
+- Specific: explicit `MapHttpRoute` entries for `/api/v1/me`, `/api/v1/tasks`,
+  `/api/v1/tasks/{id}`, `/api/v1/tasks/{id}/{action}`, `/api/v1/projects`,
+  `/api/v1/employees`, `/api/v1/notifications/{id}/read`,
+  `/api/v1/notifications/read-all`, `/api/v1/device-tokens/{token}`.
+- HTTP-verb constraints via `HttpMethodConstraint` to split GET/POST/DELETE
+  cleanly (e.g. GET `/tasks` → List, POST `/tasks` → Create).
+- Controller class names drop the "Api" suffix so the `{controller}` token
+  matches the URL segment (`AuthController` not `AuthApiController`).
+
+#### Rationale
+- No NuGet upgrade required; no risk to existing web behavior
+- Existing convention route `api/{controller}/{id}` is left intact
+- More verbose `WebApiConfig.cs` is a worthwhile trade for zero deps
+
+#### Trade-off
+- Future devs adding endpoints must remember to add the explicit route
+- Action names appear in URLs (e.g. `/tasks/{id}/accept`)
+
+---
+
+### DEC-037: AuthValidator wrapper instead of overwriting LoginETask
+
+**Date:** 2026-05-12 | **Slice:** 2 | **Status:** Implemented
+
+#### Context
+The web's `UserAccountVM.LoginETask(username, password)` validates credentials
+AND mutates `MvcApplication.userData` (session) AND auto-checks-in employees.
+The Mobile API needs validation only (session is replaced by JWT) but should
+keep the auto-checkin (Q1 = a).
+
+#### Decision
+Create `Api/Services/AuthValidator.cs` that mirrors the EF queries of
+`LoginETask` (UserAccount lookup with hashed password + tenant check via
+`IsApplicationTelesak()` + Employee/Company active state) WITHOUT writing to
+the session. Auto-checkin is invoked explicitly from `AuthController.Login`
+by calling `new UserAccountVM().Checkin(empId)` (same method the web uses).
+
+#### Rationale
+- Preserves `LoginETask` unchanged (HIGH-RISK shared code per CLAUDE.md Rule 3)
+- API auth path is isolated — no shared mutation surface
+- Auto-checkin behavior identical to web (calls the existing `Checkin` method)
+
+#### Trade-off
+- Duplicates a handful of EF query lines — below the 15-line "wrapper vs fork"
+  threshold documented in CLAUDE.md
+
+---
+
+### DEC-038: Fire-and-forget FCM via ThreadPool (no async/await)
+
+**Date:** 2026-05-12 | **Slice:** 6 | **Status:** Implemented
+
+#### Context
+CLAUDE.md mandates sync-only code. FCM HTTP calls take 50–500ms — blocking
+the web/API request inside `NotificationHub.Send` would regress every page
+that triggers a notification (Risk R4).
+
+#### Decision
+`FcmDispatcher.Dispatch` snapshots inputs as plain values, then queues a
+`ThreadPool.QueueUserWorkItem` worker that performs synchronous
+`HttpWebRequest` POSTs to FCM. The dispatch call returns immediately. All
+exceptions inside the worker are caught and logged to Debug.
+
+#### Rationale
+- Honors no-async constraint
+- Original request returns within microseconds of the dispatch call
+- A failing FCM endpoint cannot stall web pages or API responses
+
+#### Trade-off
+- ThreadPool work item is fire-and-forget — no guaranteed retry
+- If the worker pool is exhausted, dispatch may be delayed (acceptable;
+  push delivery is best-effort by design)
+
+---
+
+### DEC-039: ApiDetailedErrors dev-only flag
+
+**Date:** 2026-05-12 | **Slice:** 3 | **Status:** Implemented
+
+#### Context
+The brief required sanitized 500 responses (Arabic message only, no stack
+trace). During Slice-2 testing of `/me`, a 500 was returned with no
+indication of root cause — guessing burned time.
+
+#### Decision
+Add an opt-in `<add key="ApiDetailedErrors" value="true" />` Web.config key.
+When `true`, `ApiExceptionFilter` includes the exception type + message
+(plus inner exception) in the response body. Default is `false` (sanitized).
+Always logs to `System.Diagnostics.Debug.WriteLine` regardless.
+
+#### Rationale
+- Diagnostics in dev without touching production behavior
+- Same toggle pattern as `customErrors mode=on/off`
+
+#### Trade-off
+- Must remember to set `false` in prod configs (default is false in env
+  variants `webesnad.config` / `webuat.config` / `webtele.config`)
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports
