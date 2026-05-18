@@ -74,6 +74,19 @@ for testers + mobile devs: see `Telesak-Docs/4-MOBILE-API.md`.
 | `Api/Controllers/TasksController.cs` | Modified | +`Create`, `Approve`, `Disapprove`, `Delete` actions + helpers |
 | `App_Start/WebApiConfig.cs` | Modified | Split `/api/v1/tasks` into GET/POST verb-constrained routes; added DELETE `/api/v1/tasks/{id}` |
 
+### SLICE-7: Comments + Attachments
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Controllers/TasksController.cs` | Modified | +`GetComments`, `AddComment`, `GetAttachments`, `UploadAttachment` actions |
+| `Api/Dtos/Tasks/CommentDto.cs` | New | Response shape for a single comment (`commentId`, `taskId`, `authorId`, `authorName`, `authorType`, `body`, `createdAt`) |
+| `Api/Dtos/Tasks/AddCommentRequest.cs` | New | Request body for POST comments (`body`) |
+| `Api/Dtos/Tasks/AttachmentDto.cs` | New | Response shape for a single attachment (`attachmentId`, `taskId`, `fileName`, `description`, `fileUrl`, `fileSizeBytes`, `uploadedById`, `uploadedByName`, `uploadedAt`) |
+| `Api/Mapping/TaskMapper.cs` | Modified | +`ToCommentDto`, `ToAttachmentDto` mapping methods |
+| `App_Start/WebApiConfig.cs` | Modified | +4 explicit routes: `GET/POST tasks/{id}/comments`, `GET/POST tasks/{id}/attachments` |
+
+Access control: mirrors `GET /tasks/{id}` — Employee sees only their own tasks; Company sees all tasks in their company. File uploads use `multipart/form-data`. No restriction on file type at the API level. Max file size to be confirmed with backend team (suggested 10 MB) — returns `FILE_TOO_LARGE` (400) on violation.
+
 ### SLICE-6: Notifications + FCM (single AppCode line)
 
 | File | Type | Description |

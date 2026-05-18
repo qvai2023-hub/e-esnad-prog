@@ -266,7 +266,16 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
         public FileResult DownloadAttachment(string fileName)
         {
-            return File(Server.MapPath("/Upload/Task/" + fileName), "application/octet-stream", fileName);
+            try
+            {
+                var attachDisplay = new EtaskMinstry.Models.Attachment.AttachmentDisplay().GetAttachment(fileName);
+                string downloadName = (attachDisplay != null && !string.IsNullOrEmpty(attachDisplay.OriginalFileName)) ? attachDisplay.OriginalFileName : fileName;
+                return File(Server.MapPath("/Upload/Task/" + fileName), "application/octet-stream", downloadName);
+            }
+            catch
+            {
+                return File(Server.MapPath("/Upload/Task/" + fileName), "application/octet-stream", fileName);
+            }
         }
 
         #endregion

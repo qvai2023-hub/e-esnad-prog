@@ -141,7 +141,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                     Logo = a.Logo,
                     LaborOfficeID = LaborOfficeID,
                     SequenceNumber = SequenceNumber,
-                    Password = QvLib.Security.DataProtection.Decrypt(a.UserAccounts.FirstOrDefault().Password),
+                    Password = QvLib.Security.DataProtection.Decrypt(a.UserAccounts.FirstOrDefault(x => x.IsCompany == true).Password),
                     DonetasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Done : 0,
                     tasksCount = taskCounts.ContainsKey(a.CompanyID) ? taskCounts[a.CompanyID].Total : 0,
                 }).OrderByDescending(x=>x.Id).Take(500).ToList(); // Bug #36 — Option B safety cap

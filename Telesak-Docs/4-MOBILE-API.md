@@ -24,6 +24,8 @@ This document is everything you need to start consuming the API. If something is
    - [5.7 Employees (company)](#57-employees-company)
    - [5.8 Notifications](#58-notifications)
    - [5.9 Device tokens (FCM)](#59-device-tokens-fcm)
+   - [5.10 Comments](#510-comments)
+   - [5.11 Attachments](#511-attachments)
 6. [Error codes — full catalogue](#6-error-codes--full-catalogue)
 7. [Push notifications (FCM)](#7-push-notifications-fcm)
 8. [Testing checklist (for QA)](#8-testing-checklist-for-qa)
@@ -764,6 +766,149 @@ Response 200: `{ "success": true, "message": "تم إلغاء تسجيل الج�
 
 ---
 
+### 5.10 Comments
+
+> Both roles. Access control mirrors `GET /tasks/{id}` — Employee sees only their own tasks; Company sees all tasks in their company.
+
+#### GET `/api/v1/tasks/{id}/comments` (auth, both roles)
+
+Returns all comments on the task, oldest first. No pagination — comment threads are short.
+
+Response 200:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "commentId": 1,
+      "taskId": 1234,
+      "authorId": 42,
+      "authorName": "مسؤول الشركة",
+      "authorType": "company",
+      "body": "dd",
+      "createdAt": "2026-05-12T11:16:09Z"
+    }
+  ],
+  "message": "",
+  "errors": []
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `commentId` | int | PK |
+| `authorType` | string | `"company"` or `"employee"` — use to color the name (gold for company, as in web) |
+| `body` | string | Plain text; no HTML |
+| `createdAt` | ISO 8601 UTC | Mobile formats for display |
+
+Failure codes: `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
+
+#### POST `/api/v1/tasks/{id}/comments` (auth, both roles)
+
+Add a new comment. Author identity is taken from the JWT — no `authorId` in the request body.
+
+Request:
+```json
+{ "body": "نص التعليق" }
+```
+
+`body` is required; empty string → `INVALID_REQUEST` (400).
+
+Response 201:
+```json
+{
+  "success": true,
+  "data": {
+    "commentId": 2,
+    "taskId": 1234,
+    "authorId": 42,
+    "authorName": "مسؤول الشركة",
+    "authorType": "company",
+    "body": "نص التعليق",
+    "createdAt": "2026-05-12T14:00:00Z"
+  },
+  "message": "تم إضافة التعليق"
+}
+```
+
+Failure codes: `INVALID_REQUEST` (400), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
+
+---
+
+### 5.11 Attachments
+
+> Both roles. Same access rule as comments — Employee's own tasks only; Company sees all tasks in their company.
+
+#### GET `/api/v1/tasks/{id}/attachments` (auth, both roles)
+
+Returns all attachments on the task.
+
+Response 200:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "attachmentId": 1,
+      "taskId": 1234,
+      "fileName": "تقرير مارس 2026.pdf",
+      "description": "تقرير مهام شركة عبدالحميد حسن عبدالكريم شهر مارس 2026",
+      "fileUrl": "http://<host>/uploads/tasks/1234/abc123.pdf",
+      "fileSizeBytes": 204800,
+      "uploadedById": 42,
+      "uploadedByName": "مسؤول الشركة",
+      "uploadedAt": "2026-05-12T11:00:00Z"
+    }
+  ],
+  "message": "",
+  "errors": []
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `fileUrl` | string | Full absolute URL — mobile opens it directly with `Linking.openURL()` |
+| `fileSizeBytes` | int | Mobile displays as KB / MB |
+| `fileName` | string | Original file name including extension |
+
+Failure codes: `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
+
+#### POST `/api/v1/tasks/{id}/attachments` (auth, both roles)
+
+Upload a new file. Must be **`multipart/form-data`** — not JSON.
+
+Request fields:
+
+| Field | Required | Notes |
+|---|---|---|
+| `file` | Yes | Binary file |
+| `description` | No | Plain text description (displayed as الوصف) |
+
+Max file size: confirm with backend team (suggest 10 MB). Allowed types: no restriction at the API level — let the mobile file picker guide the user.
+
+Response 201:
+```json
+{
+  "success": true,
+  "data": {
+    "attachmentId": 2,
+    "taskId": 1234,
+    "fileName": "report.pdf",
+    "description": "تقرير الشهر",
+    "fileUrl": "http://<host>/uploads/tasks/1234/xyz789.pdf",
+    "fileSizeBytes": 102400,
+    "uploadedById": 42,
+    "uploadedByName": "مسؤول الشركة",
+    "uploadedAt": "2026-05-12T14:05:00Z"
+  },
+  "message": "تم رفع الملف"
+}
+```
+
+Failure codes: `INVALID_REQUEST` (400 — no file sent), `FILE_TOO_LARGE` (400), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
+
+---
+
 ## 6. Error codes — full catalogue
 
 Always branch on `code`, not on `message`. Codes are stable; Arabic messages may evolve.
@@ -790,6 +935,7 @@ Always branch on `code`, not on `message`. Codes are stable; Arabic messages may
 | `INVALID_PROJECT` | 400 | POST /tasks | project not in your company | Refetch projects list |
 | `NOTIFICATION_NOT_FOUND` | 404 | notifications/{id}/read | unknown notification id | Refresh notifications |
 | `NOTIFICATION_FORBIDDEN` | 403 | notifications/{id}/read | notification belongs to another user | Refresh notifications |
+| `FILE_TOO_LARGE` | 400 | tasks/{id}/attachments (POST) | uploaded file exceeds the server's max size limit | Show error, prompt user to choose a smaller file |
 | `SERVER_ERROR` | 500 | any | unhandled exception. Body has detail if `ApiDetailedErrors=true` in dev | Retry with backoff; report to backend if persistent |
 
 ---
@@ -891,6 +1037,23 @@ If the backend gets `NotRegistered` / `InvalidRegistration` / `MismatchSenderId`
 - [ ] `DELETE /tasks/{id}` → 200, DB `IsDeleted=1`.
 - [ ] `DELETE /tasks/{id}` second call → 404 TASK_NOT_FOUND.
 
+**Comments (Slice 7)**
+- [ ] `GET /tasks/{id}/comments` as Employee (own task) → 200, array oldest-first, each item has `commentId`, `authorType`, `body`, `createdAt`.
+- [ ] `GET /tasks/{id}/comments` as Employee on another employee's task → 403 TASK_FORBIDDEN.
+- [ ] `GET /tasks/{id}/comments` as Company → 200, can fetch any task in company.
+- [ ] `POST /tasks/{id}/comments` with valid body → 201, new comment in array with correct `authorType`.
+- [ ] `POST /tasks/{id}/comments` with empty `body` (`""`) → 400 INVALID_REQUEST.
+- [ ] `authorType` is `"company"` when posted by Company user and `"employee"` when posted by Employee.
+
+**Attachments (Slice 7)**
+- [ ] `GET /tasks/{id}/attachments` → 200, array with `fileName`, `fileUrl` (full absolute URL), `fileSizeBytes`, `uploadedByName`.
+- [ ] `fileUrl` opens the file directly (verify with browser or `Linking.openURL()`).
+- [ ] `POST /tasks/{id}/attachments` as `multipart/form-data` with valid `file` field → 201, response includes `attachmentId`, `fileName`, `fileSizeBytes`.
+- [ ] `POST /tasks/{id}/attachments` with `description` field → 201, `description` present in response.
+- [ ] `POST /tasks/{id}/attachments` without a `file` field → 400 INVALID_REQUEST.
+- [ ] `POST /tasks/{id}/attachments` with file exceeding server max → 400 FILE_TOO_LARGE.
+- [ ] Both endpoints return 403 TASK_FORBIDDEN when Employee accesses another employee's task.
+
 **Pickers (Slice 4)**
 - [ ] `/projects` returns projects in caller's company only.
 - [ ] `/employees` as Company → 200, active employees.
@@ -967,7 +1130,6 @@ These are explicitly NOT in the Mobile API and won't be added without a new brie
 - Forgot password / password reset
 - Admin endpoints
 - Activity log / audit feed
-- File upload endpoints (attachments)
 - Offline / sync support
 - Hijri date conversion in API responses (mobile handles it)
 - Bilingual error messages (Arabic only)
@@ -976,5 +1138,5 @@ These are explicitly NOT in the Mobile API and won't be added without a new brie
 
 ---
 
-**Last updated:** 2026-05-12, end of Sprint 8.
+**Last updated:** 2026-05-12, end of Sprint 8 — added sections 5.10 Comments and 5.11 Attachments.
 **Maintainer:** backend team. Ping us if anything contradicts what the API actually returns.
