@@ -14,6 +14,76 @@ Sprint 0: ████████████████████ 100% Comp
 
 ---
 
+## Sprint 8: Mobile API Layer
+
+Brief: a JSON Mobile API on top of the existing web (same project, same DB).
+Six vertical slices, each independently testable. **Web behavior unchanged.**
+Hard constraints honored: no async/await, no EF version upgrade, no
+System.Text.Json, no new business logic in API code, only two new tables
+(`MobileDeviceToken`, `RefreshToken`), and **exactly one line of new logic
+in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
+
+### Tasks
+
+| ID | Slice | Status | Date | Notes |
+|----|-------|--------|------|-------|
+| API-1 | Foundation (JWT, formatter, filters, 2 new tables) | ✅ Completed | 2026-05-11 | HS256 hand-rolled (no NuGet add) |
+| API-2 | Auth (login/refresh/logout) + Me | ✅ Completed | 2026-05-12 | `AuthValidator` mirrors `LoginETask` queries without session writes |
+| API-3 | Attendance (check-in/heartbeat/check-out/today) | ✅ Completed | 2026-05-12 | Reuses `UserAccountVM.Checkin` for parity with web auto-checkin at login |
+| API-4 | Tasks (employee) + Projects + Employees pickers | ✅ Completed | 2026-05-12 | Calls `TaskManger.Emp*Task` (not `ChangeTaskStatus`) — brief reuse-map deviation, documented in DEC-016 |
+| API-5 | Tasks (company create/approve/disapprove/delete) | ✅ Completed | 2026-05-12 | Same deviation as Slice 4 — calls `TaskManger.Company*Task` |
+| API-6 | Notifications + FCM (single AppCode line) | ✅ Completed | 2026-05-12 | `FcmDispatcher.Dispatch` injected at the bottom of `NotificationHub.Send` — every existing notification trigger fans out to FCM automatically |
+| API-7 | Comments + Attachments | ✅ Completed | 2026-05-12 | `GET/POST /tasks/{id}/comments`, `GET/POST /tasks/{id}/attachments`; 4 new DTOs, TaskMapper extended, 4 new routes |
+
+### Progress
+
+- [x] API-1: SQL migration, JWT services, filters, config, refresh-token cleanup job
+- [x] API-2: AuthController, MeController, AuthValidator, 9 DTOs, error-code field on ApiResponse
+- [x] API-3: AttendanceController, 3 DTOs, exception filter dev-mode toggle
+- [x] API-4: TasksController (employee actions), ProjectsController, EmployeesController, TaskMapper, ProjectMapper, EmployeeMapper, 7 DTOs
+- [x] API-5: TasksController extended (+create/approve/disapprove/delete), CreateTaskDto, verb-constrained routes
+- [x] API-6: NotificationsController, DeviceTokensController, FcmDispatcher, DeviceTokenService, NotificationMapper, 2 DTOs, **single FCM line in AppCode/Notification.cs**
+- [x] API-7: TasksController extended (comments + attachments), 4 DTOs (CommentDto, AddCommentRequest, AttachmentDto + upload), TaskMapper extended, 4 new routes
+
+### Sprint 8 Files
+
+#### Application Files (To Deploy)
+
+| # | File Path | Slice | Priority |
+|---|-----------|-------|----------|
+| 1 | `EtaskMinstry/Api/**` (all new files under Api/) | 1–6 | High |
+| 2 | `EtaskMinstry/App_Start/WebApiConfig.cs` | 1–6 | High |
+| 3 | `EtaskMinstry/Global.asax.cs` | 1 | High |
+| 4 | `EtaskMinstry/AppCode/Notification.cs` (single 1-line edit) | 6 | High |
+| 5 | `EtaskMinstry/Web.config` (+ env variants) | 1, 3 | High |
+| 6 | `EtaskMinstry/EtaskMinstry.csproj` | 1–6 | High |
+
+#### Database Migration (Manual)
+
+| # | Action | Slice | Priority |
+|---|--------|-------|----------|
+| 1 | Run `Telesak-Docs/sql/mobile-api-tables.sql` on target DB | 1 | High |
+|   | Creates `MobileDeviceToken` + `RefreshToken`. Idempotent (uses `IF NOT EXISTS`). | | |
+
+#### Configuration (Manual)
+
+| # | Action | Slice | Priority |
+|---|--------|-------|----------|
+| 1 | Generate a real 64+ char `JwtSecret` and paste into Web.config | 1 | High |
+| 2 | Use DIFFERENT JwtSecret per environment (dev / UAT / Telesak prod / E-snad prod) | 1 | High |
+| 3 | Set `FcmServerKey` to real Firebase Server Key (dev can leave placeholder) | 6 | Med |
+| 4 | Set `ApiDetailedErrors=false` in prod configs (default already false in env variants) | 1 | High |
+
+#### Tester / Mobile Dev Handoff
+
+| # | Action | Slice | Priority |
+|---|--------|-------|----------|
+| 1 | Distribute `Telesak-Docs/4-MOBILE-API.md` to tester + mobile dev | All | High |
+| 2 | Distribute `Telesak-Docs/postman/Telesak-MobileAPI.postman_collection.json` to tester | All | High |
+| 3 | Tester sign-off: run all 6 Postman folders end-to-end + web regression | All | High |
+
+---
+
 ## Sprint 7: Reports & Attendance Improvements
 
 ### Tasks
