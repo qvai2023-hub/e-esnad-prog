@@ -26,7 +26,7 @@
                         @Model.Title.SubString(40)
                     </span>
                     <span class="pull-right">
-                        @if (Model.StatusID == (int)TaskStatus.New && Model.TaskStartDate.HasValue)
+                        @if (Model.StatusID == (int)TaskStatus.New && Model.TaskStartDate.HasValue && Model.EmpID == MvcApplication.userData.userId)
                         {
                             <a class="inline-action-link has-tip Accept" title="قبول">
                                 <i class="fa fa-check fa-lg"></i>
