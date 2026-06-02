@@ -122,7 +122,8 @@
             @*إسناد المهمة*@
         <div class="form-group">
             <label class="col-sm-2 control-label text-right">إسناد المهمة لـ:</label>
-            @if (Model.StatusID != (int)TaskStatus.Approved && !Model.IsArchived && Model.StatusID != (int)TaskStatus.Done && Model.StatusID != (int)TaskStatus.Inprogress)
+            @* Bug #64 — assignment editable only when task status is New ("جديدة") *@
+            @if (Model.StatusID == (int)TaskStatus.New && !Model.IsArchived)
             {
                 <div class="col-sm-4">
                     @Html.DropDownList("EmpID", ViewBag.Employee as SelectList, "اختر موظف",

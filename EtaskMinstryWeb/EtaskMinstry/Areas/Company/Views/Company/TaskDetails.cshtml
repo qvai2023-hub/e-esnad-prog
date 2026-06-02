@@ -44,7 +44,8 @@
                         @Model.Title.SubString(40)
                     </span>
                     <span class="pull-right">
-                        @if (Model.StatusID != (int)TaskStatus.Approved && !Model.IsArchived && Model.StatusID != (int)TaskStatus.Done && Model.StatusID != (int)TaskStatus.Inprogress) //Reassign in Case of not Finished Or Not Archeived or" finished@Employee (added from bug sheet )"
+                        @* Bug #64 — reassignment allowed only when task status is New ("جديدة") *@
+                        @if (Model.StatusID == (int)TaskStatus.New && !Model.IsArchived)
                         {
                             if (Model.EmpID == null || Model.EmpID == 0)
                             {

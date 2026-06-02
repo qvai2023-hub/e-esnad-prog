@@ -1,5 +1,40 @@
 # Sprint Tracker
 
+## Sprint 8 — Bug Sweep #39 Round 2 + #64 Reassign Restriction (2026-06-02)
+
+### Sprint Goal
+Close the two remaining open bugs on `fix_v2`: re-fix the Admin path of #39 (previous fix targeted the wrong method) and implement the PO's restriction on task reassignment per #64.
+
+### Sprint 8 Bug + Tasks
+
+| Task | Page / Layer | Approach | Status |
+|---|---|---|---|
+| #39 Round 2 — Admin add-employee accepts company's own email | `/Admin/Employee/Create` | Remove `e.CompanyID != companyID` exclusion in `CheckEmployeeUniqueEmail` (the actual method called by `[Remote]`) | Uploaded — awaiting tester |
+| #64 — Restrict reassignment to status "New" only | Task details + EditTask in Company area; Common + Company backends | UI: hide reassign button and disable dropdown unless `StatusID == New`. Hidden `EmpID` input preserves assignee. Backend: guard in both `ReAssignTask` actions. `TaskManger.cs` not touched. | Uploaded — awaiting tester |
+
+### Sprint 8 Files Modified
+
+**C# (compiled into bin/EtaskMinstry.dll):**
+- `Areas/Admin/Models/CompanyEmployeeVM.cs` — `CheckEmployeeUniqueEmail` no longer excludes the current company from the duplicate check
+- `Areas/Common/Controllers/CommonController.cs` — `ReAssignTask` returns `false` when task status is not `New`
+- `Areas/Company/Controllers/CompanyController.cs` — `ReAssignTask` same guard
+
+**Views (.cshtml):**
+- `Areas/Company/Views/Company/TaskDetails.cshtml` — reassign button rendered only when `StatusID == New && !IsArchived`
+- `Areas/Company/Views/Task/EDitTask.cshtml` — employee dropdown editable only when `StatusID == New && !IsArchived`; otherwise disabled with hidden `EmpID` input preserving current assignee
+
+**Not touched (intentional):**
+- `AppCode/TaskManger.cs` — shared code per CLAUDE.md Rule 3; guard moved to controller actions instead
+- `Areas/Common/Views/Common/TaskDetails.cshtml` — reassign block was already wrapped in a `@*...*@` Razor comment
+
+### Sprint 8 Impact Analysis (#64)
+- Reports (tasks by status / employee / date / KPIs / dashboards) — not affected; reports only read data
+- Task creation — not affected; `AssignTask` is only called by the two `ReAssignTask` actions
+- Status transitions (Start/Done/Approve/Reject) — not affected
+- Historical `TaskTLog` data — not affected; only future ineligible-status reassignments are blocked
+
+---
+
 ## Sprint 7 — Pagination & Bug #36 Round 3 (2026-05-06, Session WQ5V1)
 
 ### Sprint Goal

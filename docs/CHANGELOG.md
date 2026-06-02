@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Bug #64 Restrict task reassignment to status "New" only (2026-06-02)
+
+**Status:** Implemented — uploaded to tester, awaiting verification.
+
+PO clarified that reassignment must be allowed **only** when the task status is "جديدة" (New). For any other status — Inprogress, Done, Approved, NotAproved, Rejected, Pending, or archived — the reassign button must be hidden, the EditTask employee dropdown must be disabled, and the backend must reject the request as defense-in-depth. When the dropdown is disabled, a hidden `EmpID` input preserves the current assignee so other field edits don't clear it.
+
+**Files changed (4):**
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Common/Controllers/CommonController.cs` — `ReAssignTask` loads the task and returns `false` when `StatusID != TaskStatus.New`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Controllers/CompanyController.cs` — `ReAssignTask` same guard
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/TaskDetails.cshtml` — reassign button rendered only when `StatusID == New && !IsArchived` (previously allowed Pending, Accepted, NotAproved, Rejected)
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Task/EDitTask.cshtml` — employee dropdown editable only when `StatusID == New && !IsArchived`; otherwise disabled with a hidden `EmpID` input
+
+**Not touched:**
+- `AppCode/TaskManger.cs` (shared code per CLAUDE.md Rule 3) — guard kept in the two controller actions
+- `Areas/Common/Views/Common/TaskDetails.cshtml` — reassign block was already wrapped in a `@*...*@` Razor comment, no UI change needed there
+
+**Impact:**
+- Existing reports (tasks by status / employee / date / KPIs / dashboards) — not affected; reports only read data
+- Task creation flow — not affected; AssignTask is only invoked by the two ReAssignTask actions, not by initial task save
+- Status transition workflow (Start/Done/Approve/Reject) — not affected
+- Historical TaskTLog data — not affected; only future ineligible-status reassignments are blocked
+
+### Re-fix - Bug #39 Round 2 (2026-06-02)
+
+**Status:** Implemented — uploaded to tester, awaiting verification.
+
+Round 1 fix (commit 36206c5) modified `CheckForUniqueEmail` but the `[Remote]` validation attribute on the Email field calls a different method, `CheckEmployeeUniqueEmail` (via `Admin/EmployeeController.CheckEmployeeDuplicateEmail`). The previous fix was therefore a no-op for the Add/Edit Employee form, and the tester correctly reported the bug as still reproducible.
+
+Real root cause: in `Areas/Admin/Models/CompanyEmployeeVM.cs` `CheckEmployeeUniqueEmail`, the company-table check had `&& e.CompanyID != companyID` which excluded the current company from the duplicate check, so the company's own login email was never detected.
+
+**Files changed (1):**
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Admin/Models/CompanyEmployeeVM.cs` — `CheckEmployeeUniqueEmail`: removed the `e.CompanyID != companyID` exclusion and collapsed the if/else into a single `Company.Get` query that checks all active companies regardless of `companyID`
+
 ### Hotfix - Bug #36 Round 3.1 (Session WQ5V1, 2026-05-06)
 
 After the Round 3 deploy, `/Company/Company/index` threw a generic ASP.NET error ("Sorry, an error occurred…"). Root cause: calling `.Count()` on a complex `IQueryable<CompanyTaskVM>` projection (with navigation properties, ternaries, and `.Value` calls) is fragile — EF6 has to translate the entire projection just to count, which can throw `NotSupportedException` for some predicates.

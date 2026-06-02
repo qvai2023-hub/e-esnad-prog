@@ -5,6 +5,57 @@ Each decision includes: Context, Decision, Rationale, and Consequences.
 
 ---
 
+## DEC-REASSIGN-GUARD: Restrict task reassignment to status "New" only (Bug #64)
+
+**Date:** 2026-06-02
+**Status:** Implemented — awaiting tester verification
+
+### Context
+Before this change, the system allowed reassigning a task to a different employee regardless of its status. The PO requested that reassignment be limited to status "جديدة" (New) only — for any other status (Inprogress, Done, Approved, NotAproved, Rejected, Pending, archived) the assignment field must be read-only in the UI and the backend must reject the request.
+
+### Decision
+Two layers of enforcement:
+
+1. **UI guard** — Razor views (`Areas/Company/Views/Company/TaskDetails.cshtml`, `Areas/Company/Views/Task/EDitTask.cshtml`) hide the reassign button and disable the employee dropdown unless `Model.StatusID == TaskStatus.New && !Model.IsArchived`. When the dropdown is disabled, a `<input type="hidden" name="EmpID" value="@Model.EmpID" />` preserves the current assignee so unrelated form edits don't blank it.
+2. **Backend guard** — In `Areas/Common/Controllers/CommonController.ReAssignTask` and `Areas/Company/Controllers/CompanyController.ReAssignTask`, the action loads the task and returns `false` when `task.StatusID != (int)TaskStatus.New`.
+
+### Rationale
+- The shared `AppCode/TaskManger.cs` (`AssignTask`) is called from both reassign controllers and contains logic for Inprogress-task reassignment. Modifying it would risk breaking unrelated paths (CLAUDE.md Rule 3 marks it HIGH RISK shared code). Putting the guard in the two thin controller actions keeps the blast radius at exactly the two endpoints the bug covers.
+- The hidden `EmpID` input is essential: without it, ASP.NET MVC would post `EmpID=null` for the disabled dropdown and overwrite the existing assignee on every EditTask save for non-New tasks.
+- The button-hiding (instead of disabling) on TaskDetails matches existing patterns in that view.
+
+### Consequences
+- Reassign is now strictly gated. The PO's intent is enforced at both layers, so a direct API call without the UI is also rejected.
+- Reports, dashboards, and KPIs are unaffected — they read data and never call `AssignTask`.
+- Task creation flow is unaffected — initial Save inserts the task with `EmpID` directly, not via `AssignTask`.
+- If the PO later wants to allow Inprogress reassignment too, the change is a single condition update in both controllers and both views (`StatusID == New || StatusID == Inprogress`).
+
+---
+
+## DEC-EMAIL-UNIQUENESS-ADMIN: Drop current-company exclusion in `CheckEmployeeUniqueEmail` (Bug #39 Round 2)
+
+**Date:** 2026-06-02
+**Status:** Implemented — awaiting tester verification
+
+### Context
+Bug #39 Round 1 (commit 36206c5) modified `CheckForUniqueEmail` in `Areas/Admin/Models/CompanyEmployeeVM.cs`. The tester reported the bug still reproducible. Investigation found that the `[Remote]` attribute on the Email property calls `CheckEmployeeDuplicateEmail` → `CheckEmployeeUniqueEmail`, not `CheckForUniqueEmail`. Round 1 fix was a no-op for the Add/Edit Employee form.
+
+The actual bug: in `CheckEmployeeUniqueEmail`, the company-table existence check had `&& e.CompanyID != companyID`, which excluded the current company. So when Admin added an employee to Company X using X's own login email, the company-table check did not see X and the duplicate was missed.
+
+### Decision
+Remove the `e.CompanyID != companyID` clause and collapse the `if (companyID != 0) / else` branches into a single `_unitOfWork.Company.Get().Count(...)` that checks all active companies regardless of `companyID`.
+
+### Rationale
+- The `[Remote]` validation is the authoritative client-side gate; without changing the actual method it calls, no fix is reachable.
+- The existence of two near-identical methods (`CheckForUniqueEmail` vs `CheckEmployeeUniqueEmail`) is a latent footgun. We leave it untouched for now (minimal-fix policy), but it's worth a follow-up task to deduplicate them.
+
+### Consequences
+- Admin Add/Edit Employee now correctly rejects any active company's email, including the current company's own email.
+- No effect on the Company-area path (already correct from earlier round).
+- `CheckForUniqueEmail` in the Admin model is still effectively dead code reachable only from a legacy/server-side path — a future cleanup should remove or unify it.
+
+---
+
 ## DEC-NEW-PAGINATION: Server-side pagination on `/Company/Company/index` + 500-row safety cap everywhere else
 
 **Date:** 2026-05-06
