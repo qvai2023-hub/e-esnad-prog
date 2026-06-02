@@ -150,12 +150,8 @@ namespace EtaskMinstry.Areas.Admin.Models
             //var Empresult = _unitOfWork.Employee.Get().Count(e => (companyID == 0 && e.Email.Contains(Email) && e.IsDeleted == true) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) > 0 ? false : true;
             var Empresult = _unitOfWork.Employee.Get().Count(e => ((companyID == 0 && e.Email.Contains(Email)) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) && e.IsDeleted == false) > 0 ? false : true;
 
-            //email cannot repeated in  any company 
-            bool CompResult;
-            if(companyID!=0)
-                CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false && e.CompanyID!=companyID) > 0 ? false : true;
-            else
-                CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false ) > 0 ? false : true;
+            //email cannot repeated in any company (including the current company)
+            var CompResult = _unitOfWork.Company.Get().Count(e => e.Email.Contains(Email) && e.IsDeleted == false) > 0 ? false : true;
 
             return Empresult && CompResult;
         }
