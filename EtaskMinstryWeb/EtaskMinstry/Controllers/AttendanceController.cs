@@ -138,6 +138,10 @@ namespace EtaskMinstry.Controllers
                     else
                         row.DisplayDate = row.AttendanceDate.Value.ToString("yyyy/MM/dd");
                 }
+
+                // Convert CheckInTime and CheckOutTime from 24-hour to 12-hour (no AM/PM)
+                row.CheckInTime = ConvertTo12Hour(row.CheckInTime);
+                row.CheckOutTime = ConvertTo12Hour(row.CheckOutTime);
             }
 
             ReportAgent.ReportDataSources.Clear();
@@ -200,6 +204,17 @@ namespace EtaskMinstry.Controllers
                                        .DateTimeFormat.GetMonthName(m)   // يناير…ديسمبر
                 });
             return Json(lst, JsonRequestBehavior.AllowGet);
+        }
+
+        private string ConvertTo12Hour(string time24)
+        {
+            if (string.IsNullOrEmpty(time24)) return time24;
+            DateTime dt;
+            if (!DateTime.TryParseExact(time24.Trim(),
+                new[] { "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss" },
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                return time24;
+            return dt.ToString("hh:mm");
         }
 
         #region Activity Tracking APIs
