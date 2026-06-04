@@ -159,8 +159,16 @@ namespace EtaskMinstry.Areas.Admin.Models
         public bool CheckEmployeeUniqueEmail(int? companyID, string Email, int? id)
           {
             bool Empresult=false , CompResult = false;
-            if (id != null)//edit mode
+            if (id != null && id > 0)//edit mode
             {
+                // Bug #39 edit-mode carve-out: if the submitted email is the
+                // employee's own current email, treat as not-a-duplicate so the
+                // company-table check below cannot reject an unchanged edit.
+                var current = _unitOfWork.Employee.GetByID(id.Value);
+                if (current != null && !string.IsNullOrEmpty(current.Email)
+                    && string.Equals(current.Email, Email, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
                 Empresult = _unitOfWork.Employee.Get().Count(e => ((companyID == 0 && e.EmpID != id && e.Email.Contains(Email)) || (e.CompanyID == companyID && e.EmpID != id && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.EmpID != id && e.Email.Contains(Email))) && e.IsDeleted == false) > 0 ? false : true;
             }
             else
