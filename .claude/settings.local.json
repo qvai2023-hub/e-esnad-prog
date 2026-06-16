@@ -26,7 +26,12 @@
       "mcp__Claude_in_Chrome__browser_batch",
       "Bash(git push *)",
       "Bash(git checkout *)",
-      "Bash(findstr /n \"^## Sprint\" \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\docs\\\\SPRINT-TRACKER.md\")"
+      "Bash(findstr /n \"^## Sprint\" \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\docs\\\\SPRINT-TRACKER.md\")",
+      "Bash(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\ETaskMinistryService\")",
+      "Bash(dir Telesak-Docs /b)",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\EtaskMinstryWeb\\\\EtaskMinstry\" -Recurse -Directory | Where-Object {$_.Name -eq \"Controllers\" -or $_.Name -eq \"Areas\"} | Select-Object -ExpandProperty FullName)"
     ]
   }
 }

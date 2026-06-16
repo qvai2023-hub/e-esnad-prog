@@ -1,5 +1,34 @@
 # Sprint Tracker
 
+## Sprint 9 — Bug #39 Round 3 (Edit-mode regression) (2026-06-04)
+
+### Sprint Goal
+Close the edit-mode regression surfaced after Round 2: editing an employee whose stored email also exists in `Company.Email` (legacy data) was being rejected by the `[Remote]` validator even when the email was unchanged.
+
+### Sprint 9 Bug + Tasks
+
+| Task | Page / Layer | Approach | Status |
+|---|---|---|---|
+| #39 Round 3 — Admin edit-employee rejects unchanged email when it collides with `Company.Email` | `/Admin/Employee/AddEdit` | In `CheckEmployeeUniqueEmail` edit branch, fetch the employee by `id` and early-return `true` when submitted Email equals the stored Email (case-insensitive). Round 2 add-mode behavior preserved. | Uploaded — awaiting tester |
+
+### Sprint 9 Files Modified
+
+**C# (compiled into bin/EtaskMinstry.dll):**
+- `Areas/Admin/Models/CompanyEmployeeVM.cs` — `CheckEmployeeUniqueEmail` adds an edit-mode early-return for unchanged email; edit guard tightened to `id != null && id > 0`
+
+**Not touched (intentional):**
+- `CheckForUniqueEmail` — separate lookalike method, out of scope
+- `Contains(Email)` substring semantics — latent issue flagged, out of scope per minimal-fix policy
+- Areas2, Company area, Employee area — not used / different code path
+
+### Sprint 9 Regression Surface
+- Add Employee with a company's login email — still blocked (Round 2 behavior)
+- Edit Employee, change email to another employee's email — still blocked
+- Edit Employee, change email to any company's login email — still blocked
+- Company-area Add/Edit Employee — unaffected (uses `CheckForUniqueEmail`)
+
+---
+
 ## Sprint 8 — Bug Sweep #39 Round 2 + #64 Reassign Restriction (2026-06-02)
 
 ### Sprint Goal

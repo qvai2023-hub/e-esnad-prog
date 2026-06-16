@@ -32,6 +32,34 @@ Two layers of enforcement:
 
 ---
 
+## DEC-EMAIL-UNIQUENESS-EDIT-CARVE-OUT: Allow unchanged email on Edit (Bug #39 Round 3)
+
+**Date:** 2026-06-04
+**Status:** Implemented — awaiting tester verification
+
+### Context
+Round 2 (DEC-EMAIL-UNIQUENESS-ADMIN, commit `d37bfb5`) removed the `e.CompanyID != companyID` exclusion so the company-table check fires for every active company, including the employee's own. That correctly blocks Add with a company's login email — but the same `CompResult` query runs unconditionally in Edit too. Any employee created before Round 2 with an email that also exists in `Company.Email` now fails the `[Remote]` validator on Edit, even when the email is not being changed, blocking edits to any other field.
+
+The `Empresult` query already excluded the current employee via `e.EmpID != id`, but `CompResult` had no equivalent carve-out and operates on a different table (`Company`, not `Employee`).
+
+### Decision
+Add an edit-mode short-circuit at the top of `CheckEmployeeUniqueEmail`: when `id != null && id > 0`, load the employee via `_unitOfWork.Employee.GetByID(id.Value)` (same call already used by `EmployeeDetails`) and return `true` when the submitted Email matches the stored Email (case-insensitive). The existing Add/Edit logic for `Empresult` and `CompResult` is unchanged below that guard. The edit-mode condition is also tightened from `id != null` to `id != null && id > 0` so an accidental zero doesn't enter the edit branch with no exclusion.
+
+### Rationale
+- Minimal, surgical change scoped to one method; the Round 2 invariant (Add rejects company-owned emails) is preserved untouched.
+- An unchanged email on the same employee is by definition not a duplicate — the database already accepted it. The short-circuit makes that explicit instead of relying on the `Empresult` path, which never accounted for the company-table collision.
+- Using `GetByID` matches the pattern used elsewhere in this file (`EmployeeDetails` line 415), so no new repository methods are introduced.
+- Case-insensitive compare matches typical email-address semantics and avoids false rejections from incidental casing differences in stored data.
+
+### Consequences
+- Edit Employee with unchanged email now succeeds for any historical record, including those whose email collides with `Company.Email`.
+- Add path remains strict — company-owned email still rejected.
+- Edit path remains strict when the email *is* changed — duplicates against other employees or any company are still rejected.
+- `Contains(Email)` substring semantics in the underlying `Empresult` / `CompResult` queries remain a latent issue; flagged for a separate follow-up.
+- `CheckForUniqueEmail` (Admin lookalike) remains effectively dead code; cleanup still recommended as a future task.
+
+---
+
 ## DEC-EMAIL-UNIQUENESS-ADMIN: Drop current-company exclusion in `CheckEmployeeUniqueEmail` (Bug #39 Round 2)
 
 **Date:** 2026-06-02

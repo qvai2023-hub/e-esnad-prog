@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Re-fix - Bug #39 Round 3 (2026-06-04)
+
+**Status:** Implemented — uploaded to tester, awaiting verification.
+
+Round 2 (commit `d37bfb5`) correctly fixed the Add path by removing the `e.CompanyID != companyID` exclusion from the company-table check. The tester then surfaced the symmetric edit-mode regression: editing an existing employee whose stored email also exists in `Company.Email` (legacy data created before Round 2) caused the `[Remote]` validator to reject the unchanged email with "البريد الالكتروني مستخدم من قبل", blocking any edit of unrelated fields on those employees.
+
+Root cause: `CheckEmployeeUniqueEmail` correctly excluded the current employee from `Empresult` via `e.EmpID != id`, but `CompResult` ran unconditionally in both Add and Edit modes with no edit-mode carve-out. So edit re-validated the employee's own stored email against the company table and failed.
+
+**Files changed (1):**
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Admin/Models/CompanyEmployeeVM.cs` — `CheckEmployeeUniqueEmail`: in edit mode (now guarded as `id != null && id > 0`), fetch the employee via `_unitOfWork.Employee.GetByID(id.Value)` and early-return `true` when the submitted Email matches the employee's stored Email (case-insensitive). The existing `Empresult` and `CompResult` logic is unchanged for all other edit/add paths.
+
+**Not touched (intentional):**
+- `Contains(Email)` substring semantics — flagged as a latent issue (`"ali@x.com".Contains("li@x.com")` is true) but out of scope per minimal-fix policy.
+- `CheckForUniqueEmail` (the lookalike method) — unchanged.
+- Areas2, Company area, Employee area — not touched.
+
 ### Fixed - Bug #64 Restrict task reassignment to status "New" only (2026-06-02)
 
 **Status:** Implemented — uploaded to tester, awaiting verification.
