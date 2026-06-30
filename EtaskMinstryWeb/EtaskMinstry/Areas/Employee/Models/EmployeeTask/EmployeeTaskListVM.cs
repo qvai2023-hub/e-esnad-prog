@@ -91,7 +91,7 @@ namespace EtaskMinstry.Models.EmployeeTask
                   && !t.IsDeleted
                   // && t.IsArchived != true // check that all tasks are not in archive.
                   && t.StatusID != (int)TaskStatus.Rejected
-                  && (statuse == (int)TaskStatus.All ? statuse == (int)TaskStatus.All //if need all tasks 
+                  && (statuse == (int)TaskStatus.All ? (t.EmpID == currentUser || t.StatusID != (int)TaskStatus.New) //if need all tasks — exclude New tasks reassigned away from this employee
                   : statuse == (int)TaskStatus.Delay ? true //get delay and not done tasks 
                                                             //get new or accepted task in the new tab
                   : statuse == (int)TaskStatus.New ? ((t.StatusID == (int)TaskStatus.New && t.EmpID == currentUser) || (t.StatusID == (int)TaskStatus.Accepted && t.StartDate > DateTime.Now && t.EmpID == currentUser))

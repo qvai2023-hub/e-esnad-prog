@@ -30,7 +30,15 @@
       "Bash(sort -t'-' -k2 -n)",
       "Bash(grep -E \"\\\\.\\(html|cshtml|js|cs\\)$\")",
       "Bash(git checkout *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "Bash(git fetch *)",
+      "Bash(findstr /n \"^## Sprint\" \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\docs\\\\SPRINT-TRACKER.md\")",
+      "Bash(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\ETaskMinistryService\")",
+      "Bash(dir Telesak-Docs /b)",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\EtaskMinstryWeb\\\\EtaskMinstry\" -Recurse -Directory | Where-Object {$_.Name -eq \"Controllers\" -or $_.Name -eq \"Areas\"} | Select-Object -ExpandProperty FullName)",
+      "Bash(git grep *)"
     ]
   }
 }

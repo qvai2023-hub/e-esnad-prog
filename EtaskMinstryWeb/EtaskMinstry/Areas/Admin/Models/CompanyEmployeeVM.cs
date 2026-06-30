@@ -150,12 +150,8 @@ namespace EtaskMinstry.Areas.Admin.Models
             //var Empresult = _unitOfWork.Employee.Get().Count(e => (companyID == 0 && e.Email.Contains(Email) && e.IsDeleted == true) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) > 0 ? false : true;
             var Empresult = _unitOfWork.Employee.Get().Count(e => ((companyID == 0 && e.Email.Contains(Email)) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) && e.IsDeleted == false) > 0 ? false : true;
 
-            //email cannot repeated in  any company 
-            bool CompResult;
-            if(companyID!=0)
-                CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false && e.CompanyID!=companyID) > 0 ? false : true;
-            else
-                CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false ) > 0 ? false : true;
+            //email cannot repeated in any company (including the current company)
+            var CompResult = _unitOfWork.Company.Get().Count(e => e.Email.Contains(Email) && e.IsDeleted == false) > 0 ? false : true;
 
             return Empresult && CompResult;
         }
@@ -163,8 +159,16 @@ namespace EtaskMinstry.Areas.Admin.Models
         public bool CheckEmployeeUniqueEmail(int? companyID, string Email, int? id)
           {
             bool Empresult=false , CompResult = false;
-            if (id != null)//edit mode
+            if (id != null && id > 0)//edit mode
             {
+                // Bug #39 edit-mode carve-out: if the submitted email is the
+                // employee's own current email, treat as not-a-duplicate so the
+                // company-table check below cannot reject an unchanged edit.
+                var current = _unitOfWork.Employee.GetByID(id.Value);
+                if (current != null && !string.IsNullOrEmpty(current.Email)
+                    && string.Equals(current.Email, Email, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
                 Empresult = _unitOfWork.Employee.Get().Count(e => ((companyID == 0 && e.EmpID != id && e.Email.Contains(Email)) || (e.CompanyID == companyID && e.EmpID != id && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.EmpID != id && e.Email.Contains(Email))) && e.IsDeleted == false) > 0 ? false : true;
             }
             else
@@ -174,11 +178,8 @@ namespace EtaskMinstry.Areas.Admin.Models
                 //var Empresult = _unitOfWork.Employee.Get().Count(e => (companyID == 0 && e.Email.Contains(Email) && e.IsDeleted == true) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) > 0 ? false : true;
                 Empresult = _unitOfWork.Employee.Get().Count(e => ((companyID == 0 && e.Email.Contains(Email)) || (e.CompanyID == companyID && e.Email.Contains(Email)) || (e.CompanyID != companyID && e.Email.Contains(Email))) && e.IsDeleted == false) > 0 ? false : true;
             }
-            //email cannot repeated in  any company 
-            if (companyID != 0)
-                CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false && e.CompanyID != companyID) > 0 ? false : true;
-            else
-                CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false) > 0 ? false : true;
+            //email cannot repeated in any company (including the current company) — Bug #39
+            CompResult = _unitOfWork.Company.Get().Count(e => (e.Email.Contains(Email)) && e.IsDeleted == false) > 0 ? false : true;
 
             return Empresult && CompResult;
         }

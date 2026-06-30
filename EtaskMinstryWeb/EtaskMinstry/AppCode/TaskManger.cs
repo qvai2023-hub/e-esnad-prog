@@ -752,11 +752,11 @@ namespace EtaskMinstry.AppCode
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);
-            if (objTask != null) //check if Task not null
+            if (objTask != null && objTask.EmpID == MvcApplication.userData.userId) //check if Task not null and current user is the assignee
             {
                 //Clone Task Object for Log purpose
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
-                //Update Task Status 
+                //Update Task Status
                 objTask.StatusID = (int)TaskStatus.Accepted;
                 //Log TaskRecord
                 EtaskMinstry.AppCode.LogTask.Log(objTask, beforeUpdateObj);
@@ -814,11 +814,11 @@ namespace EtaskMinstry.AppCode
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);
-            if (objTask != null) //check if Task not null
+            if (objTask != null && objTask.EmpID == MvcApplication.userData.userId) //check if Task not null and current user is the assignee
             {
                 //Clone Task Object for Log purpose
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
-                //Update Task Status 
+                //Update Task Status
                 objTask.StatusID = (int)TaskStatus.Rejected;
                 //Log TaskRecord
                 EtaskMinstry.AppCode.LogTask.Log(objTask, beforeUpdateObj);

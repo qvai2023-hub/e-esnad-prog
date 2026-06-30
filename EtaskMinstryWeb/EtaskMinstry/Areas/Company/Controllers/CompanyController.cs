@@ -122,6 +122,12 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool ReAssignTask(int taskID, int iEmployeeID)
         {
+            // Bug #64 — only allow reassignment when task status is New ("جديدة")
+            var uow = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+            var task = uow.TaskRepository.GetByID(taskID);
+            if (task == null || task.StatusID != (int)TaskStatus.New)
+                return false;
+
             return EtaskMinstry.AppCode.TaskManger.AssignTask(taskID, iEmployeeID);
         }
 
