@@ -6,8 +6,8 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ## Sprint 8 - Mobile API Layer
 
-**Status:** Completed (pending tester sign-off)
-**Date Completed:** 2026-05-12
+**Status:** Slices 1–6 implemented (pending tester sign-off). **Slice 7 (Comments + Attachments) is NOT implemented** — documented in error; see the SLICE-7 correction note below.
+**Date Completed (Slices 1–6):** 2026-05-12
 
 A JSON Mobile API layer was added to serve a future mobile app. Same project,
 same solution, same database. **Web behavior is unchanged.** Full reference
@@ -74,18 +74,20 @@ for testers + mobile devs: see `Telesak-Docs/4-MOBILE-API.md`.
 | `Api/Controllers/TasksController.cs` | Modified | +`Create`, `Approve`, `Disapprove`, `Delete` actions + helpers |
 | `App_Start/WebApiConfig.cs` | Modified | Split `/api/v1/tasks` into GET/POST verb-constrained routes; added DELETE `/api/v1/tasks/{id}` |
 
-### SLICE-7: Comments + Attachments
+### SLICE-7: Comments + Attachments — ⚠️ DESIGN ONLY, NOT IMPLEMENTED
+
+> **Correction (2026-06-30):** this slice was documented as complete but never landed in code. None of the files/methods below exist on the branch — verified: no `GetComments`/`AddComment`/`GetAttachments`/`UploadAttachment` in `TasksController.cs`, no Comment/Attachment DTOs, no `ToCommentDto`/`ToAttachmentDto` in `TaskMapper`, and no comment/attachment routes in `WebApiConfig.cs`. The table below is the **planned** design, retained for whoever implements it. The endpoints return **404** today. See `4-MOBILE-API.md` §5.10 / §5.11.
 
 | File | Type | Description |
 |------|------|-------------|
-| `Api/Controllers/TasksController.cs` | Modified | +`GetComments`, `AddComment`, `GetAttachments`, `UploadAttachment` actions |
-| `Api/Dtos/Tasks/CommentDto.cs` | New | Response shape for a single comment (`commentId`, `taskId`, `authorId`, `authorName`, `authorType`, `body`, `createdAt`) |
-| `Api/Dtos/Tasks/AddCommentRequest.cs` | New | Request body for POST comments (`body`) |
-| `Api/Dtos/Tasks/AttachmentDto.cs` | New | Response shape for a single attachment (`attachmentId`, `taskId`, `fileName`, `description`, `fileUrl`, `fileSizeBytes`, `uploadedById`, `uploadedByName`, `uploadedAt`) |
-| `Api/Mapping/TaskMapper.cs` | Modified | +`ToCommentDto`, `ToAttachmentDto` mapping methods |
-| `App_Start/WebApiConfig.cs` | Modified | +4 explicit routes: `GET/POST tasks/{id}/comments`, `GET/POST tasks/{id}/attachments` |
+| `Api/Controllers/TasksController.cs` | **Planned** | +`GetComments`, `AddComment`, `GetAttachments`, `UploadAttachment` actions |
+| `Api/Dtos/Tasks/CommentDto.cs` | **Planned** | Response shape for a single comment (`commentId`, `taskId`, `authorId`, `authorName`, `authorType`, `body`, `createdAt`) |
+| `Api/Dtos/Tasks/AddCommentRequest.cs` | **Planned** | Request body for POST comments (`body`) |
+| `Api/Dtos/Tasks/AttachmentDto.cs` | **Planned** | Response shape for a single attachment (`attachmentId`, `taskId`, `fileName`, `description`, `fileUrl`, `fileSizeBytes`, `uploadedById`, `uploadedByName`, `uploadedAt`) |
+| `Api/Mapping/TaskMapper.cs` | **Planned** | +`ToCommentDto`, `ToAttachmentDto` mapping methods |
+| `App_Start/WebApiConfig.cs` | **Planned** | +4 explicit routes: `GET/POST tasks/{id}/comments`, `GET/POST tasks/{id}/attachments` |
 
-Access control: mirrors `GET /tasks/{id}` — Employee sees only their own tasks; Company sees all tasks in their company. File uploads use `multipart/form-data`. No restriction on file type at the API level. Max file size to be confirmed with backend team (suggested 10 MB) — returns `FILE_TOO_LARGE` (400) on violation.
+Planned access control: mirrors `GET /tasks/{id}` — Employee sees only their own tasks; Company sees all tasks in their company. File uploads use `multipart/form-data`. No restriction on file type at the API level. Max file size to be confirmed with backend team (suggested 10 MB) — returns `FILE_TOO_LARGE` (400) on violation.
 
 ### SLICE-6: Notifications + FCM (single AppCode line)
 

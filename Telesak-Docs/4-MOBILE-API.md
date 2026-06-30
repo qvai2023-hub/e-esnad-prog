@@ -1,7 +1,7 @@
 # Telesak Mobile API — Reference
 
 **Audience:** mobile developers (React Native / Flutter / native iOS / Android) and QA testers.
-**Status:** Sprint 8 complete, pending tester sign-off.
+**Status:** Slices 1–6 implemented (auth, me, attendance, tasks, projects, employees, notifications, FCM). **Comments (§5.10) and Attachments (§5.11) are specified but NOT yet implemented** — see the banners on those sections. Pending tester sign-off on the implemented slices.
 **Backend:** ASP.NET Web API on .NET Framework 4.8, same project as the Telesak web app, same SQL Server database.
 
 This document is everything you need to start consuming the API. If something is unclear, ping the backend team — don't guess.
@@ -24,8 +24,8 @@ This document is everything you need to start consuming the API. If something is
    - [5.7 Employees (company)](#57-employees-company)
    - [5.8 Notifications](#58-notifications)
    - [5.9 Device tokens (FCM)](#59-device-tokens-fcm)
-   - [5.10 Comments](#510-comments)
-   - [5.11 Attachments](#511-attachments)
+   - [5.10 Comments](#510-comments) — ⚠️ NOT YET IMPLEMENTED
+   - [5.11 Attachments](#511-attachments) — ⚠️ NOT YET IMPLEMENTED
 6. [Error codes — full catalogue](#6-error-codes--full-catalogue)
 7. [Push notifications (FCM)](#7-push-notifications-fcm)
 8. [Testing checklist (for QA)](#8-testing-checklist-for-qa)
@@ -768,6 +768,8 @@ Response 200: `{ "success": true, "message": "تم إلغاء تسجيل الج�
 
 ### 5.10 Comments
 
+> ⚠️ **NOT YET IMPLEMENTED — planned only.** As of 2026-06-30 there is no `CommentsController` and no comment routes in `WebApiConfig.cs`. Every endpoint in this section currently returns **404**. The shape below is the agreed design for when this slice is built — do NOT test against it yet.
+
 > Both roles. Access control mirrors `GET /tasks/{id}` — Employee sees only their own tasks; Company sees all tasks in their company.
 
 #### GET `/api/v1/tasks/{id}/comments` (auth, both roles)
@@ -836,6 +838,8 @@ Failure codes: `INVALID_REQUEST` (400), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN`
 ---
 
 ### 5.11 Attachments
+
+> ⚠️ **NOT YET IMPLEMENTED — planned only.** As of 2026-06-30 there is no `AttachmentsController` and no attachment routes in `WebApiConfig.cs`. Every endpoint in this section currently returns **404**. The shape below (including the multipart upload contract) is the agreed design for when this slice is built — do NOT test against it yet.
 
 > Both roles. Same access rule as comments — Employee's own tasks only; Company sees all tasks in their company.
 
@@ -1037,7 +1041,7 @@ If the backend gets `NotRegistered` / `InvalidRegistration` / `MismatchSenderId`
 - [ ] `DELETE /tasks/{id}` → 200, DB `IsDeleted=1`.
 - [ ] `DELETE /tasks/{id}` second call → 404 TASK_NOT_FOUND.
 
-**Comments (Slice 7)**
+**Comments (Slice 7) — ⚠️ NOT YET IMPLEMENTED. Skip these tests; the endpoints return 404 today.**
 - [ ] `GET /tasks/{id}/comments` as Employee (own task) → 200, array oldest-first, each item has `commentId`, `authorType`, `body`, `createdAt`.
 - [ ] `GET /tasks/{id}/comments` as Employee on another employee's task → 403 TASK_FORBIDDEN.
 - [ ] `GET /tasks/{id}/comments` as Company → 200, can fetch any task in company.
@@ -1045,7 +1049,7 @@ If the backend gets `NotRegistered` / `InvalidRegistration` / `MismatchSenderId`
 - [ ] `POST /tasks/{id}/comments` with empty `body` (`""`) → 400 INVALID_REQUEST.
 - [ ] `authorType` is `"company"` when posted by Company user and `"employee"` when posted by Employee.
 
-**Attachments (Slice 7)**
+**Attachments (Slice 7) — ⚠️ NOT YET IMPLEMENTED. Skip these tests; the endpoints return 404 today.**
 - [ ] `GET /tasks/{id}/attachments` → 200, array with `fileName`, `fileUrl` (full absolute URL), `fileSizeBytes`, `uploadedByName`.
 - [ ] `fileUrl` opens the file directly (verify with browser or `Linking.openURL()`).
 - [ ] `POST /tasks/{id}/attachments` as `multipart/form-data` with valid `file` field → 201, response includes `attachmentId`, `fileName`, `fileSizeBytes`.
@@ -1138,5 +1142,5 @@ These are explicitly NOT in the Mobile API and won't be added without a new brie
 
 ---
 
-**Last updated:** 2026-05-12, end of Sprint 8 — added sections 5.10 Comments and 5.11 Attachments.
+**Last updated:** 2026-06-30 — flagged §5.10 Comments and §5.11 Attachments as NOT YET IMPLEMENTED (specified but no controller/routes in code). Previous: 2026-05-12 added those two sections as design specs.
 **Maintainer:** backend team. Ping us if anything contradicts what the API actually returns.

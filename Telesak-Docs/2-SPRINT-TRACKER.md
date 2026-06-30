@@ -3,7 +3,7 @@
 ## Current Status
 
 ```
-Sprint 8: ████████████████████ 100% Complete (pending tester sign-off)
+Sprint 8: █████████████████░░░ ~86% — Slices 1–6 done; Slice 7 (Comments+Attachments) NOT built
 Sprint 7: ████████████████████ 100% Complete
 Sprint 6: ████████████████████ 100% Complete
 Sprint 5: ████████████████████ 100% Complete
@@ -34,7 +34,7 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 | API-4 | Tasks (employee) + Projects + Employees pickers | ✅ Completed | 2026-05-12 | Calls `TaskManger.Emp*Task` (not `ChangeTaskStatus`) — brief reuse-map deviation, documented in DEC-016 |
 | API-5 | Tasks (company create/approve/disapprove/delete) | ✅ Completed | 2026-05-12 | Same deviation as Slice 4 — calls `TaskManger.Company*Task` |
 | API-6 | Notifications + FCM (single AppCode line) | ✅ Completed | 2026-05-12 | `FcmDispatcher.Dispatch` injected at the bottom of `NotificationHub.Send` — every existing notification trigger fans out to FCM automatically |
-| API-7 | Comments + Attachments | ✅ Completed | 2026-05-12 | `GET/POST /tasks/{id}/comments`, `GET/POST /tasks/{id}/attachments`; 4 new DTOs, TaskMapper extended, 4 new routes |
+| API-7 | Comments + Attachments | ❌ NOT IMPLEMENTED | — | Documented as done on 2026-05-12 but never landed in code (no controller actions, DTOs, mapper methods, or routes exist). Design retained in `1-CHANGELOG.md` SLICE-7 and `4-MOBILE-API.md` §5.10/§5.11. Endpoints return 404. Corrected 2026-06-30. |
 
 ### Progress
 
@@ -44,7 +44,7 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 - [x] API-4: TasksController (employee actions), ProjectsController, EmployeesController, TaskMapper, ProjectMapper, EmployeeMapper, 7 DTOs
 - [x] API-5: TasksController extended (+create/approve/disapprove/delete), CreateTaskDto, verb-constrained routes
 - [x] API-6: NotificationsController, DeviceTokensController, FcmDispatcher, DeviceTokenService, NotificationMapper, 2 DTOs, **single FCM line in AppCode/Notification.cs**
-- [x] API-7: TasksController extended (comments + attachments), 4 DTOs (CommentDto, AddCommentRequest, AttachmentDto + upload), TaskMapper extended, 4 new routes
+- [ ] API-7: Comments + Attachments — **NOT IMPLEMENTED** (documented in error; no code exists). Planned: TasksController +4 actions, 3 DTOs (CommentDto, AddCommentRequest, AttachmentDto), TaskMapper +2 methods, 4 new routes
 
 ### Sprint 8 Files
 
