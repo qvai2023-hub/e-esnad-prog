@@ -38,7 +38,11 @@
       "Bash(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\ETaskMinistryService\")",
       "Bash(dir Telesak-Docs /b)",
       "PowerShell(Get-ChildItem -Path \"E:\\\\work\\\\2026\\\\ai_vibe\\\\Esnad_ai\\\\EtaskMinstryWeb\\\\EtaskMinstry\" -Recurse -Directory | Where-Object {$_.Name -eq \"Controllers\" -or $_.Name -eq \"Areas\"} | Select-Object -ExpandProperty FullName)",
-      "Bash(git grep *)"
+      "Bash(git grep *)",
+      "Bash(grep -iE \"\\\\.dll$|\\\\.pdb$|bin/|obj/\")",
+      "Bash(git commit *)",
+      "Bash(ipconfig)",
+      "Bash(powershell -NoProfile -Command \"Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress\")"
     ]
   }
 }

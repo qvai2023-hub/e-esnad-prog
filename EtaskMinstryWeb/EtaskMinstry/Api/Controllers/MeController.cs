@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -27,7 +27,7 @@ namespace EtaskMinstry.Api.Controllers
             var userData = MvcApplication.userData;
             if (userData == null)
                 return Request.CreateResponse(HttpStatusCode.Unauthorized,
-                    ApiResponse.Fail("غير مصرح"));
+                    ApiResponse.Fail("ØºÙŠØ± Ù…ØµØ±Ø­"));
 
             var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
             var summary = new UserSummaryDto
@@ -80,7 +80,7 @@ namespace EtaskMinstry.Api.Controllers
                 || string.IsNullOrWhiteSpace(request.NewPassword))
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest,
-                    ApiResponse.Fail("بيانات الطلب غير صحيحة", "INVALID_REQUEST"));
+                    ApiResponse.Fail("Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø·Ù„Ø¨ ØºÙŠØ± ØµØ­ÙŠØ­Ø©", "INVALID_REQUEST"));
             }
 
             // Reuses existing web logic (UserAccountVM.ChangePassowrd reads
@@ -94,19 +94,19 @@ namespace EtaskMinstry.Api.Controllers
             {
                 // ChangePassowrd may throw if the configured SMTP server is
                 // unreachable while sending the notification email. The password
-                // change itself succeeded by then — surface a soft success.
+                // change itself succeeded by then â€” surface a soft success.
                 return Request.CreateResponse(HttpStatusCode.OK,
-                    ApiResponse.Ok(null, "تم تغيير كلمة المرور (تعذر إرسال إشعار البريد)"));
+                    ApiResponse.Ok(null, "ØªÙ… ØªØºÙŠÙŠØ± ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± (ØªØ¹Ø°Ø± Ø¥Ø±Ø³Ø§Ù„ Ø¥Ø´Ø¹Ø§Ø± Ø§Ù„Ø¨Ø±ÙŠØ¯)"));
             }
 
             if (!ok)
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest,
-                    ApiResponse.Fail("كلمة المرور القديمة غير صحيحة", "INVALID_OLD_PASSWORD"));
+                    ApiResponse.Fail("ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø§Ù„Ù‚Ø¯ÙŠÙ…Ø© ØºÙŠØ± ØµØ­ÙŠØ­Ø©", "INVALID_OLD_PASSWORD"));
             }
 
             return Request.CreateResponse(HttpStatusCode.OK,
-                ApiResponse.Ok(null, "تم تغيير كلمة المرور بنجاح"));
+                ApiResponse.Ok(null, "ØªÙ… ØªØºÙŠÙŠØ± ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø¨Ù†Ø¬Ø§Ø­"));
         }
 
         private static TodayAttendanceDto LoadTodayAttendance(UnitOfWork uow, int empId)
@@ -125,12 +125,14 @@ namespace EtaskMinstry.Api.Controllers
             if (attendance == null)
                 return new TodayAttendanceDto { HasAttendance = false };
 
-            int? minutes = null;
-            if (attendance.CheckIn.HasValue)
-            {
-                DateTime endTime = attendance.CheckOut ?? DateTime.Now;
-                minutes = (int)Math.Round((endTime - attendance.CheckIn.Value).TotalMinutes);
-            }
+            int closedMinutes = uow.AttendanceRepository
+                .Get(filter: a => a.EmpId == empId
+                                  && a.CheckIn.HasValue
+                                  && a.CheckOut.HasValue
+                                  && a.CheckIn.Value >= today
+                                  && a.CheckIn.Value < tomorrow)
+                .ToList()
+                .Sum(a => Math.Max(0, (int)Math.Round((a.CheckOut.Value - a.CheckIn.Value).TotalMinutes)));
 
             return new TodayAttendanceDto
             {
@@ -138,9 +140,10 @@ namespace EtaskMinstry.Api.Controllers
                 AttendanceId = attendance.Id,
                 CheckIn = attendance.CheckIn,
                 CheckOut = attendance.CheckOut,
-                DurationMinutes = minutes,
+                DurationMinutes = closedMinutes,
                 IsOpen = attendance.CheckIn.HasValue && attendance.CheckOut == null
             };
         }
     }
 }
+

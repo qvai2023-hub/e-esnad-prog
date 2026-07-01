@@ -58,26 +58,37 @@ namespace EtaskMinstry
         {
             set
             {
+                var context = HttpContext.Current;
+                if (context == null) return;
+
                 if (value != null)
                 {
                     object[] sessionValues = { value, IpAddress, UserAgent };
-                    HttpContext.Current.Session["User"] = sessionValues;
+                    if (context.Session != null)
+                        context.Session["User"] = sessionValues;
+                    else
+                        context.Items["User"] = sessionValues;
                 }
                 else
-                    userData = value;
+                {
+                    if (context.Session != null)
+                        context.Session.Remove("User");
+                    context.Items.Remove("User");
+                }
             }
             get
             {
+                var context = HttpContext.Current;
+                if (context == null) return null;
 
-                if (HttpContext.Current.Session["User"] != null)
-                {
+                object raw = null;
+                if (context.Session != null)
+                    raw = context.Session["User"];
+                if (raw == null)
+                    raw = context.Items["User"];
 
-                    object[] sessionValues = (object[])HttpContext.Current.Session["User"];
-                    return (UserData)sessionValues[0];
-                }
-                else
-                    return null;
-
+                var sessionValues = raw as object[];
+                return sessionValues != null ? sessionValues[0] as UserData : null;
             }
         }
         protected static string GetUser_IP()

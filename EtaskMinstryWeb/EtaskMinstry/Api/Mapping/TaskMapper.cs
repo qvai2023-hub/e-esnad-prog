@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using EtaskMinstry.Api.Dtos.Tasks;
 using TaskManagementModel;
@@ -6,7 +6,7 @@ using TaskManagementModel;
 namespace EtaskMinstry.Api.Mapping
 {
     /// <summary>
-    /// EF Task entity → API DTO. The ONLY place that touches both worlds.
+    /// EF Task entity â†’ API DTO. The ONLY place that touches both worlds.
     /// </summary>
     public static class TaskMapper
     {
@@ -27,9 +27,9 @@ namespace EtaskMinstry.Api.Mapping
                 ExpectedTime = t.ExpectedTime,
                 ActualTime = t.ActualTime,
                 ProjectName = t.Project != null ? t.Project.Name : null,
-                // isDelayed is a client-side computed property — caller MUST
+                // isDelayed is a client-side computed property â€” caller MUST
                 // materialize before invoking this mapper.
-                IsDelayed = t.isDelayed,
+                IsDelayed = SafeIsDelayed(t),
                 IsAccepted = t.StatusID == (int)TaskStatus.Accepted
             };
         }
@@ -91,11 +91,23 @@ namespace EtaskMinstry.Api.Mapping
                 ProjectName = t.Project != null ? t.Project.Name : null,
                 IsArchived = t.IsArchived,
                 IsRecurrence = t.IsRecurrence ?? false,
-                IsDelayed = t.isDelayed,
+                IsDelayed = SafeIsDelayed(t),
                 StatusLog = logs
             };
         }
 
+        private static bool SafeIsDelayed(Task t)
+        {
+            if (t == null) return false;
+            try
+            {
+                return t.isDelayed;
+            }
+            catch (System.NullReferenceException)
+            {
+                return false;
+            }
+        }
         public static TaskActionResultDto ToActionResult(Task t)
         {
             if (t == null) return null;
@@ -108,3 +120,4 @@ namespace EtaskMinstry.Api.Mapping
         }
     }
 }
+

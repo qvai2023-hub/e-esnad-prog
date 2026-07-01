@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -337,6 +337,136 @@ namespace EtaskMinstry.Api.Controllers
                 }, "تم حذف المهمة"));
         }
 
+
+        // ──────────────────────────── GET /api/v1/tasks/{id}/comments ──────────────
+        [HttpGet]
+        [ActionName("comments")]
+        public HttpResponseMessage Comments(int id)
+        {
+            var access = LoadReadableTask(id);
+            if (access.Response != null) return access.Response;
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+            bool isCompany = MvcApplication.userData.isCompany;
+            var comments = uow.TaskCommentRepository.Get(
+                    filter: c => c.TaskID == id
+                                 && c.CommentStatusId != (int)TaskCommentStatus.Deleted
+                                 && (isCompany || c.CommentStatusId != (int)TaskCommentStatus.Hidden),
+                    orderBy: q => q.OrderBy(c => c.CreatedDate),
+                    includeProperties: "Employee")
+                .ToList()
+                .Select(ToCommentDto)
+                .ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK, ApiResponse.Ok(comments));
+        }
+
+        // ──────────────────────────── POST /api/v1/tasks/{id}/comments ─────────────
+        [HttpPost]
+        [ActionName("comments")]
+        public HttpResponseMessage AddComment(int id, TaskCommentRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Body))
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ApiResponse.Fail("بيانات الطلب غير صحيحة", "INVALID_REQUEST"));
+
+            var access = LoadReadableTask(id);
+            if (access.Response != null) return access.Response;
+            if (!CanAddExtensions(access.Task))
+                return Request.CreateResponse(HttpStatusCode.Conflict,
+                    ApiResponse.Fail("لا يمكن إضافة تعليق بعد انتهاء المهمة", "INVALID_STATE"));
+
+            int empId = MvcApplication.userData.isCompany ? 0 : MvcApplication.userData.userId;
+            int commentId = TaskManger.AddComment(id, request.Body.Trim(), empId);
+            if (commentId <= 0)
+                return Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    ApiResponse.Fail("تعذر إضافة التعليق", "ACTION_FAILED"));
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+            var comment = uow.TaskCommentRepository.Get(
+                filter: c => c.TaskCommentID == commentId,
+                includeProperties: "Employee").FirstOrDefault();
+
+            return Request.CreateResponse(HttpStatusCode.Created, ApiResponse.Ok(ToCommentDto(comment), "تم إضافة التعليق"));
+        }
+
+        // ──────────────────────────── GET /api/v1/tasks/{id}/attachments ───────────
+        [HttpGet]
+        [ActionName("attachments")]
+        public HttpResponseMessage Attachments(int id)
+        {
+            var access = LoadReadableTask(id);
+            if (access.Response != null) return access.Response;
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+            var attachments = uow.AttachmentRepository.Get(
+                    filter: a => a.TaskID == id,
+                    orderBy: q => q.OrderBy(a => a.AttachmentID))
+                .ToList()
+                .Select(ToAttachmentDto)
+                .ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK, ApiResponse.Ok(attachments));
+        }
+
+        // ──────────────────────────── POST /api/v1/tasks/{id}/attachments ──────────
+        [HttpPost]
+        [ActionName("attachments")]
+        public async System.Threading.Tasks.Task<HttpResponseMessage> AddAttachment(int id)
+        {
+            var access = LoadReadableTask(id);
+            if (access.Response != null) return access.Response;
+            if (!CanAddExtensions(access.Task))
+                return Request.CreateResponse(HttpStatusCode.Conflict,
+                    ApiResponse.Fail("لا يمكن إضافة مرفق بعد انتهاء المهمة", "INVALID_STATE"));
+            if (!Request.Content.IsMimeMultipartContent())
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ApiResponse.Fail("بيانات الطلب غير صحيحة", "INVALID_REQUEST"));
+
+            var provider = await Request.Content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider());
+            string description = null;
+            HttpContent fileContent = null;
+            foreach (var part in provider.Contents)
+            {
+                var disposition = part.Headers.ContentDisposition;
+                string name = TrimQuotes(disposition != null ? disposition.Name : null);
+                if (string.Equals(name, "description", StringComparison.OrdinalIgnoreCase))
+                {
+                    description = (await part.ReadAsStringAsync()).Trim();
+                }
+                else if (string.Equals(name, "file", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(disposition.FileName))
+                {
+                    fileContent = part;
+                }
+            }
+
+            if (fileContent == null)
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ApiResponse.Fail("يجب اختيار ملف", "INVALID_REQUEST"));
+
+            string originalFileName = Extentions.SanitizeFileName(TrimQuotes(fileContent.Headers.ContentDisposition.FileName));
+            string extension = System.IO.Path.GetExtension(originalFileName);
+            string storedFileName = Guid.NewGuid().ToString("N").Substring(0, 16) + extension;
+            string uploadRoot = System.Web.Hosting.HostingEnvironment.MapPath("~/Upload/Task/");
+            if (!System.IO.Directory.Exists(uploadRoot)) System.IO.Directory.CreateDirectory(uploadRoot);
+            string filePath = System.IO.Path.Combine(uploadRoot, storedFileName);
+            byte[] bytes = await fileContent.ReadAsByteArrayAsync();
+            System.IO.File.WriteAllBytes(filePath, bytes);
+
+            bool ok = TaskManger.AttachTaskFile(id, storedFileName, description, originalFileName);
+            if (!ok)
+                return Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    ApiResponse.Fail("تعذر رفع الملف", "ACTION_FAILED"));
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+            var attachment = uow.AttachmentRepository.Get(
+                    filter: a => a.TaskID == id && a.FileName == storedFileName,
+                    orderBy: q => q.OrderByDescending(a => a.AttachmentID))
+                .FirstOrDefault();
+
+            return Request.CreateResponse(HttpStatusCode.Created, ApiResponse.Ok(ToAttachmentDto(attachment), "تم رفع الملف"));
+        }
+
         // ──────────────────────────── helpers ────────────────────────────
 
         private HttpResponseMessage InvokeEmployeeAction(
@@ -422,6 +552,84 @@ namespace EtaskMinstry.Api.Controllers
                 ApiResponse.Ok(TaskMapper.ToActionResult(fresh), "تم " + actionLabel + " المهمة"));
         }
 
+
+        private TaskAccessResult LoadReadableTask(int id)
+        {
+            var userData = MvcApplication.userData;
+            if (userData == null)
+            {
+                return new TaskAccessResult
+                {
+                    Response = Request.CreateResponse(HttpStatusCode.Unauthorized, ApiResponse.Fail("غير مصرح"))
+                };
+            }
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+            var task = uow.TaskRepository.Get(
+                filter: t => t.TaskID == id && !t.IsDeleted,
+                includeProperties: "TaskTLogs").FirstOrDefault();
+
+            if (task == null)
+            {
+                return new TaskAccessResult { Response = NotFound("لم يتم العثور على المهمة", "TASK_NOT_FOUND") };
+            }
+
+            if (!CanRead(task, userData))
+            {
+                return new TaskAccessResult
+                {
+                    Response = Request.CreateResponse(HttpStatusCode.Forbidden,
+                        ApiResponse.Fail("غير مصرح بعرض هذه المهمة", "TASK_FORBIDDEN"))
+                };
+            }
+
+            return new TaskAccessResult { Task = task };
+        }
+
+        private static bool CanAddExtensions(Task task)
+        {
+            if (task == null || task.IsArchived) return false;
+            return task.StatusID != (int)TaskStatus.Done
+                && task.StatusID != (int)TaskStatus.Approved
+                && task.StatusID != (int)TaskStatus.NotAproved;
+        }
+
+        private static TaskCommentDto ToCommentDto(TaskComment c)
+        {
+            if (c == null) return null;
+            return new TaskCommentDto
+            {
+                CommentId = c.TaskCommentID,
+                AuthorType = c.IsFromCompany ? "company" : "employee",
+                AuthorName = c.IsFromCompany ? "مسؤول الشركة" : (c.Employee != null ? c.Employee.Name : null),
+                Body = c.Comment,
+                CreatedAt = c.CreatedDate
+            };
+        }
+
+        private TaskAttachmentDto ToAttachmentDto(Attachment a)
+        {
+            if (a == null) return null;
+            string fileName = a.FileName;
+            string path = System.Web.Hosting.HostingEnvironment.MapPath("~/Upload/Task/" + fileName);
+            long size = System.IO.File.Exists(path) ? new System.IO.FileInfo(path).Length : 0;
+            string root = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            return new TaskAttachmentDto
+            {
+                AttachmentId = a.AttachmentID,
+                FileName = string.IsNullOrEmpty(a.OriginalFileName) ? a.FileName : a.OriginalFileName,
+                FileUrl = root + "/Upload/Task/" + fileName,
+                FileSizeBytes = size,
+                Description = a.Description,
+                UploadedByName = null,
+                CreatedAt = null
+            };
+        }
+
+        private static string TrimQuotes(string value)
+        {
+            return string.IsNullOrEmpty(value) ? value : value.Trim().Trim('"');
+        }
         private static bool IsLegalTransition(int currentStatusId, TaskStatus expectedFromStatus)
         {
             switch (expectedFromStatus)
@@ -472,5 +680,35 @@ namespace EtaskMinstry.Api.Controllers
         {
             return Request.CreateResponse(HttpStatusCode.NotFound, ApiResponse.Fail(message, code));
         }
+    }
+    public class TaskCommentRequest
+    {
+        public string Body { get; set; }
+    }
+
+    public class TaskCommentDto
+    {
+        public int CommentId { get; set; }
+        public string AuthorType { get; set; }
+        public string AuthorName { get; set; }
+        public string Body { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class TaskAttachmentDto
+    {
+        public int AttachmentId { get; set; }
+        public string FileName { get; set; }
+        public string FileUrl { get; set; }
+        public long FileSizeBytes { get; set; }
+        public string Description { get; set; }
+        public string UploadedByName { get; set; }
+        public DateTime? CreatedAt { get; set; }
+    }
+
+    internal class TaskAccessResult
+    {
+        public Task Task { get; set; }
+        public HttpResponseMessage Response { get; set; }
     }
 }

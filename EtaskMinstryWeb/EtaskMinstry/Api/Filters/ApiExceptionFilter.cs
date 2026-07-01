@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using System.Net;
 using System.Net.Http;
@@ -11,7 +11,7 @@ namespace EtaskMinstry.Api.Filters
     /// Catches unhandled exceptions from Mobile API actions and returns an
     /// ApiResponse with HTTP 500. By default the response is sanitized
     /// (Arabic message only). To diagnose a 500 in dev, set
-    /// `&lt;add key="ApiDetailedErrors" value="true" /&gt;` in Web.config —
+    /// `&lt;add key="ApiDetailedErrors" value="true" /&gt;` in Web.config â€”
     /// the response will then include the exception type, message, and inner
     /// exception message.
     ///
@@ -37,14 +37,14 @@ namespace EtaskMinstry.Api.Filters
                 string detail = context.Exception.GetType().Name + ": " + context.Exception.Message;
                 if (context.Exception.InnerException != null)
                 {
-                    detail += " ← " + context.Exception.InnerException.GetType().Name
+                    detail += " â† " + context.Exception.InnerException.GetType().Name
                             + ": " + context.Exception.InnerException.Message;
                 }
                 body = ApiResponse.Fail(detail, "SERVER_ERROR");
             }
             else
             {
-                body = ApiResponse.Fail("حدث خطأ غير متوقع، يرجى المحاولة لاحقاً", "SERVER_ERROR");
+                body = ApiResponse.Fail("Ø­Ø¯Ø« Ø®Ø·Ø£ ØºÙŠØ± Ù…ØªÙˆÙ‚Ø¹ØŒ ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù„Ø§Ø­Ù‚Ø§Ù‹", "SERVER_ERROR");
             }
 
             context.Response = context.Request.CreateResponse(
@@ -52,3 +52,5 @@ namespace EtaskMinstry.Api.Filters
         }
     }
 }
+
+
