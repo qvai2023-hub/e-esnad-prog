@@ -42,7 +42,13 @@
       "Bash(grep -iE \"\\\\.dll$|\\\\.pdb$|bin/|obj/\")",
       "Bash(git commit *)",
       "Bash(ipconfig)",
-      "Bash(powershell -NoProfile -Command \"Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress\")"
+      "Bash(powershell -NoProfile -Command \"Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress\")",
+      "Bash(where msbuild *)",
+      "Read(//c/Program Files/Microsoft Visual Studio/2022/**)",
+      "Read(//c/Windows/Microsoft.NET/Framework64/v4.0.30319/**)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin/MSBuild.exe\" EtaskMinstry/EtaskMinstry.csproj -t:Build -p:Configuration=Debug -clp:ErrorsOnly -nologo -v:minimal)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin/MSBuild.exe\" EtaskMinstry/EtaskMinstry.csproj -t:Build -p:Configuration=Debug -nologo -v:minimal)",
+      "Bash(echo \"EXIT=$?\")"
     ]
   }
 }

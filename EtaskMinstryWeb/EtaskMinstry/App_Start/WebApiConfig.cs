@@ -129,6 +129,22 @@ namespace EtaskMinstry
                 constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Delete) }
             );
 
+            // ─────────────── Internal API — Ops Portal (server-to-server) ───────────────
+
+            // POST /api/internal/tasks/{taskId}/attachments → InternalAttachmentsController.Upload
+            // Authenticated by the X-Ops-Portal-Key shared secret (NOT JWT). Declared
+            // before the generic convention routes so it is matched explicitly.
+            config.Routes.MapHttpRoute(
+                name: "InternalApi_TaskAttachments",
+                routeTemplate: "api/internal/tasks/{taskId}/attachments",
+                defaults: new { controller = "InternalAttachments", action = "Upload" },
+                constraints: new
+                {
+                    taskId = @"^\d+$",
+                    httpMethod = new HttpMethodConstraint(HttpMethod.Post)
+                }
+            );
+
             // Mobile API v1 — convention routing.
             // URL shape: /api/v1/{controller}/{action}/{id}
             // (WebApi 1 in this project has no attribute routing, so we use the

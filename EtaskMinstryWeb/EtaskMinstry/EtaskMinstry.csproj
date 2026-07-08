@@ -328,6 +328,8 @@
     <Compile Include="Api\Controllers\AuthController.cs" />
     <Compile Include="Api\Controllers\DeviceTokensController.cs" />
     <Compile Include="Api\Controllers\EmployeesController.cs" />
+    <Compile Include="Api\Controllers\InternalAttachmentsController.cs" />
+    <Compile Include="Api\Dtos\Internal\OpsAttachmentResultDto.cs" />
     <Compile Include="Api\Controllers\MeController.cs" />
     <Compile Include="Api\Controllers\NotificationsController.cs" />
     <Compile Include="Api\Controllers\ProjectsController.cs" />

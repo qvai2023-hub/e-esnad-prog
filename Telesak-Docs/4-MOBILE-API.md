@@ -1,7 +1,7 @@
 # Telesak Mobile API — Reference
 
 **Audience:** mobile developers (React Native / Flutter / native iOS / Android) and QA testers.
-**Status:** Slices 1–6 implemented (auth, me, attendance, tasks, projects, employees, notifications, FCM). **Comments (§5.10) and Attachments (§5.11) are specified but NOT yet implemented** — see the banners on those sections. Pending tester sign-off on the implemented slices.
+**Status:** Slices 1–7 implemented (auth, me, attendance, tasks, projects, employees, notifications, FCM, comments, attachments). Comments (§5.10) and Attachments (§5.11) are now live on `TasksController` and reachable via the `/api/v1/tasks/{id}/{action}` route. Pending tester sign-off.
 **Backend:** ASP.NET Web API on .NET Framework 4.8, same project as the Telesak web app, same SQL Server database.
 
 This document is everything you need to start consuming the API. If something is unclear, ping the backend team — don't guess.
@@ -24,8 +24,8 @@ This document is everything you need to start consuming the API. If something is
    - [5.7 Employees (company)](#57-employees-company)
    - [5.8 Notifications](#58-notifications)
    - [5.9 Device tokens (FCM)](#59-device-tokens-fcm)
-   - [5.10 Comments](#510-comments) — ⚠️ NOT YET IMPLEMENTED
-   - [5.11 Attachments](#511-attachments) — ⚠️ NOT YET IMPLEMENTED
+   - [5.10 Comments](#510-comments)
+   - [5.11 Attachments](#511-attachments)
 6. [Error codes — full catalogue](#6-error-codes--full-catalogue)
 7. [Push notifications (FCM)](#7-push-notifications-fcm)
 8. [Testing checklist (for QA)](#8-testing-checklist-for-qa)
@@ -768,13 +768,13 @@ Response 200: `{ "success": true, "message": "تم إلغاء تسجيل الج�
 
 ### 5.10 Comments
 
-> ⚠️ **NOT YET IMPLEMENTED — planned only.** As of 2026-06-30 there is no `CommentsController` and no comment routes in `WebApiConfig.cs`. Every endpoint in this section currently returns **404**. The shape below is the agreed design for when this slice is built — do NOT test against it yet.
+> Implemented on `TasksController` (`Comments` / `AddComment` actions) and routed through the generic `/api/v1/tasks/{id}/{action}` route.
 
-> Both roles. Access control mirrors `GET /tasks/{id}` — Employee sees only their own tasks; Company sees all tasks in their company.
+> Both roles. Access control mirrors `GET /tasks/{id}` — Employee sees only their own tasks (current assignee or in `TaskTLogs` history); Company sees all tasks in their company.
 
 #### GET `/api/v1/tasks/{id}/comments` (auth, both roles)
 
-Returns all comments on the task, oldest first. No pagination — comment threads are short.
+Returns the task's comments, oldest first. No pagination — comment threads are short. Soft-deleted comments are always excluded; **Hidden** comments are excluded for Employee callers but visible to Company callers.
 
 Response 200:
 ```json
@@ -783,10 +783,8 @@ Response 200:
   "data": [
     {
       "commentId": 1,
-      "taskId": 1234,
-      "authorId": 42,
-      "authorName": "مسؤول الشركة",
       "authorType": "company",
+      "authorName": "مسؤول الشركة",
       "body": "dd",
       "createdAt": "2026-05-12T11:16:09Z"
     }
@@ -798,23 +796,26 @@ Response 200:
 
 | Field | Type | Notes |
 |---|---|---|
-| `commentId` | int | PK |
-| `authorType` | string | `"company"` or `"employee"` — use to color the name (gold for company, as in web) |
-| `body` | string | Plain text; no HTML |
+| `commentId` | int | PK (`TaskComment.TaskCommentID`) |
+| `authorType` | string | `"company"` or `"employee"` (from `IsFromCompany`) — use to color the name (gold for company, as in web) |
+| `authorName` | string | `"مسؤول الشركة"` for company comments; the employee's name for employee comments |
+| `body` | string | Plain text; no HTML (maps to `TaskComment.Comment`) |
 | `createdAt` | ISO 8601 UTC | Mobile formats for display |
+
+> The API does **not** return `taskId` or `authorId` on comment objects — only the five fields above.
 
 Failure codes: `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
 
 #### POST `/api/v1/tasks/{id}/comments` (auth, both roles)
 
-Add a new comment. Author identity is taken from the JWT — no `authorId` in the request body.
+Add a new comment. Author identity is taken from the JWT — no `authorId` in the request body. Wraps `TaskManger.AddComment`.
 
 Request:
 ```json
 { "body": "نص التعليق" }
 ```
 
-`body` is required; empty string → `INVALID_REQUEST` (400).
+`body` is required; empty/whitespace → `INVALID_REQUEST` (400). Comments cannot be added once the task is finished — a task in `Done`, `Approved`, `NotAproved`, or archived state returns `INVALID_STATE` (409).
 
 Response 201:
 ```json
@@ -822,10 +823,8 @@ Response 201:
   "success": true,
   "data": {
     "commentId": 2,
-    "taskId": 1234,
-    "authorId": 42,
-    "authorName": "مسؤول الشركة",
     "authorType": "company",
+    "authorName": "مسؤول الشركة",
     "body": "نص التعليق",
     "createdAt": "2026-05-12T14:00:00Z"
   },
@@ -833,19 +832,19 @@ Response 201:
 }
 ```
 
-Failure codes: `INVALID_REQUEST` (400), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
+Failure codes: `INVALID_REQUEST` (400), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403), `INVALID_STATE` (409 — task already finished/archived), `ACTION_FAILED` (500 — `TaskManger.AddComment` returned no id).
 
 ---
 
 ### 5.11 Attachments
 
-> ⚠️ **NOT YET IMPLEMENTED — planned only.** As of 2026-06-30 there is no `AttachmentsController` and no attachment routes in `WebApiConfig.cs`. Every endpoint in this section currently returns **404**. The shape below (including the multipart upload contract) is the agreed design for when this slice is built — do NOT test against it yet.
+> Implemented on `TasksController` (`Attachments` / `AddAttachment` actions) and routed through the generic `/api/v1/tasks/{id}/{action}` route.
 
 > Both roles. Same access rule as comments — Employee's own tasks only; Company sees all tasks in their company.
 
 #### GET `/api/v1/tasks/{id}/attachments` (auth, both roles)
 
-Returns all attachments on the task.
+Returns all attachments on the task, ordered by `attachmentId`.
 
 Response 200:
 ```json
@@ -854,14 +853,12 @@ Response 200:
   "data": [
     {
       "attachmentId": 1,
-      "taskId": 1234,
       "fileName": "تقرير مارس 2026.pdf",
-      "description": "تقرير مهام شركة عبدالحميد حسن عبدالكريم شهر مارس 2026",
-      "fileUrl": "http://<host>/uploads/tasks/1234/abc123.pdf",
+      "fileUrl": "http://<host>/Upload/Task/abc123def4567890.pdf",
       "fileSizeBytes": 204800,
-      "uploadedById": 42,
-      "uploadedByName": "مسؤول الشركة",
-      "uploadedAt": "2026-05-12T11:00:00Z"
+      "description": "تقرير مهام شركة عبدالحميد حسن عبدالكريم شهر مارس 2026",
+      "uploadedByName": null,
+      "createdAt": null
     }
   ],
   "message": "",
@@ -871,24 +868,30 @@ Response 200:
 
 | Field | Type | Notes |
 |---|---|---|
-| `fileUrl` | string | Full absolute URL — mobile opens it directly with `Linking.openURL()` |
-| `fileSizeBytes` | int | Mobile displays as KB / MB |
-| `fileName` | string | Original file name including extension |
+| `attachmentId` | int | PK (`Attachment.AttachmentID`) |
+| `fileName` | string | Original file name incl. extension (`OriginalFileName`, falling back to the stored name) |
+| `fileUrl` | string | Full absolute URL under `/Upload/Task/<storedFileName>` — mobile opens it directly with `Linking.openURL()`. The stored name is a random 16-char hex + original extension |
+| `fileSizeBytes` | long | Read from disk; `0` if the file is missing. Mobile displays as KB / MB |
+| `description` | string | Plain text description (الوصف), may be null |
+| `uploadedByName` | string | Currently always `null` (not populated by the mapper) |
+| `createdAt` | ISO 8601 UTC / null | Currently always `null` (not populated by the mapper) |
+
+> The API does **not** return `taskId` or `uploadedById` on attachment objects. `uploadedByName` and `createdAt` are present in the shape but currently return `null`.
 
 Failure codes: `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
 
 #### POST `/api/v1/tasks/{id}/attachments` (auth, both roles)
 
-Upload a new file. Must be **`multipart/form-data`** — not JSON.
+Upload a new file. Must be **`multipart/form-data`** — not JSON. Wraps `TaskManger.AttachTaskFile`; the file is saved under `~/Upload/Task/` with a random stored name.
 
 Request fields:
 
 | Field | Required | Notes |
 |---|---|---|
-| `file` | Yes | Binary file |
+| `file` | Yes | Binary file (the part's `filename` must be set) |
 | `description` | No | Plain text description (displayed as الوصف) |
 
-Max file size: confirm with backend team (suggest 10 MB). Allowed types: no restriction at the API level — let the mobile file picker guide the user.
+Allowed types: no restriction at the API level — let the mobile file picker guide the user. **There is no server-side max-size check** — the request is bounded only by the standard ASP.NET `maxRequestLength` / `maxAllowedContentLength` in Web.config. There is no `FILE_TOO_LARGE` code; an oversized request fails at the IIS/ASP.NET layer, not with an API envelope. Attachments cannot be added once the task is finished — `Done`, `Approved`, `NotAproved`, or archived returns `INVALID_STATE` (409).
 
 Response 201:
 ```json
@@ -896,20 +899,18 @@ Response 201:
   "success": true,
   "data": {
     "attachmentId": 2,
-    "taskId": 1234,
     "fileName": "report.pdf",
-    "description": "تقرير الشهر",
-    "fileUrl": "http://<host>/uploads/tasks/1234/xyz789.pdf",
+    "fileUrl": "http://<host>/Upload/Task/xyz789abc1234560.pdf",
     "fileSizeBytes": 102400,
-    "uploadedById": 42,
-    "uploadedByName": "مسؤول الشركة",
-    "uploadedAt": "2026-05-12T14:05:00Z"
+    "description": "تقرير الشهر",
+    "uploadedByName": null,
+    "createdAt": null
   },
   "message": "تم رفع الملف"
 }
 ```
 
-Failure codes: `INVALID_REQUEST` (400 — no file sent), `FILE_TOO_LARGE` (400), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403).
+Failure codes: `INVALID_REQUEST` (400 — body not `multipart/form-data`, or no `file` part sent), `TASK_NOT_FOUND` (404), `TASK_FORBIDDEN` (403), `INVALID_STATE` (409 — task already finished/archived), `ACTION_FAILED` (500 — `TaskManger.AttachTaskFile` returned false).
 
 ---
 
@@ -933,14 +934,15 @@ Always branch on `code`, not on `message`. Codes are stable; Arabic messages may
 | `TASK_NOT_FOUND` | 404 | tasks/* | task id missing or already soft-deleted | Refresh list |
 | `TASK_FORBIDDEN` | 403 | tasks/* | task is in a different company / not your role's scope | Refresh list |
 | `TASK_NOT_ASSIGNED` | 403 | tasks/{id}/accept|reject|complete|time | employee tried to mutate a task not assigned to them | Refresh detail |
-| `INVALID_STATE` | 409 | tasks/{id}/* | workflow refused — current status doesn't allow this transition | Re-fetch detail and re-render available actions |
-| `ACTION_FAILED` | 500 | tasks/{id}/* | `TaskManger.*` returned false unexpectedly | Retry with backoff |
+| `INVALID_STATE` | 409 | tasks/{id}/* (incl. comments, attachments POST) | workflow refused — current status doesn't allow this transition, or the task is finished/archived so no comment/attachment can be added | Re-fetch detail and re-render available actions |
+| `ACTION_FAILED` | 500 | tasks/{id}/* (incl. comments, attachments POST) | `TaskManger.*` returned false / no id unexpectedly | Retry with backoff |
 | `INVALID_EMPLOYEE` | 400 | POST /tasks | assignee not in your company / inactive | Refetch employees list |
 | `INVALID_PROJECT` | 400 | POST /tasks | project not in your company | Refetch projects list |
 | `NOTIFICATION_NOT_FOUND` | 404 | notifications/{id}/read | unknown notification id | Refresh notifications |
 | `NOTIFICATION_FORBIDDEN` | 403 | notifications/{id}/read | notification belongs to another user | Refresh notifications |
-| `FILE_TOO_LARGE` | 400 | tasks/{id}/attachments (POST) | uploaded file exceeds the server's max size limit | Show error, prompt user to choose a smaller file |
 | `SERVER_ERROR` | 500 | any | unhandled exception. Body has detail if `ApiDetailedErrors=true` in dev | Retry with backoff; report to backend if persistent |
+
+> **Note:** There is no `FILE_TOO_LARGE` code. `POST /tasks/{id}/attachments` does not perform a server-side size check — an oversized upload is rejected by ASP.NET/IIS (`maxRequestLength` / `maxAllowedContentLength`) before it reaches the API, so it does not return the standard envelope.
 
 ---
 
@@ -1041,21 +1043,22 @@ If the backend gets `NotRegistered` / `InvalidRegistration` / `MismatchSenderId`
 - [ ] `DELETE /tasks/{id}` → 200, DB `IsDeleted=1`.
 - [ ] `DELETE /tasks/{id}` second call → 404 TASK_NOT_FOUND.
 
-**Comments (Slice 7) — ⚠️ NOT YET IMPLEMENTED. Skip these tests; the endpoints return 404 today.**
-- [ ] `GET /tasks/{id}/comments` as Employee (own task) → 200, array oldest-first, each item has `commentId`, `authorType`, `body`, `createdAt`.
+**Comments (Slice 7)**
+- [ ] `GET /tasks/{id}/comments` as Employee (own task) → 200, array oldest-first, each item has `commentId`, `authorType`, `authorName`, `body`, `createdAt` (no `taskId`/`authorId`).
 - [ ] `GET /tasks/{id}/comments` as Employee on another employee's task → 403 TASK_FORBIDDEN.
-- [ ] `GET /tasks/{id}/comments` as Company → 200, can fetch any task in company.
-- [ ] `POST /tasks/{id}/comments` with valid body → 201, new comment in array with correct `authorType`.
+- [ ] `GET /tasks/{id}/comments` as Company → 200, can fetch any task in company (and sees Hidden comments the employee wouldn't).
+- [ ] `POST /tasks/{id}/comments` with valid body → 201, new comment in response with correct `authorType`.
 - [ ] `POST /tasks/{id}/comments` with empty `body` (`""`) → 400 INVALID_REQUEST.
+- [ ] `POST /tasks/{id}/comments` on a Done/Approved/archived task → 409 INVALID_STATE.
 - [ ] `authorType` is `"company"` when posted by Company user and `"employee"` when posted by Employee.
 
-**Attachments (Slice 7) — ⚠️ NOT YET IMPLEMENTED. Skip these tests; the endpoints return 404 today.**
-- [ ] `GET /tasks/{id}/attachments` → 200, array with `fileName`, `fileUrl` (full absolute URL), `fileSizeBytes`, `uploadedByName`.
+**Attachments (Slice 7)**
+- [ ] `GET /tasks/{id}/attachments` → 200, array with `attachmentId`, `fileName`, `fileUrl` (full absolute URL under `/Upload/Task/`), `fileSizeBytes`, `description`. Note `uploadedByName` and `createdAt` currently return `null`.
 - [ ] `fileUrl` opens the file directly (verify with browser or `Linking.openURL()`).
 - [ ] `POST /tasks/{id}/attachments` as `multipart/form-data` with valid `file` field → 201, response includes `attachmentId`, `fileName`, `fileSizeBytes`.
 - [ ] `POST /tasks/{id}/attachments` with `description` field → 201, `description` present in response.
-- [ ] `POST /tasks/{id}/attachments` without a `file` field → 400 INVALID_REQUEST.
-- [ ] `POST /tasks/{id}/attachments` with file exceeding server max → 400 FILE_TOO_LARGE.
+- [ ] `POST /tasks/{id}/attachments` with a JSON (non-multipart) body or no `file` part → 400 INVALID_REQUEST.
+- [ ] `POST /tasks/{id}/attachments` on a Done/Approved/archived task → 409 INVALID_STATE.
 - [ ] Both endpoints return 403 TASK_FORBIDDEN when Employee accesses another employee's task.
 
 **Pickers (Slice 4)**
@@ -1142,5 +1145,5 @@ These are explicitly NOT in the Mobile API and won't be added without a new brie
 
 ---
 
-**Last updated:** 2026-06-30 — flagged §5.10 Comments and §5.11 Attachments as NOT YET IMPLEMENTED (specified but no controller/routes in code). Previous: 2026-05-12 added those two sections as design specs.
+**Last updated:** 2026-07-08 — synced §5.10 Comments and §5.11 Attachments to the actual implementation on `TasksController` (now live): corrected response fields (dropped `taskId`/`authorId`/`uploadedById`; `uploadedByName`/`createdAt` return null), fixed the attachment `fileUrl` path to `/Upload/Task/<storedName>`, documented the `INVALID_STATE` (409) finished-task guard and `ACTION_FAILED` (500), and removed the non-existent `FILE_TOO_LARGE` code. Previous: 2026-06-30 flagged both sections as NOT YET IMPLEMENTED; 2026-05-12 added them as design specs.
 **Maintainer:** backend team. Ping us if anything contradicts what the API actually returns.
