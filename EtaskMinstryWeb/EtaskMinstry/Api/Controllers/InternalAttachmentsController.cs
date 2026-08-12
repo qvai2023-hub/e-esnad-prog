@@ -106,30 +106,73 @@ namespace EtaskMinstry.Api.Controllers
             //    the physical bytes FIRST, so a saved row always has its file.
             string extension = Path.GetExtension(originalFileName ?? string.Empty);
             string storedFileName = Guid.NewGuid().ToString("N") + extension;
+            string storedFilePath;
             try
             {
                 string uploadRoot = HostingEnvironment.MapPath("~/Upload/Task/");
                 if (!Directory.Exists(uploadRoot)) Directory.CreateDirectory(uploadRoot);
-                File.WriteAllBytes(Path.Combine(uploadRoot, storedFileName), bytes);
+                storedFilePath = Path.Combine(uploadRoot, storedFileName);
+                File.WriteAllBytes(storedFilePath, bytes);
             }
-            catch
+            catch (Exception ex)
             {
+                // TEMP diagnostic — a failure HERE means the physical disk write failed.
+                System.Diagnostics.Debug.WriteLine(
+                    "[InternalAttachments] DISK write failed for task {0}: {1}\n{2}",
+                    taskId, ex.Message, ex.StackTrace);
                 return Fail(HttpStatusCode.InternalServerError, "تعذر رفع الملف", "SAVE_FAILED");
             }
 
             // 8) Insert the row through existing AppCode (also logs + notifies
-            //    employee/company → FCM). No new business logic here.
+            //    employee/company → FCM). AttachTaskFile → LogTask.LogAddAttachment and
+            //    NotificationHub.Send both read MvcApplication.userData, which a
+            //    key-authenticated (non-JWT) request never sets — so calling it raw
+            //    throws a NullReferenceException.
+            //
+            //    Fix: install a synthetic per-request "system" actor first.
+            //    MvcApplication.userData is stored PER REQUEST (HttpContext Session /
+            //    Items — see Global.asax.cs), NOT in a process-wide static, so this
+            //    cannot leak into any concurrent request. userId = 0 matches no real
+            //    employee/company id, so NotificationHub's actor-skip guard lets BOTH
+            //    the employee and company notifications through. Cleared in finally.
             bool ok;
             try
             {
+                MvcApplication.userData = new EtaskMinstry.Models.UserData
+                {
+                    userId = 0,                                 // no real actor → skip guard never matches
+                    isCompany = false,                          // logged as IsFromCompany = false (system value)
+                    CompanyId = task.CompanyID,
+                    UserTypeId = (int)LoggedUserType.Employee,
+                    isAuthorized = true,
+                    userName = "OpsPortal"
+                };
+
                 ok = TaskManger.AttachTaskFile(taskId, storedFileName, description, originalFileName);
             }
-            catch
+            catch (Exception ex)
             {
+                // TEMP diagnostic — a failure HERE is DB insert / LogTask / Notification,
+                // NOT the disk write (which already succeeded above).
+                System.Diagnostics.Debug.WriteLine(
+                    "[InternalAttachments] AttachTaskFile failed for task {0}, stored '{1}': {2}\n{3}",
+                    taskId, storedFileName, ex.Message, ex.StackTrace);
                 ok = false;
             }
+            finally
+            {
+                // Drop the synthetic actor so nothing else in this request sees it.
+                MvcApplication.userData = null;
+            }
+
             if (!ok)
+            {
+                // AttachTaskFile throws before its Save(), so no row was committed —
+                // delete the orphan file from step 7 so /Upload/Task/ doesn't collect
+                // files with no matching Attachment row.
+                try { if (File.Exists(storedFilePath)) File.Delete(storedFilePath); } catch { }
                 return Fail(HttpStatusCode.InternalServerError, "تعذر رفع الملف", "SAVE_FAILED");
+            }
 
             // 9) Read back the identity id to echo it.
             var saved = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString)

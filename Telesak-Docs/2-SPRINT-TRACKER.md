@@ -15,6 +15,33 @@ Sprint 0: ████████████████████ 100% Comp
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 8: Mobile API Layer
 
 Brief: a JSON Mobile API on top of the existing web (same project, same DB).
@@ -35,6 +62,7 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 | API-5 | Tasks (company create/approve/disapprove/delete) | ✅ Completed | 2026-05-12 | Same deviation as Slice 4 — calls `TaskManger.Company*Task` |
 | API-6 | Notifications + FCM (single AppCode line) | ✅ Completed | 2026-05-12 | `FcmDispatcher.Dispatch` injected at the bottom of `NotificationHub.Send` — every existing notification trigger fans out to FCM automatically |
 | API-7 | Comments + Attachments | ❌ NOT IMPLEMENTED | — | Documented as done on 2026-05-12 but never landed in code (no controller actions, DTOs, mapper methods, or routes exist). Design retained in `1-CHANGELOG.md` SLICE-7 and `4-MOBILE-API.md` §5.10/§5.11. Endpoints return 404. Corrected 2026-06-30. |
+| API-8 | Internal API — Ops Portal attachment upload (`POST /api/internal/tasks/{id}/attachments`) | ✅ Completed | 2026-07-08 | Server-to-server, `X-Ops-Portal-Key` shared secret (not JWT). Reuses `TaskManger.AttachTaskFile`. Fix: synthetic per-request system `userData` so `LogTask`/`NotificationHub` don't NRE (DEC-040). Full spec: `5-OPS-PORTAL-INTERNAL-API.md`. Pending tester sign-off. |
 
 ### Progress
 
@@ -45,6 +73,7 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 - [x] API-5: TasksController extended (+create/approve/disapprove/delete), CreateTaskDto, verb-constrained routes
 - [x] API-6: NotificationsController, DeviceTokensController, FcmDispatcher, DeviceTokenService, NotificationMapper, 2 DTOs, **single FCM line in AppCode/Notification.cs**
 - [ ] API-7: Comments + Attachments — **NOT IMPLEMENTED** (documented in error; no code exists). Planned: TasksController +4 actions, 3 DTOs (CommentDto, AddCommentRequest, AttachmentDto), TaskMapper +2 methods, 4 new routes
+- [x] API-8: Internal Ops Portal attachment upload — `InternalAttachmentsController`, `OpsAttachmentResultDto`, +1 route, `OpsPortalKey` config key, synthetic-context fix (DEC-040)
 
 ### Sprint 8 Files
 
@@ -74,6 +103,8 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 | 2 | Use DIFFERENT JwtSecret per environment (dev / UAT / Telesak prod / E-snad prod) | 1 | High |
 | 3 | Set `FcmServerKey` to real Firebase Server Key (dev can leave placeholder) | 6 | Med |
 | 4 | Set `ApiDetailedErrors=false` in prod configs (default already false in env variants) | 1 | High |
+| 5 | Set a real `OpsPortalKey` (replace `REPLACE_WITH_OPS_PORTAL_SHARED_SECRET`) and share it with Ops Portal; different value per env. Endpoint stays 503-disabled until set | API-8 | High |
+| 6 | Ensure Ops Portal writes/reads via this endpoint only — files land in the Telesak web-root `/Upload/Task/` (flat folder; DB stores bare filename, no path) | API-8 | High |
 
 #### Tester / Mobile Dev Handoff
 
@@ -85,6 +116,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 7: Reports & Attendance Improvements
 
 ### Tasks
@@ -130,6 +188,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 6: AI Chat Assistant
 
 ### Tasks
@@ -168,6 +253,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 4: Performance & Attachment Fixes
 
 ### Performance Tasks
@@ -218,6 +330,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 3: Bulk Operations & Filtering
 
 ### Tasks
@@ -238,6 +377,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 0: Attendance Report Improvements
 
 ### Tasks
@@ -256,6 +422,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Files to Upload
 
 ### Sprint 5 Files
@@ -381,6 +574,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Issues Resolved
 
 | # | Issue | Solution | Task |
@@ -392,6 +612,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint History
 
 | Sprint | Start | End | Status |
@@ -406,6 +653,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 1: Task Report & Attendance Tracking
 
 ### Task Report Tasks
@@ -440,6 +714,33 @@ in existing AppCode** (the FCM dispatch inside `NotificationHub.Send`).
 
 ---
 
+## Sprint 9 - Bug Closeout (#66, #69) (2026-07-27)
+
+### Sprint Goal
+
+Close the two currently open GitHub bugs: task deletion false-success for non-New statuses and unreliable employee attendance/session recovery after browser close.
+
+| # | Bug | Fix | Status |
+|---|-----|-----|--------|
+| #66 | Task deletion returns 200 but non-New task remains | `CompanyTaskVM.Delete` now soft-deletes any company-owned non-deleted task, and layout delete modals show success/failure from the returned boolean. | Fixed - build passed |
+| #69 | Browser close does not always trigger logout/session update | Employee layouts always load `attendance-tracker.js`; tracker marks new browser client sessions; `AttendanceController.GetCurrentAttendance` closes stale rows at DB `LastHeartbeat` and creates a fresh row when needed. | Fixed - build passed |
+
+### Files Modified
+
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Models/CompanyTaskVM.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Views/Company/Index.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs`
+- `EtaskMinstryWeb/EtaskMinstry/Scripts/attendance-tracker.js`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_Layout.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNewDesign.cshtml`
+- `EtaskMinstryWeb/EtaskMinstry/Views/Shared/_LayoutNoSearch.cshtml`
+
+### Verification
+
+- MSBuild `EtaskMinstry-NewDesign.sln` in `E:\work\2026\ai_vibe\Esnad_ai` succeeded on 2026-07-27 with 0 errors.
+- Remaining warning: existing `System.Web.Http.WebHost` reference warning in `TaskManagementModel`.
+
+---
 ## Sprint 5: UX & Performance (T-10 + T-11 + T-12 + T-13)
 
 ### Tasks

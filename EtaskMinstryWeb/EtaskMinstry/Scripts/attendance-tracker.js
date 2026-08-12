@@ -30,7 +30,8 @@
         isModalShown: false,
         isInitialized: false,
         isCheckingOut: false,
-        isInternalNavigation: false  // Track if user is navigating within the site
+        isInternalNavigation: false,  // Track if user is navigating within the site
+        isNewClientSession: false
     };
 
     // URLs
@@ -46,6 +47,8 @@
      */
     function init() {
         if (state.isInitialized) return;
+        state.isNewClientSession = !window.sessionStorage.getItem('AttendanceTrackerClientSession');
+        window.sessionStorage.setItem('AttendanceTrackerClientSession', '1');
 
         // Check if user has active attendance
         checkCurrentAttendance(function (hasAttendance) {
@@ -72,10 +75,12 @@
         $.ajax({
             url: URLS.getCurrentAttendance,
             type: 'GET',
+            data: { newClientSession: state.isNewClientSession },
             dataType: 'json',
             success: function (response) {
                 if (response.hasAttendance) {
                     state.attendanceId = response.attendanceId;
+                    state.isNewClientSession = false;
                     callback(true);
                 } else {
                     callback(false);

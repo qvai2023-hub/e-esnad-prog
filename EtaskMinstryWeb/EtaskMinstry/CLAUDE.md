@@ -653,6 +653,34 @@ Implications when adding a new endpoint:
 - For ergonomic URLs without an action segment (like `/api/v1/me`), add an
   explicit `MapHttpRoute` BEFORE the generic action route.
 
+## Internal API — Ops Portal (server-to-server, NOT part of /api/v1)
+
+A separate internal surface under `/api/internal/` for trusted server-to-server callers
+(Ops Portal). Authenticated by a **shared secret** header `X-Ops-Portal-Key` (Web.config
+`OpsPortalKey`), **not** JWT. Full contract: `Telesak-Docs/5-OPS-PORTAL-INTERNAL-API.md`.
+
+Current endpoints:
+- `POST /api/internal/tasks/{taskId}/attachments` — `InternalAttachmentsController.Upload`.
+  Writes the file to `~/Upload/Task/` (GUID name) then reuses `TaskManger.AttachTaskFile`.
+  Guards: `INVALID_API_KEY` (401), `OPS_API_DISABLED` (503, fail-closed when key unset),
+  `MISSING_FILE` (400), `TASK_NOT_FOUND` (404), `INVALID_STATE` (409, Done/Approved),
+  `SAVE_FAILED` (500).
+
+Files: `Api/Controllers/InternalAttachmentsController.cs`, `Api/Dtos/Internal/OpsAttachmentResultDto.cs`,
++1 route in `App_Start/WebApiConfig.cs`, `OpsPortalKey` in the 4 config files. No schema change.
+
+### ⚠️ Gotcha for ANY non-JWT (key-auth / internal) endpoint that reuses AppCode
+
+`MvcApplication.userData` is only populated by `JwtAuthorizeAttribute` (on `/api/v1`) or by a
+web session login. A key-authenticated request has it **null**. Many AppCode methods dereference
+it unconditionally — e.g. `LogTask.LogTaskSingleValue` (`userData.isCompany`) and
+`NotificationHub.Send` (actor-skip guard). So reusing methods like `TaskManger.AttachTaskFile`
+from an internal endpoint throws `NullReferenceException` unless you first provide a `userData`
+context. The approved pattern (DEC-040) is to install a **synthetic per-request** system actor
+(`userId=0`, `isCompany=false`) around the call and clear it in `finally` — `userData` is stored
+per-request (HttpContext Session/Items in `Global.asax.cs`), so it never leaks across requests.
+Prefer this over editing/duplicating the shared AppCode methods.
+
 ## Files added in Slice 1 (foundation)
 
 - `Api/Configuration/{ApiJsonFormatter,ApiCorsConfig}.cs`

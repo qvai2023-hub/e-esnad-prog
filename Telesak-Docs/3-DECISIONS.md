@@ -882,6 +882,51 @@ Always logs to `System.Diagnostics.Debug.WriteLine` regardless.
 
 ---
 
+### DEC-040: Synthetic per-request system actor for the internal (key-auth) attachment API
+
+**Date:** 2026-07-08 | **Task:** API-8 | **Status:** Implemented
+
+#### Context
+`POST /api/internal/tasks/{id}/attachments` (Ops Portal, authenticated by the
+`X-Ops-Portal-Key` shared secret, not JWT) reuses `TaskManger.AttachTaskFile`.
+That method calls `LogTask.LogAddAttachment` (→ `LogTaskSingleValue`, which reads
+`MvcApplication.userData.isCompany`) and `NotificationHub.Send` (reads
+`MvcApplication.userData` at the actor-skip guard). A key-authenticated request
+never populates `MvcApplication.userData` (that's `JwtAuthorizeAttribute`'s job on
+`/api/v1`), so it is `null` → `NullReferenceException` thrown before `Save()`,
+surfaced as `500 SAVE_FAILED`.
+
+#### Decision
+Install a synthetic per-request "system" `UserData` (`userId=0`, `isCompany=false`,
+`CompanyId=task.CompanyID`) in `InternalAttachmentsController` immediately before the
+`AttachTaskFile` call, and clear it in a `finally`. No shared-code changes.
+
+#### Rationale
+- `MvcApplication.userData` is stored **per request** (HttpContext Session/Items, see
+  `Global.asax.cs`), **not** a process-wide static — so a synthetic value cannot leak
+  into any concurrent request. This is what makes the "set a context" approach safe,
+  contrary to its initial reputation.
+- `userId=0` matches no real employee/company id, so `NotificationHub`'s actor-skip
+  guard lets **both** the employee and company notifications through (correct for a
+  system-originated upload). Log records `IsFromCompany=false` (agreed system value).
+- Touches **only** the internal controller — zero edits to shared `TaskManger` /
+  `LogTask` / `Notification`, honoring the shared-code-caution rules in `CLAUDE.md`.
+
+#### Alternatives rejected
+- **Internal-safe sibling methods** (`AttachTaskFileInternal` + a `NotificationHub`
+  variant without the actor-skip): would duplicate >15 lines of notification fan-out
+  logic and edit three shared files — crosses the "fork vs wrap" threshold in `CLAUDE.md`.
+- **Null-guarding the shared method bodies**: forbidden (overwriting shared method
+  bodies is HIGH-RISK) and would change behavior for every existing caller.
+
+#### Follow-up
+- Temporary `[InternalAttachments]` `Debug.WriteLine` diagnostics were added in both
+  `SAVE_FAILED` catch blocks to separate disk-write failures from DB/notify failures —
+  remove (or route to the permanent logger) after tester sign-off.
+- Orphan file written before a failed insert is now deleted in the failure path.
+
+---
+
 ## Architecture Decisions
 
 ### ADR-001: RDLC for Reports

@@ -4,6 +4,80 @@ All notable changes to the TELE SAK project will be documented in this file.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
+## Internal API — Ops Portal Attachment Upload
+
+**Status:** Implemented (pending tester sign-off).
+**Date:** 2026-07-08.
+**Reference:** `Telesak-Docs/5-OPS-PORTAL-INTERNAL-API.md` (full contract + decisions).
+
+A server-to-server endpoint so **Ops Portal** can attach files to Telesak tasks without
+writing into the Telesak web-root `/Upload/Task/` folder directly (and without leaving DB rows
+whose physical file is missing — Telesak hides those). Authenticated by a shared secret in the
+`X-Ops-Portal-Key` header, **NOT** JWT. Reuses `TaskManger.AttachTaskFile`; **web behavior
+unchanged**; no schema change (reuses `dbo.Attachment`).
+
+### Endpoint
+
+`POST /api/internal/tasks/{taskId}/attachments` — `multipart/form-data` with `file` (required),
+`description` + `originalFileName` (optional). Writes the physical file to `~/Upload/Task/` with a
+GUID stored name **first**, then inserts the `dbo.Attachment` row. Returns `201` with
+`{ attachmentId, taskId, fileName, originalFileName, description }`.
+
+| File | Type | Description |
+|------|------|-------------|
+| `Api/Controllers/InternalAttachmentsController.cs` | New | The endpoint. Shared-secret gate (constant-time, fails closed → 503 when unconfigured), multipart parse, task/state validation, file save, reuse of `TaskManger.AttachTaskFile`, identity read-back |
+| `Api/Dtos/Internal/OpsAttachmentResultDto.cs` | New | Response `data` shape |
+| `App_Start/WebApiConfig.cs` | Modified | +1 route `api/internal/tasks/{taskId}/attachments` (POST, numeric `taskId`), before the generic routes |
+| `EtaskMinstry.csproj` | Modified | `<Compile>` entries for the two new files |
+| `Web.config` (+ `webesnad.config`, `webuat.config`, `webtele.config`) | Modified | +1 appSetting `OpsPortalKey` (placeholder → endpoint disabled) |
+
+### Behavior / guards
+
+- **Auth:** `INVALID_API_KEY` (401) on bad/missing key; `OPS_API_DISABLED` (503) while `OpsPortalKey`
+  is empty / a `REPLACE_` placeholder (fail closed).
+- **Validation:** `INVALID_REQUEST` (400, not multipart), `MISSING_FILE` (400), `TASK_NOT_FOUND`
+  (404, missing or `IsDeleted=1`), `INVALID_STATE` (409, task is `Done`/`Approved` — added at
+  review), `SAVE_FAILED` (500).
+- **Size:** no app-level check — bounded by the existing `httpRuntime maxRequestLength`.
+- **Notifications:** employee + company (and FCM) fire, same as a web upload.
+
+### Follow-up fix (2026-07-08) — `SAVE_FAILED` on first integration
+
+First Ops Portal call returned `500 SAVE_FAILED`. Root cause: `AttachTaskFile` reuses
+`LogTask.LogAddAttachment` and `NotificationHub.Send`, both of which read
+`MvcApplication.userData` — `null` for a key-authenticated (non-JWT) request → `NullReferenceException`
+before `Save()`. Fixed **in the controller only** by installing a synthetic per-request "system"
+actor (`userId=0`, `isCompany=false`) around the `AttachTaskFile` call and clearing it in `finally`;
+`userId=0` matches no real id so both notifications still fire. Also added temporary
+`[InternalAttachments]` diagnostics in both `SAVE_FAILED` catch blocks (disk-write vs DB/notify) and
+orphan-file cleanup on failure. No shared-code edits. See **DEC-040**.
+
+---
+
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 8 - Mobile API Layer
 
 **Status:** Slices 1–6 implemented (pending tester sign-off). **Slice 7 (Comments + Attachments) is NOT implemented** — documented in error; see the SLICE-7 correction note below.
@@ -123,6 +197,18 @@ Planned access control: mirrors `GET /tasks/{id}` — Employee sees only their o
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 7 - Reports & Attendance Improvements
 
 **Status:** Completed
@@ -183,6 +269,18 @@ Planned access control: mirrors `GET /tasks/{id}` — Employee sees only their o
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 6 - AI Chat Assistant (T-15)
 
 **Status:** Completed
@@ -235,6 +333,18 @@ Widget features:
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 5 - UX Fixes & Performance (T-10, T-11, T-12, T-13)
 
 **Status:** Completed
@@ -308,6 +418,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 4 - Performance & Attachment Fixes
 
 ### PERF: N+1 Query Fixes, Eager Loading & Client-Side Filtering Fixes
@@ -349,6 +471,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ### T-09b: Preserve Original File Names for Attachments
 **Status:** Completed
 **Date Completed:** 2026-03-18
@@ -368,6 +502,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 3 - Bulk Operations & Filtering
 
 ### T-07/T-08/T-09/T-10: Bulk Delete, Multi-Employee Filter, SQL Scripts
@@ -390,6 +536,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 1 - Task Report & Attendance Tracking
 
 ### T-05/T-04: Task Report Redesign (CompanyTasks)
@@ -419,6 +577,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ### ATT: Attendance Tracking System
 **Status:** Completed
 **Date Completed:** 2026-03-16
@@ -454,6 +624,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 0 - Attendance Report Improvements
 
 ### A-05: Report Header Redesign & Inactivity Timeout
@@ -481,6 +663,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ### A-03: Professional Report Format
 **Status:** Completed
 **Date Completed:** 2026-03-08
@@ -503,6 +697,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ### A-02: Data Structure Improvements
 **Status:** Completed
 **Date Completed:** 2026-03-08
@@ -528,6 +734,18 @@ Batched N+1 queries in Dashboard and removed duplicate jQuery loading.
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ### A-01: Analysis & Documentation
 **Status:** Completed
 **Date Completed:** 2026-03-08
@@ -549,6 +767,18 @@ Identified 4 issues in the attendance report:
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Database Change Summary
 
 ### Tables Modified
@@ -567,6 +797,18 @@ Identified 4 issues in the attendance report:
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 4 Summary
 
 | Task | Status | Files | DB Changes |
@@ -590,6 +832,18 @@ Identified 4 issues in the attendance report:
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 3 Summary
 
 | Task | Status | Files | DB Changes |
@@ -603,6 +857,18 @@ Identified 4 issues in the attendance report:
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 1 Summary
 
 | Task | Status | Files | DB Changes |
@@ -617,6 +883,18 @@ Identified 4 issues in the attendance report:
 
 ---
 
+## 2026-07-27 - Bug Closeout (#66, #69)
+
+### Fixed
+
+- #66: Company task delete no longer reports transport success while leaving non-New tasks visible. Delete now soft-deletes any company-owned, non-deleted task and the UI displays failure when the backend returns false.
+- #69: Employee attendance/session recovery no longer depends only on browser-close `sendBeacon`. Employee layouts always load the tracker, new browser client sessions are detected with `sessionStorage`, and stale attendance rows are closed at the DB `LastHeartbeat` before a fresh row is created.
+
+### Verification
+
+- Built `EtaskMinstry-NewDesign.sln` from `E:\work\2026\ai_vibe\Esnad_ai`: succeeded, 0 errors, 1 existing `System.Web.Http.WebHost` warning in `TaskManagementModel`.
+
+---
 ## Sprint 0 Summary
 
 | Task | Status | Files | DB Changes |

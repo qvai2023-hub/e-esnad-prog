@@ -18,6 +18,7 @@ namespace EtaskMinstry.Controllers
 {
     public class AttendanceController : Controller
     {
+        private const int NewClientSessionGraceMinutes = 1;
         private AttendanceReportService attendanceReportService;
         private SharedService sharedService;
         private UnitOfWork _unitOfWork;
@@ -242,6 +243,89 @@ namespace EtaskMinstry.Controllers
                 .FirstOrDefault();
         }
 
+        private string GetSqlConnectionString()
+        {
+            var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+            var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+            return entityBuilder.ProviderConnectionString;
+        }
+
+        private DateTime? GetLastHeartbeat(int attendanceId)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(GetSqlConnectionString()))
+                {
+                    conn.Open();
+                    using (var cmd = new SqlCommand("SELECT LastHeartbeat FROM Attendance WHERE Id = @Id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", attendanceId);
+                        var value = cmd.ExecuteScalar();
+                        if (value == null || value == DBNull.Value)
+                            return null;
+                        return Convert.ToDateTime(value);
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void SetLastHeartbeat(int attendanceId, DateTime heartbeatTime)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(GetSqlConnectionString()))
+                {
+                    conn.Open();
+                    using (var cmd = new SqlCommand("UPDATE Attendance SET LastHeartbeat = @LastHeartbeat WHERE Id = @Id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@LastHeartbeat", heartbeatTime);
+                        cmd.Parameters.AddWithValue("@Id", attendanceId);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch
+            {
+                // Column may not exist yet - ignore until DB migration
+            }
+        }
+
+        private Attendance CreateAttendance(int empId)
+        {
+            var now = DateTime.Now;
+            var attendance = new Attendance
+            {
+                EmpId = empId,
+                CheckIn = now
+            };
+            _unitOfWork.AttendanceRepository.Insert(attendance);
+            _unitOfWork.Save();
+            SetLastHeartbeat(attendance.Id, now);
+            if (Session != null)
+                Session["HasActiveAttendance"] = true;
+            return attendance;
+        }
+
+        private void CloseAttendance(Attendance attendance, DateTime checkoutTime)
+        {
+            attendance.CheckOut = checkoutTime;
+            _unitOfWork.AttendanceRepository.Update(attendance);
+            _unitOfWork.Save();
+        }
+
+        private bool ShouldStartNewAttendance(Attendance attendance, DateTime? lastHeartbeat)
+        {
+            if (attendance == null)
+                return true;
+
+            var markerTime = lastHeartbeat ?? attendance.CheckIn ?? DateTime.Now;
+            return markerTime < DateTime.Now.AddMinutes(-NewClientSessionGraceMinutes);
+        }
+
         /// <summary>
         /// Logs user activity and returns current attendance ID
         /// Called periodically by JavaScript tracker
@@ -265,22 +349,7 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "No active attendance" });
                 }
 
-                // Update LastHeartbeat on Attendance record using direct SQL
-                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
-                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
-                string connStr = entityBuilder.ProviderConnectionString;
-                var now = DateTime.Now;
-                using (var conn = new SqlConnection(connStr))
-                {
-                    conn.Open();
-                    string sqlUpdate = "UPDATE Attendance SET LastHeartbeat = @LastHeartbeat WHERE Id = @Id";
-                    using (var cmd = new SqlCommand(sqlUpdate, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@LastHeartbeat", now);
-                        cmd.Parameters.AddWithValue("@Id", attendance.Id);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
+                SetLastHeartbeat(attendance.Id, DateTime.Now);
 
                 return Json(new { success = true, attendanceId = attendance.Id });
             }
@@ -385,8 +454,8 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "تم تسجيل الخروج مسبقاً في: " + attendance.CheckOut.Value.ToString("HH:mm:ss") });
                 }
 
-                // Use LastHeartbeat from Attendance record
-                DateTime checkoutTime = attendance.LastHeartbeat ?? DateTime.Now;
+                // Use LastHeartbeat from the DB column; the EF property is NotMapped.
+                DateTime checkoutTime = GetLastHeartbeat(attendance.Id) ?? DateTime.Now;
                 attendance.CheckOut = checkoutTime;
                 _unitOfWork.AttendanceRepository.Update(attendance);
                 _unitOfWork.Save();
@@ -409,7 +478,7 @@ namespace EtaskMinstry.Controllers
         /// Get current attendance status for JavaScript tracker
         /// </summary>
         [HttpGet]
-        public JsonResult GetCurrentAttendance()
+        public JsonResult GetCurrentAttendance(bool newClientSession = false)
         {
             try
             {
@@ -439,6 +508,20 @@ namespace EtaskMinstry.Controllers
                     .ToList();
 
                 var attendance = GetTodayActiveAttendance(empId);
+                if (attendance != null && newClientSession)
+                {
+                    var lastHeartbeat = GetLastHeartbeat(attendance.Id);
+                    if (ShouldStartNewAttendance(attendance, lastHeartbeat))
+                    {
+                        CloseAttendance(attendance, lastHeartbeat ?? DateTime.Now);
+                        attendance = CreateAttendance(empId);
+                    }
+                }
+
+                if (attendance == null)
+                {
+                    attendance = CreateAttendance(empId);
+                }
 
                 if (attendance == null)
                 {

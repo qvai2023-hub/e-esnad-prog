@@ -194,6 +194,37 @@ identity — exactly what the mobile controller already does in `TasksController
 `TaskManger.cs` is untouched. This keeps us fully inside the "reuse, don't rewrite" policy
 with zero HIGH-RISK edits.
 
+### 7.1 Fix — `SAVE_FAILED` on first integration (2026-07-08)
+
+**Symptom:** valid request, key accepted, but `500 SAVE_FAILED`.
+
+**Root cause:** `AttachTaskFile` reuses two AppCode paths that assume a logged-in user —
+`LogTask.LogAddAttachment` → `LogTaskSingleValue` reads `MvcApplication.userData.isCompany`
+([LogTask.cs:348](../EtaskMinstryWeb/EtaskMinstry/AppCode/LogTask.cs)), and
+`NotificationHub.Send` reads it too ([Notification.cs:175/192](../EtaskMinstryWeb/EtaskMinstry/AppCode/Notification.cs)).
+A key-authenticated request never sets `MvcApplication.userData` (no JWT/session), so it is
+`null` → `NullReferenceException`, thrown **before** `AttachTaskFile` reaches `Save()`. The DB
+row is therefore never committed, but the physical file (written first) is left as an orphan.
+
+**Fix (in the controller only — no shared-code edits):** before calling `AttachTaskFile`, install
+a **synthetic per-request "system" actor** (`userId = 0`, `isCompany = false`,
+`CompanyId = task.CompanyID`), then clear it in a `finally`. Key facts that make this safe and
+correct:
+- `MvcApplication.userData` is stored **per request** (HttpContext Session/Items, see
+  `Global.asax.cs`), **not** a process-wide static — so it cannot leak into a concurrent request.
+- `userId = 0` matches no real employee/company id, so `NotificationHub`'s actor-skip guard lets
+  **both** the employee and company notifications through (correct for a system upload).
+- The task log records `IsFromCompany = false` (agreed system value).
+
+This was chosen over adding internal-safe sibling methods in `TaskManger` / `LogTask` /
+`Notification` because that would have duplicated >15 lines of notification fan-out logic
+(crossing CLAUDE.md's fork-vs-wrap threshold) and edited three shared files. The synthetic-context
+approach touches **only** `InternalAttachmentsController` and reuses the shared code unchanged.
+
+**Also added:** temporary `Debug.WriteLine` diagnostics in both `SAVE_FAILED` catch blocks,
+tagged `[InternalAttachments]`, to distinguish a disk-write failure from a DB/log/notify failure;
+and cleanup of the orphan file when the DB step fails.
+
 ---
 
 ## 8. Files to add / edit (once approved)

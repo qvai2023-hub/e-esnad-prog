@@ -370,63 +370,14 @@ namespace EtaskMinstry.Models.Company
             {
                 if (objTask.IsDeleted)
                     return false;
-                else
-                {
-                    // Check If Task Is New And Not Assigned To Employee .
-                    if (objTask.StatusID == (int) TaskStatus.New)
-                    {
-                        // Check If Task Is Not Assigned To Employee .
-                        if (objTask.EmpID.HasValue)
-                        {
-                            // Get All Attachments of this Task .
-                            var objAttachments = objTask.Attachments.ToList();
+                if (objTask.CompanyID != MvcApplication.userData.CompanyId)
+                    return false;
 
-                            // Get All Comments of this Task .
-                            var objComments = objTask.TaskComments.ToList();
-
-                            // Get All Logs of this Task .
-                            var objlogs = objTask.TaskLogs.ToList();
-
-                            // Delete All Attachments of this Task .
-                            foreach (var objAttachment in objAttachments)
-                            {
-                                _unitOfWork.AttachmentRepository.Delete(objAttachment.AttachmentID);
-
-                                // To Delete From Server .
-                                if (System.IO.File.Exists(
-                                    HttpContext.Current.Server.MapPath("/Upload/Task/" + objAttachment.FileName)))
-
-                                    System.IO.File.Delete(
-                                        HttpContext.Current.Server.MapPath("/Upload/Task/" + objAttachment.FileName));
-                            }
-
-                            // Delete All Comments of this Task .
-                            foreach (var objComment in objComments)
-                                _unitOfWork.TaskCommentRepository.Delete(objComment.TaskCommentID);
-
-                            // Delete All Logs of this Task .
-                            foreach (var objLog in objlogs)
-                               // _unitOfWork.TaskLogRepository.Delete(objLog.TaskLogID);
-
-                            AppCode.LogTask.Log(objTask, null, true);
-
-                            objTask.IsDeleted = true;
-                            _unitOfWork.TaskRepository.Update(objTask);
-                          //  _unitOfWork.TaskRepository.Delete(objTask.TaskID);
-
-                            _unitOfWork.Save();
-
-                            return true;
-                        }
-                        else // Check If Task Is Assigned To Employee .
-                        {
-                            AppCode.LogTask.Log(objTask, null, true);
-                            objTask.IsDeleted = true;
-                            _unitOfWork.Save();
-                            return true;
-                        }
-                    }
-                }
+                AppCode.LogTask.Log(objTask, null, true);
+                objTask.IsDeleted = true;
+                _unitOfWork.TaskRepository.Update(objTask);
+                _unitOfWork.Save();
+                return true;
             }
             return false;
         }

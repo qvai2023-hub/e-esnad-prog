@@ -138,7 +138,12 @@
                         complete: function (data) {
 
                             DeleteRow.hide();
-                            $("#btnSearch").click();
+                            if (data.responseText && data.responseText.toLowerCase() == "true") {
+                                Notify("success", "تم الحذف بنجاح", 3000);
+                                $("#btnSearch").click();
+                            } else {
+                                Notify("danger", "لم يتم الحذف", 3000);
+                            }
                             //for DashBOard Delte
                             //if (currentController.toLowerCase() == 'dashboard') {
 
@@ -544,8 +549,7 @@
     <script type="text/javascript" src="~/HTML_NewDesign_Responsive/js/application.js"></script>
 
     @if (EtaskMinstry.MvcApplication.userData != null &&
-         EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Employee &&
-         HttpContext.Current.Session["HasActiveAttendance"] != null && (bool)HttpContext.Current.Session["HasActiveAttendance"] == true)
+         EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Employee)
     {
         <script src="~/Scripts/attendance-tracker.js"></script>
     }

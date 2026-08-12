@@ -263,7 +263,7 @@
             <button type="button" id="btnClearSelection" class="btn btn-default btn-sm">
                 <i class="fa fa-times"></i> إلغاء التحديد
             </button>
-            <span class="text-muted" style="margin-right:15px; font-size:12px;">* يتم حذف المهام الجديدة فقط (الحد الأقصى 500)</span>
+            <span class="text-muted" style="margin-right:15px; font-size:12px;">* الحد الأقصى 500 مهمة</span>
         </div>
         @* ---------------------- End Bulk Actions Toolbar ---------------------- *@
 
@@ -788,7 +788,7 @@
 
         var bulkDeleteConfirmation = new Modal({
             title: 'تأكيد الحذف',
-            message: 'هل أنت متأكد من حذف ' + selectedIds.length + ' مهمة؟<br><small class="text-muted">سيتم حذف المهام الجديدة فقط</small>',
+            message: 'هل أنت متأكد من حذف ' + selectedIds.length + ' مهمة؟',
             type: 'confirm',
             onAccept: function () {
                 $('#loadding').fadeIn();
