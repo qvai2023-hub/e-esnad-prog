@@ -3385,6 +3385,9 @@ namespace QvLib
 				smtpClient.Port = portNo;
 				smtpClient.Credentials = new System.Net.NetworkCredential(userName.Trim(), password.Trim());
 				smtpClient.EnableSsl = ssl;
+				// bug #73: without an explicit timeout SmtpClient blocks for the .NET
+				// default of 100s, which outlives the caller TransactionScope (60s)
+				smtpClient.Timeout = 15000;
 				smtpClient.Send(message);
 			}
 			catch (Exception e)

@@ -203,6 +203,10 @@ namespace EtaskMinstry.Areas.Admin.Models
         {
             settingObj = _unitOfWork.Settings.Get().FirstOrDefault();//(int.Parse(ConfigurationManager.AppSettings["ContactUsToEmail"].ToString()));
             Boolean bReuslt = false;
+            // bug #74: mails are queued and sent only after every DB write has been
+            // persisted, so a slow or unreachable SMTP host can no longer delay the
+            // UserAccount insert or the redirect that follows Save().
+            var pendingMails = new List<Tuple<string, string, string>>();
             if (Id == 0)//add
             {
                 //Insert Company
@@ -242,7 +246,7 @@ namespace EtaskMinstry.Areas.Admin.Models
                 string LoadTemp = (QvLib.QVMail.LoadMailTemplate("/MailTemplate/email.html"));
                 string host = HttpContext.Current.Request.Url.Host;
                 LoadTemp = LoadTemp.Replace("{CompanyName}", company.Name).Replace("{UserName}", company.Email).Replace("{Password}", DycPass).Replace("{Host}", host);
-                QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password, settingObj.PortNo, settingObj.SSL, "مرحبا بك فى برنامج ادارة المهام", company.Email, LoadTemp, settingObj.FromEmail);
+                pendingMails.Add(Tuple.Create("مرحبا بك فى برنامج ادارة المهام", company.Email, LoadTemp));
                 _unitOfWork.Save();
                 bReuslt = company.CompanyID > 0 ? true : false;
             }
@@ -278,12 +282,24 @@ namespace EtaskMinstry.Areas.Admin.Models
                     _unitOfWork.Save();
 
                     //Send Email 
-                    QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password, settingObj.PortNo, settingObj.SSL, "اسناد | رسالة ادارية", company.Email, "لقد تم تعديل في بياناتك من قبل الأدمن", settingObj.FromEmail);
+                    pendingMails.Add(Tuple.Create("اسناد | رسالة ادارية", company.Email, "لقد تم تعديل في بياناتك من قبل الأدمن"));
 
                 }
 
                 bReuslt = true;
             }
+
+            // bug #74: send queued mails after all DB work is committed
+            if (settingObj != null)
+            {
+                foreach (var mail in pendingMails)
+                {
+                    QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password,
+                                          settingObj.PortNo, settingObj.SSL, mail.Item1, mail.Item2, mail.Item3,
+                                          settingObj.FromEmail);
+                }
+            }
+
             return bReuslt;
         }
 

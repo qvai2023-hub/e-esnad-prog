@@ -395,6 +395,10 @@ namespace EtaskMinstry.Areas.Company.Models
             settingObj = _unitOfWork.Settings.GetByID(int.Parse(ConfigurationManager.AppSettings["ContactUsToEmail"].ToString()));
             Boolean bReuslt = false;
             string LoadTemp = string.Empty;
+            // bug #73: mails are queued and sent AFTER the transaction commits. A blocking
+            // SMTP call inside the TransactionScope outlives its 60s timeout, which aborts
+            // the transaction and makes the following _unitOfWork.Save() throw.
+            var pendingMails = new List<Tuple<string, string, string>>();
             using (TransactionScope tsTransScope = new TransactionScope())//(TransactionScopeOption.Suppress))
             {
 
@@ -450,9 +454,7 @@ namespace EtaskMinstry.Areas.Company.Models
                                        .Replace("{Password}", DycPass)
                                        .Replace("{Host}", host);
 
-                    var send = QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password,
-                                              settingObj.PortNo, settingObj.SSL, "Welcome to ETask", obj.Email, LoadTemp,
-                                              settingObj.FromEmail);
+                    pendingMails.Add(Tuple.Create("Welcome to ETask", obj.Email, LoadTemp));
 
                     _unitOfWork.Save();
 
@@ -500,9 +502,7 @@ namespace EtaskMinstry.Areas.Company.Models
                             .Replace("{Company}", MvcApplication.userData.userName)
                                            .Replace("{Host}", host);
 
-                 var updatesend=       QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password,
-                                              settingObj.PortNo, settingObj.SSL, "اسناد | رسالة ادارية", obj.Email, LoadTemp,
-                                              settingObj.FromEmail);
+                 pendingMails.Add(Tuple.Create("اسناد | رسالة ادارية", obj.Email, LoadTemp));
 
 
                         //  QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password, settingObj.PortNo, settingObj.SSL, "", obj.Email, companyName + "لقد تم تعديل في بياناتك من قبل الشركة", settingObj.FromEmail);
@@ -516,6 +516,19 @@ namespace EtaskMinstry.Areas.Company.Models
                 //complete transaction
                 tsTransScope.Complete();
             }
+
+            // bug #73: send queued mails only after the transaction has committed, so a
+            // slow or unreachable SMTP host can no longer roll back the employee record
+            if (settingObj != null)
+            {
+                foreach (var mail in pendingMails)
+                {
+                    QvLib.QVMail.SendMail(settingObj.ServerName, settingObj.UserName, settingObj.Password,
+                                          settingObj.PortNo, settingObj.SSL, mail.Item1, mail.Item2, mail.Item3,
+                                          settingObj.FromEmail);
+                }
+            }
+
             return bReuslt;
         }
 
