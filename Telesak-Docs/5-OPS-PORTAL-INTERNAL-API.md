@@ -459,3 +459,118 @@ A task that exists but has no attachments is `200` with `"data": []`, not `404`.
 - `Api/Dtos/Internal/OpsAttachmentListItemDto.cs` *(new)* — item shape.
 - `App_Start/WebApiConfig.cs` — route `InternalApi_TaskAttachmentsList` (GET, numeric taskId).
 - `EtaskMinstry.csproj` — `<Compile>` entry for the new DTO.
+
+---
+
+## 14. Read endpoint — download one attachment's bytes (2026-09-13)
+
+Answers §2.2 of `TELESAK-API-REQUEST-task-attachments.md` — the endpoint the Ops Portal
+called "the blocker". Implemented; §2.3 (company range) follows separately.
+
+```
+GET /api/internal/attachments/{attachmentId}/content
+Host: <telesak-host>
+X-Ops-Portal-Key: <same shared secret>
+```
+
+### 14.1 Response `200`
+
+The raw file bytes, streamed from `/Upload/Task/` — not buffered in memory, since an export
+run is a few hundred of these back to back. Headers:
+
+| Header | Value |
+|---|---|
+| `Content-Type` | Guessed from the extension; `application/octet-stream` when unrecognised. |
+| `Content-Length` | Real byte count. |
+| `Content-Disposition` | `attachment; filename*=utf-8''<percent-encoded>; filename=<ascii fallback>` |
+
+Real example for an attachment named `تقرير الزيارة.pdf` stored as `3f2ac1d4e5b64789.pdf`:
+
+```
+Content-Disposition: attachment; filename*=utf-8''%D8%AA%D9%82%D8%B1%D9%8A%D8%B1%20%D8%A7%D9%84%D8%B2%D9%8A%D8%A7%D8%B1%D8%A9.pdf; filename=3f2ac1d4e5b64789.pdf
+```
+
+Two notes on that header:
+
+- **The charset token is lowercase `utf-8''`**, not the `UTF-8''` in the request. This is
+  what .NET's `ContentDispositionHeaderValue.FileNameStar` emits; RFC 5987 defines the token
+  as case-insensitive and every client accepts it.
+- **A plain ASCII `filename=` is present alongside `filename*`.** RFC 6266 clients prefer
+  `filename*` when both appear, so this changes nothing for a correct client — it only means
+  a client that ignores the extended form saves the GUID stored name rather than mojibake.
+  If the Ops Portal's HTTP client has the opposite preference, say so and we will drop it.
+
+`Content-Type` comes from `System.Web.MimeMapping`, which is IIS's table — so a `.zip`
+reports as `application/x-zip-compressed` rather than `application/zip`. Harmless, but worth
+knowing if you switch on the value.
+
+### 14.2 Errors — exactly the distinctions requested
+
+| Situation | Status | `code` |
+|---|---|---|
+| Attachment row does not exist | `404` | `ATTACHMENT_NOT_FOUND` |
+| Row exists, but its task is unknown or `IsDeleted = 1` | `404` | `ATTACHMENT_NOT_FOUND` |
+| Row exists but the physical file is missing on disk | `410` | `FILE_MISSING` |
+| File present but unreadable (permissions, I/O error) | `500` | `READ_FAILED` |
+| Key missing / wrong | `401` | `INVALID_API_KEY` |
+| `OpsPortalKey` unset or still a `REPLACE_*` placeholder | `503` | `OPS_API_DISABLED` |
+| Anything else | `500` | via `ApiExceptionFilter` |
+
+The second row is an addition to the request's table, for consistency with §13: an attachment
+hanging off a soft-deleted task is treated as not existing, so a file cannot be pulled out of
+a deleted task by guessing its id. **If the Ops Portal needs files from deleted tasks for an
+already-dispatched export, tell us — it is a one-line change, but it should be a decision
+rather than an accident.**
+
+### 14.3 On "never a 200 carrying an HTML page"
+
+The request singled this out as the one failure mode they cannot detect. Three things make it
+structurally true here rather than merely intended:
+
+1. Every error path above returns `Request.CreateResponse(status, ApiResponse.Fail(...))` —
+   a real status with a JSON body, never a bare status and never a redirect.
+2. `ApiExceptionFilter` is registered globally, so an unhandled exception becomes a JSON
+   `500`, not an ASP.NET error page.
+3. `Web.config` has `customErrors mode="On" defaultRedirect="~/Error"`, which is what would
+   produce an HTML page — but it only rewrites responses that have no content of their own,
+   and there is no `<httpErrors>` element, so IIS's `existingResponse="Auto"` default passes
+   our bodied responses through untouched.
+
+**The one case outside that guarantee:** a URL matching *no* route at all falls through to
+MVC, where `customErrors` can redirect to the HTML error page. That means a `302` (or an HTML
+`200` after following it) indicates **a malformed URL on the caller's side**, not a missing
+file. Worth asserting on in the Ops Portal client: a response whose `Content-Type` is
+`text/html` should never be written to a ZIP.
+
+### 14.4 Hardening
+
+- The stored name from `dbo.Attachment.FileName` is reduced to its bare file name before it
+  reaches the filesystem, so a row containing `..\..\web.config` cannot escape `/Upload/Task/`.
+  Nothing should ever have written a path into that column; this endpoint is the first thing
+  that turns it into a file read, so it does not assume.
+- The ASCII `filename=` fallback is restricted to `[A-Za-z0-9._-]`, which also rules out
+  header injection through a stored name containing quotes or CR/LF.
+- Files open with `FileShare.Read`, so concurrent downloads — and the Telesak web UI serving
+  the same file — do not lock each other out.
+- The action is named `Download` in code, not `Content`, so it cannot collide with
+  `ApiController`'s own protected `Content<T>` helpers during action selection. The URL is
+  unchanged.
+
+### 14.5 Test plan
+
+- [ ] Valid key + existing attachment with file on disk → `200`, bytes byte-for-byte identical to the file in `/Upload/Task/`.
+- [ ] `Content-Length` equals the real file size; body length matches it.
+- [ ] Arabic `originalFileName` → `filename*=utf-8''…` decodes back to the original name.
+- [ ] `Content-Type` is `application/pdf` for a `.pdf`, `application/octet-stream` for an unknown extension.
+- [ ] Unknown `attachmentId` → `404` `ATTACHMENT_NOT_FOUND`.
+- [ ] Attachment whose task has `IsDeleted = 1` → `404`.
+- [ ] Row present, file deleted from disk → **`410` `FILE_MISSING`**, JSON body, not `404` and not `200`.
+- [ ] Wrong/missing key → `401`; unconfigured key → `503`.
+- [ ] **No error response has `Content-Type: text/html`.**
+- [ ] A ~10 MiB file downloads intact, and server memory does not spike by the file size (streaming, not buffering).
+- [ ] Two concurrent downloads of the same attachment both succeed.
+- [ ] Round trip against §13: every item with `fileExists: true` downloads `200`; every item with `fileExists: false` returns `410`.
+
+**Implemented in:**
+- `Api/Controllers/InternalAttachmentsController.cs` — `Download` action + `BuildMediaType`, `BuildContentDisposition`, `AsciiFallbackName` helpers.
+- `App_Start/WebApiConfig.cs` — route `InternalApi_AttachmentContent` (GET, numeric attachmentId).

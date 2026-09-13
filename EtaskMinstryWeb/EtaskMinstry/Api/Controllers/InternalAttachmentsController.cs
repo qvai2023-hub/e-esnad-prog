@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Hosting;
 using System.Web.Http;
@@ -209,6 +210,94 @@ namespace EtaskMinstry.Api.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, ApiResponse.Ok(items));
         }
 
+        /// <summary>
+        /// Ops Portal server-to-server attachment download.
+        /// URL: GET /api/internal/attachments/{attachmentId}/content
+        ///
+        /// Returns the raw bytes — this is the one thing the Ops Portal cannot do
+        /// any other way, since /Upload/Task/ is Telesak's own web root and ADR-048
+        /// ruled out letting another app read it directly.
+        ///
+        /// Streams straight from disk rather than buffering: an export run is a few
+        /// hundred of these back to back, and there is no reason to hold each file
+        /// in memory. Web API disposes the response content, and with it the file
+        /// handle, once the body has been written.
+        ///
+        /// Every failure carries a real status code and a JSON body — never a 200
+        /// wrapping an HTML page, which would otherwise be saved into a customer's
+        /// ZIP as if it were their document.
+        ///
+        /// The action is named Download rather than Content so it cannot collide
+        /// with ApiController's own protected Content&lt;T&gt; helpers during action
+        /// selection; the URL the Ops Portal calls is still /content.
+        /// </summary>
+        [HttpGet]
+        public HttpResponseMessage Download(int attachmentId)
+        {
+            // 1) Shared-secret gate (fail closed if the key isn't configured).
+            var keyError = ValidateApiKey();
+            if (keyError != null) return keyError;
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+
+            var attachment = uow.AttachmentRepository.GetByID(attachmentId);
+            if (attachment == null)
+                return Fail(HttpStatusCode.NotFound, "لم يتم العثور على المرفق", "ATTACHMENT_NOT_FOUND");
+
+            // 2) An attachment hanging off an unknown or soft-deleted task does not
+            //    exist as far as this API is concerned — same rule the list endpoint
+            //    applies, so a file cannot be pulled out of a deleted task by id.
+            var task = attachment.TaskID.HasValue
+                ? uow.TaskRepository.GetByID(attachment.TaskID.Value)
+                : null;
+            if (task == null || task.IsDeleted)
+                return Fail(HttpStatusCode.NotFound, "لم يتم العثور على المرفق", "ATTACHMENT_NOT_FOUND");
+
+            // 3) Row exists but the bytes are gone → 410, distinct from 404, so the
+            //    caller can tell "no such attachment" from "we lost the file".
+            string storedName = SafeStoredName(attachment.FileName);
+            string path = storedName == null
+                ? null
+                : HostingEnvironment.MapPath("~/Upload/Task/" + storedName);
+
+            if (path == null || !File.Exists(path))
+                return Fail(HttpStatusCode.Gone, "الملف غير موجود على الخادم", "FILE_MISSING");
+
+            // 4) FileShare.Read so concurrent downloads — and the web UI serving the
+            //    same file — do not lock each other out.
+            FileStream stream;
+            long length;
+            try
+            {
+                stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                length = stream.Length;
+            }
+            catch (FileNotFoundException)
+            {
+                // Deleted between the File.Exists check above and the open.
+                return Fail(HttpStatusCode.Gone, "الملف غير موجود على الخادم", "FILE_MISSING");
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return Fail(HttpStatusCode.Gone, "الملف غير موجود على الخادم", "FILE_MISSING");
+            }
+            catch
+            {
+                return Fail(HttpStatusCode.InternalServerError, "تعذر قراءة الملف", "READ_FAILED");
+            }
+
+            string displayName = !string.IsNullOrWhiteSpace(attachment.OriginalFileName)
+                ? attachment.OriginalFileName
+                : storedName;
+
+            var response = Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StreamContent(stream);
+            response.Content.Headers.ContentType = BuildMediaType(GuessContentType(displayName));
+            response.Content.Headers.ContentLength = length;
+            response.Content.Headers.ContentDisposition = BuildContentDisposition(displayName, storedName);
+            return response;
+        }
+
         // ──────────────────────────── helpers ────────────────────────────
 
         /// <summary>
@@ -328,6 +417,78 @@ namespace EtaskMinstry.Api.Controllers
         private static DateTime ToUtc(DateTime serverLocal)
         {
             return DateTime.SpecifyKind(serverLocal, DateTimeKind.Local).ToUniversalTime();
+        }
+
+        /// <summary>
+        /// Content-Type header value, falling back to octet-stream if the mapped
+        /// string is somehow not a legal media type.
+        /// </summary>
+        private static MediaTypeHeaderValue BuildMediaType(string contentType)
+        {
+            try
+            {
+                return new MediaTypeHeaderValue(contentType);
+            }
+            catch
+            {
+                return new MediaTypeHeaderValue(DefaultContentType);
+            }
+        }
+
+        /// <summary>
+        /// Content-Disposition for a download, carrying the Arabic display name.
+        ///
+        /// <c>FileNameStar</c> emits the RFC 5987 form the Ops Portal asked for —
+        /// note .NET writes the charset token lowercase (<c>filename*=utf-8''…</c>),
+        /// which is case-insensitive per the RFC and accepted everywhere.
+        ///
+        /// A plain ASCII <c>filename=</c> is set alongside it. RFC 6266 clients
+        /// prefer <c>filename*</c> when both are present, so this changes nothing
+        /// for a correct client; it just means a client that ignores the extended
+        /// form saves the GUID stored name instead of mojibake.
+        /// </summary>
+        private static ContentDispositionHeaderValue BuildContentDisposition(string displayName, string storedName)
+        {
+            var disposition = new ContentDispositionHeaderValue("attachment");
+
+            if (!string.IsNullOrWhiteSpace(displayName))
+            {
+                try { disposition.FileNameStar = displayName; }
+                catch { /* unencodable name — the ASCII fallback below still applies */ }
+            }
+
+            string fallback = AsciiFallbackName(storedName);
+            if (fallback != null)
+            {
+                try { disposition.FileName = fallback; }
+                catch { }
+            }
+
+            return disposition;
+        }
+
+        /// <summary>
+        /// An ASCII-only, header-safe version of a file name for the plain
+        /// <c>filename=</c> parameter. Anything outside [A-Za-z0-9._-] becomes an
+        /// underscore, which also rules out header injection via a stored name
+        /// containing quotes or CR/LF. Returns null when nothing usable is left.
+        /// </summary>
+        private static string AsciiFallbackName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+
+            var sb = new StringBuilder(name.Length);
+            foreach (char c in name)
+            {
+                bool safe = (c >= 'a' && c <= 'z')
+                         || (c >= 'A' && c <= 'Z')
+                         || (c >= '0' && c <= '9')
+                         || c == '.' || c == '_' || c == '-';
+                sb.Append(safe ? c : '_');
+            }
+
+            string result = sb.ToString().Trim('_', '.');
+            return result.Length == 0 ? null : result;
         }
 
         /// <summary>

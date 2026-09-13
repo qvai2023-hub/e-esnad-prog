@@ -159,6 +159,21 @@ namespace EtaskMinstry
                 }
             );
 
+            // GET /api/internal/attachments/{attachmentId}/content → InternalAttachmentsController.Content
+            // Raw file bytes for the Ops Portal export. Same X-Ops-Portal-Key gate.
+            // Four segments, so it could not collide with the DefaultApi convention
+            // route below regardless, but it is declared here with its siblings.
+            config.Routes.MapHttpRoute(
+                name: "InternalApi_AttachmentContent",
+                routeTemplate: "api/internal/attachments/{attachmentId}/content",
+                defaults: new { controller = "InternalAttachments", action = "Download" },
+                constraints: new
+                {
+                    attachmentId = @"^\d+$",
+                    httpMethod = new HttpMethodConstraint(HttpMethod.Get)
+                }
+            );
+
             // Mobile API v1 — convention routing.
             // URL shape: /api/v1/{controller}/{action}/{id}
             // (WebApi 1 in this project has no attribute routing, so we use the
