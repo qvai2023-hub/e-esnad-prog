@@ -145,6 +145,20 @@ namespace EtaskMinstry
                 }
             );
 
+            // GET /api/internal/tasks/{taskId}/attachments → InternalAttachmentsController.List
+            // Same template as the upload above; the verb constraint on that route lets a
+            // GET fall through to this one. Same X-Ops-Portal-Key gate.
+            config.Routes.MapHttpRoute(
+                name: "InternalApi_TaskAttachmentsList",
+                routeTemplate: "api/internal/tasks/{taskId}/attachments",
+                defaults: new { controller = "InternalAttachments", action = "List" },
+                constraints: new
+                {
+                    taskId = @"^\d+$",
+                    httpMethod = new HttpMethodConstraint(HttpMethod.Get)
+                }
+            );
+
             // Mobile API v1 — convention routing.
             // URL shape: /api/v1/{controller}/{action}/{id}
             // (WebApi 1 in this project has no attribute routing, so we use the

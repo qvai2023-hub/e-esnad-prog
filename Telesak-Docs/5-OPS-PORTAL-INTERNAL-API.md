@@ -1,4 +1,4 @@
-# Ops Portal Internal API — Task Attachment Upload
+# Ops Portal Internal API — Task Attachments (Upload + Read)
 
 > **Status: IMPLEMENTED (pending tester sign-off).** Approved 2026-07-08 with the Done/Approved
 > guard added at review. Code builds clean. Decisions are locked in §0; the endpoint behaves
@@ -334,3 +334,128 @@ supersede the optimistic notification row in §11.
 - [ ] Web UI task-details still shows the attachment.
 - [ ] Regression: an attachment added from the Telesak web UI by a **company** user still logs `IsFromCompany = 1`.
 - [ ] Regression: an attachment added from the web UI by an **employee** still logs `IsFromCompany = 0`, and that employee is still not notified of their own upload.
+
+---
+
+## 13. Read endpoint — list a task's attachments (2026-09-13)
+
+Answers §2.1 of `TELESAK-API-REQUEST-task-attachments.md` from the Ops Portal team.
+Implemented; §2.2 (`/content`) and §2.3 (company range) follow separately.
+
+```
+GET /api/internal/tasks/{taskId}/attachments
+Host: <telesak-host>
+X-Ops-Portal-Key: <same shared secret as the upload>
+Accept: application/json
+```
+
+Same template as the upload — the two routes are told apart by verb.
+
+### 13.1 Response `200`
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "attachmentId": 12345,
+      "taskId": 987,
+      "fileName": "3f2ac1d4e5b6478callf00dbaadf00d1.pdf",
+      "originalFileName": "تقرير الزيارة.pdf",
+      "description": "تقرير الزيارة الميدانية",
+      "sizeBytes": 284113,
+      "contentType": "application/pdf",
+      "fileExists": true,
+      "uploadedAtUtc": "2026-08-14T06:31:22Z",
+      "uploadedBySource": "employee",
+      "uploadedByUserTypeId": 2
+    }
+  ],
+  "message": ""
+}
+```
+
+The JSON formatter runs with `NullValueHandling.Ignore`, so **a field that is unknown is
+absent from the object, not present as `null`.** Treat "key missing" as "unknown".
+
+### 13.2 Fields
+
+| Field | Notes |
+|---|---|
+| `attachmentId`, `taskId`, `fileName`, `originalFileName`, `description` | Straight from `dbo.Attachment`. |
+| `sizeBytes` | Real size on disk. `0` when the file is missing. |
+| `contentType` | Guessed from the extension via `System.Web.MimeMapping`; `application/octet-stream` when unrecognised. |
+| `fileExists` | `false` when the row exists but the file is gone from `/Upload/Task/`. Telesak's own UI hides such rows. **Skip these when building an export** rather than writing a 0-byte file into a customer's ZIP. |
+| `uploadedAtUtc` | **UTC**, converted from the server-local `dbo.TaskLog.LogDate`. Absent when no log row matches. |
+| `uploadedBySource` | `"employee"` or `"company"`. Absent when unknown. |
+| `uploadedByUserTypeId` | `2` = employee, `3` = company side. Absent when unknown. |
+| `uploadedByUserAccountId`, `uploadedByName` | **Never returned** — see §13.4. |
+
+### 13.3 Where the upload facts come from
+
+`dbo.Attachment` has no date column and no uploader column, so neither can be read from it.
+What does exist is the `dbo.TaskLog` row that `LogTask.LogAddAttachment` writes beside every
+insert, whose `Value` carries the stored file name:
+
+```
+[{'columnName':'AttachmentID','oldVal':'','newVal':'<stored file name>'}]
+```
+
+The endpoint loads the task's attachment log rows in one query and matches them to
+attachments by that stored name — which is a GUID, so a mismatch is not a practical concern.
+`LogDate` gives the upload time and `IsFromCompany` gives the side.
+
+Every insert path in the application goes through `LogAddAttachment` (the web UI's
+task-create and task-detail flows, the Mobile API, and the Ops Portal upload), so coverage is
+complete going forward. **Rows predating the log feature, or written by a path that bypassed
+it, will have no match** — those come back with the three `uploaded*` fields absent.
+
+### 13.4 What we cannot give you, and why
+
+The Ops Portal request asked for four `uploaded*` fields. Two of them are answerable and two
+are not:
+
+- **`uploadedByUserAccountId` / `uploadedByName` — not available at all.** No table records
+  which account attached a file. `dbo.TaskLog` stores a single `IsFromCompany` bit and no
+  actor id. The fields exist on the DTO so the contract need not change if a column is added
+  later, but they are never populated today. Adding one would not be retroactive, and per
+  §2.1 of the request we have not touched the shared schema.
+- **`uploadedByUserTypeId = 4` (Ops Portal / Saqia dispatch) cannot be distinguished from
+  `3` (company user).** Both are `IsFromCompany = 1`. The distinction that *is* reliable is
+  **`2` vs not-`2`** — "the employee attached this" against "someone on the company or
+  dispatch side did" — which is the one the ملفات المهام للموظفين report actually turns on.
+
+This is strictly better than the Ops Portal's current heuristic, but it is not the full
+identity they asked for. Flagging it plainly so nobody builds on an assumption of exactness.
+
+### 13.5 Errors
+
+| Situation | Status | `code` |
+|---|---|---|
+| Key missing / wrong | `401` | `INVALID_API_KEY` |
+| `OpsPortalKey` unset or still a `REPLACE_*` placeholder | `503` | `OPS_API_DISABLED` |
+| Task does not exist, or `IsDeleted = 1` | `404` | `TASK_NOT_FOUND` |
+| Anything else | `500` | via `ApiExceptionFilter` |
+
+A task that exists but has no attachments is `200` with `"data": []`, not `404`.
+
+### 13.6 Test plan
+
+- [ ] Valid key, task with attachments → `200`, one item per `dbo.Attachment` row, ordered by `attachmentId`.
+- [ ] Task with no attachments → `200`, `data: []`.
+- [ ] Wrong/missing key → `401` `INVALID_API_KEY`; unconfigured key → `503` `OPS_API_DISABLED`.
+- [ ] Unknown `taskId` → `404`; `IsDeleted = 1` task → `404`.
+- [ ] `POST` to the same URL still routes to the upload (verb split works).
+- [ ] Row whose file was deleted from `/Upload/Task/` → `fileExists: false`, `sizeBytes: 0`, still listed.
+- [ ] `sizeBytes` matches the byte count on disk; `contentType` is `application/pdf` for a `.pdf`.
+- [ ] File uploaded via the Ops Portal endpoint → `uploadedBySource: "company"`, `uploadedByUserTypeId: 3`.
+- [ ] File attached by an employee in the web UI → `uploadedBySource: "employee"`, `uploadedByUserTypeId: 2`.
+- [ ] **`uploadedAtUtc` is genuinely UTC** — compare against `dbo.TaskLog.LogDate`, which is Riyadh local; the response must be 3 hours earlier, not equal.
+- [ ] A pre-log-feature attachment → the three `uploaded*` keys are absent, and the item still lists.
+- [ ] Error responses carry a JSON body, never an HTML page from `customErrors`.
+
+**Implemented in:**
+- `Api/Controllers/InternalAttachmentsController.cs` — `List` action + list helpers.
+- `Api/Dtos/Internal/OpsAttachmentListItemDto.cs` *(new)* — item shape.
+- `App_Start/WebApiConfig.cs` — route `InternalApi_TaskAttachmentsList` (GET, numeric taskId).
+- `EtaskMinstry.csproj` — `<Compile>` entry for the new DTO.

@@ -38,6 +38,20 @@ namespace EtaskMinstry.Api.Controllers
         private const int MaxDescriptionLength = 350;     // dbo.Attachment.Description nvarchar(350)
         private const int MaxOriginalNameLength = 255;    // dbo.Attachment.OriginalFileName nvarchar(255)
 
+        /// <summary>Fallback media type when the extension maps to nothing useful.</summary>
+        private const string DefaultContentType = "application/octet-stream";
+
+        /// <summary>
+        /// Narrows the dbo.TaskLog scan to attachment rows. LogTask.LogTaskSingleValue
+        /// writes Value as [{'columnName':'AttachmentID','oldVal':'','newVal':'&lt;stored name&gt;'}],
+        /// and comments use the same shape with 'TaskCommentID', so the column name has
+        /// to be part of the match.
+        /// </summary>
+        private const string AttachmentLogColumnMarker = "'columnName':'AttachmentID'";
+
+        /// <summary>Prefix of the Value fragment carrying the stored file name.</summary>
+        private const string AttachmentLogValuePrefix = "'newVal':'";
+
         [HttpPost]
         public async System.Threading.Tasks.Task<HttpResponseMessage> Upload(int taskId)
         {
@@ -148,7 +162,173 @@ namespace EtaskMinstry.Api.Controllers
             }, "تم رفع الملف"));
         }
 
+        /// <summary>
+        /// Ops Portal server-to-server attachment list.
+        /// URL: GET /api/internal/tasks/{taskId}/attachments
+        ///
+        /// Read-only counterpart to <see cref="Upload"/>. Same shared-secret gate,
+        /// same ApiResponse envelope. Returns every dbo.Attachment row of the task,
+        /// including rows whose physical file has gone missing — those carry
+        /// fileExists = false and sizeBytes = 0 so an exporter can skip them
+        /// instead of writing an empty file into a customer's ZIP.
+        ///
+        /// Upload date and uploader side come from the dbo.TaskLog row that
+        /// LogTask.LogAddAttachment writes next to each insert; dbo.Attachment
+        /// itself records neither. See OpsAttachmentListItemDto for what that can
+        /// and cannot tell the caller.
+        /// </summary>
+        [HttpGet]
+        public HttpResponseMessage List(int taskId)
+        {
+            // 1) Shared-secret gate (fail closed if the key isn't configured).
+            var keyError = ValidateApiKey();
+            if (keyError != null) return keyError;
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+
+            // 2) Same task visibility rule as the upload: unknown and soft-deleted
+            //    tasks are indistinguishable to the caller.
+            var task = uow.TaskRepository.GetByID(taskId);
+            if (task == null || task.IsDeleted)
+                return Fail(HttpStatusCode.NotFound, "لم يتم العثور على المهمة", "TASK_NOT_FOUND");
+
+            var attachments = uow.AttachmentRepository
+                .Get(filter: a => a.TaskID == taskId,
+                     orderBy: q => q.OrderBy(a => a.AttachmentID))
+                .ToList();
+
+            // 3) One query for the task's attachment log rows, matched in memory —
+            //    a task has a bounded number of logs, so this beats a query per file.
+            var uploadLogs = uow.TaskLogRepository
+                .Get(filter: l => l.TaskID == taskId && l.Value.Contains(AttachmentLogColumnMarker),
+                     orderBy: q => q.OrderBy(l => l.TaskLogID))
+                .ToList();
+
+            var items = attachments.Select(a => ToListItem(a, taskId, uploadLogs)).ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK, ApiResponse.Ok(items));
+        }
+
         // ──────────────────────────── helpers ────────────────────────────
+
+        /// <summary>
+        /// Projects one dbo.Attachment row into the wire shape, resolving physical
+        /// file facts from disk and upload facts from the task's log rows.
+        /// </summary>
+        private OpsAttachmentListItemDto ToListItem(Attachment a, int taskId, List<TaskLog> uploadLogs)
+        {
+            string storedName = SafeStoredName(a.FileName);
+            string path = storedName == null
+                ? null
+                : HostingEnvironment.MapPath("~/Upload/Task/" + storedName);
+
+            bool exists = false;
+            long size = 0L;
+            if (path != null)
+            {
+                try
+                {
+                    var info = new FileInfo(path);
+                    exists = info.Exists;
+                    if (exists) size = info.Length;
+                }
+                catch
+                {
+                    // Unreadable path (permissions, name the OS rejects) reads as
+                    // "no file" — same outcome the caller needs either way.
+                    exists = false;
+                    size = 0L;
+                }
+            }
+
+            var item = new OpsAttachmentListItemDto
+            {
+                AttachmentId = a.AttachmentID,
+                TaskId = taskId,
+                FileName = a.FileName,
+                OriginalFileName = a.OriginalFileName,
+                Description = a.Description,
+                FileExists = exists,
+                SizeBytes = size,
+                ContentType = GuessContentType(
+                    !string.IsNullOrWhiteSpace(a.OriginalFileName) ? a.OriginalFileName : a.FileName)
+            };
+
+            var log = FindUploadLog(uploadLogs, a.FileName);
+            if (log != null)
+            {
+                item.UploadedAtUtc = ToUtc(log.LogDate);
+                item.UploadedBySource = log.IsFromCompany ? "company" : "employee";
+                item.UploadedByUserTypeId = log.IsFromCompany
+                    ? (int)LoggedUserType.Company
+                    : (int)LoggedUserType.Employee;
+            }
+
+            // UploadedByUserAccountId / UploadedByName stay null: no uploader
+            // identity is recorded anywhere in the schema.
+            return item;
+        }
+
+        /// <summary>
+        /// The earliest log row whose Value carries this stored file name. Null when
+        /// the attachment predates the log feature or was inserted outside
+        /// LogTask.LogAddAttachment.
+        /// </summary>
+        private static TaskLog FindUploadLog(List<TaskLog> uploadLogs, string storedFileName)
+        {
+            if (uploadLogs == null || string.IsNullOrEmpty(storedFileName)) return null;
+
+            string marker = AttachmentLogValuePrefix + storedFileName + "'";
+            return uploadLogs.FirstOrDefault(
+                l => l.Value != null && l.Value.IndexOf(marker, StringComparison.Ordinal) >= 0);
+        }
+
+        /// <summary>
+        /// The bare file name of a stored attachment, with any directory component
+        /// stripped. Defence in depth: nothing should ever have written a path into
+        /// dbo.Attachment.FileName, but this endpoint turns that column straight into
+        /// a filesystem read, so a "..\..\web.config" value must not escape
+        /// /Upload/Task/. Returns null for anything unusable.
+        /// </summary>
+        private static string SafeStoredName(string storedFileName)
+        {
+            if (string.IsNullOrWhiteSpace(storedFileName)) return null;
+            try
+            {
+                string name = Path.GetFileName(storedFileName.Trim());
+                return string.IsNullOrEmpty(name) ? null : name;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>Media type guessed from the extension; never null.</summary>
+        private static string GuessContentType(string fileName)
+        {
+            try
+            {
+                string mapped = System.Web.MimeMapping.GetMimeMapping(fileName ?? string.Empty);
+                return string.IsNullOrWhiteSpace(mapped) ? DefaultContentType : mapped;
+            }
+            catch
+            {
+                return DefaultContentType;
+            }
+        }
+
+        /// <summary>
+        /// Converts a dbo.TaskLog.LogDate to UTC. LogTask writes DateTime.Now (server
+        /// local time) and SQL Server hands it back with Kind = Unspecified, which the
+        /// JSON formatter's DateTimeZoneHandling.Utc would otherwise stamp as UTC
+        /// without shifting it — publishing Riyadh time labelled "Z". Stamping Local
+        /// first makes the conversion real.
+        /// </summary>
+        private static DateTime ToUtc(DateTime serverLocal)
+        {
+            return DateTime.SpecifyKind(serverLocal, DateTimeKind.Local).ToUniversalTime();
+        }
 
         /// <summary>
         /// Returns null when the X-Ops-Portal-Key header matches the configured
