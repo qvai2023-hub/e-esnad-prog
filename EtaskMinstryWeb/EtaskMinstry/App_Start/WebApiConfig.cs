@@ -174,6 +174,20 @@ namespace EtaskMinstry
                 }
             );
 
+            // GET /api/internal/companies/{companyId}/attachments → InternalAttachmentsController.ByCompany
+            // Date-range + employee filtered list, so an export run is a handful of
+            // requests instead of one per task. Query parameters bind by name.
+            config.Routes.MapHttpRoute(
+                name: "InternalApi_CompanyAttachments",
+                routeTemplate: "api/internal/companies/{companyId}/attachments",
+                defaults: new { controller = "InternalAttachments", action = "ByCompany" },
+                constraints: new
+                {
+                    companyId = @"^\d+$",
+                    httpMethod = new HttpMethodConstraint(HttpMethod.Get)
+                }
+            );
+
             // Mobile API v1 — convention routing.
             // URL shape: /api/v1/{controller}/{action}/{id}
             // (WebApi 1 in this project has no attribute routing, so we use the

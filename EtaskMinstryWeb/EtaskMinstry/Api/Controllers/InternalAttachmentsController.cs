@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -52,6 +53,22 @@ namespace EtaskMinstry.Api.Controllers
 
         /// <summary>Prefix of the Value fragment carrying the stored file name.</summary>
         private const string AttachmentLogValuePrefix = "'newVal':'";
+
+        /// <summary>Page size used when the caller does not ask for one.</summary>
+        private const int DefaultPageSize = 100;
+
+        /// <summary>
+        /// Hard ceiling on page size. Also bounds the IN clause of the per-page log
+        /// lookup, keeping it well inside SQL Server's ~2100 parameter limit. Matches
+        /// the value in the Ops Portal team's own example request.
+        /// </summary>
+        private const int MaxPageSize = 500;
+
+        /// <summary>Ceiling on how many ids the empIds filter accepts, for the same reason.</summary>
+        private const int MaxEmpIdsFilter = 500;
+
+        /// <summary>The one date format the range filters accept, and the one taskStartDate is returned in.</summary>
+        private const string FilterDateFormat = "yyyy-MM-dd";
 
         [HttpPost]
         public async System.Threading.Tasks.Task<HttpResponseMessage> Upload(int taskId)
@@ -298,6 +315,110 @@ namespace EtaskMinstry.Api.Controllers
             return response;
         }
 
+        /// <summary>
+        /// Ops Portal server-to-server attachment list for a whole company and date
+        /// range.
+        /// URL: GET /api/internal/companies/{companyId}/attachments
+        ///        ?fromDate=2026-08-01&amp;toDate=2026-08-31&amp;empIds=101,102&amp;page=1&amp;pageSize=500
+        ///
+        /// Exists to collapse an export run from one request per task — several
+        /// hundred for a month of a 40-employee company — into a handful. Every item
+        /// carries the same shape the per-task list returns, plus the employee and
+        /// task context needed to build a folder-per-employee ZIP without going back
+        /// for each task.
+        ///
+        /// All query parameters are optional. Omitting the dates returns the
+        /// company's whole history; omitting empIds covers every employee.
+        /// </summary>
+        [HttpGet]
+        public HttpResponseMessage ByCompany(int companyId, string fromDate = null, string toDate = null,
+                                             string empIds = null, int page = 1, int pageSize = DefaultPageSize)
+        {
+            // 1) Shared-secret gate (fail closed if the key isn't configured).
+            var keyError = ValidateApiKey();
+            if (keyError != null) return keyError;
+
+            // 2) Dates are parsed exact-and-invariant, never with the ambient culture.
+            //    A server whose OS locale is ar-SA defaults to the UmAlQura calendar,
+            //    where DateTime.Parse("2026-08-01") yields a Gregorian date six
+            //    centuries out — silently, and only on that machine.
+            DateTime? from, to;
+            if (!TryParseFilterDate(fromDate, out from))
+                return Fail(HttpStatusCode.BadRequest, "صيغة التاريخ غير صحيحة", "INVALID_DATE");
+            if (!TryParseFilterDate(toDate, out to))
+                return Fail(HttpStatusCode.BadRequest, "صيغة التاريخ غير صحيحة", "INVALID_DATE");
+            if (from.HasValue && to.HasValue && to.Value < from.Value)
+                return Fail(HttpStatusCode.BadRequest, "نطاق التاريخ غير صحيح", "INVALID_DATE_RANGE");
+
+            List<int> employeeIds;
+            if (!TryParseEmpIds(empIds, out employeeIds))
+                return Fail(HttpStatusCode.BadRequest, "قائمة الموظفين غير صحيحة", "INVALID_EMP_IDS");
+
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = DefaultPageSize;
+            if (pageSize > MaxPageSize) pageSize = MaxPageSize;
+
+            var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
+
+            var company = uow.Company.GetByID(companyId);
+            if (company == null || company.IsDeleted == true)
+                return Fail(HttpStatusCode.NotFound, "لم يتم العثور على الشركة", "COMPANY_NOT_FOUND");
+
+            // 3) Build the query in steps so each filter is only added when it
+            //    applies — clearer SQL than one expression full of constant guards.
+            var query = uow.AttachmentRepository
+                .Get(filter: a => a.Task != null && a.Task.CompanyID == companyId && !a.Task.IsDeleted,
+                     includeProperties: "Task,Task.Employee");
+
+            if (from.HasValue)
+            {
+                DateTime fromValue = from.Value;
+                query = query.Where(a => a.Task.StartDate.HasValue && a.Task.StartDate.Value >= fromValue);
+            }
+
+            if (to.HasValue)
+            {
+                // toDate is inclusive of the whole day, so compare against the start
+                // of the next one — Task.StartDate can carry a time component.
+                DateTime toExclusive = to.Value.AddDays(1);
+                query = query.Where(a => a.Task.StartDate.HasValue && a.Task.StartDate.Value < toExclusive);
+            }
+
+            if (employeeIds.Count > 0)
+                query = query.Where(a => a.Task.EmpID.HasValue && employeeIds.Contains(a.Task.EmpID.Value));
+
+            int totalCount = query.Count();
+
+            // 4) Order by AttachmentID: unique and monotonic, so paging is stable
+            //    even if rows are added between the caller's pages.
+            var rows = query
+                .OrderBy(a => a.AttachmentID)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // 5) One log query for the whole page rather than one per task. Page size
+            //    is capped at MaxPageSize partly to keep this IN clause well inside
+            //    SQL Server's parameter limit.
+            var taskIds = rows.Where(a => a.TaskID.HasValue).Select(a => a.TaskID.Value).Distinct().ToList();
+            var uploadLogs = taskIds.Count == 0
+                ? new List<TaskLog>()
+                : uow.TaskLogRepository
+                     .Get(filter: l => l.TaskID.HasValue && taskIds.Contains(l.TaskID.Value)
+                                       && l.Value.Contains(AttachmentLogColumnMarker),
+                          orderBy: q => q.OrderBy(l => l.TaskLogID))
+                     .ToList();
+
+            var logsByTask = uploadLogs
+                .GroupBy(l => l.TaskID.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var items = rows.Select(a => ToCompanyItem(a, logsByTask)).ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK,
+                PagedResponse.Build(items, page, pageSize, totalCount));
+        }
+
         // ──────────────────────────── helpers ────────────────────────────
 
         /// <summary>
@@ -417,6 +538,99 @@ namespace EtaskMinstry.Api.Controllers
         private static DateTime ToUtc(DateTime serverLocal)
         {
             return DateTime.SpecifyKind(serverLocal, DateTimeKind.Local).ToUniversalTime();
+        }
+
+        /// <summary>
+        /// Projects one dbo.Attachment row, with its Task (and Employee) loaded, into
+        /// the company-range wire shape.
+        /// </summary>
+        private OpsCompanyAttachmentItemDto ToCompanyItem(Attachment a, Dictionary<int, List<TaskLog>> logsByTask)
+        {
+            int taskId = a.TaskID.HasValue ? a.TaskID.Value : 0;
+
+            List<TaskLog> taskLogs;
+            if (!logsByTask.TryGetValue(taskId, out taskLogs)) taskLogs = null;
+
+            // Build the shared part once, then copy across. The base projection owns
+            // the disk lookup and the log matching; this method only adds context.
+            var baseItem = ToListItem(a, taskId, taskLogs);
+
+            var task = a.Task;
+            var employee = task != null ? task.Employee : null;
+
+            return new OpsCompanyAttachmentItemDto
+            {
+                AttachmentId = baseItem.AttachmentId,
+                TaskId = baseItem.TaskId,
+                FileName = baseItem.FileName,
+                OriginalFileName = baseItem.OriginalFileName,
+                Description = baseItem.Description,
+                SizeBytes = baseItem.SizeBytes,
+                ContentType = baseItem.ContentType,
+                FileExists = baseItem.FileExists,
+                UploadedAtUtc = baseItem.UploadedAtUtc,
+                UploadedBySource = baseItem.UploadedBySource,
+                UploadedByUserTypeId = baseItem.UploadedByUserTypeId,
+                UploadedByUserAccountId = baseItem.UploadedByUserAccountId,
+                UploadedByName = baseItem.UploadedByName,
+
+                EmpId = task != null ? task.EmpID : null,
+                EmpName = employee != null ? employee.Name : null,
+                TaskTitle = task != null ? task.Title : null,
+                TaskStartDate = (task != null && task.StartDate.HasValue)
+                    ? task.StartDate.Value.ToString(FilterDateFormat, CultureInfo.InvariantCulture)
+                    : null
+            };
+        }
+
+        /// <summary>
+        /// Parses a yyyy-MM-dd filter value. Returns false only for a value that is
+        /// present but unparseable; a null or blank value is a valid "no filter" and
+        /// yields true with a null result.
+        ///
+        /// Exact-and-invariant on purpose. DateTime.Parse would follow the ambient
+        /// culture, and on a server whose OS locale is ar-SA that means the UmAlQura
+        /// calendar — "2026-08-01" would parse to a Gregorian date six centuries
+        /// later, on that machine only, with no error.
+        /// </summary>
+        private static bool TryParseFilterDate(string value, out DateTime? parsed)
+        {
+            parsed = null;
+            if (string.IsNullOrWhiteSpace(value)) return true;
+
+            DateTime result;
+            if (!DateTime.TryParseExact(value.Trim(), FilterDateFormat, CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None, out result))
+                return false;
+
+            parsed = result.Date;
+            return true;
+        }
+
+        /// <summary>
+        /// Parses the comma-separated empIds filter. Blank entries are skipped, so
+        /// "101,,102," is accepted. Returns false for a non-numeric entry or for more
+        /// than <see cref="MaxEmpIdsFilter"/> ids — silently dropping either would
+        /// return a quietly wrong subset of an export.
+        /// </summary>
+        private static bool TryParseEmpIds(string value, out List<int> ids)
+        {
+            ids = new List<int>();
+            if (string.IsNullOrWhiteSpace(value)) return true;
+
+            foreach (string part in value.Split(','))
+            {
+                string trimmed = part.Trim();
+                if (trimmed.Length == 0) continue;
+
+                int id;
+                if (!int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out id))
+                    return false;
+
+                if (!ids.Contains(id)) ids.Add(id);
+            }
+
+            return ids.Count <= MaxEmpIdsFilter;
         }
 
         /// <summary>

@@ -574,3 +574,194 @@ file. Worth asserting on in the Ops Portal client: a response whose `Content-Typ
 **Implemented in:**
 - `Api/Controllers/InternalAttachmentsController.cs` — `Download` action + `BuildMediaType`, `BuildContentDisposition`, `AsciiFallbackName` helpers.
 - `App_Start/WebApiConfig.cs` — route `InternalApi_AttachmentContent` (GET, numeric attachmentId).
+
+---
+
+## 15. Read endpoint — a company's attachments for a date range (2026-09-13)
+
+Answers §2.3 of `TELESAK-API-REQUEST-task-attachments.md`. This completes the three read
+endpoints they asked for.
+
+```
+GET /api/internal/companies/{companyId}/attachments
+      ?fromDate=2026-08-01&toDate=2026-08-31&empIds=101,102,103&page=1&pageSize=500
+X-Ops-Portal-Key: <same shared secret>
+```
+
+Every query parameter is optional. No dates returns the company's whole history; no `empIds`
+covers every employee.
+
+### 15.1 Parameters
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `fromDate`, `toDate` | none | **`yyyy-MM-dd` only** — see §15.4. Both inclusive; `toDate=2026-08-31` covers all of the 31st. |
+| `empIds` | all | Comma-separated `Task.EmpID` values. Blank entries are skipped, so `101,,102,` is fine. Max 500. |
+| `page` | `1` | Values below 1 are clamped to 1. A page past the end is `200` with an empty array. |
+| `pageSize` | `100` | Capped at **500**, the value in your own example. |
+
+A non-numeric `empIds` entry, more than 500 ids, a date that is not `yyyy-MM-dd`, or
+`toDate` before `fromDate` are all rejected with `400` rather than silently ignored —
+quietly dropping a filter would hand back a wrong subset of an export that looks complete.
+
+### 15.2 Response `200`
+
+The standard `PagedResponse` envelope, so `totalCount` / `page` / `pageSize` sit next to the
+data and `totalPages` comes along free:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "attachmentId": 12345,
+      "taskId": 987,
+      "fileName": "3f2ac1d4e5b64789.pdf",
+      "originalFileName": "تقرير الزيارة.pdf",
+      "description": "تقرير الزيارة الميدانية",
+      "sizeBytes": 284113,
+      "contentType": "application/pdf",
+      "fileExists": true,
+      "uploadedAtUtc": "2026-08-14T06:31:22Z",
+      "uploadedBySource": "employee",
+      "uploadedByUserTypeId": 2,
+      "empId": 101,
+      "empName": "محمد العتيبي",
+      "taskTitle": "زيارة ميدانية — الرياض",
+      "taskStartDate": "2026-08-14"
+    }
+  ],
+  "page": 1,
+  "pageSize": 500,
+  "totalCount": 1342,
+  "totalPages": 3,
+  "message": ""
+}
+```
+
+Items are the §13 shape plus `empId`, `empName`, `taskTitle`, `taskStartDate` — enough to
+build the folder-per-employee ZIP without a second round trip per task. `empName` is included
+beyond the request because the export needs a folder label and it is already joined.
+
+Ordering is by `attachmentId` ascending: unique and monotonic, so paging stays stable even if
+rows are inserted while you walk the pages.
+
+### 15.3 `taskStartDate` is a plain date string, not a timestamp
+
+`"2026-08-14"`, not `"2026-08-14T00:00:00Z"`. The formatter runs
+`DateTimeZoneHandling.Utc`, which for this server-local column would either stamp it `Z`
+without shifting (a lie) or shift it and move the item to the previous day — so an attachment
+matching `fromDate=2026-08-14` would report `taskStartDate: "2026-08-13"`. It is a business
+date you match against your own filter values, not an instant, so it is returned in the same
+format the filter parameters use. `uploadedAtUtc` **is** an instant and stays a real UTC
+timestamp.
+
+### 15.4 Why `yyyy-MM-dd` is the only accepted date format
+
+Not pedantry. There is no `<globalization>` element in `Web.config`, so the thread culture
+follows the OS. On a server whose locale is `ar-SA`, the default calendar is **UmAlQura**, and
+`DateTime.Parse("2026-08-01")` yields a Gregorian date roughly six centuries out — silently,
+on that machine only, with no error to notice. Both filter dates go through
+`DateTime.TryParseExact` with `CultureInfo.InvariantCulture`, so the result cannot depend on
+which host the app is deployed to.
+
+### 15.5 One thing to confirm before you build against this
+
+**The date range filters `Task.StartDate`, exactly as §2.3 of the request asked.** Worth
+saying out loud what that means: a file uploaded in September to a task that started in August
+appears in the **August** export, not September's.
+
+For a report described as "the files attached to that employee's tasks" over a date range,
+upload date may well be what is actually meant. Both are available — `uploadedAtUtc` is on
+every item — so if you want the range to filter on upload date instead, or want both filters
+available, say so and it is a small change. Implemented as specified in the meantime.
+
+### 15.6 Errors
+
+| Situation | Status | `code` |
+|---|---|---|
+| Key missing / wrong | `401` | `INVALID_API_KEY` |
+| `OpsPortalKey` unset or still a `REPLACE_*` placeholder | `503` | `OPS_API_DISABLED` |
+| Company does not exist, or `IsDeleted = 1` | `404` | `COMPANY_NOT_FOUND` |
+| `fromDate` / `toDate` not `yyyy-MM-dd` | `400` | `INVALID_DATE` |
+| `toDate` earlier than `fromDate` | `400` | `INVALID_DATE_RANGE` |
+| `empIds` non-numeric, or more than 500 ids | `400` | `INVALID_EMP_IDS` |
+| Anything else | `500` | via `ApiExceptionFilter` |
+
+A company with no matching attachments is `200` with `"data": []` and `totalCount: 0`.
+
+### 15.7 Load notes
+
+- One query for the page of attachments (with `Task` and `Task.Employee` joined), one for its
+  `totalCount`, and **one** for the upload-log rows of every task on the page — not one per
+  task. Three queries per request regardless of page size.
+- `pageSize` is capped at 500 partly to keep that log lookup's `IN` clause well inside SQL
+  Server's ~2100 parameter ceiling.
+- At `pageSize=500`, a month of a 40-employee company is a small handful of requests instead
+  of the several hundred §2.3 was written to avoid.
+
+### 15.8 Test plan
+
+- [ ] Valid key, company with attachments, no filters → `200`, `totalCount` equals every non-deleted task's attachment count for that company.
+- [ ] `fromDate`/`toDate` narrow the set; **`toDate` is inclusive** — an attachment on a task starting on `toDate` itself is present.
+- [ ] A task with `IsDeleted = 1` contributes nothing, at any page.
+- [ ] `empIds=101,102` returns only those employees' tasks; `101,,102,` behaves identically.
+- [ ] `empIds=abc` → `400` `INVALID_EMP_IDS`; `fromDate=01/08/2026` → `400` `INVALID_DATE`; `toDate` < `fromDate` → `400` `INVALID_DATE_RANGE`.
+- [ ] Unknown `companyId` → `404`; `IsDeleted = 1` company → `404`.
+- [ ] `pageSize=5000` is clamped to 500 and the response's `pageSize` says `500`.
+- [ ] `page=0` behaves as `page=1`; a page past the end → `200`, empty `data`, correct `totalCount`.
+- [ ] Walking every page yields each `attachmentId` exactly once, with no gaps.
+- [ ] **Date parsing does not depend on the host:** the same `fromDate=2026-08-01` returns the same set on a server with an `ar-SA` OS locale as on an `en-US` one.
+- [ ] `taskStartDate` comes back as `"2026-08-14"`, and matches the day you filtered on — not the day before.
+- [ ] `empName` is populated for assigned tasks, absent for an unassigned one.
+- [ ] Cross-check against §13: for a single task, the items here match that task's own list endpoint.
+
+**Implemented in:**
+- `Api/Controllers/InternalAttachmentsController.cs` — `ByCompany` action + `ToCompanyItem`, `TryParseFilterDate`, `TryParseEmpIds` helpers.
+- `Api/Dtos/Internal/OpsCompanyAttachmentItemDto.cs` *(new)* — item shape.
+- `App_Start/WebApiConfig.cs` — route `InternalApi_CompanyAttachments` (GET, numeric companyId).
+- `EtaskMinstry.csproj` — `<Compile>` entry for the new DTO.
+
+---
+
+## 16. Status of the Ops Portal read request
+
+All three endpoints from `docs/TELESAK-API-REQUEST-task-attachments.md` are implemented and
+compile clean. Answers to their §5 checklist:
+
+1. **§2.1 list — yes**, §13.
+2. **§2.2 download — yes**, §14. This was the blocker.
+3. **§2.3 company range — yes**, §15.
+4. **`uploaded*` identity fields — partly**, §13.4. Upload *time* and the employee/company
+   *side* are available with no schema change, derived from `dbo.TaskLog`. Account id and
+   uploader name are not recorded anywhere and are never returned. `uploadedByUserTypeId = 4`
+   (Ops Portal dispatch) cannot be told apart from `3` (company user). The shared schema was
+   not touched.
+5. **Base URL and key — unchanged.** Same host and the same `OpsPortalKey` /
+   `X-Ops-Portal-Key` as the upload endpoint, per environment. No separate read key was
+   added; say the word if you would rather have one.
+6. **Is `/Upload/Task/<FileName>` directly downloadable? — Yes, anonymously.** There is no
+   `<authorization>` section, no `deny users="?"`, and no `web.config` under `Upload/`
+   anywhere in the tree, so IIS serves those files as plain static content with no login.
+
+**Point 6 is also a finding, not just an answer.** It means every task attachment in Telesak
+and Esnad is readable by anyone who can reach the host and knows or guesses a stored file
+name. The names are GUIDs, so this is not trivially enumerable, but it is not access control
+either. Now that §14 exists, the Ops Portal no longer needs that path, and closing it should
+be scheduled as its own piece of work rather than left standing indefinitely.
+
+**Still open, for the Ops Portal team to confirm:**
+
+- Should the §15 range filter on `Task.StartDate` (as specified) or on upload date? See §15.5.
+- Should §14 serve attachments belonging to soft-deleted tasks? Currently `404`. See §14.2.
+- Is the ASCII `filename=` fallback alongside `filename*` acceptable to your HTTP client? See §14.1.
+- Do you want a rate limit on `/content`, or is sequential-from-one-server sufficient?
+
+**Still open on our side:**
+
+- None of this has been exercised at runtime — it compiles, and the `Content-Disposition`
+  encoding was checked directly, but the test plans in §12.x, §13.6, §14.5 and §15.8 need a
+  deployed environment with the database.
+- `OpsPortalKey` must hold a real value in each environment; while the
+  `REPLACE_WITH_OPS_PORTAL_SHARED_SECRET` placeholder stands, **all four** endpoints return
+  `503 OPS_API_DISABLED`.
