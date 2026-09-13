@@ -765,3 +765,54 @@ be scheduled as its own piece of work rather than left standing indefinitely.
 - `OpsPortalKey` must hold a real value in each environment; while the
   `REPLACE_WITH_OPS_PORTAL_SHARED_SECRET` placeholder stands, **all four** endpoints return
   `503 OPS_API_DISABLED`.
+
+---
+
+## 17. Postman collection
+
+`Telesak-Docs/postman/Telesak-OpsPortal-InternalAPI.postman_collection.json` — 24 requests
+across 6 folders, covering the upload endpoint and all three read endpoints. The existing
+`Telesak-MobileAPI` collection covers `/api/v1/…` only and is untouched.
+
+**Set before running:** `baseUrl`, `opsPortalKey`, `taskId`, `companyId`. The task must belong
+to the company and have at least one attachment whose file is present on disk.
+
+**Optional, for cases that skip rather than fail when unset:** `missingFileAttachmentId` (a row
+whose file you deleted from `/Upload/Task/`, for the `410`), `deletedTaskAttachmentId` (an
+attachment on a task with `IsDeleted = 1`), and `empIds`.
+
+While `OpsPortalKey` still holds the `REPLACE_*` placeholder, everything returns `503` and only
+folder `00` passes — which is itself the correct result, and the folder says so.
+
+| Folder | What it covers |
+|---|---|
+| `00 - Preflight` | Missing and wrong key on both list and download; asserts the gate runs before any filesystem access. |
+| `01 - Upload` | Needs a file picked by hand. See below — this folder carries the two highest-value assertions. |
+| `02 - List` | Item shape, the `fileExists` / `sizeBytes` invariant, absence of the uploader identity fields, unknown task, and the verb split. |
+| `03 - Download` | `Content-Length` against body length and against the list's `sizeBytes`, `filename*` round-trip, `404`, `410`, deleted-task case. |
+| `04 - Company range` | Paged envelope, date and employee filters, `pageSize` clamp, page disjointness, all four `400`s, unknown company. |
+| `05 - Cross-check` | The same task read through both list endpoints must agree. |
+
+### 17.1 The two assertions worth reading before you trust the rest
+
+**`uploadedAtUtc` is genuinely UTC.** Folder `01` records the client clock at upload time, then
+compares it to the `uploadedAtUtc` the list returns. A server-local timestamp mislabelled `Z`
+lands a full UTC offset away — about three hours for Riyadh — so this fails loudly where eyeballing
+an ISO string with a `Z` on the end would not. Ten minutes of slack covers ordinary clock skew.
+
+**The upload actually commits.** The same request asserts `uploadedAtUtc` is present at all,
+which is only true if `LogTask.LogAddAttachment` ran without throwing. That is the regression
+test for §12: before that fix, the log call raised a `NullReferenceException` before
+`UnitOfWork.Save()`, so no attachment row was committed and no log row existed.
+
+### 17.2 What the collection cannot check
+
+- **Streaming rather than buffering.** Folder `03` verifies the bytes and the length, not that
+  the server avoided holding the file in memory. Watch the worker process during a large download.
+- **Concurrency.** `FileShare.Read` needs two simultaneous downloads; Postman's runner is
+  sequential. Use `newman` twice in parallel, or two runner windows.
+- **Host-culture date parsing.** The `ar-SA` / UmAlQura hazard in §15.4 only shows on a server
+  with that OS locale. The collection asserts the endpoint's behaviour, not the host's; run it
+  against a UAT box with the production locale to actually cover it.
+- **Whether the bytes are the right file.** Length and headers are checked; content is not
+  compared against the file on disk. Do that by hand once per environment.

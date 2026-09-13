@@ -1,0 +1,804 @@
+{
+  "info": {
+    "name": "Telesak Ops Portal Internal API",
+    "description": "Server-to-server attachment API used by Ops Portal (/api/internal/...), authenticated by the X-Ops-Portal-Key shared secret rather than a JWT. Covers the upload endpoint and the three read endpoints from Telesak-Docs/5-OPS-PORTAL-INTERNAL-API.md sections 13, 14 and 15.\n\nBEFORE RUNNING set these collection variables: baseUrl, opsPortalKey, taskId, companyId. The task must belong to the company and have at least one attachment whose file is present on disk.\n\nOPTIONAL variables, for tests that are skipped when left empty: missingFileAttachmentId (an attachment row whose file was deleted from /Upload/Task/, for the 410 case) and deletedTaskAttachmentId (an attachment on a task with IsDeleted = 1).\n\nThe '01 - Upload' folder needs a file picked by hand in the request's form-data body; a file path cannot be committed. Skip that folder if you only want the read endpoints.\n\nNote: while OpsPortalKey still holds the REPLACE_WITH_OPS_PORTAL_SHARED_SECRET placeholder, every endpoint returns 503 OPS_API_DISABLED and only the '00 - Preflight' folder will pass.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:43305" },
+    { "key": "opsPortalKey", "value": "" },
+    { "key": "taskId", "value": "" },
+    { "key": "companyId", "value": "" },
+    { "key": "fromDate", "value": "2026-08-01" },
+    { "key": "toDate", "value": "2026-08-31" },
+    { "key": "empIds", "value": "" },
+    { "key": "missingFileAttachmentId", "value": "" },
+    { "key": "deletedTaskAttachmentId", "value": "" },
+    { "key": "attachmentId", "value": "" },
+    { "key": "attachmentOriginalName", "value": "" },
+    { "key": "attachmentSizeBytes", "value": "" },
+    { "key": "uploadedAttachmentId", "value": "" },
+    { "key": "uploadedAtClientMs", "value": "" },
+    { "key": "pageOneIds", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00 - Preflight (key gate)",
+      "item": [
+        {
+          "name": "List - missing key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Fails closed either way: 401 when a key is configured and none was sent,",
+                  "// 503 when OpsPortalKey is still unset or a REPLACE_ placeholder.",
+                  "pm.test('401 or 503', () => pm.expect([401, 503]).to.include(pm.response.code));",
+                  "const body = pm.response.json();",
+                  "pm.test('success false', () => pm.expect(body.success).to.eql(false));",
+                  "pm.test('code is the gate code', () => pm.expect(['INVALID_API_KEY', 'OPS_API_DISABLED']).to.include(body.code));",
+                  "pm.test('not an HTML page', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.not.include('text/html'));",
+                  "if (body.code === 'OPS_API_DISABLED') {",
+                  "  console.warn('OpsPortalKey is not configured in this environment - every other request in this collection will return 503.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/internal/tasks/{{taskId}}/attachments"
+          }
+        },
+        {
+          "name": "List - wrong key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 or 503', () => pm.expect([401, 503]).to.include(pm.response.code));",
+                  "pm.test('never 200', () => pm.expect(pm.response.code).to.not.eql(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('code is the gate code', () => pm.expect(['INVALID_API_KEY', 'OPS_API_DISABLED']).to.include(body.code));",
+                  "pm.test('not an HTML page', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.not.include('text/html'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "definitely-not-the-key" }
+            ],
+            "url": "{{baseUrl}}/api/internal/tasks/{{taskId}}/attachments"
+          }
+        },
+        {
+          "name": "Download - wrong key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// The gate must run before anything touches the filesystem.",
+                  "pm.test('401 or 503', () => pm.expect([401, 503]).to.include(pm.response.code));",
+                  "pm.test('body is JSON, not file bytes', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.include('json'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "definitely-not-the-key" }
+            ],
+            "url": "{{baseUrl}}/api/internal/attachments/1/content"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Upload (pick a file by hand)",
+      "description": "Optional. The form-data 'file' field has no committed path - open the request, choose any small file, then run. The second request is the one that matters: it proves the TaskLog row is written (the NullReferenceException fixed in section 12) and that uploadedAtUtc is genuinely UTC.",
+      "item": [
+        {
+          "name": "Upload attachment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Client-side clock at the moment of upload, for the UTC check in the next request.",
+                  "pm.collectionVariables.set('uploadedAtClientMs', String(Date.now()));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('success true', () => pm.expect(body.success).to.eql(true));",
+                  "pm.test('attachmentId is a real id', () => pm.expect(body.data.attachmentId).to.be.a('number').and.to.be.above(0));",
+                  "pm.test('taskId echoed', () => pm.expect(body.data.taskId).to.eql(Number(pm.collectionVariables.get('taskId'))));",
+                  "pm.test('stored fileName returned', () => pm.expect(body.data.fileName).to.be.a('string').and.to.have.length.above(0));",
+                  "pm.collectionVariables.set('uploadedAttachmentId', String(body.data.attachmentId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "description", "value": "Postman internal API smoke test", "type": "text" },
+                { "key": "originalFileName", "value": "تقرير الزيارة.pdf", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/api/internal/tasks/{{taskId}}/attachments"
+          }
+        },
+        {
+          "name": "List after upload - log row present and uploadedAtUtc is real UTC",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const items = pm.response.json().data;",
+                  "const wanted = Number(pm.collectionVariables.get('uploadedAttachmentId'));",
+                  "const item = items.find(i => i.attachmentId === wanted);",
+                  "pm.test('the uploaded attachment is listed', () => pm.expect(item, 'attachmentId ' + wanted).to.be.an('object'));",
+                  "if (!item) { return; }",
+                  "",
+                  "// If LogTask.LogAddAttachment throws (the bug fixed in section 12), no TaskLog",
+                  "// row is written and the attachment row is never committed at all. Reaching",
+                  "// here with uploadedAtUtc set is the regression test for that fix.",
+                  "pm.test('uploadedAtUtc present - TaskLog row was written', () => pm.expect(item.uploadedAtUtc).to.be.a('string'));",
+                  "pm.test('uploadedAtUtc is ISO with a Z', () => pm.expect(item.uploadedAtUtc).to.match(/Z$/));",
+                  "",
+                  "// The real test. A server-local timestamp mislabelled 'Z' would land a whole",
+                  "// UTC offset away from the client's clock - about 3 hours ahead for Riyadh.",
+                  "// Ten minutes of slack covers ordinary clock skew without hiding that.",
+                  "const serverMs = Date.parse(item.uploadedAtUtc);",
+                  "const clientMs = Number(pm.collectionVariables.get('uploadedAtClientMs'));",
+                  "const driftMinutes = Math.abs(serverMs - clientMs) / 60000;",
+                  "pm.test('uploadedAtUtc is genuinely UTC (within 10 min of client clock, was ' + driftMinutes.toFixed(1) + ' min)', () => pm.expect(driftMinutes).to.be.below(10));",
+                  "",
+                  "// No session and no JWT on this path, so the log records the dispatch side.",
+                  "pm.test('uploadedBySource = company for an Ops Portal upload', () => pm.expect(item.uploadedBySource).to.eql('company'));",
+                  "pm.test('uploadedByUserTypeId = 3', () => pm.expect(item.uploadedByUserTypeId).to.eql(3));",
+                  "pm.test('file landed on disk', () => pm.expect(item.fileExists).to.eql(true));",
+                  "pm.test('sizeBytes is non-zero', () => pm.expect(item.sizeBytes).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/tasks/{{taskId}}/attachments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - List a task's attachments (section 13)",
+      "item": [
+        {
+          "name": "List task attachments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('success true', () => pm.expect(body.success).to.eql(true));",
+                  "pm.test('data is an array', () => pm.expect(body.data).to.be.an('array'));",
+                  "",
+                  "body.data.forEach(i => {",
+                  "  pm.test('item ' + i.attachmentId + ' - taskId matches the route', () => pm.expect(i.taskId).to.eql(Number(pm.collectionVariables.get('taskId'))));",
+                  "  pm.test('item ' + i.attachmentId + ' - fileExists is a boolean', () => pm.expect(i.fileExists).to.be.a('boolean'));",
+                  "  pm.test('item ' + i.attachmentId + ' - contentType present', () => pm.expect(i.contentType).to.be.a('string'));",
+                  "  pm.test('item ' + i.attachmentId + ' - sizeBytes is 0 exactly when the file is gone', () => {",
+                  "    if (i.fileExists) { pm.expect(i.sizeBytes).to.be.above(0); } else { pm.expect(i.sizeBytes).to.eql(0); }",
+                  "  });",
+                  "  // Never returned - no uploader identity is recorded anywhere (section 13.4).",
+                  "  pm.test('item ' + i.attachmentId + ' - no uploader account id', () => pm.expect(i.uploadedByUserAccountId).to.be.undefined);",
+                  "  pm.test('item ' + i.attachmentId + ' - no uploader name', () => pm.expect(i.uploadedByName).to.be.undefined);",
+                  "  if (i.uploadedBySource !== undefined) {",
+                  "    pm.test('item ' + i.attachmentId + ' - source and typeId agree', () => {",
+                  "      pm.expect(i.uploadedByUserTypeId).to.eql(i.uploadedBySource === 'company' ? 3 : 2);",
+                  "    });",
+                  "  }",
+                  "});",
+                  "",
+                  "// Carry a downloadable one into folder 03.",
+                  "const usable = body.data.find(i => i.fileExists);",
+                  "pm.test('at least one attachment has its file on disk', () => pm.expect(usable, 'set taskId to a task with a present attachment').to.be.an('object'));",
+                  "if (usable) {",
+                  "  pm.collectionVariables.set('attachmentId', String(usable.attachmentId));",
+                  "  pm.collectionVariables.set('attachmentOriginalName', usable.originalFileName || usable.fileName);",
+                  "  pm.collectionVariables.set('attachmentSizeBytes', String(usable.sizeBytes));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/tasks/{{taskId}}/attachments"
+          }
+        },
+        {
+          "name": "List - unknown task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('code = TASK_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('TASK_NOT_FOUND'));",
+                  "pm.test('not an HTML page', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.not.include('text/html'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/tasks/999999999/attachments"
+          }
+        },
+        {
+          "name": "Verb split - POST on the same URL still reaches Upload",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Both verbs share one URL template. A POST with a non-multipart body must",
+                  "// reach the upload action and be rejected as INVALID_REQUEST. A 405, or a",
+                  "// 200 listing attachments, would mean the route split is broken.",
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_REQUEST - POST routed to Upload', () => pm.expect(pm.response.json().code).to.eql('INVALID_REQUEST'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/internal/tasks/{{taskId}}/attachments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Download an attachment (section 14)",
+      "item": [
+        {
+          "name": "Download attachment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "",
+                  "const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "pm.test('not an HTML page', () => pm.expect(contentType).to.not.include('text/html'));",
+                  "",
+                  "const declared = Number(pm.response.headers.get('Content-Length'));",
+                  "pm.test('Content-Length is set', () => pm.expect(declared).to.be.a('number').and.to.be.above(0));",
+                  "pm.test('body length matches Content-Length', () => pm.expect(pm.response.stream.length).to.eql(declared));",
+                  "",
+                  "// Only meaningful when folder 02 ran first and populated this.",
+                  "const expectedSize = pm.collectionVariables.get('attachmentSizeBytes');",
+                  "if (expectedSize) {",
+                  "  pm.test('size matches what the list endpoint reported', () => pm.expect(declared).to.eql(Number(expectedSize)));",
+                  "} else {",
+                  "  pm.test.skip('run folder 02 first to cross-check the size');",
+                  "}",
+                  "",
+                  "const disposition = pm.response.headers.get('Content-Disposition') || '';",
+                  "pm.test('Content-Disposition is an attachment', () => pm.expect(disposition).to.include('attachment'));",
+                  "pm.test('carries the RFC 5987 filename*', () => pm.expect(disposition.toLowerCase()).to.include(\"filename*=utf-8''\"));",
+                  "",
+                  "// The percent-encoded name must decode back to exactly what the list returned,",
+                  "// which is the whole point of the extended form for Arabic file names.",
+                  "const match = /filename\\*=utf-8''([^;]+)/i.exec(disposition);",
+                  "pm.test('filename* decodes to the original name', () => {",
+                  "  pm.expect(match, 'no filename* in: ' + disposition).to.not.eql(null);",
+                  "  const expectedName = pm.collectionVariables.get('attachmentOriginalName');",
+                  "  if (expectedName) { pm.expect(decodeURIComponent(match[1])).to.eql(expectedName); }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/attachments/{{attachmentId}}/content"
+          }
+        },
+        {
+          "name": "Download - unknown attachment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('code = ATTACHMENT_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('ATTACHMENT_NOT_FOUND'));",
+                  "pm.test('JSON body, not an HTML page', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.include('json'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/attachments/999999999/content"
+          }
+        },
+        {
+          "name": "Download - row present, file missing (410)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Needs missingFileAttachmentId: an attachment row whose file you deleted",
+                  "// from /Upload/Task/. Skipped rather than failed when it is not set.",
+                  "if (!pm.collectionVariables.get('missingFileAttachmentId')) {",
+                  "  pm.test.skip('missingFileAttachmentId not set - skipping the 410 case');",
+                  "  return;",
+                  "}",
+                  "pm.test('410 Gone, not 404 and not 200', () => pm.response.to.have.status(410));",
+                  "pm.test('code = FILE_MISSING', () => pm.expect(pm.response.json().code).to.eql('FILE_MISSING'));",
+                  "pm.test('JSON body, not an HTML page', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.include('json'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/attachments/{{missingFileAttachmentId}}/content"
+          }
+        },
+        {
+          "name": "Download - attachment on a deleted task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Section 14.2: an attachment whose task has IsDeleted = 1 is treated as",
+                  "// not existing, so a file cannot be pulled out of a deleted task by id.",
+                  "// This is our addition to the requested error table - confirm it is wanted.",
+                  "if (!pm.collectionVariables.get('deletedTaskAttachmentId')) {",
+                  "  pm.test.skip('deletedTaskAttachmentId not set - skipping the deleted-task case');",
+                  "  return;",
+                  "}",
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('no file bytes returned', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.include('json'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/attachments/{{deletedTaskAttachmentId}}/content"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Company attachments for a date range (section 15)",
+      "item": [
+        {
+          "name": "Company attachments - no filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('success true', () => pm.expect(body.success).to.eql(true));",
+                  "pm.test('paged envelope present', () => {",
+                  "  pm.expect(body.page).to.be.a('number');",
+                  "  pm.expect(body.pageSize).to.be.a('number');",
+                  "  pm.expect(body.totalCount).to.be.a('number');",
+                  "  pm.expect(body.totalPages).to.be.a('number');",
+                  "});",
+                  "pm.test('default pageSize is 100', () => pm.expect(body.pageSize).to.eql(100));",
+                  "pm.test('data is an array', () => pm.expect(body.data).to.be.an('array'));",
+                  "",
+                  "body.data.forEach(i => {",
+                  "  // A plain date string, not a timestamp - see section 15.3.",
+                  "  if (i.taskStartDate !== undefined) {",
+                  "    pm.test('item ' + i.attachmentId + ' - taskStartDate is yyyy-MM-dd', () => pm.expect(i.taskStartDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/));",
+                  "  }",
+                  "  pm.test('item ' + i.attachmentId + ' - taskId present', () => pm.expect(i.taskId).to.be.a('number'));",
+                  "});",
+                  "",
+                  "// Ordering must be stable for paging to be walkable.",
+                  "const ids = body.data.map(i => i.attachmentId);",
+                  "pm.test('ordered by attachmentId ascending', () => pm.expect(ids).to.eql(ids.slice().sort((a, b) => a - b)));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments"
+          }
+        },
+        {
+          "name": "Company attachments - date range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "const from = pm.collectionVariables.get('fromDate');",
+                  "const to = pm.collectionVariables.get('toDate');",
+                  "",
+                  "// Both bounds inclusive - a task starting on toDate itself must be present.",
+                  "// String comparison is safe because the format is yyyy-MM-dd.",
+                  "body.data.forEach(i => {",
+                  "  pm.test('item ' + i.attachmentId + ' - taskStartDate ' + i.taskStartDate + ' inside [' + from + ', ' + to + ']', () => {",
+                  "    pm.expect(i.taskStartDate >= from).to.eql(true);",
+                  "    pm.expect(i.taskStartDate <= to).to.eql(true);",
+                  "  });",
+                  "});",
+                  "",
+                  "// Reminder, not an assertion: the range filters Task.StartDate, so a file",
+                  "// uploaded after toDate still appears here if its task started in range.",
+                  "// Section 15.5 - confirm with the Ops Portal team that this is what they want.",
+                  "const late = body.data.filter(i => i.uploadedAtUtc && i.uploadedAtUtc.substring(0, 10) > to);",
+                  "if (late.length) {",
+                  "  console.warn(late.length + ' item(s) were uploaded after toDate but their task started in range. Expected given the StartDate filter - see section 15.5.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?fromDate={{fromDate}}&toDate={{toDate}}&pageSize=500"
+          }
+        },
+        {
+          "name": "Company attachments - pageSize is clamped to 500",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('pageSize clamped to 500', () => pm.expect(body.pageSize).to.eql(500));",
+                  "pm.test('no more than 500 items returned', () => pm.expect(body.data.length).to.be.at.most(500));",
+                  "pm.test('page 0 behaves as page 1', () => pm.expect(body.page).to.eql(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?page=0&pageSize=5000"
+          }
+        },
+        {
+          "name": "Company attachments - page 1 of 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('at most 2 items', () => pm.expect(body.data.length).to.be.at.most(2));",
+                  "pm.collectionVariables.set('pageOneIds', JSON.stringify(body.data.map(i => i.attachmentId)));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?page=1&pageSize=2"
+          }
+        },
+        {
+          "name": "Company attachments - page 2 does not repeat page 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "const first = JSON.parse(pm.collectionVariables.get('pageOneIds') || '[]');",
+                  "const second = body.data.map(i => i.attachmentId);",
+                  "const overlap = second.filter(id => first.indexOf(id) !== -1);",
+                  "pm.test('no attachmentId appears on both pages', () => pm.expect(overlap).to.eql([]));",
+                  "if (first.length && second.length) {",
+                  "  pm.test('page 2 continues after page 1', () => pm.expect(Math.min.apply(null, second)).to.be.above(Math.max.apply(null, first)));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?page=2&pageSize=2"
+          }
+        },
+        {
+          "name": "Company attachments - page past the end",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK, not 404', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('data is empty', () => pm.expect(body.data).to.eql([]));",
+                  "pm.test('totalCount still reported', () => pm.expect(body.totalCount).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?page=99999&pageSize=10"
+          }
+        },
+        {
+          "name": "Company attachments - blank entries in empIds are tolerated",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Set empIds to a real comma-separated list to make this meaningful.",
+                  "if (!pm.collectionVariables.get('empIds')) {",
+                  "  pm.test.skip('empIds not set - skipping the filter case');",
+                  "  return;",
+                  "}",
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const wanted = pm.collectionVariables.get('empIds').split(',').filter(s => s.trim()).map(Number);",
+                  "pm.response.json().data.forEach(i => {",
+                  "  pm.test('item ' + i.attachmentId + ' - empId ' + i.empId + ' is in the filter', () => pm.expect(wanted).to.include(i.empId));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?empIds={{empIds}},,&pageSize=500"
+          }
+        },
+        {
+          "name": "Company attachments - bad date format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Rejected, never silently ignored: a dropped filter would return a wrong",
+                  "// subset of an export that looks complete.",
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_DATE', () => pm.expect(pm.response.json().code).to.eql('INVALID_DATE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?fromDate=01/08/2026"
+          }
+        },
+        {
+          "name": "Company attachments - reversed date range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_DATE_RANGE', () => pm.expect(pm.response.json().code).to.eql('INVALID_DATE_RANGE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?fromDate=2026-08-31&toDate=2026-08-01"
+          }
+        },
+        {
+          "name": "Company attachments - non-numeric empIds",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_EMP_IDS', () => pm.expect(pm.response.json().code).to.eql('INVALID_EMP_IDS'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?empIds=101,abc"
+          }
+        },
+        {
+          "name": "Company attachments - unknown company",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "pm.test('code = COMPANY_NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('COMPANY_NOT_FOUND'));",
+                  "pm.test('not an HTML page', () => pm.expect(pm.response.headers.get('Content-Type') || '').to.not.include('text/html'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/999999999/attachments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Cross-check the list against the range endpoint",
+      "item": [
+        {
+          "name": "A task's own list matches what the company range reports for it",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const rangeItems = pm.response.json().data.filter(i => i.taskId === Number(pm.collectionVariables.get('taskId')));",
+                  "",
+                  "// The two endpoints share one projection, so they must not disagree.",
+                  "pm.sendRequest({",
+                  "  url: pm.collectionVariables.get('baseUrl') + '/api/internal/tasks/' + pm.collectionVariables.get('taskId') + '/attachments',",
+                  "  method: 'GET',",
+                  "  header: { 'X-Ops-Portal-Key': pm.collectionVariables.get('opsPortalKey') }",
+                  "}, (err, res) => {",
+                  "  pm.test('per-task list reachable', () => pm.expect(err).to.eql(null));",
+                  "  if (err) { return; }",
+                  "  const listItems = res.json().data;",
+                  "  const rangeIds = rangeItems.map(i => i.attachmentId).sort((a, b) => a - b);",
+                  "  const listIds = listItems.map(i => i.attachmentId).sort((a, b) => a - b);",
+                  "  pm.test('same attachment ids from both endpoints', () => pm.expect(rangeIds).to.eql(listIds));",
+                  "  rangeItems.forEach(r => {",
+                  "    const l = listItems.find(i => i.attachmentId === r.attachmentId);",
+                  "    if (!l) { return; }",
+                  "    pm.test('attachment ' + r.attachmentId + ' - fileExists agrees', () => pm.expect(r.fileExists).to.eql(l.fileExists));",
+                  "    pm.test('attachment ' + r.attachmentId + ' - sizeBytes agrees', () => pm.expect(r.sizeBytes).to.eql(l.sizeBytes));",
+                  "    pm.test('attachment ' + r.attachmentId + ' - uploadedAtUtc agrees', () => pm.expect(r.uploadedAtUtc).to.eql(l.uploadedAtUtc));",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Ops-Portal-Key", "value": "{{opsPortalKey}}" }
+            ],
+            "url": "{{baseUrl}}/api/internal/companies/{{companyId}}/attachments?pageSize=500"
+          }
+        }
+      ]
+    }
+  ]
+}
