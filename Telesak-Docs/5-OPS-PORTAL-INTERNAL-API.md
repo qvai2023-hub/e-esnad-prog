@@ -3,6 +3,9 @@
 > **Status: IMPLEMENTED (pending tester sign-off).** Approved 2026-07-08 with the Done/Approved
 > guard added at review. Code builds clean. Decisions are locked in §0; the endpoint behaves
 > exactly as documented below.
+>
+> **2026-09-13:** a blocking `NullReferenceException` was found in the reused AppCode and fixed —
+> the endpoint returned `500 SAVE_FAILED` on every call before that. See §12.
 
 **Audience:** Telesak backend team + Ops Portal team.
 **Author:** backend team.
@@ -277,3 +280,57 @@ say the word if you want any changed:
 **Before it works in an environment:** set a real `OpsPortalKey` value (replace the
 `REPLACE_WITH_OPS_PORTAL_SHARED_SECRET` placeholder). While the placeholder stands, the
 endpoint returns `503 OPS_API_DISABLED`.
+
+---
+
+## 12. Post-implementation fix — `userData` NullReferenceException (2026-09-13)
+
+**Symptom:** every call to `POST /api/internal/tasks/{taskId}/attachments` returned
+`500 SAVE_FAILED`. No `dbo.Attachment` row was committed, and the physical file was left
+orphaned in `/Upload/Task/` (it is written before the row insert, by design — §1).
+
+**Cause.** §3 states the endpoint deliberately does not set `MvcApplication.userData` — it is
+authenticated by the shared key, not by a session or a JWT. But two pieces of the AppCode it
+reuses dereferenced that property without a null check:
+
+| Site | Read |
+|---|---|
+| `AppCode/LogTask.cs` → `LogTaskSingleValue` (and 3 sibling log methods) | `MvcApplication.userData.isCompany`, to set `TaskLog.IsFromCompany` |
+| `AppCode/Notification.cs` → `NotificationHub.Send`, 3 sites | `userData.isCompany` / `userData.userId`, to suppress notifying the actor about their own action |
+
+`MvcApplication.userData` returns `null` when neither `Session["User"]` nor `Items["User"]`
+is set (`Global.asax.cs`), so both threw. Both throws happen **inside**
+`TaskManger.AttachTaskFile` and **before** its closing `_unitOfWork.Save()`, which is why the
+attachment row never reached the database. The controller's `try/catch` turned the exception
+into `SAVE_FAILED`, hiding the real cause.
+
+The Mobile API upload path (`TasksController.AddAttachment`) was unaffected:
+`JwtAuthorizeAttribute` populates `userData` from the JWT claims before the action runs.
+
+**Fix.** Null-tolerant reads at all seven sites; behaviour is byte-for-byte unchanged whenever
+`userData` is present.
+
+- `LogTask.cs` — new private `ActorIsCompany()` helper returning `actor == null || actor.isCompany`.
+  With no logged-in actor the change came from the Saqia/Ops dispatch side, never from the
+  employee, so the row logs as **company-side** (`TaskLog.IsFromCompany = 1`). The task-log UI
+  renders that as `"المدير المسؤول"`, which is correct for a dispatched file.
+- `Notification.cs` — `Send` hoists `var actor = MvcApplication.userData;` and guards each read.
+  With no actor there is no "self" to suppress, so both the employee and the company are
+  notified normally — which is the intended behaviour for an Ops Portal dispatch.
+
+**Why this blocks the read endpoints.** `LogAddAttachment` is the *only* record of when an
+attachment was uploaded and from which side — `dbo.Attachment` has no `UploadedAt` or
+uploader column. Without this fix, Ops-Portal-uploaded files produce no `TaskLog` row at all,
+so the `uploadedAtUtc` / `uploadedBySource` fields of the planned list endpoints would be
+permanently null for exactly the files the Ops Portal cares about.
+
+**Verification status:** compiles clean (`EtaskMinstry.csproj`, 0 errors). The runtime path
+needs IIS + the database and has **not** been exercised yet — see the test rows below, which
+supersede the optimistic notification row in §11.
+
+- [ ] Valid key + valid file → **201**, `dbo.Attachment` row committed, file on disk.
+- [ ] Same call writes a `dbo.TaskLog` row with `IsFromCompany = 1` and `Value` containing the stored `FileName`.
+- [ ] Employee **and** company both receive the "attachment added" notification + FCM push.
+- [ ] Web UI task-details still shows the attachment.
+- [ ] Regression: an attachment added from the Telesak web UI by a **company** user still logs `IsFromCompany = 1`.
+- [ ] Regression: an attachment added from the web UI by an **employee** still logs `IsFromCompany = 0`, and that employee is still not notified of their own upload.

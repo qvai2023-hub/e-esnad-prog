@@ -153,6 +153,11 @@ public class NotificationHub : Hub
     {
         var now = DateTime.Now;
 
+        // The user whose action triggered this notification. Null for server-to-server
+        // callers such as the Ops Portal internal API, which sets neither a session nor
+        // a JWT identity — every read of it below must tolerate that.
+        var actor = MvcApplication.userData;
+
         var unitOfWork = new UnitOfWork(MvcApplication.ConnectionString);
 
         //create the main motification object
@@ -172,7 +177,10 @@ public class NotificationHub : Hub
         {
             case UsersType.Company:
                 {
-                    if (MvcApplication.userData.isCompany && MvcApplication.userData.userId == To.InstanceID && type != NotificationType.InprogressTask)
+                    // Suppress the "notify me about my own action" case. actor is null for
+                    // server-to-server callers (Ops Portal internal API sets no identity) — there
+                    // is no self to suppress then, so fall through and notify normally.
+                    if (actor != null && actor.isCompany && actor.userId == To.InstanceID && type != NotificationType.InprogressTask)
                         break;
 
                     var item = new NotificationCollection()
@@ -189,7 +197,8 @@ public class NotificationHub : Hub
                 break;
             case UsersType.Employee:
                 {
-                    if (!MvcApplication.userData.isCompany && MvcApplication.userData.userId == To.InstanceID && type != NotificationType.InprogressTask)
+                    // Same self-suppression guard as the Company case above.
+                    if (actor != null && !actor.isCompany && actor.userId == To.InstanceID && type != NotificationType.InprogressTask)
                         break;
                     var item = new NotificationCollection()
                     {
@@ -208,7 +217,7 @@ public class NotificationHub : Hub
             case UsersType.AllCompanyEmployees: //send message to company emps
                 {
                     //call serverice and bring them
-                  EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployee(To.InstanceID).Where(i=>i.id!= MvcApplication.userData.userId).ToList().ForEach(delegate(EmployeeProfile i) 
+                  EtaskMinstry.AppCode.ServiceManger.GetCompanyEmployee(To.InstanceID).Where(i=>(actor == null || i.id != actor.userId)).ToList().ForEach(delegate(EmployeeProfile i) 
                     {
 
                    

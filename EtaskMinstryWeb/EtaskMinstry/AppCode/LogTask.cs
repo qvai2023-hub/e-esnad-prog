@@ -122,7 +122,7 @@ namespace EtaskMinstry.AppCode
                 try
                 {
                     string logVal = "[" + String.Join(",", JsonList) + "]";
-                    Log(Currentobj.TaskID, logVal, MvcApplication.userData.isCompany,Currentobj.PriorityID,Currentobj.StatusID);
+                    Log(Currentobj.TaskID, logVal, ActorIsCompany(),Currentobj.PriorityID,Currentobj.StatusID);
                 }
                 catch (Exception)
                 {
@@ -244,7 +244,7 @@ namespace EtaskMinstry.AppCode
             try
             {
                 string logVal = "[" + String.Join(",", JsonList) + "]";
-                Log(Currentobj.TaskID, logVal, MvcApplication.userData.isCompany, Currentobj.PriorityID,Currentobj.StatusID);
+                Log(Currentobj.TaskID, logVal, ActorIsCompany(), Currentobj.PriorityID,Currentobj.StatusID);
             }
             catch (Exception)
             {
@@ -280,7 +280,7 @@ namespace EtaskMinstry.AppCode
             try
             {
                 string logVal = "[" + String.Join(",", JsonList) + "]";
-                Log(Currentobj.TaskID, logVal, MvcApplication.userData.isCompany, Currentobj.PriorityID,Currentobj.StatusID);
+                Log(Currentobj.TaskID, logVal, ActorIsCompany(), Currentobj.PriorityID,Currentobj.StatusID);
             }
             catch (Exception)
             {
@@ -345,7 +345,27 @@ namespace EtaskMinstry.AppCode
             UnitOfWork _unitOfWork =
                 new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
             var obj = _unitOfWork.TaskRepository.GetByID(TaskID);
-            Log(TaskID, logVal, MvcApplication.userData.isCompany,obj.PriorityID,obj.StatusID);
+            Log(TaskID, logVal, ActorIsCompany(),obj.PriorityID,obj.StatusID);
+        }
+
+        /// <summary>
+        /// The acting user's "company side" flag for the log row.
+        ///
+        /// <see cref="MvcApplication.userData"/> is null for server-to-server callers —
+        /// the Ops Portal internal API deliberately sets neither session nor JWT identity
+        /// (see InternalAttachmentsController). Dereferencing it there threw a
+        /// NullReferenceException that aborted the whole AttachTaskFile call *before*
+        /// its UnitOfWork.Save(), so the dbo.Attachment row was never committed and the
+        /// upload returned 500 while leaving an orphaned file on disk.
+        ///
+        /// With no logged-in actor the change came from the Saqia/Ops dispatch side,
+        /// never from the employee, so it logs as company-side. Behaviour is unchanged
+        /// whenever userData is present.
+        /// </summary>
+        private static bool ActorIsCompany()
+        {
+            var actor = MvcApplication.userData;
+            return actor == null || actor.isCompany;
         }
 
     }
