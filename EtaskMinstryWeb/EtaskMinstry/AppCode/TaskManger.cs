@@ -969,6 +969,10 @@ namespace EtaskMinstry.AppCode
                 if (todayLog != null)
                 {
                     todayLog.TimeCount = timeValue;
+                    // Keep the unit in step with the value. This row may have been created by a
+                    // status transition, which leaves TimUnitID NULL, and GetCountMiniuts maps a
+                    // NULL/0 unit to zero minutes - so omitting this silently discards the time.
+                    todayLog.TimUnitID = (int)TimeUnit.Hour;
                     _unitOfWork.TaskStatuseLog.Update(todayLog);
                 }
                 else
