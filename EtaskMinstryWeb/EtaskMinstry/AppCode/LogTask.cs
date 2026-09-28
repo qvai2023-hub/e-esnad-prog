@@ -27,11 +27,22 @@ namespace EtaskMinstry.AppCode
         }
 
         /// <summary>
+        /// Log an update that no user made directly (e.g. the automatic Accepted -> Inprogress
+        /// change in TaskManger.UpdateTaskStatus). It always logs as employee-side, because
+        /// otherwise the row is attributed to whoever happened to open the page.
+        /// </summary>
+        public static void LogAutomaticUpdate(TaskManagementModel.Task Currentobj, TaskManagementModel.Task beforeUpdate)
+        {
+            LogUpdate(Currentobj, beforeUpdate, false);
+        }
+
+        /// <summary>
         /// log Updated object
         /// </summary>
         /// <param name="Currentobj"></param>
         /// <param name="beforeUpdate"></param>
-        private static void LogUpdate(TaskManagementModel.Task Currentobj, TaskManagementModel.Task beforeUpdate)
+        /// <param name="isFromCompany">null = the acting user's side (default behaviour)</param>
+        private static void LogUpdate(TaskManagementModel.Task Currentobj, TaskManagementModel.Task beforeUpdate, bool? isFromCompany = null)
         {
             //the list to save json
             List<string> JsonList = new List<string>();
@@ -122,7 +133,7 @@ namespace EtaskMinstry.AppCode
                 try
                 {
                     string logVal = "[" + String.Join(",", JsonList) + "]";
-                    Log(Currentobj.TaskID, logVal, ActorIsCompany(),Currentobj.PriorityID,Currentobj.StatusID);
+                    Log(Currentobj.TaskID, logVal, isFromCompany ?? ActorIsCompany(),Currentobj.PriorityID,Currentobj.StatusID);
                 }
                 catch (Exception)
                 {
