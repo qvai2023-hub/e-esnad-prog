@@ -148,7 +148,9 @@ namespace EtaskMinstry.AppCode
                 //    //Clone Task Object for Log purpose
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
 
-                int lastStatus = objTask.TaskTLogs.LastOrDefault(l => l.StatusID != (int)TaskStatus.Pending) == null ? (int)TaskStatus.New : objTask.TaskTLogs.LastOrDefault(l => l.StatusID != (int)TaskStatus.Pending).StatusID;
+                // Ordered by TaskTLogID: the lazy-loaded TaskTLogs collection has no guaranteed order
+                var lastNotPendingLog = objTask.TaskTLogs.Where(l => l.StatusID != (int)TaskStatus.Pending).OrderByDescending(l => l.TaskTLogID).FirstOrDefault();
+                int lastStatus = lastNotPendingLog == null ? (int)TaskStatus.New : lastNotPendingLog.StatusID;
 
                 //Update Task Status 
                 objTask.StatusID = lastStatus;
