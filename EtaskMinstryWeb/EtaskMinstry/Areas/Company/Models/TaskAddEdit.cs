@@ -237,7 +237,40 @@ namespace EtaskMinstry.Models.Task
 
                     //log.
                     AppCode.LogTask.Log(objTask, beforeUpdateObj);
-                  
+
+                    // Assignee changed from the edit form: record it the same way
+                    // TaskManger.AssignTask (Reassign button) does, so the old employee
+                    // sees the task as stopped and the new one gets its history + notification.
+                    if (beforeUpdateObj.EmpID != objTask.EmpID)
+                    {
+                        if (beforeUpdateObj.EmpID.HasValue)
+                        {
+                            _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                            {
+                                TaskID = objTask.TaskID,
+                                CreatedDate = DateTime.Now,
+                                EmpID = beforeUpdateObj.EmpID,
+                                StatusID = (int)TaskStatus.Pending
+                            });
+                        }
+                        if (objTask.EmpID.HasValue)
+                        {
+                            _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                            {
+                                TaskID = objTask.TaskID,
+                                CreatedDate = DateTime.Now,
+                                EmpID = objTask.EmpID,
+                                StatusID = objTask.StatusID
+                            });
+                        }
+                        _unitOfWork.Save();
+
+                        if (beforeUpdateObj.EmpID.HasValue)
+                            NotificationHub.Send(Users.Employee(beforeUpdateObj.EmpID.Value), NotificationType.NewTask, "تم ايقاف المهمة: " + objTask.Title, @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
+                        if (objTask.EmpID.HasValue)
+                            NotificationHub.Send(Users.Employee(objTask.EmpID.Value), NotificationType.NewTask, "تم اسناد المهمة : " + objTask.Title, @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
+                    }
+
                 }
                 else
                 {

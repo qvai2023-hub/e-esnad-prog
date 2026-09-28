@@ -241,7 +241,39 @@ namespace EtaskMinstry.Models.TaskCommon
 
                     //log.
                     AppCode.LogTask.Log(objTask, beforeUpdateObj);
-                  
+
+                    // Assignee changed: record it the same way TaskManger.AssignTask does
+                    // (same fix as Areas/Company/Models/TaskAddEdit.cs).
+                    if (beforeUpdateObj.EmpID != objTask.EmpID)
+                    {
+                        if (beforeUpdateObj.EmpID.HasValue)
+                        {
+                            _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                            {
+                                TaskID = objTask.TaskID,
+                                CreatedDate = DateTime.Now,
+                                EmpID = beforeUpdateObj.EmpID,
+                                StatusID = (int)TaskStatus.Pending
+                            });
+                        }
+                        if (objTask.EmpID.HasValue)
+                        {
+                            _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                            {
+                                TaskID = objTask.TaskID,
+                                CreatedDate = DateTime.Now,
+                                EmpID = objTask.EmpID,
+                                StatusID = objTask.StatusID
+                            });
+                        }
+                        _unitOfWork.Save();
+
+                        if (beforeUpdateObj.EmpID.HasValue)
+                            NotificationHub.Send(Users.Employee(beforeUpdateObj.EmpID.Value), NotificationType.NewTask, "تم ايقاف المهمة: " + objTask.Title, @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
+                        if (objTask.EmpID.HasValue)
+                            NotificationHub.Send(Users.Employee(objTask.EmpID.Value), NotificationType.NewTask, "تم اسناد المهمة : " + objTask.Title, @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
+                    }
+
                 }
                 else
                 {
