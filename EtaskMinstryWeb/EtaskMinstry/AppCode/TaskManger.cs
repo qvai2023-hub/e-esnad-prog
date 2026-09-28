@@ -949,7 +949,9 @@ namespace EtaskMinstry.AppCode
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);
-            if (objTask != null) //check if Task not null
+            // Only the current assignee may log time: the row is written under objTask.EmpID,
+            // so time entered by a previous assignee would be credited to the new one.
+            if (objTask != null && objTask.EmpID == MvcApplication.userData.userId) //check if Task not null and current user is the assignee
             {
                 //Clone Task Object for Log purpose
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
@@ -959,11 +961,13 @@ namespace EtaskMinstry.AppCode
                 // Update existing today's log or insert a new one to avoid accumulating duplicate entries
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
+                // Ordered so repeated entries on the same day always update the same (earliest) row
                 var todayLog = _unitOfWork.TaskStatuseLog.Get(
                     filter: l => l.TaskID == iTaskID &&
                                  l.EmpID == objTask.EmpID &&
                                  l.CreatedDate >= today &&
-                                 l.CreatedDate < tomorrow
+                                 l.CreatedDate < tomorrow,
+                    orderBy: q => q.OrderBy(l => l.TaskTLogID)
                 ).FirstOrDefault();
 
                 if (todayLog != null)
@@ -974,6 +978,19 @@ namespace EtaskMinstry.AppCode
                     // NULL/0 unit to zero minutes - so omitting this silently discards the time.
                     todayLog.TimUnitID = (int)TimeUnit.Hour;
                     _unitOfWork.TaskStatuseLog.Update(todayLog);
+
+                    // The existing row keeps its own status, so a New -> Inprogress change made
+                    // by this entry needs its own status row (no time on it).
+                    if (objTask.StatusID != beforeUpdateObj.StatusID)
+                    {
+                        _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                        {
+                            TaskID = iTaskID,
+                            CreatedDate = DateTime.Now,
+                            EmpID = objTask.EmpID,
+                            StatusID = objTask.StatusID
+                        });
+                    }
                 }
                 else
                 {
