@@ -111,7 +111,10 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         /// <returns></returns>
         public bool EndTask(int taskId)
         {
-            return listTasks.EndTask(taskId);
+            // Same path as the task-details finish button. listTasks.EndTask overwrote
+            // EndDate and logged the Done row with EmpID = 0 / TimeCount = 0.
+            return EtaskMinstry.AppCode.TaskManger.EmpFinishTask(taskId);
+            // return listTasks.EndTask(taskId);
         }
 
 
