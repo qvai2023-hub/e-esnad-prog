@@ -42,7 +42,8 @@ namespace EtaskMinstry.AppCode
             if (MvcApplication.userData.isCompany)
             {
                 //var Tasks =   _unitOfWork.TaskRepository.Get(t=>t.CompanyID == MvcApplication.userData.userId && (t.StartDate.HasValue ?t.StartDate.Value.Date <= DateTime.Now.Date : false && t.StatusID== (int)TaskStatus.Accepted ) && !t.IsArchived);
-                var Tasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId && t.StatusID == (int)TaskStatus.Accepted && !t.IsArchived);
+                // ToList: Clone() below lazy-loads navigation properties, which must not run while this query's reader is open
+                var Tasks = _unitOfWork.TaskRepository.Get(t => t.CompanyID == MvcApplication.userData.userId && t.StatusID == (int)TaskStatus.Accepted && !t.IsArchived).ToList();
                 foreach (var item in Tasks)
                 {
                     var date = item.StartDate;
@@ -51,7 +52,9 @@ namespace EtaskMinstry.AppCode
 
                         if (item.StartDate.Value.Date <= DateTime.Now.Date)
                         {
+                            var beforeUpdateObj = item.Clone<TaskManagementModel.Task>();
                             item.StatusID = (int)TaskStatus.Inprogress;
+                            LogAutoInprogress(_unitOfWork, item, beforeUpdateObj);
                         }
 
                     }
@@ -61,7 +64,7 @@ namespace EtaskMinstry.AppCode
             }
             else
             {
-                var Tasks = _unitOfWork.TaskRepository.Get(t => t.EmpID == MvcApplication.userData.userId && t.StatusID == (int)TaskStatus.Accepted && !t.IsArchived);
+                var Tasks = _unitOfWork.TaskRepository.Get(t => t.EmpID == MvcApplication.userData.userId && t.StatusID == (int)TaskStatus.Accepted && !t.IsArchived).ToList();
                 foreach (var item in Tasks)
                 {
                     var date = item.StartDate;
@@ -70,7 +73,9 @@ namespace EtaskMinstry.AppCode
 
                         if (item.StartDate.Value.Date <= DateTime.Now.Date)
                         {
+                            var beforeUpdateObj = item.Clone<TaskManagementModel.Task>();
                             item.StatusID = (int)TaskStatus.Inprogress;
+                            LogAutoInprogress(_unitOfWork, item, beforeUpdateObj);
                         }
 
 
@@ -83,7 +88,21 @@ namespace EtaskMinstry.AppCode
 
         }
 
-
+        /// <summary>
+        /// Record the automatic Accepted -> Inprogress change in both logs, like every other status change.
+        /// The TaskTLog row is saved by the caller's _unitOfWork.Save().
+        /// </summary>
+        private static void LogAutoInprogress(UnitOfWork _unitOfWork, TaskManagementModel.Task objTask, TaskManagementModel.Task beforeUpdateObj)
+        {
+            EtaskMinstry.AppCode.LogTask.LogAutomaticUpdate(objTask, beforeUpdateObj);
+            _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+            {
+                TaskID = objTask.TaskID,
+                CreatedDate = DateTime.Now,
+                EmpID = objTask.EmpID,
+                StatusID = (int)TaskStatus.Inprogress
+            });
+        }
 
         #endregion
 
