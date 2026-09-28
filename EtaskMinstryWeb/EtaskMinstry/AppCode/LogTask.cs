@@ -49,11 +49,11 @@ namespace EtaskMinstry.AppCode
                              Currentobj.StartDate + "'}");
 
             if (Currentobj.Summary != beforeUpdate.Summary)
-                JsonList.Add("{'columnName':'Summary','oldVal':'" + beforeUpdate.Summary + "','newVal':'" +
-                             Currentobj.Summary + "'}");
+                JsonList.Add("{'columnName':'Summary','oldVal':'" + Esc(beforeUpdate.Summary) + "','newVal':'" +
+                             Esc(Currentobj.Summary) + "'}");
             if (Currentobj.Description != beforeUpdate.Description)
-                JsonList.Add("{'columnName':'Description','oldVal':'" + beforeUpdate.Description + "','newVal':'" +
-                             Currentobj.Description + "'}");
+                JsonList.Add("{'columnName':'Description','oldVal':'" + Esc(beforeUpdate.Description) + "','newVal':'" +
+                             Esc(Currentobj.Description) + "'}");
 
             if (Currentobj.ExpectedTime != beforeUpdate.ExpectedTime)
 
@@ -87,14 +87,14 @@ namespace EtaskMinstry.AppCode
                 JsonList.Add(
                     (beforeUpdate.ProjectID != null && Currentobj.ProjectID != null) ?
                     "{'columnName':'ProjectID','oldVal':'" +
-              new EtaskMinstry.Models.Project.ProjectDisplay().GetById(beforeUpdate.ProjectID.Value).Name + "','newVal':'" +
-                 new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name + "'}" :
+              Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(beforeUpdate.ProjectID.Value).Name) + "','newVal':'" +
+                 Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name) + "'}" :
 
                  (beforeUpdate.ProjectID != null) ? "{'columnName':'ProjectID','oldVal':'" +
-              new EtaskMinstry.Models.Project.ProjectDisplay().GetById(beforeUpdate.ProjectID.Value).Name + "','newVal':''}" :
+              Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(beforeUpdate.ProjectID.Value).Name) + "','newVal':''}" :
 
                (Currentobj.ProjectID != null) ? "{'columnName':'ProjectID','oldVal':'','newVal':'" +
-                 new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name + "'}" :
+                 Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name) + "'}" :
                  "{'columnName':'ProjectID','oldVal':'','newVal':''}");
             }
             //if (Currentobj.TaskComment.Count > beforeUpdate.TaskComment.Count)
@@ -152,7 +152,7 @@ namespace EtaskMinstry.AppCode
                         "{'columnName':'IsNewTask','oldVal':'','newVal':'" + true + "'}",
                         "{'columnName':'EmpID','oldVal':'','newVal':'" + Currentobj.EmpID + "'}",
                        (Currentobj.ProjectID != null)? 
-                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name + "'}":
+                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name) + "'}":
                        "{'columnName':'ProjectID','oldVal':'','newVal':''}",
 
                         "{'columnName':'StartDate','oldVal':'','newVal':'" +
@@ -160,8 +160,8 @@ namespace EtaskMinstry.AppCode
                         "{'columnName':'EndDate','oldVal':'','newVal':'" +
                         Extentions.ToGregDatediff(Currentobj.EndDate.Value) + "'}",
                         "{'columnName':'ExpectedTime','oldVal':'','newVal':'" + Currentobj.ExpectedTime + "'}",
-                        "{'columnName':'Description','oldVal':'','newVal':'" + Currentobj.Description + "'}",
-                        "{'columnName':'Summary','oldVal':'','newVal':'" + Currentobj.Summary + "'}",
+                        "{'columnName':'Description','oldVal':'','newVal':'" + Esc(Currentobj.Description) + "'}",
+                        "{'columnName':'Summary','oldVal':'','newVal':'" + Esc(Currentobj.Summary) + "'}",
                         "{'columnName':'PriorityID','oldVal':'','newVal':'" +
                         _unitOfWork.PriorityRepository.GetByID(Currentobj.PriorityID).Name + "'}",
                         "{'columnName':'StatusID','oldVal':'','newVal':'" +
@@ -175,14 +175,14 @@ namespace EtaskMinstry.AppCode
                             "{'columnName':'IsNewTask','oldVal':'','newVal':'" + true + "'}",
                             "{'columnName':'EmpID','oldVal':'','newVal':'" + Currentobj.EmpID + "'}",
                                (Currentobj.ProjectID != null)? 
-                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name + "'}":
+                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name) + "'}":
                        "{'columnName':'ProjectID','oldVal':'','newVal':''}",
                             "{'columnName':'StartDate','oldVal':'','newVal':'" +
                             Extentions.ToGregDatediff(Currentobj.StartDate.Value) + "'}",
                             "{'columnName':'EndDate','oldVal':'','newVal':''}",
                             "{'columnName':'ExpectedTime','oldVal':'','newVal':'" + Currentobj.ExpectedTime + "'}",
-                            "{'columnName':'Description','oldVal':'','newVal':'" + Currentobj.Description + "'}",
-                            "{'columnName':'Summary','oldVal':'','newVal':'" + Currentobj.Summary + "'}",
+                            "{'columnName':'Description','oldVal':'','newVal':'" + Esc(Currentobj.Description) + "'}",
+                            "{'columnName':'Summary','oldVal':'','newVal':'" + Esc(Currentobj.Summary) + "'}",
                             "{'columnName':'PriorityID','oldVal':'','newVal':'" +
                             _unitOfWork.PriorityRepository.GetByID(Currentobj.PriorityID).Name + "'}",
                             "{'columnName':'StatusID','oldVal':'','newVal':'" +
@@ -197,14 +197,14 @@ namespace EtaskMinstry.AppCode
                         "{'columnName':'IsNewTask','oldVal':'','newVal':'" + true + "'}",
                         "{'columnName':'EmpID','oldVal':'','newVal':'" + Currentobj.EmpID + "'}",
                           (Currentobj.ProjectID != null)? 
-                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name + "'}":
+                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name) + "'}":
                        "{'columnName':'ProjectID','oldVal':'','newVal':''}",
                         "{'columnName':'StartDate','oldVal':'','newVal':''}",
                         "{'columnName':'EndDate','oldVal':'','newVal':'" +
                         Extentions.ToGregDatediff(Currentobj.EndDate.Value) + "'}",
                         "{'columnName':'ExpectedTime','oldVal':'','newVal':'" + Currentobj.ExpectedTime + "'}",
-                        "{'columnName':'Description','oldVal':'','newVal':'" + Currentobj.Description + "'}",
-                        "{'columnName':'Summary','oldVal':'','newVal':'" + Currentobj.Summary + "'}",
+                        "{'columnName':'Description','oldVal':'','newVal':'" + Esc(Currentobj.Description) + "'}",
+                        "{'columnName':'Summary','oldVal':'','newVal':'" + Esc(Currentobj.Summary) + "'}",
                         "{'columnName':'PriorityID','oldVal':'','newVal':'" +
                         _unitOfWork.PriorityRepository.GetByID(Currentobj.PriorityID).Name + "'}",
                         "{'columnName':'StatusID','oldVal':'','newVal':'" +
@@ -218,13 +218,13 @@ namespace EtaskMinstry.AppCode
          "{'columnName':'IsNewTask','oldVal':'','newVal':'" + true + "'}",
          "{'columnName':'EmpID','oldVal':'','newVal':'" + Currentobj.EmpID + "'}",
            (Currentobj.ProjectID != null)? 
-                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name + "'}":
+                       "{'columnName':'ProjectID','oldVal':'','newVal':'" +  Esc(new EtaskMinstry.Models.Project.ProjectDisplay().GetById(Currentobj.ProjectID.Value).Name) + "'}":
                        "{'columnName':'ProjectID','oldVal':'','newVal':''}",
          "{'columnName':'StartDate','oldVal':'','newVal':''}",
          "{'columnName':'EndDate','oldVal':'','newVal':''}",
          "{'columnName':'ExpectedTime','oldVal':'','newVal':'" + Currentobj.ExpectedTime + "'}",
-         "{'columnName':'Description','oldVal':'','newVal':'" + Currentobj.Description + "'}",
-         "{'columnName':'Summary','oldVal':'','newVal':'" + Currentobj.Summary + "'}",
+         "{'columnName':'Description','oldVal':'','newVal':'" + Esc(Currentobj.Description) + "'}",
+         "{'columnName':'Summary','oldVal':'','newVal':'" + Esc(Currentobj.Summary) + "'}",
          "{'columnName':'PriorityID','oldVal':'','newVal':'" +
          _unitOfWork.PriorityRepository.GetByID(Currentobj.PriorityID).Name + "'}",
          "{'columnName':'StatusID','oldVal':'','newVal':'" +
@@ -341,7 +341,7 @@ namespace EtaskMinstry.AppCode
         /// <param name="strColName"></param>
         private static void LogTaskSingleValue(int TaskID, string value, string strColName)
         {
-            string logVal = "[{'columnName':'" + strColName + "','oldVal':'','newVal':'" + value + "'}]";
+            string logVal = "[{'columnName':'" + strColName + "','oldVal':'','newVal':'" + Esc(value) + "'}]";
             UnitOfWork _unitOfWork =
                 new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
             var obj = _unitOfWork.TaskRepository.GetByID(TaskID);
@@ -366,6 +366,16 @@ namespace EtaskMinstry.AppCode
         {
             var actor = MvcApplication.userData;
             return actor == null || actor.isCompany;
+        }
+
+        /// <summary>
+        /// Escape a free-text value for the single-quoted log format. An unescaped ' (e.g. a
+        /// comment "it's done") made the whole row unparseable in Generallog.ParseJson, so the
+        /// entry showed up empty in the task log. JavaScriptSerializer reads \' and \\ back.
+        /// </summary>
+        private static string Esc(string value)
+        {
+            return value == null ? null : value.Replace("\\", "\\\\").Replace("'", "\\'");
         }
 
     }
