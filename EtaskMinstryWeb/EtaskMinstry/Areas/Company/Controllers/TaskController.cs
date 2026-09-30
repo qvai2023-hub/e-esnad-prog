@@ -142,6 +142,14 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public ActionResult SaveTask(TaskAddEdit objTask)
         {
+            // Edit only the company's own task, and assign only its own employees / projects
+            bool allowed = (objTask.TaskID <= 0 || RecordAccess.CompanyOwnsTask(objTask.TaskID))
+                           && (!objTask.EmpID.HasValue || RecordAccess.CompanyOwnsEmployee(objTask.EmpID))
+                           && (objTask.EmployessLst == null || objTask.EmployessLst.All(e => !e.HasValue || RecordAccess.CompanyOwnsEmployee(e)))
+                           && (!objTask.ProjectID.HasValue || objTask.ProjectID == 0 || RecordAccess.CompanyOwnsProject(objTask.ProjectID));
+            if (!allowed)
+                return Redirect("~/Company/Company/Index");
+
             AssignTask(objTask);
             //if (objTask.EmployessLst == null)
             //{
@@ -406,6 +414,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         public ActionResult GetTask(int taskId)
         {
             Dictionary<string, object> Data = new Dictionary<string, object>();
+            if (!RecordAccess.CompanyOwnsTask(taskId))
+                return Json(Data, JsonRequestBehavior.AllowGet);
             var task =new TaskAddEdit().gettask(taskId);
             Data.Add("Title",task.Title);
             Data.Add("Description",task.Description);           
@@ -414,6 +424,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
         public ActionResult EDitTask(int taskId)
         {
+            if (!RecordAccess.CompanyOwnsTask(taskId))
+                return Redirect("~/Company/Company/Index");
             var task = new TaskAddEdit().Select(taskId);
 
             FillDropDownLists();

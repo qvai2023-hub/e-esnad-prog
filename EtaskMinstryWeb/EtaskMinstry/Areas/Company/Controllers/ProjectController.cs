@@ -33,6 +33,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [EncryptedActionParameter]
         public ActionResult GetProject(int iID)
         {
+            if (!RecordAccess.CompanyOwnsProject(iID))
+                return HttpNotFound();
             return PartialView("PartialOneProject", new ProjectAddEdit().Get(iID));
         }
 
@@ -46,12 +48,17 @@ namespace EtaskMinstry.Areas.Company.Controllers
         {
             //NotificationHub.Send(Users.Employee(405), NotificationType.AddComment,"تم إضافة مشروع جديد " + objProject.Name, "");
 
+            // An existing project (ID > 0) is edited by id: only the company's own
+            if (objProject.ID > 0 && !RecordAccess.CompanyOwnsProject(objProject.ID))
+                return false;
             return objProject.Save();
         }
 
         [HttpPost]
         public Boolean ArchiveTask(ProjectAddEdit objProject)
         {
+            if (objProject.ID > 0 && !RecordAccess.CompanyOwnsProject(objProject.ID))
+                return false;
             return objProject.Save();
         }
 
@@ -63,6 +70,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpGet]
         public ActionResult GetTasksByProject(int ProjectID)
         {
+            if (!RecordAccess.CompanyOwnsProject(ProjectID))
+                return Json(new List<TaskAddEdit>(), JsonRequestBehavior.AllowGet);
             return Json(new TaskAddEdit().GetTasksByProject(ProjectID), JsonRequestBehavior.AllowGet);
         }
 

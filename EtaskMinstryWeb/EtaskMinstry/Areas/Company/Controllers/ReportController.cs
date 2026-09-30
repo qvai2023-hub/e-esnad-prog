@@ -313,6 +313,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
         public ActionResult BriefTasksReport(int CompanyId)
         {
+            // The menu link passes the company's own id; never trust it from the URL
+            CompanyId = MvcApplication.userData.userId;
             TasksService _TasksService = new TasksService();
             var data = _TasksService.GetData(CompanyId);
 

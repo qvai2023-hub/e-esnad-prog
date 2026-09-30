@@ -171,6 +171,7 @@
     <Compile Include="AppCode\Encryption.cs" />
     <Compile Include="AppCode\Enums.cs" />
     <Compile Include="AppCode\Extentions.cs" />
+    <Compile Include="AppCode\RecordAccess.cs" />
     <Compile Include="AppCode\FileManger.cs" />
     <Compile Include="AppCode\Generallog.cs" />
     <Compile Include="AppCode\Log.cs" />

@@ -72,6 +72,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [EncryptedActionParameter]
         public ActionResult TaskExtensions(string id)
         {
+            if (!RecordAccess.CompanyOwnsTask(int.Parse(id)))
+                return HttpNotFound();
             return PartialView(new TaskExtensionsVM().Select(int.Parse(id)));
         }
 
@@ -91,6 +93,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                int? timeUnitID, int? projectID,string desc=null)
         {
             int? timeunit = timeUnitID.HasValue ? timeUnitID : null;
+            if (!RecordAccess.CompanyOwnsTask(taskID) || (projectID.HasValue && projectID != 0 && !RecordAccess.CompanyOwnsProject(projectID)))
+                return "Fail";
             if (validateTaskDuration(StartDate, EndDate, Duration, timeunit))
                 return
                     EtaskMinstry.AppCode.TaskManger.EditTask(taskID, ProrityID, StartDate, EndDate, Duration,
@@ -127,6 +131,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
             var task = uow.TaskRepository.GetByID(taskID);
             if (task == null || task.StatusID != (int)TaskStatus.New)
                 return false;
+            // Own task, and only to one of the company's own employees
+            if (!RecordAccess.CompanyOwnsTask(taskID) || !RecordAccess.CompanyOwnsEmployee(iEmployeeID))
+                return false;
 
             return EtaskMinstry.AppCode.TaskManger.AssignTask(taskID, iEmployeeID);
         }
@@ -138,6 +145,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool PendTask(int taskID)
         {
+            if (!RecordAccess.CompanyOwnsTask(taskID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.PendTask(taskID);
            //return new TaskWorkflow().ChangeTaskStatus(taskID, TaskWorkFlowActions.Pause).IsChanged;
         }
@@ -149,6 +158,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public string UnPendTask(int taskID)
         {
+            if (!RecordAccess.CompanyOwnsTask(taskID))
+                return " "; // same "not done" value TaskManger.UnPendTask returns
             return EtaskMinstry.AppCode.TaskManger.UnPendTask(taskID);
             //return new TaskWorkflow().ChangeTaskStatus(taskID, TaskWorkFlowActions.Reopen).NewStatus.ToString();
         }
@@ -161,6 +172,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool CompanyAcceptTask(int iTaskID)
         {
+            if (!RecordAccess.CompanyOwnsTask(iTaskID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.CompanyAcceptTask(iTaskID);
         }
         /// <summary>
@@ -170,6 +183,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool CompanyRejectTask(int iTaskID)
         {
+            if (!RecordAccess.CompanyOwnsTask(iTaskID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.CompanyRejectTask(iTaskID);
         }
 
@@ -194,6 +209,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
             //    Type = NotificationType.AddComment
             //});
 
+            if (!RecordAccess.CompanyOwnsTask(taskID))
+                return Json(new { id = 0, isCompany = true }, JsonRequestBehavior.AllowGet); // same shape as a failed AddComment
+
             int commentID = EtaskMinstry.AppCode.TaskManger.AddComment(taskID, strComment, iEmployeeID);
             bool isCompany = EtaskMinstry.AppCode.TaskManger.GetUserCommmet(commentID);
             var d = new { id = commentID, isCompany = isCompany };
@@ -208,6 +226,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool HideComment(int iCommentID)
         {
+            if (!RecordAccess.CompanyOwnsComment(iCommentID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.HideComment(iCommentID);
         }
 
@@ -218,6 +238,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool ShowComment(int iCommentID)
         {
+            if (!RecordAccess.CompanyOwnsComment(iCommentID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.ShowComment(iCommentID);
         }
 
@@ -228,6 +250,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public bool ReportComment(int iCommentID)
         {
+            if (!RecordAccess.CompanyOwnsComment(iCommentID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.ReportComment(iCommentID);
         }
 
@@ -248,6 +272,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         public ActionResult AddAttachment(HttpPostedFileBase uploadFile)
         {
             int Taskid = int.Parse(Request.Form["taskID"]);
+            if (!RecordAccess.CompanyOwnsTask(Taskid))
+                return RedirectToAction("Index");
             //if (Extentions.ValidateReCaptcha())
             //{
                 string originalFileName = Request.Files.Count > 0 ? Extentions.SanitizeFileName(Request.Files[0].FileName) : null;
@@ -274,7 +300,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         {
             // Only a bare stored file name: "../../Web.config" used to download the config file
             fileName = Extentions.SafeUploadFileName(fileName);
-            if (fileName == null || !System.IO.File.Exists(Server.MapPath("/Upload/Task/" + fileName)))
+            if (fileName == null || !System.IO.File.Exists(Server.MapPath("/Upload/Task/" + fileName))
+                || !RecordAccess.CompanyOwnsAttachment(fileName))
                 throw new HttpException(404, "File not found");
             try
             {
@@ -355,7 +382,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public Boolean Archive(int iTaskID)
         {
-            return new TaskManger().Archive(iTaskID);      
+            if (!RecordAccess.CompanyOwnsTask(iTaskID))
+                return false;
+            return new TaskManger().Archive(iTaskID);
         }
 
         /// <summary>
@@ -366,6 +395,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public Boolean AcceptTask(int iTaskID)
         {
+            if (!RecordAccess.CompanyOwnsTask(iTaskID))
+                return false;
             return new TaskManger().AcceptRefusedTask(iTaskID, TaskStatus.Approved);
         }
 
@@ -377,6 +408,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public Boolean RefusedTask(int iTaskID)
         {
+            if (!RecordAccess.CompanyOwnsTask(iTaskID))
+                return false;
             return new TaskManger().AcceptRefusedTask(iTaskID, TaskStatus.NotAproved);
         }
 
@@ -388,6 +421,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         /// <returns></returns>
         public Boolean ChangePriority(int TaskID, int PriorityID)
         {
+            if (!RecordAccess.CompanyOwnsTask(TaskID))
+                return false;
             return new TaskManger().ChangePriority(TaskID, PriorityID);
         }
 
@@ -411,7 +446,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
             var vm = new CompanyTaskVM();
             foreach (var taskId in taskIds)
             {
-                if (vm.Delete(taskId))
+                // Another company's task counts as a failure, like a non-deletable one
+                if (RecordAccess.CompanyOwnsTask(taskId) && vm.Delete(taskId))
                     successCount++;
                 else
                     failCount++;

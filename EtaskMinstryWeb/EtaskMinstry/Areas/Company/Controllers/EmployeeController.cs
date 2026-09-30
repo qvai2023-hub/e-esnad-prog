@@ -37,6 +37,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [EncryptedActionParameter]
         public ActionResult AddEdit(int? EmpID)
         {
+            if (EmpID.HasValue && EmpID != 0 && !RecordAccess.CompanyOwnsEmployee(EmpID))
+                return RedirectToAction("Index");
             if (EmpID.HasValue && EmpID != 0)
             {
                 ViewBag.IsValiRecap = true;
@@ -57,6 +59,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
             bool bReturn = false;
             if (obj == null)
                 obj.EmpID = 0;
+            // Editing (EmpID > 0) is only for the company's own employees
+            if (obj.EmpID > 0 && !RecordAccess.CompanyOwnsEmployee(obj.EmpID))
+                return RedirectToAction("Index");
             if (Extentions.ValidateReCaptcha())
             {
                 bReturn = obj.Save();
@@ -136,6 +141,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public void SetIsActive(int? EmpID)
         {
+            if (!RecordAccess.CompanyOwnsEmployee(EmpID))
+                return;
             new CompanyEmployeeVM().SetIsActive(EmpID);
         }
 
@@ -183,6 +190,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [HttpPost]
         public ActionResult RehireDeletedEmp(int EmpId)
         {
+            if (!RecordAccess.CompanyOwnsEmployee(EmpId))
+                return Json(false, JsonRequestBehavior.AllowGet);
             var result = new CompanyEmployeeVM().UpdateRehireDeletedEmployee(EmpId);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
@@ -212,6 +221,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
         [EncryptedActionParameter]
         public ActionResult Details(int? EmpID)
         {
+            if (EmpID.HasValue && EmpID != 0 && !RecordAccess.CompanyOwnsEmployee(EmpID))
+                return RedirectToAction("Index");
             if (EmpID.HasValue && EmpID != 0)
             {
                 ViewBag.IsValiRecap = true;
