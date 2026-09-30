@@ -132,9 +132,20 @@ namespace EtaskMinstry.Models.Login
                     activeEmp = _unitOfWork.Employee.Get().FirstOrDefault(u => u.EmpID == user.EmpID && u.IsActive == true && u.IsDeleted==false);
                     if (activeEmp != null)
                     {
-                        Checkin((int)user.EmpID);
+                        // The employee's company must be active too (same rule as the mobile API's
+                        // AuthValidator). The check was commented out and companyStatus hardcoded to
+                        // active, so a deactivated or deleted company's employees kept full access.
+                        // A stopped company still logs in here, but companyStatus = stoped makes
+                        // EmployeeAuthorize send the user to the StopedUser page.
+                        var employer = activeEmp.CompanyID.HasValue ? _unitOfWork.Company.GetByID(activeEmp.CompanyID.Value) : null;
+                        bool companyActive = employer == null || (employer.IsActive == true && employer.IsDeleted != true);
+                        if (companyActive)
+                            Checkin((int)user.EmpID);
                         //activeCompany = _unitOfWork.Company.Get().FirstOrDefault(u => u.CompanyID == user.CompanyID && u.IsActive == true);
-                        return checkLoginETask(user, bReturn);
+                        bool loggedIn = checkLoginETask(user, bReturn);
+                        if (loggedIn && !companyActive)
+                            MvcApplication.userData.companyStatus = (int)userStatus.stoped;
+                        return loggedIn;
                     }
 
                 }
