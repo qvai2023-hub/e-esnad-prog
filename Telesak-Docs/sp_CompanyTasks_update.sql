@@ -44,7 +44,9 @@ from Task t   left join Project p on t.ProjectID = p.ProjectID
 where t.IsDeleted=0 and ((@CompanyId=0) or (t.CompanyID = @CompanyId))  and
    ((@ProjectIds = '')
    or (@notInProjectList = 0 and @ProjectIds='-2' and t.ProjectID is null)
-   or (@notInProjectList = 1 and t.ProjectID not in(select * from dbo.fnSplitStringAsTable(@ProjectIds,','))  OR t.ProjectID IS NULL)
+   -- The OR must sit inside its own parentheses: "(A and B OR C)" is "(A and B) OR C", so every
+   -- task without a project was returned whatever projects were selected.
+   or (@notInProjectList = 1 and (t.ProjectID not in(select * from dbo.fnSplitStringAsTable(@ProjectIds,','))  OR t.ProjectID IS NULL))
    or (@notInProjectList = 0 and t.ProjectID in (select * from dbo.fnSplitStringAsTable(@ProjectIds,','))))and
 
       ((@EmpId = '')
