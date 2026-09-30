@@ -272,6 +272,10 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
         public FileResult DownloadAttachment(string fileName)
         {
+            // Only a bare stored file name: "../../Web.config" used to download the config file
+            fileName = Extentions.SafeUploadFileName(fileName);
+            if (fileName == null || !System.IO.File.Exists(Server.MapPath("/Upload/Task/" + fileName)))
+                throw new HttpException(404, "File not found");
             try
             {
                 var attachDisplay = new EtaskMinstry.Models.Attachment.AttachmentDisplay().GetAttachment(fileName);

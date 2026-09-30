@@ -528,7 +528,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                         for (int i = 0; i < RemovedFiles.Count; i++)
                             if (!String.IsNullOrEmpty(RemovedFiles[i]))
                             {
-                                if (System.IO.File.Exists(Server.MapPath("/Upload/Task/" + RemovedFiles[i])))
+                                // Posted value: never let "../../Web.config" reach File.Delete
+                                if (Extentions.SafeUploadFileName(RemovedFiles[i]) != null && System.IO.File.Exists(Server.MapPath("/Upload/Task/" + RemovedFiles[i])))
                                     System.IO.File.Delete(Server.MapPath("/Upload/Task/" + RemovedFiles[i]));
 
                                 //new AttachmentDisplay().Delete(new AttachmentDisplay().GetAttachment(RemovedFiles[i]));
@@ -645,7 +646,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
                             for (int i = 0; i < RemovedFiles.Count; i++)
                                 if (!String.IsNullOrEmpty(RemovedFiles[i]))
                                 {
-                                    if (System.IO.File.Exists(Server.MapPath("/Upload/Task/" + RemovedFiles[i])))
+                                    // Posted value: never let "../../Web.config" reach File.Delete
+                                    if (Extentions.SafeUploadFileName(RemovedFiles[i]) != null && System.IO.File.Exists(Server.MapPath("/Upload/Task/" + RemovedFiles[i])))
                                         System.IO.File.Delete(Server.MapPath("/Upload/Task/" + RemovedFiles[i]));
 
                                     //new AttachmentDisplay().Delete(new AttachmentDisplay().GetAttachment(RemovedFiles[i]));

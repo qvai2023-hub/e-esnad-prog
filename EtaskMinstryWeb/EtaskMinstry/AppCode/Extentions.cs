@@ -18,6 +18,21 @@ namespace EtaskMinstry
 {
     public static class Extentions
     {
+        /// <summary>
+        /// The name itself if it is a bare file name, otherwise null. Request values are used to
+        /// build "/Upload/Task/" + name paths, and Server.MapPath accepts "../" as long as the
+        /// result stays inside the site, so "../../Web.config" reached the config file.
+        /// </summary>
+        public static string SafeUploadFileName(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+            string name = fileName.Trim();
+            if (name == "." || name == ".." || name.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0)
+                return null;
+            return name;
+        }
+
         public static string SanitizeFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName)) return null;
