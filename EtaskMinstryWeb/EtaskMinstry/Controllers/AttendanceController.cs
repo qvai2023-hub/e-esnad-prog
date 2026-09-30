@@ -352,29 +352,43 @@ namespace EtaskMinstry.Controllers
                     attendance = GetTodayActiveAttendance(empId);
                 }
 
-                if (attendance == null || attendance.CheckOut.HasValue)
+                // Only the employee's own attendance row (attendanceId is posted by the client)
+                if (attendance == null || attendance.CheckOut.HasValue || attendance.EmpId != empId)
                 {
                     return Json(new { success = false });
                 }
 
                 // Parse last activity time if provided, otherwise use now
-                DateTime checkoutTime = DateTime.Now;
+                DateTime lastActivity = DateTime.Now;
                 if (!string.IsNullOrEmpty(lastActivityTime))
                 {
                     if (DateTime.TryParse(lastActivityTime, out DateTime parsedTime))
                     {
-                        checkoutTime = parsedTime;
+                        lastActivity = parsedTime;
                     }
                 }
+                // Client clock: keep it between check-in and now
+                if (lastActivity > DateTime.Now) lastActivity = DateTime.Now;
+                if (attendance.CheckIn.HasValue && lastActivity < attendance.CheckIn.Value) lastActivity = attendance.CheckIn.Value;
 
-                attendance.CheckOut = checkoutTime;
-                _unitOfWork.AttendanceRepository.Update(attendance);
-                _unitOfWork.Save();
-
-                // Clear session flag so tracker won't load on next page
-                if (Session != null)
+                // The browser fires this on every unload it can't tell apart from a close: F5,
+                // Back, typing a URL, closing one of several tabs, and JS redirects after
+                // Accept/Finish. Closing the row here ended the employee's attendance for the rest
+                // of the day during normal use. Instead record the last activity as the heartbeat:
+                // if the page is reloaded the next page keeps heartbeating and the row stays open;
+                // if the user really left, AutoCheckoutJob closes the row at this time once
+                // heartbeats have stopped for HEARTBEAT_TIMEOUT_MINUTES.
+                var efConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                var entityBuilder = new System.Data.EntityClient.EntityConnectionStringBuilder(efConnStr);
+                using (var conn = new SqlConnection(entityBuilder.ProviderConnectionString))
                 {
-                    Session["HasActiveAttendance"] = false;
+                    conn.Open();
+                    using (var cmd = new SqlCommand("UPDATE Attendance SET LastHeartbeat = @LastHeartbeat WHERE Id = @Id AND CheckOut IS NULL", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@LastHeartbeat", lastActivity);
+                        cmd.Parameters.AddWithValue("@Id", attendance.Id);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
                 return Json(new { success = true });
@@ -411,7 +425,8 @@ namespace EtaskMinstry.Controllers
                     attendance = GetTodayActiveAttendance(empId);
                 }
 
-                if (attendance == null)
+                // Only the employee's own attendance row (attendanceId is posted by the client)
+                if (attendance == null || attendance.EmpId != empId)
                 {
                     return Json(new { success = false, message = "لا يوجد حضور نشط - attendanceId: " + attendanceId });
                 }
