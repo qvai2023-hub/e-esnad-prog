@@ -141,6 +141,8 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         [EncryptedActionParameter]
         public ActionResult TaskExtensions(string id)
         {
+            if (!RecordAccess.EmployeeCanSeeTask(int.Parse(id)))
+                return HttpNotFound();
 
             return PartialView(new EtaskMinstry.Models.Employee.TaskExtensionsVM().Select(int.Parse(id)));
         }
@@ -153,6 +155,8 @@ namespace EtaskMinstry.Areas.Employee.Controllers
 
         public string UpdateTaskDalyTime(int taskID, decimal Duration)
         {
+            if (!RecordAccess.EmployeeCanSeeTask(taskID))
+                return "Error";
 
             return EtaskMinstry.AppCode.TaskManger.EmpUpdateDalyTaskTime(taskID, Duration);
         }
@@ -175,6 +179,8 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         /// <returns></returns>
         public bool StartTask(int taskID)
         {
+            if (!RecordAccess.EmployeeIsAssignee(taskID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.EmployeeStartTask(taskID);
 
 
@@ -219,21 +225,29 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         [HttpPost]
         public int AddComment(int taskID, string strComment, int iEmployeeID)
         {
+            if (!RecordAccess.EmployeeCanSeeTask(taskID))
+                return 0; // same value a failed AddComment returns
             return EtaskMinstry.AppCode.TaskManger.AddComment(taskID, strComment, iEmployeeID);
         }
 
         public bool HideComment(int iCommentID)
         {
+            if (!RecordAccess.EmployeeCanSeeComment(iCommentID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.HideComment(iCommentID);
         }
 
         public bool ShowComment(int iCommentID)
         {
+            if (!RecordAccess.EmployeeCanSeeComment(iCommentID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.ShowComment(iCommentID);
         }
 
         public bool ReportComment(int iCommentID)
         {
+            if (!RecordAccess.EmployeeCanSeeComment(iCommentID))
+                return false;
             return EtaskMinstry.AppCode.TaskManger.ReportComment(iCommentID);
         }
 
@@ -254,6 +268,8 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         {
             
             int Taskid = int.Parse(Request.Form["taskID"]);
+            if (!RecordAccess.EmployeeCanSeeTask(Taskid))
+                return RedirectToAction("Index");
             //if (Extentions.ValidateReCaptcha())
             //{
                 string originalFileName = Request.Files.Count > 0 ? Extentions.SanitizeFileName(Request.Files[0].FileName) : null;
@@ -280,7 +296,8 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         {
             // Only a bare stored file name: "../../Web.config" used to download the config file
             fileName = Extentions.SafeUploadFileName(fileName);
-            if (fileName == null || !System.IO.File.Exists(Server.MapPath("/Upload/Task/" + fileName)))
+            if (fileName == null || !System.IO.File.Exists(Server.MapPath("/Upload/Task/" + fileName))
+                || !RecordAccess.EmployeeCanSeeAttachment(fileName))
                 throw new HttpException(404, "File not found");
             try
             {

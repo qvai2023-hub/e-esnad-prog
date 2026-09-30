@@ -240,6 +240,9 @@ namespace EtaskMinstry.Models.EmployeeTask
         {
             var result = false;
             var task = _unitOfWork.TaskRepository.GetByID(taskId);
+            // Only the current assignee may end the task
+            if (task == null || task.EmpID != MvcApplication.userData.userId)
+                return false;
             var oldtask = task.Clone<TaskManagementModel.Task>();
             task.StatusID = (int)TaskStatus.Done;
             task.DeliverDate = DateTime.Now;

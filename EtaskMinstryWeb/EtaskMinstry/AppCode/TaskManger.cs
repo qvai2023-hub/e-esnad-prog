@@ -855,11 +855,11 @@ namespace EtaskMinstry.AppCode
             UnitOfWork _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
             //GetTaskObject
             var objTask = _unitOfWork.TaskRepository.GetByID(iTaskID);
-            if (objTask != null) //check if Task not null
+            if (objTask != null && objTask.EmpID == MvcApplication.userData.userId) //check if Task not null and current user is the assignee (as in EmpAcceptTask / EmpRejectTask)
             {
                 //Clone Task Object for Log purpose
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
-                //Update Task Status 
+                //Update Task Status
                 objTask.StatusID = (int)TaskStatus.Done;
                 objTask.DeliverDate = DateTime.Now;
                 //Log TaskRecord
@@ -1180,7 +1180,8 @@ namespace EtaskMinstry.AppCode
                 }
                 else
                 {
-                    if (objTask != null) //check if Task not null
+                    // A company may only open its own tasks (any company used to pass)
+                    if (objTask != null && (!EtaskMinstry.MvcApplication.userData.isCompany || objTask.CompanyID == EtaskMinstry.MvcApplication.userData.userId)) //check if Task not null
                     {
                         isValid = objTask.IsDeleted != true;
                     }
