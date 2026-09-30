@@ -228,7 +228,6 @@
     <Compile Include="Areas\Employee\Controllers\HelpController.cs" />
     <Compile Include="Areas\Employee\Controllers\ReportController.cs" />
     <Compile Include="Areas\Employee\Controllers\TasksController.cs" />
-    <Compile Include="Areas\Employee\Controllers\TestFileUploadController.cs" />
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
     <Compile Include="Areas\Employee\Models\DashBoardVM.cs" />
     <Compile Include="Areas\Employee\Models\EmployeeTaskDetailVM.cs" />
@@ -240,7 +239,6 @@
     <Compile Include="Areas\Employee\Models\TaskExtensionsVM.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ChatController.cs" />
-    <Compile Include="Controllers\DataBaseController.cs" />
     <Compile Include="Controllers\EmployeePerformanceReportController.cs" />
     <Compile Include="Controllers\EmployeesReportController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
@@ -250,7 +248,6 @@
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\SiteController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
     <Compile Include="CustomAttrbutes\AdminAuthorize.cs" />
     <Compile Include="CustomAttrbutes\CompanyAuthorize.cs" />
     <Compile Include="CustomAttrbutes\CustomAuthorize.cs" />
