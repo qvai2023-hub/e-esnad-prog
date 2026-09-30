@@ -73,6 +73,9 @@ namespace EtaskMinstry.Areas.Company.Controllers
             int iProjectID = ProjectID.IntParse();
             int empID = EmpID.IntParse();
             int yearID = ddlHijriDateYear.IntParse();
+            // The menu opens this page with a plain GET, so the checkbox value is absent (null);
+            // reading .Value inside the query threw "Nullable object must have a value".
+            bool withoutProject = hdnWithoutProject ?? false;
             DateTime dtStartYear = DateTime.Now;
             DateTime dtEndYear = DateTime.Now;
             if (yearID != 0)
@@ -85,7 +88,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
                                          System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"]
                                              .ToString())
                                          .TaskRepository.Get(i => i.CompanyID == MvcApplication.userData.CompanyId && i.IsDeleted == false
-                                                                  && (hdnWithoutProject.Value
+                                                                  && (withoutProject
                                                                       ? !i.ProjectID.HasValue
                                                                       : (iProjectID == 0 || i.ProjectID == iProjectID))
                                                                   && (empID == 0 || i.EmpID == empID)
