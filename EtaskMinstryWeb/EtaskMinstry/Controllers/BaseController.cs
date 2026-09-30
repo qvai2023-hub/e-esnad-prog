@@ -22,15 +22,46 @@ namespace EtaskMinstry.Controllers
         public virtual Boolean Delete(int id, string CurrenClass)
         {
             CompanyEmployeeVM obj = new CompanyEmployeeVM();
-           
+
+            // Every area controller inherits this action, and nothing checked that the record
+            // belongs to the caller: any logged-in user could delete any company's tasks,
+            // projects or employees. A company may only delete its own records; Admin may
+            // delete employees and use the generic branch.
+            var user = MvcApplication.userData;
+            bool isAdmin = user != null && user.UserTypeId == (int)LoggedUserType.Admin;
+            bool isCompany = user != null && user.isCompany;
+            var ownerCheck = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
+
             // Special Delete For Tasks And Projects .
-            if (CurrenClass.ToLower() == "company")
+            // "dashboard": the Company dashboard's delete icon posts from the DashBoard
+            // controller. It is a task delete, but it used to fall into the generic branch
+            // below, which treated the task id as an employee id.
+            if (CurrenClass.ToLower() == "company" || CurrenClass.ToLower() == "dashboard")
+            {
+                var task = ownerCheck.TaskRepository.GetByID(id);
+                if (!isCompany || task == null || task.CompanyID != user.userId)
+                    return false;
                 return new CompanyTaskVM().Delete(id);
+            }
 
             else if (CurrenClass.ToLower() == "project")
+            {
+                var project = ownerCheck.ProjectRepository.GetByID(id);
+                if (!isCompany || project == null || project.CompanyID != user.userId)
+                    return false;
                 return new ProjectDisplay().Delete(id);
+            }
             if (CurrenClass.ToLower() == "employee")
+            {
+                var employee = ownerCheck.Employee.GetByID(id);
+                if (employee == null || !(isAdmin || (isCompany && employee.CompanyID == user.userId)))
+                    return false;
                 return new CompanyEmployeeVM().Delete(id);
+            }
+            else if (!isAdmin)
+            {
+                return false;
+            }
             else
             {
                 string Email = obj.GetEmail(id);
