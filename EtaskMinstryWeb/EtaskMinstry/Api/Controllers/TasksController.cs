@@ -423,6 +423,14 @@ namespace EtaskMinstry.Api.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest,
                     ApiResponse.Fail("بيانات الطلب غير صحيحة", "INVALID_REQUEST"));
 
+            // Same size limit as the web upload (AppCode/UploadFile.cs). Checked before the body is
+            // buffered, so an oversized request can't be read into memory. 64 KB covers the
+            // multipart framing and the description field.
+            long maxFileSize = long.Parse(ConfigurationManager.AppSettings["maxfileSize"]);
+            if (Request.Content.Headers.ContentLength.HasValue && Request.Content.Headers.ContentLength.Value > maxFileSize + 65536)
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ApiResponse.Fail("حجم الملف أكبر من المسموح", "FILE_TOO_LARGE"));
+
             var provider = await Request.Content.ReadAsMultipartAsync(new MultipartMemoryStreamProvider());
             string description = null;
             HttpContent fileContent = null;
@@ -446,11 +454,27 @@ namespace EtaskMinstry.Api.Controllers
 
             string originalFileName = Extentions.SanitizeFileName(TrimQuotes(fileContent.Headers.ContentDisposition.FileName));
             string extension = System.IO.Path.GetExtension(originalFileName);
+            byte[] bytes = await fileContent.ReadAsByteArrayAsync();
+
+            // Same allow-list as the web upload: known extension AND matching file header.
+            // Without it any file (.html, .aspx, ...) was written into the site's Upload folder
+            // and served back from the web app's own origin.
+            if (bytes.Length == 0 || bytes.Length > maxFileSize)
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ApiResponse.Fail("حجم الملف أكبر من المسموح", "FILE_TOO_LARGE"));
+            var allowedHeaders = Extentions.ValidHeaders(new System.Collections.Generic.Dictionary<string, byte[]>());
+            string extKey = string.IsNullOrEmpty(extension) ? "" : extension.TrimStart('.').ToUpperInvariant();
+            byte[] expectedHeader;
+            if (!allowedHeaders.TryGetValue(extKey, out expectedHeader)
+                || bytes.Length < expectedHeader.Length
+                || !Extentions.CompareArray(expectedHeader, bytes.Take(expectedHeader.Length).ToArray()))
+                return Request.CreateResponse(HttpStatusCode.BadRequest,
+                    ApiResponse.Fail("نوع الملف غير مسموح", "INVALID_FILE_TYPE"));
+
             string storedFileName = Guid.NewGuid().ToString("N").Substring(0, 16) + extension;
             string uploadRoot = System.Web.Hosting.HostingEnvironment.MapPath("~/Upload/Task/");
             if (!System.IO.Directory.Exists(uploadRoot)) System.IO.Directory.CreateDirectory(uploadRoot);
             string filePath = System.IO.Path.Combine(uploadRoot, storedFileName);
-            byte[] bytes = await fileContent.ReadAsByteArrayAsync();
             System.IO.File.WriteAllBytes(filePath, bytes);
 
             bool ok = TaskManger.AttachTaskFile(id, storedFileName, description, originalFileName);
