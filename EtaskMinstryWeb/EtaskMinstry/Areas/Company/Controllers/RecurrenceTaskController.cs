@@ -9,6 +9,7 @@ using EtaskMinstry.AppCode;
 
 namespace EtaskMinstry.Areas.Company.Controllers
 {
+    [CompanyAuthorize]
     public class RecurrenceTaskController : Controller
     {
         //

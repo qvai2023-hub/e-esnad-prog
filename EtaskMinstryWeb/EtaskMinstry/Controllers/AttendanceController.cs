@@ -28,8 +28,36 @@ namespace EtaskMinstry.Controllers
             sharedService = new SharedService();
             _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
         }
+        /// <summary>
+        /// Report actions below were reachable anonymously and trusted the posted CompanyId.
+        /// Admin may report on any company; a Company only on itself (companyId is forced to
+        /// its own id); employees and anonymous callers get nothing.
+        /// </summary>
+        private static bool CanUseAttendanceReport(ref int? companyId)
+        {
+            var user = MvcApplication.userData;
+            if (user == null || user.status != (int)userStatus.active)
+                return false;
+            if (user.UserTypeId == (int)LoggedUserType.Admin)
+                return true;
+            if (user.isCompany)
+            {
+                companyId = user.userId;
+                return true;
+            }
+            return false;
+        }
+
+        private static bool IsAdmin()
+        {
+            var user = MvcApplication.userData;
+            return user != null && user.status == (int)userStatus.active && user.UserTypeId == (int)LoggedUserType.Admin;
+        }
+
         public ActionResult AttendanceReport(int? companyId)
         {
+            if (!CanUseAttendanceReport(ref companyId))
+                return RedirectToAction("login", "Security", new { area = "" });
             ViewBag.companyId = companyId;
             ViewBag.Providers = sharedService.GetProviders();
             if (companyId==null)
@@ -56,7 +84,10 @@ namespace EtaskMinstry.Controllers
 
         [HttpPost]
         public ActionResult GetEmployees(int companyId) {
-           var lst= attendanceReportService.GetEmployeesByCompanyId(companyId);
+           int? scopedCompanyId = companyId;
+           if (!CanUseAttendanceReport(ref scopedCompanyId))
+               return new HttpStatusCodeResult(403);
+           var lst= attendanceReportService.GetEmployeesByCompanyId(scopedCompanyId.Value);
            return Json(lst, JsonRequestBehavior.AllowGet);
         }
 
@@ -111,6 +142,8 @@ namespace EtaskMinstry.Controllers
 
         public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate, int? calendarType)
         {
+            if (!CanUseAttendanceReport(ref CompanyId))
+                return RedirectToAction("login", "Security", new { area = "" });
             // Convert Hijri dates to Gregorian before passing to service
             string fromDateForSP = FromDate;
             string toDateForSP = ToDate;
@@ -187,6 +220,9 @@ namespace EtaskMinstry.Controllers
         [HttpPost]
         public ActionResult GetCompanies(string provider)
         {
+            // Company picker is only shown to Admin
+            if (!IsAdmin())
+                return new HttpStatusCodeResult(403);
             var lst = sharedService.GetCompaniesByproviderId(provider);
             return Json(lst, JsonRequestBehavior.AllowGet);
         }

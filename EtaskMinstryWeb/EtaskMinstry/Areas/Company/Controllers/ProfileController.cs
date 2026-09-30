@@ -8,6 +8,9 @@ using EtaskMinstry.AppCode;
 
 namespace EtaskMinstry.Areas.Company.Controllers
 {
+    // Company's own profile. Without this an employee session could edit the company whose
+    // CompanyID equals its EmpID (userData.userId is used as the company id below).
+    [EtaskMinstry.CustomAttrbutes.CompanyAuthorize]
     public class ProfileController : Controller
     {
         //

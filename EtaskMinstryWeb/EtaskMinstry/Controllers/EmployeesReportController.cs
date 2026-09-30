@@ -9,6 +9,8 @@ using System.Web.Mvc;
 
 namespace EtaskMinstry.Controllers
 {
+    // Admin-only report (Admin menu). Was reachable anonymously with any CompanyId.
+    [EtaskMinstry.CustomAttrbutes.AdminAuthorize]
     public class EmployeesReportController : Controller
     {
         private EmployeesReportService employeesReportService;

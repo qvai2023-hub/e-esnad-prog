@@ -7,6 +7,9 @@ using System.Web.Mvc;
 
 namespace EtaskMinstry.Areas.Employee.Controllers
 {
+    // Employee's own profile. Without this a company session could edit the employee whose
+    // EmpID equals its CompanyID (userData.userId is used as the employee id below).
+    [EtaskMinstry.EmployeeAuthorize]
     public class EmployeeController : Controller
     {
         //
