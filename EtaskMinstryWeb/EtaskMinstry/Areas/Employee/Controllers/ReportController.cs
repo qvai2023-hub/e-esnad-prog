@@ -41,6 +41,17 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
+        /// <summary>
+        /// The employee report's Gregorian picker posts yyyy-mm-dd; ConvertDate expects
+        /// yyyy/mm/dd (the Company picker), so accept either separator.
+        /// </summary>
+        private static DateTime? ParseGregorianDate(string date)
+        {
+            return date.Contains("-")
+                ? QvLib.QVUtil.Date.ConvertStringToDate(date)
+                : QvLib.QVUtil.Date.ConvertDate(date);
+        }
+
         public ActionResult ShowTaskReport(ReportPreperationVM model)
         {
             _unitOfWork = new UnitOfWork(System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString());
@@ -54,12 +65,31 @@ namespace EtaskMinstry.Areas.Employee.Controllers
 
             SqlParameter param5 = new SqlParameter("@StatusId", SqlDbType.NVarChar) { Value = model.Status == null ? "" : model.Status.Contains(-1) ? "-1" : string.Join(",", model.Status) };
             SqlParameter param6 = new SqlParameter("@PriorityId", SqlDbType.NVarChar) { Value = model.priorities == null ? "" : string.Join(",", model.priorities) };
-            SqlParameter param7 = new SqlParameter("@FromDate", SqlDbType.DateTime) { Value = model.fromDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromDate).Date };
-            SqlParameter param8 = new SqlParameter("@ToDate", SqlDbType.DateTime) { Value = model.toDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toDate).Date };
+            // Dates arrive in the system calendar (ISGreg). They were always parsed as Hijri, so with
+            // the Gregorian setting a date such as 2026-09-01 failed or became a wrong year.
+            // Same handling as the Company task report (Areas/Company/Controllers/ReportController.cs).
+            SqlParameter param7;
+            SqlParameter param8;
+            SqlParameter param10;
+            SqlParameter param11;
+            if (EtaskMinstry.MvcApplication.IsGregDate)
+            {
+                param7 = new SqlParameter("@FromDate", SqlDbType.DateTime) { Value = model.fromDate == null ? new Nullable<DateTime>() : ParseGregorianDate(model.fromDate) };
+                param8 = new SqlParameter("@ToDate", SqlDbType.DateTime) { Value = model.toDate == null ? new Nullable<DateTime>() : ParseGregorianDate(model.toDate) };
+                param10 = new SqlParameter("@FromEndDate", SqlDbType.DateTime) { Value = model.fromendDate == null ? new Nullable<DateTime>() : ParseGregorianDate(model.fromendDate) };
+                param11 = new SqlParameter("@ToEndDate", SqlDbType.DateTime) { Value = model.toendDate == null ? new Nullable<DateTime>() : ParseGregorianDate(model.toendDate) };
+            }
+            else
+            {
+                param7 = new SqlParameter("@FromDate", SqlDbType.DateTime) { Value = model.fromDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromDate).Date };
+                param8 = new SqlParameter("@ToDate", SqlDbType.DateTime) { Value = model.toDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toDate).Date };
+                param10 = new SqlParameter("@FromEndDate", SqlDbType.DateTime) { Value = model.fromendDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromendDate).Date };
+                param11 = new SqlParameter("@ToEndDate", SqlDbType.DateTime) { Value = model.toendDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toendDate).Date };
+            }
 
             SqlParameter param9 = new SqlParameter("@taskName", SqlDbType.NVarChar) { Value = model.taskName == null ? "" : model.taskName };
-            SqlParameter param10 = new SqlParameter("@FromEndDate", SqlDbType.DateTime) { Value = model.fromendDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.fromendDate).Date };
-            SqlParameter param11 = new SqlParameter("@ToEndDate", SqlDbType.DateTime) { Value = model.toendDate == null ? new Nullable<DateTime>() : QvLib.QVUtil.Date.hijritodate(model.toendDate).Date };
+            // Show report dates in the system calendar too (the procedure defaulted to Hijri)
+            SqlParameter param12 = new SqlParameter("@CalendarType", SqlDbType.Int) { Value = EtaskMinstry.MvcApplication.IsGregDate ? 1 : 0 };
 
             parameters.Add(param);
             parameters.Add(param1);
@@ -73,6 +103,7 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             parameters.Add(param9);
             parameters.Add(param10);
             parameters.Add(param11);
+            parameters.Add(param12);
 
 
             foreach (var item in parameters)
