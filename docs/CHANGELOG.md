@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Employee dashboard dropped the fraction of entered task time (2026-10-06)
+
+**Status:** Tested and confirmed by user.
+
+An employee entering 1.5 hours saw 1 on the dashboard after a refresh, and re-editing pre-filled 1 and saved it, losing the 0.5 for real. The value was stored correctly (`TaskTLog.TimeCount` is `decimal(5,2)`); `DashBoardVM.Select` cast it to `int` when building the card's `TasktodayTime`.
+
+**Files changed (1):**
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Employee/Models/DashBoardVM.cs` — lines 200/349 cast to `decimal` instead of `int`; lines 200/243/349/392 format with `"0.##"` so times show as `1.5` / `2`, not `1.50` / `2.00`
+
+**Not touched:** `TaskManagementModel/Extentions/Task.cs` (shared; task details page still shows `1.50`), Areas2.
+
+**Note:** times already overwritten as whole numbers by a re-edit cannot be recovered.
+
+### Fixed - Reports show a Windows Security sign-in prompt on servers running SSRS (2026-10-06)
+
+**Status:** Tested and confirmed by user.
+
+On `t.telesakold.app.qvtest.com`, opening any report showed a "Windows Security — Sign in to access this site" dialog. SQL Server Reporting Services on that server reserves `http://+:80/Reports` in HTTP.sys, which outranks the IIS site binding, so every `/Reports/...` request went to SSRS (401 Negotiate/NTLM) and never reached the app. Servers without SSRS were unaffected.
+
+**Fix:** the app's report route prefix is now `/AppReports/{ReportName}`.
+
+**Files changed (6):**
+- `EtaskMinstryWeb/EtaskMinstry/App_Start/RouteConfig.cs` — route URL `Reports/{ReportName}` → `AppReports/{ReportName}`
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Company/Controllers/ReportController.cs` — 4 redirects
+- `EtaskMinstryWeb/EtaskMinstry/Areas/Employee/Controllers/ReportController.cs` — 2 redirects
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/AttendanceController.cs` — 1 redirect
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/EmployeesReportController.cs` — 1 redirect
+- `EtaskMinstryWeb/EtaskMinstry/Controllers/EmployeePerformanceReportController.cs` — 1 redirect
+
+**Not touched:** Areas2, RDLC files, `Report/Report.aspx`.
+
 ### Re-fix - Bug #39 Round 3 (2026-06-04)
 
 **Status:** Implemented — uploaded to tester, awaiting verification.

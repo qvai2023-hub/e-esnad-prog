@@ -197,7 +197,7 @@ namespace EtaskMinstry.Models.Employee
                                     {
                                         emp.Add(new TaskTimeDetails()
                                         {
-                                            LogTime = ((int)lastDate.TimeCount).ToString(),
+                                            LogTime = ((decimal)lastDate.TimeCount).ToString("0.##"),
                                             isToday = lastDate.CreatedDate.Date == DateTime.Today.Date,
                                             LogDate = lastDate.CreatedDate.Date.ToString(),
                                             empId = lastDate.EmpID.Value
@@ -240,7 +240,7 @@ namespace EtaskMinstry.Models.Employee
                                     uniqueTimeLog.Add(item.Key, new TaskTimeDetails()
                                     {
 
-                                        LogTime = totalTimeCountSameDay == 0 ? item.ToList()[0].LogTime : totalTimeCountSameDay.ToString(),
+                                        LogTime = totalTimeCountSameDay == 0 ? item.ToList()[0].LogTime : totalTimeCountSameDay.ToString("0.##"),
                                         isToday = item.ToList()[0].isToday,
                                         LogDate = (MvcApplication.IsGregDate) ? item.Key.ToGregArabicDate() : item.Key.ToHijriArabicDate()
                                     });
@@ -346,7 +346,7 @@ namespace EtaskMinstry.Models.Employee
                                     {
                                         emp.Add(new TaskTimeDetails()
                                         {
-                                            LogTime = ((int)lastDate.TimeCount).ToString(),
+                                            LogTime = ((decimal)lastDate.TimeCount).ToString("0.##"),
                                             isToday = lastDate.CreatedDate.Date == DateTime.Today.Date,
                                             LogDate = lastDate.CreatedDate.Date.ToString(),
                                             empId = lastDate.EmpID.Value
@@ -389,7 +389,7 @@ namespace EtaskMinstry.Models.Employee
                                     uniqueTimeLog.Add(item.Key, new TaskTimeDetails()
                                     {
 
-                                        LogTime = totalTimeCountSameDay == 0 ? item.ToList()[0].LogTime : totalTimeCountSameDay.ToString(),
+                                        LogTime = totalTimeCountSameDay == 0 ? item.ToList()[0].LogTime : totalTimeCountSameDay.ToString("0.##"),
                                         isToday = item.ToList()[0].isToday,
                                         LogDate = (MvcApplication.IsGregDate) ? item.Key.ToGregArabicDate() : item.Key.ToHijriArabicDate()
                                     });
