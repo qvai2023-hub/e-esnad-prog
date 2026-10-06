@@ -44,7 +44,7 @@ namespace EtaskMinstry.Controllers
             }    
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_EmployeePerformance", data));
-            return Redirect("/Reports/EmployeePerformance");
+            return Redirect("/AppReports/EmployeePerformance");
         }
 
         [HttpPost]

@@ -119,7 +119,7 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_CompanyTasks", tasks));
            
-            return Redirect("/Reports/CompanyTasks");
+            return Redirect("/AppReports/CompanyTasks");
         }
 
         //public ActionResult ShowTaskReport(ReportPreperationVM model)
@@ -129,7 +129,7 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         //   // var tasks = db.sp_ProjectTasks(0, 0, 0).ToList();
         //    //ReportAgent.ReportDataSources.Clear();
         //    //ReportAgent.ReportDataSources.Add(new ReportDataSource("DS_ProjectTasks", tasks));
-        //    return Redirect("/Reports/ProjectTasks");
+        //    return Redirect("/AppReports/ProjectTasks");
         //}
         /// <summary>
         /// prepare project report
@@ -170,7 +170,7 @@ namespace EtaskMinstry.Areas.Employee.Controllers
             ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_ProjectTasks", tasks));
-            return Redirect("/Reports/ProjectTasks");
+            return Redirect("/AppReports/ProjectTasks");
         }
     }
 }

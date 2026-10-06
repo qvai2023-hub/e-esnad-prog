@@ -47,7 +47,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_ProjectTasks", tasks));
-            return Redirect("/Reports/ProjectTasks");
+            return Redirect("/AppReports/ProjectTasks");
         }
 
         public ActionResult ProjectReport()
@@ -258,7 +258,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             ReportAgent.ReportParameters.Add(new ReportParameter("CalendarType", model.calendarType.ToString()));
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_CompanyTasks", tasks));
-            return Redirect("/Reports/CompanyTasks");
+            return Redirect("/AppReports/CompanyTasks");
         }
 
 
@@ -311,7 +311,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
             // saving subreport in tempdata
            // TempData["MaintenanceOperationsRequests"] = new ReportDataSource("ds_maintenancepropertyrequest", companyTasks);
          
-            return Redirect("/Reports/TotalEmployeeTasks");
+            return Redirect("/AppReports/TotalEmployeeTasks");
         }
 
         public ActionResult BriefTasksReport(int CompanyId)
@@ -323,7 +323,7 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.AddReportDataSources(new ReportDataSource("DataSet1", data));
-            return Redirect("/Reports/BriefTasksReport");
+            return Redirect("/AppReports/BriefTasksReport");
         }
     }
 }

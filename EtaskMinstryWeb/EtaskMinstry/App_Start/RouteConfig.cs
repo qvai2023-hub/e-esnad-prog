@@ -16,7 +16,7 @@ namespace EtaskMinstry
             // Reports
             routes.MapRoute(
                 name: "Reports",
-                url: "Reports/{ReportName}",
+                url: "AppReports/{ReportName}",
                 defaults: new { controller = "Reports", action = "LoadReport" }
             );
 

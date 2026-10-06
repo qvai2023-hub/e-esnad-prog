@@ -36,7 +36,7 @@ namespace EtaskMinstry.Controllers
 
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_EmpReport", data));
-            return Redirect("/Reports/Report3");
+            return Redirect("/AppReports/Report3");
         }
         [HttpPost]
         public ActionResult GetCompanies(string provider)

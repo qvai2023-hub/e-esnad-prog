@@ -101,7 +101,7 @@ namespace EtaskMinstry.Controllers
         //    //}
         //    ReportAgent.ReportDataSources.Clear();
         //    ReportAgent.AddReportDataSources(new ReportDataSource("DS_attendance", data));
-        //    return Redirect("/Reports/Attendance");
+        //    return Redirect("/AppReports/Attendance");
         //}
         //public ActionResult ViewReport(int? CompanyId, int? EmployeeId
         //    , string FromYear ,string fromMonth, string toYear, string toMonth)
@@ -137,7 +137,7 @@ namespace EtaskMinstry.Controllers
 
 
         //    ReportAgent.AddReportDataSources(new ReportDataSource("DS_attendance", data));
-        //    return Redirect("/Reports/Attendance");
+        //    return Redirect("/AppReports/Attendance");
         //}
 
         public ActionResult ViewReport(int? CompanyId, int? EmployeeId, string FromDate, string ToDate, int? calendarType)
@@ -215,7 +215,7 @@ namespace EtaskMinstry.Controllers
             ReportAgent.ReportParameters.Add(new ReportParameter("CalendarType", (calendarType ?? 1).ToString()));
 
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_attendance", data));
-            return Redirect("/Reports/Attendance");
+            return Redirect("/AppReports/Attendance");
         }
         [HttpPost]
         public ActionResult GetCompanies(string provider)
