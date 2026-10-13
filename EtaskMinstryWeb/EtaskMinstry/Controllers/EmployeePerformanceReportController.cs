@@ -43,8 +43,21 @@ namespace EtaskMinstry.Controllers
                 return View();
             }    
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_EmployeePerformance", data));
+            // Bug #82: show the selected period in the report title (exports included)
+            ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", ToDisplayDate(FromDate)));
+            ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", ToDisplayDate(ToDate)));
             return Redirect("/AppReports/EmployeePerformance");
+        }
+
+        // Picker posts dd/MM/yyyy; show yyyy/MM/dd like the other reports. Hijri input is shown as entered.
+        private static string ToDisplayDate(string value)
+        {
+            DateTime d;
+            if (MvcApplication.IsGregDate && DateTime.TryParseExact(value, "dd/MM/yyyy", new System.Globalization.CultureInfo("en-US"), System.Globalization.DateTimeStyles.None, out d))
+                return d.ToString("yyyy/MM/dd", new System.Globalization.CultureInfo("en-US"));
+            return value ?? "";
         }
 
         [HttpPost]
