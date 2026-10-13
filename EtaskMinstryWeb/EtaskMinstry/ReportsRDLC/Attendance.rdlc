@@ -571,6 +571,7 @@
                         <BackgroundColor>#f5f5f5</BackgroundColor>
                         <VerticalAlign>Middle</VerticalAlign>
                         <PaddingRight>10pt</PaddingRight>
+                        <Direction>RTL</Direction>
                       </Style>
                     </Textbox>
                     <ColSpan>6</ColSpan>
@@ -631,6 +632,7 @@
             </TablixMember>
           </TablixMembers>
         </TablixRowHierarchy>
+        <LayoutDirection>RTL</LayoutDirection>
         <DataSetName>DS_attendance</DataSetName>
         <Top>0cm</Top>
         <Left>2.25cm</Left>
@@ -674,6 +676,7 @@
           </Border>
           <BackgroundColor>#e6f2ff</BackgroundColor>
           <VerticalAlign>Middle</VerticalAlign>
+          <Direction>RTL</Direction>
         </Style>
       </Textbox>
 
@@ -739,15 +742,16 @@
               </Style>
             </Paragraph>
           </Paragraphs>
-          <Top>0.8cm</Top>
-          <Left>12cm</Left>
+          <Top>0.4cm</Top>
+          <Left>7.25cm</Left>
           <Height>0.6cm</Height>
-          <Width>7cm</Width>
+          <Width>8cm</Width>
           <Style>
             <Border>
               <Style>None</Style>
             </Border>
             <PaddingRight>5pt</PaddingRight>
+            <Direction>RTL</Direction>
           </Style>
         </Textbox>
         <!-- Report Title (Center) -->
@@ -784,6 +788,7 @@
             <PaddingRight>2pt</PaddingRight>
             <PaddingTop>2pt</PaddingTop>
             <PaddingBottom>2pt</PaddingBottom>
+            <Direction>RTL</Direction>
           </Style>
         </Textbox>
         <!-- Logo (Right) -->
@@ -792,9 +797,9 @@
           <Value>=Parameters!LogoUrl.Value</Value>
           <Sizing>FitProportional</Sizing>
           <Top>0.13cm</Top>
-          <Left>15.39cm</Left>
-          <Height>1.40cm</Height>
-          <Width>4.32cm</Width>
+          <Left>15.25cm</Left>
+          <Height>1.2cm</Height>
+          <Width>3.75cm</Width>
           <Style>
             <Border>
               <Style>None</Style>
@@ -853,9 +858,9 @@
             </Paragraph>
           </Paragraphs>
           <Top>0.3cm</Top>
-          <Left>13cm</Left>
+          <Left>12.25cm</Left>
           <Height>0.5cm</Height>
-          <Width>6cm</Width>
+          <Width>6.75cm</Width>
           <Style>
             <Border>
               <Style>None</Style>
@@ -883,7 +888,7 @@
           <Top>0.3cm</Top>
           <Left>0cm</Left>
           <Height>0.5cm</Height>
-          <Width>4cm</Width>
+          <Width>4.75cm</Width>
           <Style>
             <Border>
               <Style>None</Style>
