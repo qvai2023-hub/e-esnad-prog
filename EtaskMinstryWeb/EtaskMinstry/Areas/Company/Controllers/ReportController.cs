@@ -39,14 +39,19 @@ namespace EtaskMinstry.Areas.Company.Controllers
             SqlParameter param1 = new SqlParameter("@CompanyId", SqlDbType.BigInt) { Value = MvcApplication.userData.CompanyId.ToString() };
             SqlParameter param2 = new SqlParameter("@ProjectId", SqlDbType.NVarChar) { Value = ProjectID.HasValue ? ProjectID.Value.ToString() : "0" };
             SqlParameter param3 = new SqlParameter("@EmployeeId", SqlDbType.NVarChar) { Value = "0" };
+            // Bug #85: dates follow the ISGreg setting (requires Telesak-Docs/sp_ProjectTasks_update.sql)
+            SqlParameter param4 = new SqlParameter("@CalendarType", SqlDbType.Int) { Value = MvcApplication.IsGregDate ? 1 : 0 };
             parameters.Add(param1);
             parameters.Add(param2);
             parameters.Add(param3);
+            parameters.Add(param4);
             var tasks = _unitOfWork.SP_ProjecetTasksResults.CallStoredProcedure("sp_ProjectTasks", parameters.ToArray());
             ReportAgent.ReportDataSources.Clear();
             ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_ProjectTasks", tasks));
+            // Bug #84: company name in the report header
+            ReportAgent.ReportParameters.Add(new ReportParameter("CompanyName", MvcApplication.userData.companyName ?? ""));
             return Redirect("/AppReports/ProjectTasks");
         }
 

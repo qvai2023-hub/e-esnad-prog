@@ -747,6 +747,39 @@
                     </Border>
                   </Style>
                 </Image>
+                <Textbox Name="HeaderCompanyName">
+                  <CanGrow>true</CanGrow>
+                  <KeepTogether>true</KeepTogether>
+                  <Paragraphs>
+                    <Paragraph>
+                      <TextRuns>
+                        <TextRun>
+                          <Value>=Parameters!CompanyName.Value</Value>
+                          <Style>
+                            <FontFamily>janna LT</FontFamily>
+                            <FontSize>11pt</FontSize>
+                            <FontWeight>Bold</FontWeight>
+                          </Style>
+                        </TextRun>
+                      </TextRuns>
+                      <Style>
+                        <TextAlign>Right</TextAlign>
+                      </Style>
+                    </Paragraph>
+                  </Paragraphs>
+                  <Top>0.55in</Top>
+                  <Left>3.35552in</Left>
+                  <Height>0.3in</Height>
+                  <Width>3.30072in</Width>
+                  <ZIndex>1</ZIndex>
+                  <Style>
+                    <Border>
+                      <Style>None</Style>
+                    </Border>
+                    <PaddingRight>2pt</PaddingRight>
+                    <Direction>RTL</Direction>
+                  </Style>
+                </Textbox>
               </ReportItems>
               <KeepTogether>true</KeepTogether>
               <Height>0.94669in</Height>
@@ -879,6 +912,12 @@
     <ReportParameter Name="LogoUrl">
       <DataType>String</DataType>
       <Prompt>LogoUrl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CompanyName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>CompanyName</Prompt>
     </ReportParameter>
   </ReportParameters>
 
