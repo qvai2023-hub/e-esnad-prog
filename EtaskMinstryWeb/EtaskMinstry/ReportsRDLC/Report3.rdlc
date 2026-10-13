@@ -49,7 +49,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>تقرير الموظفين</Value>
+                    <Value>="تقرير الموظفين" &amp; IIF(Len(Parameters!StartDate.Value &amp; "") &gt; 0, " — من " &amp; Parameters!StartDate.Value, "") &amp; IIF(Len(Parameters!EndDate.Value &amp; "") &gt; 0, " إلى " &amp; Parameters!EndDate.Value, "")</Value>
                     <Style>
                       <FontStyle>Normal</FontStyle>
                       <FontFamily>janna LT</FontFamily>
@@ -107,7 +107,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>عدد مرات الدخول خلال الشهر الحالى</Value>
+                                  <Value>=IIF(Len(Parameters!StartDate.Value &amp; "") &gt; 0 Or Len(Parameters!EndDate.Value &amp; "") &gt; 0, "عدد مرات الدخول خلال الفترة", "عدد مرات الدخول خلال الشهر الحالى")</Value>
                                   <Style>
                                     <FontSize>14pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
@@ -468,6 +468,18 @@
     <ReportParameter Name="LogoUrl">
       <DataType>String</DataType>
       <Prompt>LogoUrl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="StartDate">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>StartDate</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndDate">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>EndDate</Prompt>
     </ReportParameter>
   </ReportParameters>
 

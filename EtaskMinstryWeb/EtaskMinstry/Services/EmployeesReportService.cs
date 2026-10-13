@@ -25,17 +25,31 @@ namespace EtaskMinstry.Services
             return new SelectList(companies, "CompanyID", "Name");
         }
 
-        public List<EmployeesReportModel> GetData(int CompanyId)
+        /// <summary>
+        /// Employees of a company with their check-in count. #83: count check-ins inside
+        /// [from, to] (both inclusive days); with no dates, keep the original current-month count.
+        /// </summary>
+        public List<EmployeesReportModel> GetData(int CompanyId, DateTime? from = null, DateTime? to = null)
         {
             List<EmployeesReportModel> data = new List<EmployeesReportModel>();
-            var currentMonth = DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
+            DateTime rangeStart, rangeEnd;
+            if (!from.HasValue && !to.HasValue)
+            {
+                rangeStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                rangeEnd = rangeStart.AddMonths(1);
+            }
+            else
+            {
+                // open ends use bounds that fit SQL datetime (DateTime.MinValue would overflow)
+                rangeStart = from.HasValue ? from.Value.Date : new DateTime(1900, 1, 1);
+                rangeEnd = to.HasValue ? to.Value.Date.AddDays(1) : new DateTime(9999, 12, 31);
+            }
             data = _unitOfWork.Employee.Get(filter: a => a.IsDeleted == false && a.CompanyID == CompanyId, includeProperties: "Attendances").Select(a => new EmployeesReportModel()
             {
                 EmpId=a.EmpID,
                 employeeName = a.Name,
                 JobTitle=a.JobTitle,
-                CheckinCount=a.Attendances.Where(x=>x.CheckIn.Value.Month == currentMonth &&x.CheckIn.Value.Year==currentYear).Count()
+                CheckinCount=a.Attendances.Where(x => x.CheckIn >= rangeStart && x.CheckIn < rangeEnd).Count()
             }).ToList();
             return data;
         }
