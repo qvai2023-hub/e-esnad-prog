@@ -330,7 +330,22 @@ namespace EtaskMinstry.Areas.Company.Controllers
             TasksService _TasksService = new TasksService();
             var data = _TasksService.GetData(CompanyId);
 
+            // Bug #89: company name + report period in the header. TasksService.GetData always
+            // covers the current (Gregorian) month, so the period is its first and last day.
+            DateTime monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            DateTime monthEnd = monthStart.AddMonths(1).AddDays(-1);
+            CultureInfo displayCulture = new CultureInfo("en-US");
+            if (!MvcApplication.IsGregDate)
+            {
+                displayCulture = new CultureInfo("ar-SA");
+                displayCulture.DateTimeFormat.Calendar = new UmAlQuraCalendar();
+            }
+
             ReportAgent.ReportDataSources.Clear();
+            ReportAgent.ReportParameters.Clear();
+            ReportAgent.ReportParameters.Add(new ReportParameter("CompanyName", MvcApplication.userData.companyName ?? ""));
+            ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", monthStart.ToString("yyyy/MM/dd", displayCulture)));
+            ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", monthEnd.ToString("yyyy/MM/dd", displayCulture)));
             ReportAgent.AddReportDataSources(new ReportDataSource("DataSet1", data));
             return Redirect("/AppReports/BriefTasksReport");
         }
