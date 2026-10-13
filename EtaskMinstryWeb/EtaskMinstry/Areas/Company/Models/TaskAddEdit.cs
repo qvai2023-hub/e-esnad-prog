@@ -237,7 +237,37 @@ namespace EtaskMinstry.Models.Task
 
                     //log.
                     AppCode.LogTask.Log(objTask, beforeUpdateObj);
-                  
+
+                    // Bug #76 / #94: changing the employee of a New task from the edit page is a
+                    // reassignment. Write the same TaskTLog rows + notifications as TaskManger.AssignTask:
+                    // old employee -> Pending (متوقفة), new employee -> New. Without them the old employee
+                    // lost the task (#76) and later saw it again as جديدة (#94).
+                    if (beforeUpdateObj.StatusID == (int)TaskStatus.New && objTask.EmpID.HasValue
+                        && beforeUpdateObj.EmpID != objTask.EmpID)
+                    {
+                        if (beforeUpdateObj.EmpID.HasValue)
+                        {
+                            _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                            {
+                                TaskID = objTask.TaskID,
+                                CreatedDate = DateTime.Now,
+                                EmpID = beforeUpdateObj.EmpID,
+                                StatusID = (int)TaskStatus.Pending
+                            });
+                        }
+                        _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
+                        {
+                            TaskID = objTask.TaskID,
+                            CreatedDate = DateTime.Now,
+                            EmpID = objTask.EmpID,
+                            StatusID = (int)TaskStatus.New
+                        });
+                        _unitOfWork.Save();
+
+                        if (beforeUpdateObj.EmpID.HasValue)
+                            NotificationHub.Send(Users.Employee(beforeUpdateObj.EmpID.Value), NotificationType.NewTask, "تم ايقاف المهمة: " + objTask.Title, @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
+                        NotificationHub.Send(Users.Employee(objTask.EmpID.Value), NotificationType.NewTask, "تم اسناد المهمة : " + objTask.Title, @"/Employee/Tasks/TaskDetails/" + objTask.TaskID);
+                    }
                 }
                 else
                 {

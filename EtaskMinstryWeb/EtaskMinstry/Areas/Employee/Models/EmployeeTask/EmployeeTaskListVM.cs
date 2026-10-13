@@ -91,7 +91,9 @@ namespace EtaskMinstry.Models.EmployeeTask
                   && !t.IsDeleted
                   // && t.IsArchived != true // check that all tasks are not in archive.
                   && t.StatusID != (int)TaskStatus.Rejected
-                  && (statuse == (int)TaskStatus.All ? (t.EmpID == currentUser || t.StatusID != (int)TaskStatus.New) //if need all tasks — exclude New tasks reassigned away from this employee
+                  && (statuse == (int)TaskStatus.All ? (t.EmpID == currentUser || t.StatusID != (int)TaskStatus.New //if need all tasks — exclude New tasks reassigned away from this employee
+                        // Bug #76: ...but keep them when this employee's own last log is Pending — the row then shows as متوقفة (no actions)
+                        || t.TaskTLogs.Where(o => o.EmpID == currentUser).OrderByDescending(o => o.TaskTLogID).Select(o => (int?)o.StatusID).FirstOrDefault() == (int)TaskStatus.Pending)
                   : statuse == (int)TaskStatus.Delay ? true //get delay and not done tasks 
                                                             //get new or accepted task in the new tab
                   : statuse == (int)TaskStatus.New ? ((t.StatusID == (int)TaskStatus.New && t.EmpID == currentUser) || (t.StatusID == (int)TaskStatus.Accepted && t.StartDate > DateTime.Now && t.EmpID == currentUser))
