@@ -267,9 +267,17 @@ namespace EtaskMinstry.Controllers
         /// Forget Password
         /// </summary>
         /// <returns></returns>
-        public ActionResult ForgetPasswoed()
+        public ActionResult ForgetPassword()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Old misspelled URL — kept so existing bookmarks still work.
+        /// </summary>
+        public ActionResult ForgetPasswoed()
+        {
+            return RedirectToActionPermanent("ForgetPassword");
         }
 
         /// <summary>
@@ -278,7 +286,7 @@ namespace EtaskMinstry.Controllers
         /// <param name="Email"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult ForgetPasswoed(string Email)
+        public ActionResult ForgetPassword(string Email)
         {
             var sent_result = new EtaskMinstry.Models.Login.Security().ForgetPawword(Email);
             ViewBag.DisplayBackButton = true;

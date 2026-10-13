@@ -992,7 +992,7 @@
     <Content Include="Views\Log\PartialLogDate.cshtml" />
     <Content Include="Views\Reports\LoadReport.cshtml" />
     <Content Include="Views\Security\ChangePassword.cshtml" />
-    <Content Include="Views\Security\ForgetPasswoed.cshtml" />
+    <Content Include="Views\Security\ForgetPassword.cshtml" />
     <Content Include="Views\Security\ForgetPasswordConfirmation.cshtml" />
     <Content Include="Views\Security\Login.cshtml" />
     <Content Include="Views\Security\StopedUser.cshtml" />
