@@ -586,7 +586,9 @@
 
         });
 
-        $( ".priortybar label").click(function() {
+        // Bug #91: delegated — the grid in #divTasks is replaced by AJAX (tabs, search, pager),
+        // so a direct .click() binding is lost on every reload.
+        $(document).on('click', '#divTasks .priortybar label', function() {
             debugger
             //alert("priortybar")
             if (!$(this).hasClass('Static-bar')) {
@@ -605,7 +607,6 @@
 
                         if (data.responseText.toLowerCase() == "false") {
                             Notify("danger", "حدث خطا لم يتم تغير الاولوية", 3000);
-                            $(obj).css('width', OldWidth + "%");
                         }
 
                     }
