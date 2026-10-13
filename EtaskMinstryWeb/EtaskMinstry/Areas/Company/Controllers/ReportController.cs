@@ -309,7 +309,11 @@ namespace EtaskMinstry.Areas.Company.Controllers
             ReportAgent.ReportParameters.Clear();
             //use serialize session
             ReportAgent.AddReportDataSources(new ReportDataSource("DS_TotalEmployeeTasks", tasks));
-          
+            // Bug #87: company name + selected start-date range in the report header
+            ReportAgent.ReportParameters.Add(new ReportParameter("CompanyName", MvcApplication.userData.companyName ?? ""));
+            ReportAgent.ReportParameters.Add(new ReportParameter("StartDate", from.HasValue ? (MvcApplication.IsGregDate ? from.Value.ToString("yyyy/MM/dd", enCul) : model.FromDate) : ""));
+            ReportAgent.ReportParameters.Add(new ReportParameter("EndDate", to.HasValue ? (MvcApplication.IsGregDate ? to.Value.ToString("yyyy/MM/dd", enCul) : model.ToDate) : ""));
+
            // object[] listParams = new object[11];
           //  var companyTasks = _unitOfWork.SP_CompanyTasksResults.CallStoredProcedure("sp_CompanyTasks", ["0",'','',"0","0",'','',null,null,'',null,null]);
           

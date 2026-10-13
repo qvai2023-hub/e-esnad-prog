@@ -82,7 +82,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>     تقرير مهام كل موظف</Value>
+                    <Value>="تقرير مهام كل موظف" &amp; IIF(Len(Parameters!StartDate.Value &amp; "") &gt; 0, " — من " &amp; Parameters!StartDate.Value, "") &amp; IIF(Len(Parameters!EndDate.Value &amp; "") &gt; 0, " إلى " &amp; Parameters!EndDate.Value, "")</Value>
                     <Style>
                       <FontStyle>Normal</FontStyle>
                       <FontFamily>janna LT</FontFamily>
@@ -1128,6 +1128,39 @@
                     </Border>
                   </Style>
                 </Image>
+                <Textbox Name="HeaderCompanyName">
+                  <CanGrow>true</CanGrow>
+                  <KeepTogether>true</KeepTogether>
+                  <Paragraphs>
+                    <Paragraph>
+                      <TextRuns>
+                        <TextRun>
+                          <Value>=Parameters!CompanyName.Value</Value>
+                          <Style>
+                            <FontFamily>janna LT</FontFamily>
+                            <FontSize>11pt</FontSize>
+                            <FontWeight>Bold</FontWeight>
+                          </Style>
+                        </TextRun>
+                      </TextRuns>
+                      <Style>
+                        <TextAlign>Right</TextAlign>
+                      </Style>
+                    </Paragraph>
+                  </Paragraphs>
+                  <Top>0.67in</Top>
+                  <Left>4.16006in</Left>
+                  <Height>0.27in</Height>
+                  <Width>4.00203in</Width>
+                  <ZIndex>1</ZIndex>
+                  <Style>
+                    <Border>
+                      <Style>None</Style>
+                    </Border>
+                    <PaddingRight>2pt</PaddingRight>
+                    <Direction>RTL</Direction>
+                  </Style>
+                </Textbox>
               </ReportItems>
               <KeepTogether>true</KeepTogether>
               <Left>0.00008cm</Left>
@@ -1280,6 +1313,24 @@
     <ReportParameter Name="LogoUrl">
       <DataType>String</DataType>
       <Prompt>LogoUrl</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="CompanyName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>CompanyName</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="StartDate">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>StartDate</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="EndDate">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>EndDate</Prompt>
     </ReportParameter>
   </ReportParameters>
 
