@@ -269,6 +269,10 @@ namespace EtaskMinstry.Models.Company
                     t.HijriEndDate = (t.EndDate.HasValue) ? t.EndDate.Value.ToGregArabicDate() : String.Empty;
                     t.EmpName = t.EmpID == null
                                     ? "غير مسنده" : (CompanyEmployee.Count(i => i.id == t.EmpID) > 0 ? CompanyEmployee.FirstOrDefault(i => i.id == t.EmpID).name : "-");
+                    // Bug #96: الوقت المستغرق was never set outside the Delay tab. Use Task.ActualTime —
+                    // the same value Company TaskDetails shows (ComapnyTaskDetailVM).
+                    var actualTime = pagedEntities.First(e => e.TaskID == t.TaskID).ActualTime;
+                    t.SpendtimebyDay = actualTime.HasValue ? TaskManger.SpendTimeByDay(actualTime) : "0";
                 });
             }
             else
