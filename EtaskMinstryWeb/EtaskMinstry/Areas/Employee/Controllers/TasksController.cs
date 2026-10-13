@@ -111,7 +111,9 @@ namespace EtaskMinstry.Areas.Employee.Controllers
         /// <returns></returns>
         public bool EndTask(int taskId)
         {
-            return listTasks.EndTask(taskId);
+            // Bug #75: use the same finish logic as Task Details / Dashboard / API.
+            // The old listTasks.EndTask overwrote Task.EndDate with today's date.
+            return EtaskMinstry.AppCode.TaskManger.EmpFinishTask(taskId);
         }
 
 
