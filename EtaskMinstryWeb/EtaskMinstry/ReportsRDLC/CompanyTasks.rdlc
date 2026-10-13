@@ -788,38 +788,6 @@
                 <PaddingRight>5pt</PaddingRight>
               </Style>
             </Textbox>
-            <!-- Report Period (Right, under company name) -->
-            <Textbox Name="HeaderMonth">
-              <CanGrow>true</CanGrow>
-              <Paragraphs>
-                <Paragraph>
-                  <TextRuns>
-                    <TextRun>
-                      <Value>=IIF(IsNothing(Parameters!ReportPeriod.Value) Or Len(CStr(Parameters!ReportPeriod.Value)) = 0, "", Parameters!ReportPeriod.Value)</Value>
-                      <Style>
-                        <FontFamily>janna LT</FontFamily>
-                        <FontSize>10pt</FontSize>
-                        <FontWeight>Bold</FontWeight>
-                      </Style>
-                    </TextRun>
-                  </TextRuns>
-                  <Style>
-                    <TextAlign>Right</TextAlign>
-                  </Style>
-                </Paragraph>
-              </Paragraphs>
-              <Top>0.88in</Top>
-              <Left>3.9in</Left>
-              <Height>0.25in</Height>
-              <Width>3.86in</Width>
-              <ZIndex>2</ZIndex>
-              <Style>
-                <Border>
-                  <Style>None</Style>
-                </Border>
-                <PaddingRight>5pt</PaddingRight>
-              </Style>
-            </Textbox>
             <!-- Separator Line -->
             <Line Name="HeaderSeparator">
               <Top>1.3in</Top>
