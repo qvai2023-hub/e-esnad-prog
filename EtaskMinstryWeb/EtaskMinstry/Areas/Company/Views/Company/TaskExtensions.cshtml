@@ -262,7 +262,7 @@
         $('#btnAddComment').click(function (e) {
 
             //e.preventDefault();
-            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_-]{0,350}$/;
+            var varchar350 = /^[a-zA-Z0-9\u0600-\u06ff./\s_'-]{0,350}$/;
             if ($('#CommentText').val().trim() == "") {
                 debugger
                 $('#trCommentvalidation')[0].innerHTML = " يجب الا تترك الخانات فارغه ";
