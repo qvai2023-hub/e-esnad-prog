@@ -214,7 +214,8 @@ gridColumns.Add(grid.Column("Edit", "تعديل", @<text><a class="fa fa-edit" i
 if (!(Model.Items.All(i => i.StatusID == (int)TaskStatus.New) && Model.Items.Any(i => i.EmpName != "")))
 {
 gridColumns.Add(grid.Column("Delete", "حذف", @<text>
-        <a class="fa fa-trash" id="@item.TaskID"></a>
+        @* Bug #90: only New tasks can be deleted (CompanyTaskVM.Delete) — disable the icon for any other status. *@
+        <a class="@(item.StatusID == (int)TaskStatus.New ? "fa fa-trash" : "fa fa-trash disabled")" id="@item.TaskID"></a>
     </text>
 
     , "DeleteCol"));
