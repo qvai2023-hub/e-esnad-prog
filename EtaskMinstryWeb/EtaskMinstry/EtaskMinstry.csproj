@@ -185,6 +185,7 @@
     <Compile Include="AppCode\ServiceManger.cs" />
     <Compile Include="AppCode\StatusLog.cs" />
     <Compile Include="AppCode\TaskManger.cs" />
+    <Compile Include="AppCode\TaskTimeEstimate.cs" />
     <Compile Include="AppCode\TaskWorkflow.cs" />
     <Compile Include="AppCode\UploadFile.cs" />
     <Compile Include="App_GlobalResources\ColumnNameLog.Designer.cs">

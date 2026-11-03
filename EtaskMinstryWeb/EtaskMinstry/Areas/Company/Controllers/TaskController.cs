@@ -333,42 +333,8 @@ namespace EtaskMinstry.Areas.Company.Controllers
 
             iTotalDays = iTotalDays - Holidays;
 
-            switch (iTimeUnit)
-            {
-                // Convert iTotalDays To Months .
-                case (int)TimeUnit.Month:
-                    // Check If iTotalDays After Converting To Month < iTimeCount .
-                    if (iTimeCount > iTotalDays / ((int)TimeUnitValue.Day * (int)TimeUnitValue.Week + 2))
-                        return false;
-                    break;
-
-                // Convert iTotalDays To Weeks .
-                case (int)TimeUnit.Week:
-                    // Check If iTotalDays After Converting To Weeks < iTimeCount .
-                    if (iTimeCount > iTotalDays / (int)TimeUnitValue.Day)
-                        return false;
-                    break;
-
-                case (int)TimeUnit.Day:
-                    if (iTimeCount > iTotalDays)
-                        return false;
-                    break;
-
-                // Convert iTotalDays To Hours .
-                case (int)TimeUnit.Hour:
-                    // Check If iTotalDays After Converting To Hour < iTimeCount .
-                    if (iTimeCount > iTotalDays * (int)TimeUnitValue.Hour)
-                        return false;
-                    break;
-
-                // Convert iTotalDays To Minutes .
-                case (int)TimeUnit.Minute:
-                    // Check If iTotalDays After Converting To Minute < iTimeCount .
-                    if (iTimeCount > iTotalDays * (int)TimeUnitValue.Hour * (int)TimeUnitValue.Minute)
-                        return false;
-                    break;
-            }
-            return true;
+            // 1 day = 8 hours = 480 minutes (the old checks allowed 24 hours a day)
+            return TaskTimeEstimate.FitsWorkingDays((decimal)iTimeCount, iTimeUnit, (decimal)iTotalDays);
         }
 
         /// <summary>
