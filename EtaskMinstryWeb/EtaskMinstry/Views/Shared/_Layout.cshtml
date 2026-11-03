@@ -706,6 +706,14 @@ color: #767475 !important;
         <script src="~/Scripts/attendance-tracker.js"></script>
     }
 
+    @* Sign-in session heartbeat - server-side Logout once every tab is gone (Company and Employee) *@
+    @if (EtaskMinstry.MvcApplication.userData != null && EtaskMinstry.MvcApplication.userData.UserTypeId != (int)LoggedUserType.Admin &&
+         HttpContext.Current != null && HttpContext.Current.Session != null &&
+         HttpContext.Current.Session[EtaskMinstry.Services.UserSessionTracker.SessionKeyName] != null)
+    {
+        <script src="~/Scripts/session-heartbeat.js"></script>
+    }
+
     @if (EtaskMinstry.MvcApplication.userData != null && !EtaskMinstry.MvcApplication.userData.isCompany &&
          EtaskMinstry.MvcApplication.userData.UserTypeId == (int)LoggedUserType.Employee)
     {
