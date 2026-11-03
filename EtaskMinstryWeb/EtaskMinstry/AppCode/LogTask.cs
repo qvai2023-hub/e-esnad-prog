@@ -132,7 +132,7 @@ namespace EtaskMinstry.AppCode
             {
                 try
                 {
-                    string logVal = "[" + String.Join(",", JsonList) + "]";
+                    string logVal = WithChangedBy("[" + String.Join(",", JsonList) + "]", isFromCompany.HasValue);
                     Log(Currentobj.TaskID, logVal, isFromCompany ?? ActorIsCompany(),Currentobj.PriorityID,Currentobj.StatusID);
                 }
                 catch (Exception)
@@ -254,7 +254,7 @@ namespace EtaskMinstry.AppCode
             //if there're fields had changed insert new log for updated items.
             try
             {
-                string logVal = "[" + String.Join(",", JsonList) + "]";
+                string logVal = WithChangedBy("[" + String.Join(",", JsonList) + "]");
                 Log(Currentobj.TaskID, logVal, ActorIsCompany(), Currentobj.PriorityID,Currentobj.StatusID);
             }
             catch (Exception)
@@ -290,7 +290,7 @@ namespace EtaskMinstry.AppCode
             //if there're fields had changed insert new log for updated items.
             try
             {
-                string logVal = "[" + String.Join(",", JsonList) + "]";
+                string logVal = WithChangedBy("[" + String.Join(",", JsonList) + "]");
                 Log(Currentobj.TaskID, logVal, ActorIsCompany(), Currentobj.PriorityID,Currentobj.StatusID);
             }
             catch (Exception)
@@ -377,6 +377,22 @@ namespace EtaskMinstry.AppCode
         {
             var actor = MvcApplication.userData;
             return actor == null || actor.isCompany;
+        }
+
+        /// <summary>
+        /// Add who made the change to a task log value, as one more entry:
+        /// {'columnName':'ChangedBy','oldVal':'','newVal':'Employee:45'} (or Company:/Admin:,
+        /// or System for an automatic change). The log pages only render the column names they
+        /// know, so the entry is stored for audit without changing what users see.
+        /// </summary>
+        private static string WithChangedBy(string logVal, bool automatic = false)
+        {
+            var actor = MvcApplication.userData;
+            string changedBy = (automatic || actor == null)
+                ? "System"
+                : ((LoggedUserType)actor.UserTypeId).ToString() + ":" + actor.userId;
+            return logVal.Substring(0, logVal.Length - 1)
+                   + ",{'columnName':'ChangedBy','oldVal':'','newVal':'" + changedBy + "'}]";
         }
 
         /// <summary>

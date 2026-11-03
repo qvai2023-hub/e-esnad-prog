@@ -19,6 +19,9 @@ namespace EtaskMinstry.Models.Employee
         public string Summary { get; set; }
         public DateTime? TaskStartDate { get; set; }
         public string StartDate { get; set; }
+        /// <summary>When work actually started / ended, from the status history (TaskTLog)</summary>
+        public string ActualStart { get; set; }
+        public string ActualEnd { get; set; }
         public string EndDate { get; set; }
         public string CreatedDate { get; set; }
         public string EstimatedTime { get; set; }
@@ -108,6 +111,8 @@ namespace EtaskMinstry.Models.Employee
 
             
                 objDetails.DilverTime = objTask.DeliverDate.HasValue ? (MvcApplication.IsGregDate) ? "تاريخ التسليم :" + objTask.DeliverDate.Value.ToGregDate() + " " : "تاريخ التسليم :" + objTask.DeliverDate.Value.ToHijriDate() + "::" : "";
+                objDetails.ActualStart = EtaskMinstry.AppCode.TaskActualDates.Format(EtaskMinstry.AppCode.TaskActualDates.Start(objTask));
+                objDetails.ActualEnd = EtaskMinstry.AppCode.TaskActualDates.Format(EtaskMinstry.AppCode.TaskActualDates.End(objTask));
                 objDetails.TasktodayTime = objDetails.TimeDetails.FirstOrDefault(t => t.isToday) == null ? "0" : objDetails.TimeDetails.FirstOrDefault(t => t.isToday).LogTime.Split(' ')[0];
                 return objDetails;
             }
