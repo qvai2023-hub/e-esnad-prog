@@ -4,6 +4,67 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Telesak: complete task history, who made each change, actual start and end (2026-11-03)
+
+**Status:** Data checks passed on a copy of live data (`actual-start-end-checks.sql`, `task-logs-no-delete.sql`). Browser testing pending.
+
+- Starting a task (`EmployeeStartTask`) wrote TaskTLog only; it now also writes the task history (TaskLog).
+- Every TaskLog entry records who made the change, as one more JSON entry `{'columnName':'ChangedBy','newVal':'Employee:45'}` (`Company:<id>`, `Admin:<id>`, or `System` for the automatic Accepted → Inprogress change). The log pages only render the column names they know, so nothing visible changes. Older rows have no `ChangedBy`.
+- Soft-deleting a task wrote the "deleted" entry once per existing log row (a `foreach` whose body had been commented out). It is written once now, in Common and Company.
+- Task details (Company, Common, Employee) show **البداية الفعلية / النهاية الفعلية**, read from TaskTLog. `Task.StartDate` / `EndDate` are not touched and stay the planned dates.
+  - Actual start = first Inprogress row. Tasks moved to Inprogress automatically before `5b0d03d` have none (20 of 19,050 on live data); for those, the later of the first Accepted row and the planned start, never after the first Done.
+  - Actual end = last Done row, shown only while the task is Done / Approved / NotApproved. On live data it falls on the `DeliverDate` day for all 18,594 finished tasks (`DeliverDate` keeps the date only).
+- `TaskLog` and `TaskTLog` rows cannot be deleted: AFTER DELETE triggers roll the delete back. UPDATE stays allowed (time entries update TaskTLog). The unused hard delete `TaskManger.Delete` now fails by design.
+
+**Files changed:**
+- `AppCode/TaskManger.cs` (shared) — `EmployeeStartTask` calls `LogTask.Log`
+- `AppCode/LogTask.cs` — `WithChangedBy` added to the update / insert / delete log values
+- `AppCode/TaskActualDates.cs` (new) — `Start`, `End`, `Format`
+- `Areas/Common/Models/TaskCommonVM.cs`, `Areas/Company/Models/CompanyTaskVM.cs` — duplicate "deleted" entry
+- `Areas/Company/Models/ComapnyTaskDetailVM.cs`, `Areas/Common/Models/TaskDetailCommonVM.cs`, `Areas/Employee/Models/EmployeeTaskDetailVM.cs` — `ActualStart`, `ActualEnd`
+- `Areas/Company/Views/Company/TaskDetails.cshtml`, `Areas/Common/Views/Common/TaskDetails.cshtml`, `Areas/Employee/Views/Tasks/TaskDetails.cshtml` — two rows
+- `EtaskMinstry.csproj`
+- `Telesak-Docs/sql/task-logs-no-delete.sql` (new, run on the DB), `Telesak-Docs/sql/actual-start-end-checks.sql` (new, read-only)
+
+**Not touched:** `Task.StartDate` / `EndDate`, reports, Areas2.
+
+### Changed - Telesak: one Logout per Login and one attendance row per day (2026-11-03)
+
+**Status:** Build and code review only. Browser testing pending.
+
+- **Logout (LogGeneral ActionID 9)** is written at most once per Login, by whichever ends the sign-in first: the Logout button, the inactivity checkout, or `AutoCheckoutJob` when heartbeats stop (stamped with the last heartbeat). Before, closing the browser left no Logout. Companies have no attendance, so theirs is still written by the Logout button only.
+- **One attendance row per employee per day** (server time = Riyadh). A second sign-in the same day continues today's row (reopens it) instead of adding one.
+- **Inactivity checkout** uses the last real activity in any tab as the CheckOut time, not `LastHeartbeat` (which kept running while idle, adding ~35 minutes). Closing the row is atomic (`WHERE CheckOut IS NULL`).
+- **Tabs:** the last activity is shared through `localStorage`. An idle tab does not warn or check out while another tab is in use; a checkout in one tab signs the others out; a heartbeat that finds the attendance closed signs the page out.
+- An earlier version used a new `UserSession` table (`eca8a70`); it was reverted (`bb4c446`). Drop the table if it was created: `DROP TABLE dbo.UserSession`.
+
+**Effect on reports:**
+- Attendance report (`sp_Attendance`) already groups by employee + day (MIN CheckIn, MAX CheckOut): same rows; days ended by inactivity show an earlier CheckOut; a reopened day shows no CheckOut until the employee signs out.
+- Employees report `CheckinCount` becomes days attended (at most 1 per day).
+- `sp_EmployeePerformanceReport`, `GetEvaluationService` (ministry), `GetEvaluationServiceV2`: `LogOutCount` rises (closed browsers and timeouts are logged now) but never exceeds `LoginCount`. `LoginCount` unchanged.
+
+**Files changed:**
+- `Services/LogoutLog.cs` (new) — `WriteOnce`
+- `Controllers/SecurityController.cs` — Logout writes through `LogoutLog`
+- `Controllers/AttendanceController.cs` — `InactivityCheckout(attendanceId, lastActivityTime)`, atomic close + Logout; `LogActivity` returns `ended`
+- `Services/AutoCheckoutJob.cs` — atomic close, Logout at the last heartbeat
+- `Models/Login/UserAccountVM.cs` — `Checkin` continues today's row
+- `Scripts/attendance-tracker.js` — tab sync
+- `EtaskMinstry.csproj`
+- `Telesak-Docs/sql/session-and-estimate-acceptance-checks.sql` — rewritten for Attendance
+
+### Changed - Telesak: task estimate saved as a pair, 1 day = 8 hours = 480 minutes (2026-11-03)
+
+**Status:** Build and conversion checks only. Browser testing pending.
+
+- A time is saved only with a unit, Day (3) / Hour (4) / Minute (5): Company and Common task forms, the task-details inline edit, and the mobile API create (400 `INVALID_REQUEST`). A unit without a time is dropped. Old Month / Week estimates open as days (1 week = 5 days).
+- The duration check allowed 24 hours per working day; it now uses 8 hours, so a 1-day and an 8-hour task give the same activity level.
+- `TaskAddEditCommon` threw on `TimeUnitID.Value` for a task without an estimate.
+
+**Files changed:** `AppCode/TaskTimeEstimate.cs` (new), `AppCode/TaskManger.cs` (shared, `validateTaskDuration`), `Api/Controllers/TasksController.cs`, `Areas/Company/Controllers/{CompanyController,TaskController}.cs`, `Areas/Common/Controllers/{CommonController,TaskCommonController}.cs`, `Areas/Company/Models/{TaskAddEdit,ComapnyTaskDetailVM}.cs`, `Areas/Common/Models/{TaskAddEditCommon,TaskDetailCommonVM}.cs`, `Models/TimeUnit/TimeUnitDisplay.cs`, `Areas/Company/Views/Task/{SaveData,EDitTask}.cshtml`, `Areas/Common/Views/TaskCommon/SaveData.cshtml`, `EtaskMinstry.csproj`. Data repair for older rows: `Telesak-Docs/sql/backfill-TimUnitID.sql`.
+
+**Not done (by request):** National ID — `EmployeeVM.NationalID` is `Int64` and the duplicate check uses `Contains`; left as is.
+
 ### Fixed - Employee dashboard dropped the fraction of entered task time (2026-10-06)
 
 **Status:** Tested and confirmed by user.
