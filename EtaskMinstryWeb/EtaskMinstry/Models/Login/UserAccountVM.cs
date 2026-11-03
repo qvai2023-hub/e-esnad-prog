@@ -231,6 +231,36 @@ namespace EtaskMinstry.Models.Login
 
         public void Checkin(int userId)
         {
+            // One attendance row per employee per day (server time is Riyadh time). A second
+            // sign-in the same day, from another browser or after a Logout, continues
+            // today's row instead of adding one: it is reopened from the first CheckIn.
+            var today = DateTime.Now.Date;
+            var tomorrow = today.AddDays(1);
+            var todayRow = _unitOfWork.AttendanceRepository
+                .Get(filter: a => a.EmpId == userId && a.CheckIn >= today && a.CheckIn < tomorrow)
+                .OrderByDescending(a => a.Id)
+                .FirstOrDefault();
+            if (todayRow != null)
+            {
+                var efConn = System.Configuration.ConfigurationManager.ConnectionStrings["ETaskEntities"].ToString();
+                using (var conn = new System.Data.SqlClient.SqlConnection(new System.Data.EntityClient.EntityConnectionStringBuilder(efConn).ProviderConnectionString))
+                {
+                    conn.Open();
+                    using (var cmd = new System.Data.SqlClient.SqlCommand(
+                        "UPDATE Attendance SET CheckOut = NULL, AutoCheckout = 0, LastHeartbeat = @Now WHERE Id = @Id", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Now", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@Id", todayRow.Id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                if (HttpContext.Current?.Session != null)
+                {
+                    HttpContext.Current.Session["HasActiveAttendance"] = true;
+                }
+                return;
+            }
+
             TaskManagementModel.Attendance obj = new TaskManagementModel.Attendance();
             obj.EmpId = userId;
             string date = DateTime.Now.ToString("dd/MM/yyyy HH:mm:s");

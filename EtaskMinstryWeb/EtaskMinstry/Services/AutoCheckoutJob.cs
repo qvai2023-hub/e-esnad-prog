@@ -167,7 +167,8 @@ namespace EtaskMinstry.Services
             {
                 // Close original session at 23:59:59 of check-in day
                 var endOfDay = session.CheckIn.Value.Date.AddDays(1).AddSeconds(-1);
-                UpdateCheckout(conn, session.Id, endOfDay, true);
+                if (UpdateCheckout(conn, session.Id, endOfDay, true) == 0)
+                    return;   // closed meanwhile by Logout / inactivity checkout
 
                 // Create new records for subsequent days
                 DateTime currentDate = session.CheckIn.Value.Date.AddDays(1);
@@ -185,19 +186,24 @@ namespace EtaskMinstry.Services
             else
             {
                 // Simple case - same day checkout
-                UpdateCheckout(conn, session.Id, checkoutTime, true);
+                if (UpdateCheckout(conn, session.Id, checkoutTime, true) == 0)
+                    return;   // closed meanwhile by Logout / inactivity checkout
             }
+
+            // The sign-in ended when the heartbeats stopped: log its single Logout at that time
+            LogoutLog.WriteOnce(conn, session.EmpId, null, false, null, checkoutTime);
         }
 
-        private static void UpdateCheckout(SqlConnection conn, int attendanceId, DateTime checkoutTime, bool autoCheckout)
+        /// <returns>1 if the row was closed, 0 if it was already closed</returns>
+        private static int UpdateCheckout(SqlConnection conn, int attendanceId, DateTime checkoutTime, bool autoCheckout)
         {
-            string sql = "UPDATE Attendance SET CheckOut = @CheckOut, AutoCheckout = @AutoCheckout WHERE Id = @Id";
+            string sql = "UPDATE Attendance SET CheckOut = @CheckOut, AutoCheckout = @AutoCheckout WHERE Id = @Id AND CheckOut IS NULL";
             using (var cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@CheckOut", checkoutTime);
                 cmd.Parameters.AddWithValue("@AutoCheckout", autoCheckout);
                 cmd.Parameters.AddWithValue("@Id", attendanceId);
-                cmd.ExecuteNonQuery();
+                return cmd.ExecuteNonQuery();
             }
         }
 

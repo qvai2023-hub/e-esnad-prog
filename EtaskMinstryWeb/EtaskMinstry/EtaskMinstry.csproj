@@ -311,6 +311,7 @@
     <Compile Include="Resources\Task\Task.Designer.cs" />
     <Compile Include="Services\AttendanceReportService.cs" />
     <Compile Include="Services\AutoCheckoutJob.cs" />
+    <Compile Include="Services\LogoutLog.cs" />
     <Compile Include="Services\EmployeePerformanceReportService.cs" />
     <Compile Include="Services\EmployeesReportService.cs" />
     <Compile Include="Services\SharedService.cs" />

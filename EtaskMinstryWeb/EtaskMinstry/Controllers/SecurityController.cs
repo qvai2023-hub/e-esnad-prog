@@ -172,7 +172,14 @@ namespace EtaskMinstry.Controllers
                 }
 
                 //log--->logout
-                Generallog.LoginORLogout(ActionType.LogOut);
+                // One Logout per Login: if the inactivity checkout or the heartbeat timeout
+                // already logged this sign-in out, nothing more is written
+                var loggedUser = @EtaskMinstry.MvcApplication.userData;
+                if (loggedUser.UserTypeId == (int)LoggedUserType.Admin)
+                    Generallog.LoginORLogout(ActionType.LogOut);
+                else
+                    EtaskMinstry.Services.LogoutLog.WriteOnce(loggedUser.userId, null, loggedUser.isCompany,
+                        Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? Request.ServerVariables["REMOTE_ADDR"], DateTime.Now);
                 //MvcApplication.userData = null;
                 FormsAuthentication.SignOut();
 
