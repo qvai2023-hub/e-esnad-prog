@@ -85,17 +85,6 @@ namespace EtaskMinstry.Services
                 {
                     conn.Open();
 
-                    // Sign-in sessions first: closing one writes its Logout and checks out its
-                    // attendance at the last heartbeat, before the generic attendance pass below
-                    try
-                    {
-                        UserSessionTracker.CloseExpired(conn);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine("[AutoCheckoutJob] Session timeout pass failed: {0}", ex.Message);
-                    }
-
                     // Find orphaned sessions: open attendance with LastHeartbeat > 15 minutes ago
                     // Or CheckIn > 15 minutes ago if LastHeartbeat is null (JS tracker never connected)
                     string selectSql = @"
@@ -178,7 +167,8 @@ namespace EtaskMinstry.Services
             {
                 // Close original session at 23:59:59 of check-in day
                 var endOfDay = session.CheckIn.Value.Date.AddDays(1).AddSeconds(-1);
-                UpdateCheckout(conn, session.Id, endOfDay, true);
+                if (UpdateCheckout(conn, session.Id, endOfDay, true) == 0)
+                    return;   // closed meanwhile by Logout / inactivity checkout
 
                 // Create new records for subsequent days
                 DateTime currentDate = session.CheckIn.Value.Date.AddDays(1);
@@ -196,56 +186,24 @@ namespace EtaskMinstry.Services
             else
             {
                 // Simple case - same day checkout
-                UpdateCheckout(conn, session.Id, checkoutTime, true);
+                if (UpdateCheckout(conn, session.Id, checkoutTime, true) == 0)
+                    return;   // closed meanwhile by Logout / inactivity checkout
             }
+
+            // The sign-in ended when the heartbeats stopped: log its single Logout at that time
+            LogoutLog.WriteOnce(conn, session.EmpId, null, false, null, checkoutTime);
         }
 
-        /// <summary>
-        /// Checks out the employee's open attendance rows when their sign-in session closed at
-        /// closeAt (UserSessionTracker). Each row ends at its own last heartbeat if that is
-        /// earlier, never before its check-in, with the usual midnight split.
-        /// </summary>
-        internal static void CloseOpenAttendance(SqlConnection conn, int empId, DateTime closeAt)
+        /// <returns>1 if the row was closed, 0 if it was already closed</returns>
+        private static int UpdateCheckout(SqlConnection conn, int attendanceId, DateTime checkoutTime, bool autoCheckout)
         {
-            var openRows = new System.Collections.Generic.List<OrphanedSession>();
-            using (var cmd = new SqlCommand(
-                "SELECT Id, EmpId, CheckIn, LastHeartbeat FROM Attendance WHERE EmpId = @EmpId AND CheckOut IS NULL", conn))
-            {
-                cmd.Parameters.AddWithValue("@EmpId", empId);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        openRows.Add(new OrphanedSession
-                        {
-                            Id = reader.GetInt32(0),
-                            EmpId = reader.GetInt32(1),
-                            CheckIn = reader.IsDBNull(2) ? (DateTime?)null : reader.GetDateTime(2),
-                            LastHeartbeat = reader.IsDBNull(3) ? (DateTime?)null : reader.GetDateTime(3)
-                        });
-                    }
-                }
-            }
-
-            foreach (var row in openRows)
-            {
-                if (!row.LastHeartbeat.HasValue || row.LastHeartbeat.Value > closeAt)
-                    row.LastHeartbeat = closeAt;
-                if (row.CheckIn.HasValue && row.LastHeartbeat.Value < row.CheckIn.Value)
-                    row.LastHeartbeat = row.CheckIn;
-                ProcessOrphanedSession(conn, row);
-            }
-        }
-
-        private static void UpdateCheckout(SqlConnection conn, int attendanceId, DateTime checkoutTime, bool autoCheckout)
-        {
-            string sql = "UPDATE Attendance SET CheckOut = @CheckOut, AutoCheckout = @AutoCheckout WHERE Id = @Id";
+            string sql = "UPDATE Attendance SET CheckOut = @CheckOut, AutoCheckout = @AutoCheckout WHERE Id = @Id AND CheckOut IS NULL";
             using (var cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@CheckOut", checkoutTime);
                 cmd.Parameters.AddWithValue("@AutoCheckout", autoCheckout);
                 cmd.Parameters.AddWithValue("@Id", attendanceId);
-                cmd.ExecuteNonQuery();
+                return cmd.ExecuteNonQuery();
             }
         }
 

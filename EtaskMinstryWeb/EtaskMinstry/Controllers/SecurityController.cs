@@ -4,7 +4,6 @@ using EtaskMinstry.CustomAttrbutes;
 using EtaskMinstry.Models.Login;
 using EtaskMinstry.AppCode;
 using EtaskMinstry.Models;
-using EtaskMinstry.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,7 +79,6 @@ namespace EtaskMinstry.Controllers
                     }
                  
                     Generallog.LoginORLogout(ActionType.Login);
-                    StartUserSession();
                     return Redirect(returnUrl != string.Empty ? returnUrl : MvcApplication.userData.isCompany ? "/Company/DashBoard" : "/Employee/DashBoardEmp");
                 }
                 else
@@ -174,10 +172,14 @@ namespace EtaskMinstry.Controllers
                 }
 
                 //log--->logout
-                // A tracked session writes the single Logout itself; if the heartbeat timeout or
-                // another tab already closed it, nothing more is logged
-                if (UserSessionTracker.CloseCurrent(UserSessionTracker.ReasonLogout, ClientIp()) == UserSessionTracker.CloseResult.NotTracked)
+                // One Logout per Login: if the inactivity checkout or the heartbeat timeout
+                // already logged this sign-in out, nothing more is written
+                var loggedUser = @EtaskMinstry.MvcApplication.userData;
+                if (loggedUser.UserTypeId == (int)LoggedUserType.Admin)
                     Generallog.LoginORLogout(ActionType.LogOut);
+                else
+                    EtaskMinstry.Services.LogoutLog.WriteOnce(loggedUser.userId, null, loggedUser.isCompany,
+                        Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? Request.ServerVariables["REMOTE_ADDR"], DateTime.Now);
                 //MvcApplication.userData = null;
                 FormsAuthentication.SignOut();
 
@@ -189,35 +191,6 @@ namespace EtaskMinstry.Controllers
                 //MvcApplication.userData = null;
             }
             return RedirectToAction("Login");
-        }
-
-        /// <summary>
-        /// Heartbeat from Scripts/session-heartbeat.js (every open tab, and once on pagehide).
-        /// active = false means the server already closed this sign-in session, and the page signs out.
-        /// </summary>
-        [HttpPost]
-        public JsonResult SessionHeartbeat()
-        {
-            if (MvcApplication.userData == null)
-                return Json(new { active = false });
-
-            return Json(new { active = UserSessionTracker.Heartbeat() != UserSessionTracker.HeartbeatResult.Closed });
-        }
-
-        private static void StartUserSession()
-        {
-            var ids = new EtaskMinstry.Models.TaskLogging.LogVM().EmpOrCom_Name();
-            int employeeId = ids.ContainsKey("EmployeeId") ? Convert.ToInt32(ids["EmployeeId"]) : 0;
-            int companyId = ids.ContainsKey("CompanyId") ? Convert.ToInt32(ids["CompanyId"]) : 0;
-            UserSessionTracker.Start(employeeId != 0 ? employeeId : (int?)null,
-                                     companyId != 0 ? companyId : (int?)null,
-                                     MvcApplication.userData.isCompany,
-                                     ClientIp());
-        }
-
-        private static string ClientIp()
-        {
-            return System.Web.HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? System.Web.HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
         }
 
         /// <summary>
