@@ -1038,6 +1038,8 @@ namespace EtaskMinstry.AppCode
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
 
                 objTask.StatusID = (int)TaskStatus.Inprogress;
+                //Log TaskRecord (the status change was only in TaskTLog, not in the task's history)
+                EtaskMinstry.AppCode.LogTask.Log(objTask, beforeUpdateObj);
                 //Insert TaskStatusLog Record 
                 _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
                 {
