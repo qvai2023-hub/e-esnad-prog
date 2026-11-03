@@ -82,6 +82,12 @@ namespace EtaskMinstry.Models.Company
                 objDetails.EndDate = objTask.EndDate.HasValue ? (MvcApplication.IsGregDate) ? objTask.EndDate.Value.ToGregDatediff() : objTask.EndDate.Value.ToHijriDate() : "-";
                 objDetails.ExpectedTime = objTask.ExpectedTime.HasValue ? objTask.ExpectedTime : null;
                 objDetails.TimeUnitID = objTask.TimeUnitID.HasValue ? objTask.TimeUnitID : null;
+                // An old Month/Week estimate is shown as days so the inline edit keeps its value
+                decimal? expectedTime = objDetails.ExpectedTime;
+                int? timeUnitId = objDetails.TimeUnitID;
+                EtaskMinstry.AppCode.TaskTimeEstimate.ToAllowedUnit(ref expectedTime, ref timeUnitId);
+                objDetails.ExpectedTime = expectedTime;
+                objDetails.TimeUnitID = timeUnitId;
                 objDetails.EstimatedTime = objTask.ExpectedTime + " " + (objTask.TimeUnit == null ? "" : objTask.TimeUnit.Name);
                 objDetails.ActualTime = objTask.ActualTime.HasValue ? TaskManger.SpendTimeByDay(objTask.ActualTime) : "0";
                 objDetails.IsArchived = objTask.IsArchived;

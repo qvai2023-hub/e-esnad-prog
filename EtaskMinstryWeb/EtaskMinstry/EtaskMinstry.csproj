@@ -185,6 +185,7 @@
     <Compile Include="AppCode\ServiceManger.cs" />
     <Compile Include="AppCode\StatusLog.cs" />
     <Compile Include="AppCode\TaskManger.cs" />
+    <Compile Include="AppCode\TaskTimeEstimate.cs" />
     <Compile Include="AppCode\TaskWorkflow.cs" />
     <Compile Include="AppCode\UploadFile.cs" />
     <Compile Include="App_GlobalResources\ColumnNameLog.Designer.cs">
@@ -310,6 +311,7 @@
     <Compile Include="Resources\Task\Task.Designer.cs" />
     <Compile Include="Services\AttendanceReportService.cs" />
     <Compile Include="Services\AutoCheckoutJob.cs" />
+    <Compile Include="Services\UserSessionTracker.cs" />
     <Compile Include="Services\EmployeePerformanceReportService.cs" />
     <Compile Include="Services\EmployeesReportService.cs" />
     <Compile Include="Services\SharedService.cs" />
@@ -776,6 +778,7 @@
     <Content Include="Report\Report.aspx" />
     <Content Include="Scripts\application.js" />
     <Content Include="Scripts\attendance-tracker.js" />
+    <Content Include="Scripts\session-heartbeat.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\chosen.jquery.js" />
     <Content Include="Scripts\datatables.min.js" />

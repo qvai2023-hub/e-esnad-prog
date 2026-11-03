@@ -102,6 +102,10 @@ namespace EtaskMinstry.Areas.Common.Controllers
                                int? timeUnitID, int? projectID, string desc = null)
         {
             int? timeunit = timeUnitID.HasValue ? timeUnitID : null;
+            // The estimate is saved as a pair: a time needs a Day/Hour/Minute unit
+            if (!EtaskMinstry.AppCode.TaskTimeEstimate.IsValid(Duration, timeunit))
+                return "Fail";
+            timeunit = EtaskMinstry.AppCode.TaskTimeEstimate.UnitToSave(Duration, timeunit);
             if (validateTaskDuration(StartDate, EndDate, Duration, timeunit))
                 return
                     EtaskMinstry.AppCode.TaskManger.EditTask(taskID, ProrityID, StartDate, EndDate, Duration,

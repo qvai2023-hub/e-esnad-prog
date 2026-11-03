@@ -95,6 +95,10 @@ namespace EtaskMinstry.Areas.Company.Controllers
             int? timeunit = timeUnitID.HasValue ? timeUnitID : null;
             if (!RecordAccess.CompanyOwnsTask(taskID) || (projectID.HasValue && projectID != 0 && !RecordAccess.CompanyOwnsProject(projectID)))
                 return "Fail";
+            // The estimate is saved as a pair: a time needs a Day/Hour/Minute unit
+            if (!EtaskMinstry.AppCode.TaskTimeEstimate.IsValid(Duration, timeunit))
+                return "Fail";
+            timeunit = EtaskMinstry.AppCode.TaskTimeEstimate.UnitToSave(Duration, timeunit);
             if (validateTaskDuration(StartDate, EndDate, Duration, timeunit))
                 return
                     EtaskMinstry.AppCode.TaskManger.EditTask(taskID, ProrityID, StartDate, EndDate, Duration,
