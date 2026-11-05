@@ -169,12 +169,13 @@ GO
 
    Added beside them:
 
-     CorrectedAssignedTasks       ttls1 correlated to this task        DEFECT 3
+     CorrectedAssignedTasks       independent per-task period/status   DEFECT 3
      CorrectedAssignedTaskesTime  same, through GetWorkMinutes
      CorrectedTotalWorkTime       GetWorkMinutes                       DEFECT 4
      CorrectedActivityLevelSql    GetActivityPercent                   DEFECT 1
      CorrectedLoginCount          distinct login calendar days         ISSUE 1
      CorrectedLogOutCount         distinct logout calendar days        ISSUE 1
+     CorrectedCompletedTasks      distinct tasks completed in period   ISSUE 3
      IsActive / IsDeleted         so the operator can see who is filed DEFECT 7
 
    The "Sql" suffix on the activity column is deliberate: TeleworkReporter
@@ -189,11 +190,10 @@ GO
    ttls.TaskID = Task.TaskID. So one active task makes every other task of that
    employee qualify.
 
-   Adding the missing correlation only ever REMOVES rows -- the corrected set is
-   a strict subset of the legacy set, and every other predicate is identical. So
-   the expensive query runs once with the legacy predicate and each row carries a
-   flag saying whether it would also have survived the correlated one. Counting
-   rows gives the legacy answer; summing the flag gives the corrected answer.
+   The corrected set is evaluated independently. Merely adding TaskID to the
+   status-1/2 predicate incorrectly drops legitimate Accepted or Done-in-period
+   tasks; leaving it uncorrelated lets one task affect another. V2 therefore
+   evaluates period overlap and status history for each employee/TaskID pair.
 
    ---------------------------------------------------------------------------
    DEFECT 7 -- @ActiveOnly and @ExcludeDeleted
@@ -260,7 +260,7 @@ CREATE PROCEDURE [dbo].[GetEvaluationServiceV2]
     @IsTelesak       BIT,
     @ActiveOnly      BIT = 1,   -- 0 reproduces the original population
     @ExcludeDeleted  BIT = 1,   -- 0 reproduces the original population
-    @IncludePeriodActivity BIT = 1,  -- keep inactive/deleted people who were active IN the period
+    @IncludePeriodActivity BIT = 0,  -- business rule: always exclude inactive/deleted employees
 
     -- Who the filters removed. OUTPUT parameters rather than a second result set:
     -- a second result set makes INSERT ... EXEC fail with "Column name or number of
@@ -397,23 +397,15 @@ BEGIN
         + CAST(ISNULL(@UnassignedActive, 0) AS varchar(12)) + '.';
 
     /* -------------------------------------------------------------------------
-       Assigned tasks. The inner query is the original, unchanged, including the
-       uncorrelated ttls1. The outer layer adds the correlated flag -- it cannot
-       go inside, because SQL Server will not accept a subquery in GROUP BY.
+       Legacy assigned tasks: original query, unchanged, including uncorrelated
+       ttls1. This exists only for the Current comparison. The corrected TaskTLog
+       calculation is the separate block immediately after it.
        ---------------------------------------------------------------------- */
     SELECT
         a.TaskID,
         a.TempId,
         a.ExpectedTime,
-        a.TimeUnitID,
-        CASE WHEN EXISTS (
-                 SELECT NULL AS [EMPTY]
-                 FROM [TaskTLog] AS [ttls1c]
-                 WHERE ([ttls1c].EmpID = a.TempId)
-                   AND ([ttls1c].StatusID = 1 OR [ttls1c].StatusID = 2)
-                   AND ([ttls1c].CreatedDate < @PeriodEnd)
-                   AND ([ttls1c].TaskID = a.TaskID)        -- the missing correlation
-             ) THEN 1 ELSE 0 END AS IsActiveTaskCorrected
+        a.TimeUnitID
     INTO #AssignedTasksTempTable
     FROM
     ( SELECT Task.TaskID
@@ -535,6 +527,90 @@ BEGIN
          Group By Task.TaskID,TaskTLog.EmpID ,SequenceNumber,ExpectedTime,TimeUnitID)
     AS a;
 
+    /* -------------------------------------------------------------------------
+       Corrected assigned tasks are calculated independently from the legacy
+       set. This is important in both directions:
+
+         * another task's New/Inprogress row must not make this task qualify;
+         * a legitimate Accepted/Done-in-period task must not be dropped merely
+           because this exact task has no status 1/2 row.
+
+       The corrected period is derived only from TaskTLog status timestamps.
+       Task.StartDate/EndDate are planned dates and are deliberately not used to
+       decide whether a task was assigned during the report window. Every status
+       test is correlated to this employee AND this TaskID. The legacy table
+       above remains untouched so Current still reproduces the deployed procedure.
+       ---------------------------------------------------------------------- */
+    SELECT c.TempId,
+           COUNT(*) AS CorrectedAssignedTasks,
+           SUM(dbo.GetWorkMinutes(c.ExpectedTime, c.TimeUnitID)) AS CorrectedAssignedTaskesTime
+    INTO #CorrectedAssignedSummary
+    FROM (
+        SELECT DISTINCT
+               t.TaskID,
+               tl.EmpID AS TempId,
+               ISNULL(t.ExpectedTime, 0) AS ExpectedTime,
+               t.TimeUnitID
+        FROM dbo.TaskTLog AS tl
+        JOIN dbo.Task AS t ON t.TaskID = tl.TaskID
+        JOIN dbo.Employee AS e ON e.EmpID = tl.EmpID
+        JOIN dbo.UserAccount AS ua ON ua.EmpID = e.EmpID
+        WHERE ua.IsTelesak = @IsTelesak
+          AND tl.CreatedDate < @PeriodEnd
+          AND ISNULL(t.IsDeleted, 0) = 0
+
+          -- Active at the opening of the window, based on the last status log
+          -- before it, OR became active/completed inside the window. Done (5)
+          -- inside the window is included because the task was active for at
+          -- least part of that window. Approved (6) alone is not enough: the
+          -- corresponding Done may have happened before the window.
+          AND (
+              ISNULL((SELECT TOP (1) opening.StatusID
+                      FROM dbo.TaskTLog AS opening
+                      WHERE opening.TaskID = t.TaskID
+                        AND opening.EmpID = tl.EmpID
+                        AND opening.CreatedDate < @PeriodStart
+                      ORDER BY opening.CreatedDate DESC, opening.TaskTLogID DESC), 0)
+                  IN (1, 2, 8, 10)
+              OR EXISTS (
+                  SELECT NULL
+                  FROM dbo.TaskTLog AS insidePeriod
+                  WHERE insidePeriod.TaskID = t.TaskID
+                    AND insidePeriod.EmpID = tl.EmpID
+                    AND insidePeriod.StatusID IN (1, 2, 5, 8, 10)
+                    AND insidePeriod.CreatedDate >= @PeriodStart
+                    AND insidePeriod.CreatedDate < @PeriodEnd
+              )
+          )
+
+          -- A task pending before the window with no movement inside it was not active.
+          AND NOT (
+              ISNULL((SELECT TOP (1) pending.StatusID
+                      FROM dbo.TaskTLog AS pending
+                      WHERE pending.TaskID = t.TaskID
+                        AND pending.EmpID = tl.EmpID
+                        AND pending.CreatedDate < @PeriodStart
+                      ORDER BY pending.CreatedDate DESC, pending.TaskTLogID DESC), 0) = 3
+              AND NOT EXISTS (
+                  SELECT NULL
+                  FROM dbo.TaskTLog AS moved
+                  WHERE moved.TaskID = t.TaskID
+                    AND moved.EmpID = tl.EmpID
+                    AND moved.CreatedDate >= @PeriodStart
+                    AND moved.CreatedDate < @PeriodEnd
+              )
+          )
+
+          -- Rejected before the end of the window was not an assigned task.
+          AND ISNULL((SELECT TOP (1) lastStatus.StatusID
+                      FROM dbo.TaskTLog AS lastStatus
+                      WHERE lastStatus.TaskID = t.TaskID
+                        AND lastStatus.EmpID = tl.EmpID
+                        AND lastStatus.CreatedDate < @PeriodEnd
+                      ORDER BY lastStatus.CreatedDate DESC, lastStatus.TaskTLogID DESC), 0) <> 9
+    ) AS c
+    GROUP BY c.TempId;
+
 
     --Login Count INTO #LoginTempTable
     SELECT *
@@ -579,6 +655,7 @@ BEGIN
     FROM(
             SELECT TaskTLog.EmpID
                   ,COUNT(TaskTLog.StatusID) As 'CompletedTasks'
+                  ,COUNT(DISTINCT TaskTLog.TaskID) As 'CorrectedCompletedTasks'
             FROM  TaskTLog
             WHERE
             (
@@ -640,24 +717,22 @@ BEGIN
            ,ISNULL(LogOutCount, 0)     As LogOutCount
 
            -- ---- corrected, same row ----------------------------------------
-           ,ISNULL(SUM(CAST(#AssignedTasksTempTable.IsActiveTaskCorrected AS INT)), 0)
+           ,ISNULL(#CorrectedAssignedSummary.CorrectedAssignedTasks, 0)
                 As CorrectedAssignedTasks
-           ,ISNULL(SUM(CASE WHEN #AssignedTasksTempTable.IsActiveTaskCorrected = 1
-                            THEN dbo.GetWorkMinutes(#AssignedTasksTempTable.ExpectedTime, #AssignedTasksTempTable.TimeUnitID)
-                            ELSE 0 END), 0)
+           ,ISNULL(#CorrectedAssignedSummary.CorrectedAssignedTaskesTime, 0)
                 As CorrectedAssignedTaskesTime
            ,ISNULL(CorrectedTotalWorkTime, 0)
                 As CorrectedTotalWorkTime
            ,ISNULL([dbo].[GetActivityPercent](
                        CorrectedTotalWorkTime,
-                       ISNULL(SUM(CASE WHEN #AssignedTasksTempTable.IsActiveTaskCorrected = 1
-                                       THEN dbo.GetWorkMinutes(#AssignedTasksTempTable.ExpectedTime, #AssignedTasksTempTable.TimeUnitID)
-                                       ELSE 0 END), 0)), 0)
+                       ISNULL(#CorrectedAssignedSummary.CorrectedAssignedTaskesTime, 0)), 0)
                 As CorrectedActivityLevelSql
            ,ISNULL(CorrectedLoginCount, 0)
                 As CorrectedLoginCount
            ,ISNULL(CorrectedLogOutCount, 0)
                 As CorrectedLogOutCount
+           ,ISNULL(CorrectedCompletedTasks, 0)
+                As CorrectedCompletedTasks
 
            -- ---- who this row actually is -----------------------------------
            ,CAST(ISNULL(Employee.IsActive, 0)  AS BIT) As IsActive
@@ -673,6 +748,7 @@ BEGIN
                                        AND ISNULL([Company].IsActive, 0) = 1
                                        AND ISNULL([Company].IsDeleted, 0) = 0)
     Left Join #AssignedTasksTempTable ON (Employee.EmpID=#AssignedTasksTempTable.TempId)
+    Left Join #CorrectedAssignedSummary ON (Employee.EmpID=#CorrectedAssignedSummary.TempId)
     Left Join #LoginTempTable ON (Employee.EmpID=#LoginTempTable.EmployeeID)
     Left Join #LogOutTempTable ON (Employee.EmpID=#LogOutTempTable.EmployeeID)
     Left Join #CompeletedTasks ON (Employee.EmpID=#CompeletedTasks.EmpID)
@@ -686,7 +762,8 @@ BEGIN
                 AND (@ExcludeDeleted = 0 OR ISNULL(Employee.IsDeleted, 0) = 0))
            -- a leaver who did anything inside the period is still reported for it
            OR (@IncludePeriodActivity = 1 AND #PeriodActivity.EmpID IS NOT NULL))
-    group BY   Employee.EmpID,Employee.NationalID,Employee.LaborOfficeID,Employee.SequenceNumber,LoginCount,LogOutCount,CorrectedLoginCount,CorrectedLogOutCount,CompletedTasks,TotalWorkTime,CorrectedTotalWorkTime,Employee.IsActive,Employee.IsDeleted
+    group BY   Employee.EmpID,Employee.NationalID,Employee.LaborOfficeID,Employee.SequenceNumber,LoginCount,LogOutCount,CorrectedLoginCount,CorrectedLogOutCount,CompletedTasks,CorrectedCompletedTasks,TotalWorkTime,CorrectedTotalWorkTime,Employee.IsActive,Employee.IsDeleted
+              ,#CorrectedAssignedSummary.CorrectedAssignedTasks,#CorrectedAssignedSummary.CorrectedAssignedTaskesTime
               ,#PeriodActivity.EmpID,#Deactivations.DeactivatedAt,#MaxDaily.MaxDailyMinutes
     order BY   ISNULL(CorrectedTotalWorkTime, 0) DESC, ISNULL(CompletedTasks, 0) DESC, Employee.EmpID;
 

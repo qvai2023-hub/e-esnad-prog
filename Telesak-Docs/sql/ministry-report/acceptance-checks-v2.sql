@@ -44,6 +44,7 @@ CREATE TABLE #V2
     TotalWorkTime INT, ActivityLevel INT, LoginCount INT, LogOutCount INT,
     CorrectedAssignedTasks INT, CorrectedAssignedTaskesTime DECIMAL(18,2), CorrectedTotalWorkTime DECIMAL(18,2),
     CorrectedActivityLevelSql DECIMAL(18,2), CorrectedLoginCount INT, CorrectedLogOutCount INT,
+    CorrectedCompletedTasks INT,
     IsActive BIT, IsDeleted BIT, HadPeriodActivity BIT, DeactivatedAt DATETIME, MaxDailyMinutes DECIMAL(18,2)
 );
 
