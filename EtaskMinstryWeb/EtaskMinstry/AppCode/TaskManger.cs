@@ -491,8 +491,34 @@ namespace EtaskMinstry.AppCode
                                                       (DayOfWeek)Enum.Parse(typeof(DayOfWeek), w.WeekEndDay.ToString()));
                 }
                 iTotalDays = iTotalDays - Holidays;
-                // 1 day = 8 hours = 480 minutes (the old checks allowed 24 hours a day)
-                return TaskTimeEstimate.FitsWorkingDays(iTimeCount, iTimeUnit.Value, iTotalDays);
+                switch (iTimeUnit)
+                {
+                    case (int)TimeUnit.Month:
+                        if (iTimeCount > iTotalDays / ((int)TimeUnitValue.Day * (int)TimeUnitValue.Week + 2))
+                            return false;
+                        break;
+
+                    case (int)TimeUnit.Week:
+                        if (iTimeCount > iTotalDays / (int)TimeUnitValue.Day)
+                            return false;
+                        break;
+
+                    case (int)TimeUnit.Day:
+                        if (iTimeCount > iTotalDays)
+                            return false;
+                        break;
+
+                    case (int)TimeUnit.Hour:
+                        if (iTimeCount > iTotalDays * (int)TimeUnitValue.Hour)
+                            return false;
+                        break;
+
+                    case (int)TimeUnit.Minute:
+                        if (iTimeCount > iTotalDays * (int)TimeUnitValue.Hour * (int)TimeUnitValue.Minute)
+                            return false;
+                        break;
+                }
+                return true;
             }
             else
             {
@@ -1038,8 +1064,6 @@ namespace EtaskMinstry.AppCode
                 var beforeUpdateObj = objTask.Clone<TaskManagementModel.Task>();
 
                 objTask.StatusID = (int)TaskStatus.Inprogress;
-                //Log TaskRecord (the status change was only in TaskTLog, not in the task's history)
-                EtaskMinstry.AppCode.LogTask.Log(objTask, beforeUpdateObj);
                 //Insert TaskStatusLog Record 
                 _unitOfWork.TaskStatuseLog.Insert(new TaskTLog()
                 {

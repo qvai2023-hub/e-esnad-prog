@@ -298,10 +298,7 @@ namespace EtaskMinstry.Controllers
 
                 if (attendance == null)
                 {
-                    // No open row at all: the inactivity checkout in another tab or AutoCheckoutJob
-                    // already ended this sign-in, so the page must sign out too
-                    bool ended = !_unitOfWork.AttendanceRepository.Get(a => a.EmpId == empId && a.CheckOut == null).Any();
-                    return Json(new { success = false, ended = ended, message = "No active attendance" });
+                    return Json(new { success = false, message = "No active attendance" });
                 }
 
                 // Update LastHeartbeat on Attendance record using direct SQL
@@ -407,7 +404,7 @@ namespace EtaskMinstry.Controllers
         /// Sets checkout time to last recorded activity
         /// </summary>
         [HttpPost]
-        public JsonResult InactivityCheckout(int? attendanceId, string lastActivityTime)
+        public JsonResult InactivityCheckout(int? attendanceId)
         {
             try
             {
@@ -439,36 +436,11 @@ namespace EtaskMinstry.Controllers
                     return Json(new { success = false, message = "تم تسجيل الخروج مسبقاً في: " + attendance.CheckOut.Value.ToString("HH:mm:ss") });
                 }
 
-                // Check out at the employee's last real activity (shared by all their tabs).
-                // LastHeartbeat is not that: the heartbeat keeps running while the user is idle,
-                // so it would count the 30 idle minutes and the 5-minute warning as work.
-                DateTime now = DateTime.Now;
-                DateTime checkoutTime;
-                if (string.IsNullOrEmpty(lastActivityTime) || !DateTime.TryParse(lastActivityTime, out checkoutTime))
-                    checkoutTime = attendance.LastHeartbeat ?? now;
-                if (checkoutTime > now) checkoutTime = now;
-                if (attendance.CheckIn.HasValue && checkoutTime < attendance.CheckIn.Value) checkoutTime = attendance.CheckIn.Value;
-
-                // Close the row only if it is still open, so a second tab or AutoCheckoutJob
-                // running at the same moment cannot check it out twice
-                int closed;
-                using (var conn = new SqlConnection(Services.LogoutLog.ConnectionString()))
-                {
-                    conn.Open();
-                    using (var cmd = new SqlCommand("UPDATE Attendance SET CheckOut = @CheckOut WHERE Id = @Id AND CheckOut IS NULL", conn))
-                    {
-                        cmd.Parameters.AddWithValue("@CheckOut", checkoutTime);
-                        cmd.Parameters.AddWithValue("@Id", attendance.Id);
-                        closed = cmd.ExecuteNonQuery();
-                    }
-                    if (closed > 0)
-                        Services.LogoutLog.WriteOnce(conn, empId, null, false,
-                            Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? Request.ServerVariables["REMOTE_ADDR"], checkoutTime);
-                }
-                if (closed == 0)
-                {
-                    return Json(new { success = false, message = "تم تسجيل الخروج مسبقاً" });
-                }
+                // Use LastHeartbeat from Attendance record
+                DateTime checkoutTime = attendance.LastHeartbeat ?? DateTime.Now;
+                attendance.CheckOut = checkoutTime;
+                _unitOfWork.AttendanceRepository.Update(attendance);
+                _unitOfWork.Save();
 
                 // Clear session flag so tracker won't load on next page
                 if (Session != null)

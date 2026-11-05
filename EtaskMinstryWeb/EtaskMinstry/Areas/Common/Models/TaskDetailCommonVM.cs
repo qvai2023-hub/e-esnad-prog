@@ -26,9 +26,6 @@ namespace EtaskMinstry.Models.Common
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string FinishDate { get; set; }
-        /// <summary>When work actually started / ended, from the status history (TaskTLog)</summary>
-        public string ActualStart { get; set; }
-        public string ActualEnd { get; set; }
         public string CreatedDate { get; set; }
         public string EstimatedTime { get; set; }
         public string ActualTime { get; set; }
@@ -88,20 +85,12 @@ namespace EtaskMinstry.Models.Common
                 objDetails.EndDate = objTask.EndDate.HasValue ? (MvcApplication.IsGregDate) ? objTask.EndDate.Value.ToGregDatediff() : objTask.EndDate.Value.ToHijriDate() : "-";
                 objDetails.ExpectedTime = objTask.ExpectedTime.HasValue ? objTask.ExpectedTime : null;
                 objDetails.TimeUnitID = objTask.TimeUnitID.HasValue ? objTask.TimeUnitID : null;
-                // An old Month/Week estimate is shown as days so the inline edit keeps its value
-                decimal? expectedTime = objDetails.ExpectedTime;
-                int? timeUnitId = objDetails.TimeUnitID;
-                EtaskMinstry.AppCode.TaskTimeEstimate.ToAllowedUnit(ref expectedTime, ref timeUnitId);
-                objDetails.ExpectedTime = expectedTime;
-                objDetails.TimeUnitID = timeUnitId;
                 objDetails.EstimatedTime = objTask.ExpectedTime + " " + (objTask.TimeUnit == null ? "" : objTask.TimeUnit.Name);
                 objDetails.ActualTime = objTask.ActualTime.HasValue ? TaskManger.SpendTimeByDay(objTask.ActualTime) : "0";
                 objDetails.IsArchived = objTask.IsArchived;
                 objDetails.StartDate = objTask.StartDate.HasValue ? (MvcApplication.IsGregDate) ? objTask.StartDate.Value.ToGregDatediff() : objTask.StartDate.Value.ToHijriDate() : "-";
                 objDetails.StatusID = objTask.StatusID;
                 objDetails.FinishDate = objTask.DeliverDate.HasValue ? (MvcApplication.IsGregDate) ? objTask.DeliverDate.Value.ToGregDatediff() : objTask.DeliverDate.Value.ToHijriDate() : "_";
-                objDetails.ActualStart = EtaskMinstry.AppCode.TaskActualDates.Format(EtaskMinstry.AppCode.TaskActualDates.Start(objTask));
-                objDetails.ActualEnd = EtaskMinstry.AppCode.TaskActualDates.Format(EtaskMinstry.AppCode.TaskActualDates.End(objTask));
                 objDetails.StatusName = objTask.Status.Name;
                 objDetails.Summary = objTask.Summary;
                 objDetails.Title = objTask.Title;

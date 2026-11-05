@@ -5,57 +5,6 @@ Each decision includes: Context, Decision, Rationale, and Consequences.
 
 ---
 
-## DEC-SIGNIN-ON-ATTENDANCE: Track sign-in through Attendance, no UserSession table
-
-**Date:** 2026-11-03
-**Status:** Implemented — browser testing pending
-
-### Context
-Telesak asked for exactly one Logout (LogGeneral ActionID 9) per sign-in, a server-side timeout, and no logout while another tab is open. A first version added a `UserSession` table (one row per sign-in: LoginAt, LastHeartbeatAt, LogoutAt, CloseReason). The user preferred to keep the existing `Attendance` heartbeat and add no table.
-
-### Decision
-- Revert the `UserSession` change (`bb4c446`).
-- `Services/LogoutLog.WriteOnce` inserts the Logout only when the user's latest Login/Logout event is a Login (one `INSERT ... SELECT ... WHERE`). Every path that ends a sign-in calls it: Logout button, inactivity checkout, `AutoCheckoutJob`.
-- Attendance rows are closed with `WHERE CheckOut IS NULL`, and the Logout is written only by the path that actually closed the row.
-- One attendance row per employee per day; a second sign-in reopens it.
-
-### Rationale
-- No schema change, no new table to deploy or keep in sync.
-- The inactivity checkout already redirects to Logout, so "attendance ended" and "signed out" line up for employees.
-
-### Consequences
-- Two browsers signed in at once produce two Logins and one Logout (no duplicates, but not one Logout per Login).
-- Companies have no attendance: their Logout is written by the button only.
-- Break time between a sign-out and the next sign-in the same day counts as attendance (first in, last out). The Attendance report already worked this way (MIN CheckIn / MAX CheckOut per day).
-- `LogOutCount` in the performance report and the ministry feed rises, capped by `LoginCount`.
-
----
-
-## DEC-ACTUAL-DATES-FROM-TASKTLOG: Actual start/end read from TaskTLog, planned dates untouched
-
-**Date:** 2026-11-03
-**Status:** Implemented — data checks passed, browser testing pending
-
-### Context
-`Task.StartDate` / `EndDate` hold the planned dates from the form; delay calculation and the task reports compare against them. Telesak asked for accurate start/end dates.
-
-### Decision
-Do not write to `Task.StartDate` / `EndDate`. Show the actual dates on the task details pages, computed by `AppCode/TaskActualDates`:
-- Start = first TaskTLog row with StatusID 2 (Inprogress). If none and the task was worked on, the later of the first Accepted (8) row and the planned start, never after the first Done.
-- End = last TaskTLog row with StatusID 5 (Done), only while the task is Done / Approved / NotApproved.
-
-### Rationale
-- Overwriting the planned dates would change the meaning of `isDelayed` and of every report reading `Task.StartDate` / `EndDate`.
-- TaskTLog status rows are never edited (time entries change only TimeCount / TimUnitID), and on live data every finished task has a Done row on its `DeliverDate` day. TaskTLog also keeps the time, `DeliverDate` the date only.
-- The fallback covers the 20 tasks moved to Inprogress automatically before that change was logged (`5b0d03d`).
-
-### Consequences
-- Display only: reports are unchanged.
-- Who made a change is stored inside the TaskLog JSON (`ChangedBy`) rather than a new column, so no schema change; reading it in SQL needs a `LIKE` on `Value`.
-- `TaskLog` / `TaskTLog` deletes are blocked by AFTER DELETE triggers (INSTEAD OF is not allowed with the cascading FK). A DBA must disable the trigger to remove test data.
-
----
-
 ## DEC-REASSIGN-GUARD: Restrict task reassignment to status "New" only (Bug #64)
 
 **Date:** 2026-06-02

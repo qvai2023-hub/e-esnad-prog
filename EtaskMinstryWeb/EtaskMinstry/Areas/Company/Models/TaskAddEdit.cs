@@ -134,13 +134,6 @@ namespace EtaskMinstry.Models.Task
         /// <returns> Boolean </returns>
         public int Save()
         {
-            // The estimate is saved as a pair: a time needs a Day/Hour/Minute unit
-            if (!EtaskMinstry.AppCode.TaskTimeEstimate.IsValid(ExpectedTime, TimeUnitID))
-            {
-                Saved = false;
-                return 0;
-            }
-            TimeUnitID = EtaskMinstry.AppCode.TaskTimeEstimate.UnitToSave(ExpectedTime, TimeUnitID);
 
             int result = 0;
 
@@ -291,11 +284,6 @@ namespace EtaskMinstry.Models.Task
             if (objTask == null)
                 return null;
 
-            // An old Month/Week estimate is shown as days so editing keeps its value
-            decimal? expectedTime = objTask.ExpectedTime;
-            int? timeUnitId = objTask.TimeUnitID;
-            EtaskMinstry.AppCode.TaskTimeEstimate.ToAllowedUnit(ref expectedTime, ref timeUnitId);
-
             return new TaskAddEdit()
                 {
                     CompanyID = MvcApplication.userData.userId,
@@ -305,11 +293,11 @@ namespace EtaskMinstry.Models.Task
                     Description = objTask.Description,
                     EmpID = objTask.EmpID.HasValue ? objTask.EmpID.Value:0,
                 EndDate = objTask.EndDate.HasValue ? MvcApplication.IsGregDate ? objTask.EndDate.Value.ToGregDate3() : objTask.EndDate.Value.ToHijriDate() : "",
-                ExpectedTime = expectedTime,
+                ExpectedTime = objTask.ExpectedTime.HasValue ? objTask.ExpectedTime : null,
                     IsArchived = objTask.IsArchived,
                 StartDate = objTask.StartDate.HasValue ? MvcApplication.IsGregDate ? objTask.StartDate.Value.ToGregDate3() : objTask.StartDate.Value.ToHijriDate() : "",
                 StatusID = objTask.StatusID,
-                    TimeUnitID = timeUnitId.HasValue ? timeUnitId.Value : 0,
+                    TimeUnitID = objTask.TimeUnitID.HasValue? objTask.TimeUnitID.Value:0,
                     Summary = objTask.Summary,
                     Title = objTask.Title,
                     TaskID = objTask.TaskID,

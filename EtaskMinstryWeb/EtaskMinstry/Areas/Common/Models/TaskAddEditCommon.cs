@@ -133,13 +133,6 @@ namespace EtaskMinstry.Models.TaskCommon
         /// <returns> Boolean </returns>
         public int Save()
         {
-            // The estimate is saved as a pair: a time needs a Day/Hour/Minute unit
-            if (!TaskTimeEstimate.IsValid(ExpectedTime, TimeUnitID))
-            {
-                Saved = false;
-                return 0;
-            }
-            TimeUnitID = TaskTimeEstimate.UnitToSave(ExpectedTime, TimeUnitID);
 
             int result = 0;
 
@@ -238,8 +231,7 @@ namespace EtaskMinstry.Models.TaskCommon
                         objTask.StartDate =(MvcApplication.IsGregDate? StartDate.ToGregExactformate():StartDate.ToGregExact());
 
                     objTask.Summary = Summary;
-                    // TimeUnitID.Value threw when the task was saved without an estimate
-                    objTask.TimeUnitID = TimeUnitID;
+                    objTask.TimeUnitID = TimeUnitID.Value;
                     objTask.Title = Title;
 
                     _unitOfWork.TaskRepository.Update(objTask);
@@ -266,11 +258,6 @@ namespace EtaskMinstry.Models.TaskCommon
             if (objTask == null)
                 return null;
 
-            // An old Month/Week estimate is shown as days so editing keeps its value
-            decimal? expectedTime = objTask.ExpectedTime;
-            int? timeUnitId = objTask.TimeUnitID;
-            TaskTimeEstimate.ToAllowedUnit(ref expectedTime, ref timeUnitId);
-
             return new TaskAddEditCommon()
                 {
                     CompanyID = MvcApplication.userData.userId,
@@ -280,12 +267,11 @@ namespace EtaskMinstry.Models.TaskCommon
                     Description = objTask.Description,
                     EmpID = objTask.EmpID.Value,
                     EndDate = objTask.EndDate.HasValue ? MvcApplication.IsGregDate ? objTask.EndDate.Value.ToGregDate() : objTask.EndDate.Value.ToHijriDate() : "",
-                    ExpectedTime = expectedTime,
+                    ExpectedTime = objTask.ExpectedTime.HasValue ? objTask.ExpectedTime : null,
                     IsArchived = objTask.IsArchived,
                     StartDate = objTask.StartDate.HasValue ? MvcApplication.IsGregDate ? objTask.StartDate.Value.ToGregDate() : objTask.StartDate.Value.ToHijriDate() : "",
                     StatusID = objTask.StatusID,
-                    // objTask.TimeUnitID.Value threw for a task without an estimate
-                    TimeUnitID = timeUnitId.HasValue ? timeUnitId.Value : 0,
+                    TimeUnitID = objTask.TimeUnitID.Value,
                     Summary = objTask.Summary,
                     Title = objTask.Title,
                     TaskID = objTask.TaskID,

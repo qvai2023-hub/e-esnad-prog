@@ -1,44 +1,5 @@
 # Sprint Tracker
 
-## Sprint 10 — Telesak requirements: sign-in, attendance, estimate, task history (2026-11-03)
-
-### Sprint Goal
-Close the Telesak team's list on `fix/all-except-ministry` (merged into `fix/all-fixes`), using the existing tables — no `UserSession` table.
-
-### Sprint 10 Tasks
-
-| # | Requirement | Approach | Status |
-|---|---|---|---|
-| 1 | Session heartbeat | Existing `Attendance.LastHeartbeat` + `AutoCheckoutJob` | Done — browser test pending |
-| 2 | 30 min idle → 5 min warning → one Checkout | Checkout at the last real activity, atomic close, one Logout | Done — browser test pending |
-| 3 | Several tabs: no duplicate attendance, no logout while a tab is active | Last activity shared via `localStorage`; checkout signs every tab out | Done — browser test pending |
-| 4 | One attendance row per employee / Riyadh date | `Checkin` continues today's row (no unique index) | Done — browser test pending |
-| 5 | TimUnitID always saved with the time | Day / Hour / Minute only, 1 day = 8 h = 480 min | Done — browser test pending |
-| 6 | Full, non-deletable task status history | `EmployeeStartTask` logged, `ChangedBy` in TaskLog JSON, delete triggers, duplicate "deleted" entry fixed | Done — triggers run on DB, browser test pending |
-| 7 | Accurate start/end, reassignment logged | Actual start/end from TaskTLog on task details; `Task.StartDate` / `EndDate` untouched | Done — data checks PASS, browser test pending |
-| 8 | National ID as 10-digit text | Not changed by request (column already `nvarchar`) | Skipped |
-
-### Sprint 10 Commits
-- `6893f50` estimate pair · `bb4c446` revert UserSession · `40ec8e5` one Logout per Login, one attendance row per day · `cbb1c88` task history and actual dates
-- `fix/all-fixes` only: `87b5048` rollback script for `telework-fixed-objects.sql`
-
-### Sprint 10 SQL
-- Run: `Telesak-Docs/sql/task-logs-no-delete.sql` (done), `DROP TABLE dbo.UserSession` if it was created
-- Read-only checks: `session-and-estimate-acceptance-checks.sql`, `actual-start-end-checks.sql`
-
-### Sprint 10 Regression Surface
-- Attendance report — same rows; earlier CheckOut on days ended by inactivity
-- Employees report — `CheckinCount` = days attended
-- Performance report / ministry feed — `LogOutCount` rises, ≤ `LoginCount`
-- Task log page — unchanged display; one "deleted" entry per deleted task
-- Task create / edit (Company, Common, mobile API) — time requires a unit
-
-### Sprint 10 Open Items
-- Browser testing of all of the above
-- National ID: `EmployeeVM.NationalID` is `Int64`; duplicate check uses `Contains`
-
----
-
 ## Sprint 9 — Bug #39 Round 3 (Edit-mode regression) (2026-06-04)
 
 ### Sprint Goal

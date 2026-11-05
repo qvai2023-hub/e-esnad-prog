@@ -360,9 +360,10 @@ namespace EtaskMinstry.Models.Common
                             foreach (var objComment in objComments)
                                 _unitOfWork.TaskCommentRepository.Delete(objComment.TaskCommentID);
 
-                            // The task's logs are kept (the task is only soft-deleted). The foreach
-                            // that stood here had lost its body to a comment, so it ran the Log call
-                            // below once per existing log row - one "deleted" entry is written now.
+                            // Delete All Logs of this Task .
+                            foreach (var objLog in objlogs)
+                               // _unitOfWork.TaskLogRepository.Delete(objLog.TaskLogID);
+
                             AppCode.LogTask.Log(objTask, null, true);
 
                             objTask.IsDeleted = true;

@@ -205,13 +205,6 @@ namespace EtaskMinstry.Api.Controllers
                     ApiResponse.Fail("بيانات الطلب غير صحيحة", "INVALID_REQUEST"));
             }
 
-            // The estimate is saved as a pair: a time needs a Day (3) / Hour (4) / Minute (5) unit
-            if (!EtaskMinstry.AppCode.TaskTimeEstimate.IsValid(request.ExpectedTime, request.TimeUnitId))
-            {
-                return Request.CreateResponse(HttpStatusCode.BadRequest,
-                    ApiResponse.Fail("يجب اختيار وحدة الوقت المقدر (يوم أو ساعة أو دقيقة)", "INVALID_REQUEST"));
-            }
-
             int companyId = userData.userId;
             var uow = new UnitOfWork(ConfigurationManager.ConnectionStrings["ETaskEntities"].ConnectionString);
 
@@ -255,7 +248,7 @@ namespace EtaskMinstry.Api.Controllers
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 ExpectedTime = request.ExpectedTime ?? 0,
-                TimeUnitID = EtaskMinstry.AppCode.TaskTimeEstimate.UnitToSave(request.ExpectedTime, request.TimeUnitId),
+                TimeUnitID = request.TimeUnitId,
                 IsArchived = false,
                 IsDeleted = false,
                 StatusID = (int)TaskStatus.New

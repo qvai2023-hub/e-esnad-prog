@@ -41,53 +41,6 @@
         getCurrentAttendance: '/Attendance/GetCurrentAttendance'
     };
 
-    // Shared by all of the employee's tabs (localStorage), so an idle tab does not warn
-    // or check out while another tab is in use, and one checkout signs every tab out
-    var SHARED = {
-        activity: 'attendanceTracker.lastActivity',
-        ended: 'attendanceTracker.ended'
-    };
-
-    function readShared(key) {
-        try { return window.localStorage.getItem(key); } catch (e) { return null; }
-    }
-
-    function writeShared(key, value) {
-        try { window.localStorage.setItem(key, value); } catch (e) { }
-    }
-
-    /**
-     * Latest activity in any tab
-     */
-    function sharedLastActivity() {
-        var shared = parseInt(readShared(SHARED.activity), 10);
-        var local = state.lastActivityTime.getTime();
-        return new Date(isNaN(shared) ? local : Math.max(shared, local));
-    }
-
-    function idleMilliseconds() {
-        return Date.now() - sharedLastActivity().getTime();
-    }
-
-    /**
-     * Another tab was used, or another tab ended the sign-in
-     */
-    function setupTabSync() {
-        window.addEventListener('storage', function (e) {
-            if (!state.isInitialized || !e.newValue) return;
-
-            if (e.key === SHARED.activity) {
-                if (state.isModalShown) hideInactivityModal();
-                resetInactivityTimer();
-            } else if (e.key === SHARED.ended) {
-                console.log('[AttendanceTracker] Signed out in another tab');
-                hideInactivityModal();
-                cleanup();
-                window.location.href = '/Security/Logout';
-            }
-        });
-    }
-
     /**
      * Initialize the tracker
      */
@@ -108,9 +61,6 @@
             setupActivityTracking();
             setupBeaconCheckout();
             setupHeartbeat();
-            setupTabSync();
-            // Opening a page is activity: other open tabs restart their idle timers
-            writeShared(SHARED.activity, String(state.lastActivityTime.getTime()));
             setupInactivityDetection();
         });
     }
@@ -156,7 +106,6 @@
         if (state.isModalShown) return;
 
         state.lastActivityTime = new Date();
-        writeShared(SHARED.activity, String(state.lastActivityTime.getTime()));
 
         // Reset inactivity timer
         resetInactivityTimer();
@@ -218,7 +167,7 @@
 
         var data = new FormData();
         data.append('attendanceId', state.attendanceId);
-        data.append('lastActivityTime', sharedLastActivity().toISOString());
+        data.append('lastActivityTime', state.lastActivityTime.toISOString());
 
         // navigator.sendBeacon is fire-and-forget, works during unload
         if (navigator.sendBeacon) {
@@ -252,11 +201,6 @@
             success: function (response) {
                 if (response.success && response.attendanceId) {
                     state.attendanceId = response.attendanceId;
-                } else if (response.ended) {
-                    // The sign-in was already ended on the server (another tab's inactivity
-                    // checkout, or the heartbeat timeout): sign this page out too
-                    cleanup();
-                    window.location.href = '/Security/Logout';
                 }
             }
         });
@@ -278,21 +222,9 @@
         if (state.timeoutTimer) clearTimeout(state.timeoutTimer);
 
         // Set new inactivity timer
-        scheduleInactivityWarning(CONFIG.INACTIVITY_WARNING);
-    }
-
-    /**
-     * Warn only when no tab has been used for INACTIVITY_WARNING
-     */
-    function scheduleInactivityWarning(delay) {
         state.inactivityTimer = setTimeout(function () {
-            var idle = idleMilliseconds();
-            if (idle < CONFIG.INACTIVITY_WARNING) {
-                scheduleInactivityWarning(CONFIG.INACTIVITY_WARNING - idle);
-            } else {
-                showInactivityModal();
-            }
-        }, delay);
+            showInactivityModal();
+        }, CONFIG.INACTIVITY_WARNING);
     }
 
     /**
@@ -399,12 +331,6 @@
             // Then check if we should stop
             if (remaining <= 0) {
                 clearInterval(state.countdownInterval);
-                // Another tab may have been used during the countdown
-                if (idleMilliseconds() < CONFIG.INACTIVITY_WARNING) {
-                    hideInactivityModal();
-                    resetInactivityTimer();
-                    return;
-                }
                 // Trigger checkout when countdown reaches 0
                 console.log('[AttendanceTracker] Countdown reached 0, performing checkout');
                 performInactivityCheckout();
@@ -443,13 +369,11 @@
         $.ajax({
             url: URLS.inactivityCheckout,
             type: 'POST',
-            data: { attendanceId: state.attendanceId, lastActivityTime: sharedLastActivity().toISOString() },
+            data: { attendanceId: state.attendanceId },
             dataType: 'json',
             success: function (response) {
                 console.log('[AttendanceTracker] Checkout response:', response);
                 if (response.success) {
-                    // Sign the employee's other tabs out as well
-                    writeShared(SHARED.ended, String(Date.now()));
                     hideInactivityModal();
                     showCheckoutNotification(response.checkoutTime);
                     cleanup();

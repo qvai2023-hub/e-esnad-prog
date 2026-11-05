@@ -325,10 +325,6 @@
                      $('#TimeExpectedID').removeAttr("disabled");
                      $('#TimeExpectedID').rules("add", { required: true, messages: { required: "الوقت المقدر مطلوب" } });                 }
              });
-             // Start consistent: no unit chosen -> no estimate (the time is only saved with its unit)
-             if ($("#TimeUnitID").val() == "") {
-                 $('#TimeExpectedID').val("").attr("disabled", "disabled");
-             }
 
             $("#TitleValidation").text("");
             $(".form-textbox").removeClass("input-validation-error");

@@ -26,13 +26,12 @@ namespace EtaskMinstry.Models.TimeUnit
         #region "Task Manage"
 
         /// <summary>
-        /// Get the Time Units a task estimate may use: Day / Hour / Minute (the agreed values 3 / 4 / 5).
+        /// Get All Time Units .
         /// </summary>
         /// <returns></returns>
         public List<TimeUnitDisplay> Get()
         {
-            int[] allowedUnits = EtaskMinstry.AppCode.TaskTimeEstimate.AllowedUnits;
-            return _unitOfWork.TimUnitRepository.Get(filter: i => allowedUnits.Contains(i.TimeUnitID))
+            return _unitOfWork.TimUnitRepository.Get()
                               .Select(i => new TimeUnitDisplay()
                                   {
                                       ID = i.TimeUnitID,
